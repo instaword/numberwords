@@ -1,0 +1,51 @@
+# Mizo (Lushai) number spec — SKELETON. Numeral data is NOT yet filled in.
+#
+# This is the primary target language, but the numeral words below are
+# deliberately left as TODO(verify) placeholders. They MUST be filled in from a
+# verified source (a Mizo dictionary/grammar or a native speaker), with the
+# source cited in the PR that fills them. Do NOT guess numerals and commit them
+# as fact — a wrong number library is worthless. See CLAUDE.md and
+# docs/spec-format.md.
+#
+# Mizo may not decompose as cleanly as the English example (tone, elision, and
+# joining rules may differ). Part of the first task is confirming whether this
+# lexicon+grammar shape fits Mizo, or whether the format needs to grow. Raise it
+# in a PR if it doesn't fit.
+
+meta:
+  language: Mizo
+  code: mizo          # TODO(verify): confirm the correct code — 'lus' (ISO 639-3) is commonly used for Lushai/Mizo.
+  version: 0.0.0
+  supports: { min: 0, max: 100 }   # Start small (0–100). Extend once round-trip holds.
+  sources:
+    - "TODO(verify): cite the dictionary / grammar / native-speaker source used."
+
+lexicon:
+  units:              # 0–9  — fill from a verified source.
+    0: ""             # TODO(verify)
+    1: ""             # TODO(verify)
+    2: ""             # TODO(verify)
+    3: ""             # TODO(verify)
+    4: ""             # TODO(verify)
+    5: ""             # TODO(verify)
+    6: ""             # TODO(verify)
+    7: ""             # TODO(verify)
+    8: ""             # TODO(verify)
+    9: ""             # TODO(verify)
+  tens:               # 10, 20, … 100 — confirm which are atomic vs. composed.
+    10: ""            # TODO(verify)
+    # Add 20..90 and 100 once the pattern is confirmed with a source.
+
+grammar:
+  # TODO: define the ranged rules once the lexicon and joining behaviour are
+  # verified. Do NOT copy the English grammar blindly — confirm how Mizo forms
+  # e.g. 21 or 305 (connector words? tone/elision at joins? ordering?).
+  rules: []
+
+parse:
+  case_insensitive: true
+  word_separators: [" ", "-"]
+  connectors: []      # TODO(verify): any ignorable connector/filler words when parsing?
+  aliases: {}         # TODO(verify): accepted spelling/diacritic variants → canonical form.
+
+examples: []          # Add verified {number, text} pairs here as you confirm them.

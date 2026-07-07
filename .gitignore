@@ -1,0 +1,46 @@
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+*.code-workspace
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+
+# --- Node / npm ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+coverage/
+*.tsbuildinfo
+.next/
+out/
+
+# --- Generated / build artifacts ---
+# Compiled target packages are generated from the spec; keep sources, ignore output.
+/generated/
+*.local
+
+# --- Secrets / env ---
+.env
+.env.*
+!.env.example
