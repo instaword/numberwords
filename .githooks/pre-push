@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Local guard: refuse to push directly to the protected `main` branch.
+#
+# This is an early-warning convenience — the authoritative enforcement is
+# GitHub branch protection. Enable this hook once per clone with:
+#
+#     git config core.hooksPath .githooks
+#
+# git passes "<local ref> <local sha> <remote ref> <remote sha>" lines on stdin.
+
+protected_branch="refs/heads/main"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+	if [ "$remote_ref" = "$protected_branch" ]; then
+		echo "✋ Refusing to push directly to 'main'." >&2
+		echo "   All changes must go through a branch and a pull request." >&2
+		echo "   See CONTRIBUTING.md. Create a branch:" >&2
+		echo "       git switch -c feat/your-change" >&2
+		exit 1
+	fi
+done
+
+exit 0

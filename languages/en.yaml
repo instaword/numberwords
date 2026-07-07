@@ -1,0 +1,72 @@
+# English number spec — WORKED REFERENCE EXAMPLE.
+#
+# This file exists to demonstrate the rule-spec format with a language whose
+# correctness any reviewer can verify at a glance. It is intentionally limited
+# to 0–999. See docs/spec-format.md for the full explanation of each section.
+#
+# It is NOT a shipping target language — it's the teaching example.
+
+meta:
+  language: English
+  code: en
+  version: 0.1.0
+  supports: { min: 0, max: 999 }
+  sources:
+    - "Illustrative reference example."
+
+lexicon:
+  units:
+    0: zero
+    1: one
+    2: two
+    3: three
+    4: four
+    5: five
+    6: six
+    7: seven
+    8: eight
+    9: nine
+  teens:
+    10: ten
+    11: eleven
+    12: twelve
+    13: thirteen
+    14: fourteen
+    15: fifteen
+    16: sixteen
+    17: seventeen
+    18: eighteen
+    19: nineteen
+  tens:
+    20: twenty
+    30: thirty
+    40: forty
+    50: fifty
+    60: sixty
+    70: seventy
+    80: eighty
+    90: ninety
+  scales:
+    100: hundred
+
+grammar:
+  rules:
+    - { range: [0, 9],     form: "{units}" }
+    - { range: [10, 19],   form: "{teens}" }
+    - { range: [20, 99],   form: "{tens}[-{units:1-9}]" }
+    - { range: [100, 999], form: "{units:1-9} hundred[ and {0-99}]" }
+
+parse:
+  case_insensitive: true
+  word_separators: [" ", "-"]
+  connectors: ["and"]
+  aliases: {}
+
+examples:
+  - { number: 0,   text: "zero" }
+  - { number: 7,   text: "seven" }
+  - { number: 19,  text: "nineteen" }
+  - { number: 42,  text: "forty-two" }
+  - { number: 100, text: "one hundred" }
+  - { number: 305, text: "three hundred and five" }
+  - { number: 999, text: "nine hundred and ninety-nine" }
