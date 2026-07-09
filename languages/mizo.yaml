@@ -25,7 +25,7 @@ meta:
 
 lexicon:
   units:               # 0–9. standalone = used alone; bound = used after a scale word (e.g. "sawm").
-    0: { standalone: "zêro",    bound: "zêro"  }   # TODO(verify)
+    0: { standalone: "bial",    bound: "bial"  }   # TODO(verify)
     1: { standalone: "pakhat",  bound: "khat"  }   # TODO(verify)
     2: { standalone: "pahnih",  bound: "hnih"  }   # TODO(verify)
     3: { standalone: "pathum",  bound: "thum"  }   # TODO(verify)
@@ -65,15 +65,19 @@ grammar:
       range: [11, 19]
       output: "{scales[10].word} {units[ones_digit].standalone}"
 
-    - name: exact_tens               # sawmhnih, sawmthum, … (bound form of tens digit)
+    - name: exact_tens               # sawm hnih, sawm thum, … (bound form of tens digit)
       range: [20, 99]
       condition: "ones_digit == 0"
-      output: "{scales[10].word}{units[tens_digit].bound}"
+      output: "{scales[10].word} {units[tens_digit].bound}"
 
-    - name: compound_tens            # sawmhnih pahnih, sawmnga pariat, …
+    - name: compound_tens            # sawm hnih pahnih, sawm nga pariat, …
       range: [21, 99]
       condition: "ones_digit > 0"
-      output: "{scales[10].word}{units[tens_digit].bound} {units[ones_digit].standalone}"
+      output: "{scales[10].word} {units[tens_digit].bound} {units[ones_digit].standalone}"
+
+    - name: hundred
+      range: [100, 100]
+      output: "{scales[100].word}"
 
 parse:
   case_insensitive: true
@@ -84,15 +88,16 @@ parse:
 
 
 examples:
-  - { number: 0,  text: "zêro" }
+  - { number: 0,  text: "bial" }
   - { number: 1,  text: "pakhat" }
   - { number: 2,  text: "pahnih" }
   - { number: 10, text: "sawm" }
   - { number: 11, text: "sawm pakhat" }
   - { number: 12, text: "sawm pahnih" }
-  - { number: 20, text: "sawmhnih" }
-  - { number: 21, text: "sawmhnih pakhat" }
-  - { number: 22, text: "sawmhnih pahnih" }
-  - { number: 30, text: "sawmthum" }
-  - { number: 58, text: "sawmnga pariat" }
+  - { number: 20, text: "sawm hnih" }
+  - { number: 21, text: "sawm hnih pakhat" }
+  - { number: 22, text: "sawm hnih pahnih" }
+  - { number: 30, text: "sawm thum" }
+  - { number: 58, text: "sawm nga pariat" }
+  - { number: 100, text: "za" }
 
