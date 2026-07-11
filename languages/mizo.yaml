@@ -1,51 +1,103 @@
-# Mizo (Lushai) number spec — SKELETON. Numeral data is NOT yet filled in.
+# Mizo (Lushai) number spec — SKELETON. Numeral data is NOT yet verified.
 #
-# This is the primary target language, but the numeral words below are
-# deliberately left as TODO(verify) placeholders. They MUST be filled in from a
-# verified source (a Mizo dictionary/grammar or a native speaker), with the
-# source cited in the PR that fills them. Do NOT guess numerals and commit them
-# as fact — a wrong number library is worthless. See CLAUDE.md and
+# This is the primary target language. The numeral words below are filled in
+# as a working draft, but they are UNVERIFIED — they still need confirmation
+# from a Mizo dictionary/grammar or a native speaker, with the source cited
+# in the PR that verifies them. Do NOT treat these as fact. See CLAUDE.md and
 # docs/spec-format.md.
 #
-# Mizo may not decompose as cleanly as the English example (tone, elision, and
-# joining rules may differ). Part of the first task is confirming whether this
-# lexicon+grammar shape fits Mizo, or whether the format needs to grow. Raise it
-# in a PR if it doesn't fit.
+# Units have two grammatical forms depending on context: a standalone form
+# (used alone, e.g. counting) and a bound form (used when combined with a
+# scale word, e.g. after "sawm"). Grammar rules below select the correct
+# form per digit position — see the comment above `grammar:`.
+# NOTE:
+# This is a proposal exploring how the specification could model
+# Mizo grammatical forms. It is intended for discussion and review
+# and does not represent the finalized specification.
 
 meta:
   language: Mizo
   code: mizo          # TODO(verify): confirm the correct code — 'lus' (ISO 639-3) is commonly used for Lushai/Mizo.
-  version: 0.0.0
+  version: 0.1.0
   supports: { min: 0, max: 100 }   # Start small (0–100). Extend once round-trip holds.
   sources:
     - "TODO(verify): cite the dictionary / grammar / native-speaker source used."
 
 lexicon:
-  units:              # 0–9  — fill from a verified source.
-    0: ""             # TODO(verify)
-    1: ""             # TODO(verify)
-    2: ""             # TODO(verify)
-    3: ""             # TODO(verify)
-    4: ""             # TODO(verify)
-    5: ""             # TODO(verify)
-    6: ""             # TODO(verify)
-    7: ""             # TODO(verify)
-    8: ""             # TODO(verify)
-    9: ""             # TODO(verify)
-  tens:               # 10, 20, … 100 — confirm which are atomic vs. composed.
-    10: ""            # TODO(verify)
-    # Add 20..90 and 100 once the pattern is confirmed with a source.
+  units:               # 0–9. standalone = used alone; bound = used after a scale word (e.g. "sawm").
+    0: { standalone: "bial",    bound: "bial"  }   # TODO(verify)
+    1: { standalone: "pakhat",  bound: "khat"  }   # TODO(verify)
+    2: { standalone: "pahnih",  bound: "hnih"  }   # TODO(verify)
+    3: { standalone: "pathum",  bound: "thum"  }   # TODO(verify)
+    4: { standalone: "pali",    bound: "li"    }   # TODO(verify)
+    5: { standalone: "panga",   bound: "nga"   }   # TODO(verify)
+    6: { standalone: "paruk",   bound: "ruk"   }   # TODO(verify)
+    7: { standalone: "pasarih", bound: "sarih" }   # TODO(verify)
+    8: { standalone: "pariat",  bound: "riat"  }   # TODO(verify)
+    9: { standalone: "pakua",   bound: "kua"   }   # TODO(verify)
+  scales:               # 10, 100, … — confirm which are atomic vs. composed.
+    10:  { word: "sawm" }   # TODO(verify)
+    100: { word: "za" }       # TODO(verify)
+    # Add 1000+ once the pattern is confirmed with a source.
+
+# Positional variables available to `condition` and `output` below, derived
+# from the number being rendered (not looked up in the lexicon):
+#   ones_digit = n % 10
+#   tens_digit = (n // 10) % 10
+#
+# Lexicon addressing is always <table>[<key>].<field>, e.g.:
+#   units[tens_digit].bound      -> bound form of the digit in the tens place
+#   units[ones_digit].standalone -> standalone form of the digit in the ones place
+#   scales[10].word              -> the word for the 10-scale ("sawm")
+#
 
 grammar:
-  # TODO: define the ranged rules once the lexicon and joining behaviour are
-  # verified. Do NOT copy the English grammar blindly — confirm how Mizo forms
-  # e.g. 21 or 305 (connector words? tone/elision at joins? ordering?).
-  rules: []
+  rules:
+    - name: units
+      range: [0, 9]
+      output: "{units[ones_digit].standalone}"
+
+    - name: ten
+      range: [10, 10]
+      output: "{scales[10].word}"
+
+    - name: teens                    # sawm pakhat, sawm pahnih, …
+      range: [11, 19]
+      output: "{scales[10].word} {units[ones_digit].standalone}"
+
+    - name: exact_tens               # sawm hnih, sawm thum, … (bound form of tens digit)
+      range: [20, 99]
+      condition: "ones_digit == 0"
+      output: "{scales[10].word} {units[tens_digit].bound}"
+
+    - name: compound_tens            # sawm hnih pahnih, sawm nga pariat, …
+      range: [21, 99]
+      condition: "ones_digit > 0"
+      output: "{scales[10].word} {units[tens_digit].bound} {units[ones_digit].standalone}"
+
+    - name: hundred
+      range: [100, 100]
+      output: "{scales[100].word}"
 
 parse:
   case_insensitive: true
   word_separators: [" ", "-"]
+  accepted_forms: { standalone_units: true, bound_units: true }
   connectors: []      # TODO(verify): any ignorable connector/filler words when parsing?
   aliases: {}         # TODO(verify): accepted spelling/diacritic variants → canonical form.
 
-examples: []          # Add verified {number, text} pairs here as you confirm them.
+
+examples:
+  - { number: 0,  text: "bial" }
+  - { number: 1,  text: "pakhat" }
+  - { number: 2,  text: "pahnih" }
+  - { number: 10, text: "sawm" }
+  - { number: 11, text: "sawm pakhat" }
+  - { number: 12, text: "sawm pahnih" }
+  - { number: 20, text: "sawm hnih" }
+  - { number: 21, text: "sawm hnih pakhat" }
+  - { number: 22, text: "sawm hnih pahnih" }
+  - { number: 30, text: "sawm thum" }
+  - { number: 58, text: "sawm nga pariat" }
+  - { number: 100, text: "za" }
+
