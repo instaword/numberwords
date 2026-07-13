@@ -40,3 +40,37 @@ def test_out_of_range_raises(spec):
         spec.number_to_text(101)
     with pytest.raises(ValueError):
         spec.number_to_text(-1)
+
+
+def test_examples_parse_back(spec):
+    for example in spec.examples:
+        assert spec.text_to_number(example["text"]) == example["number"]
+
+
+@pytest.mark.parametrize("n", range(0, 101))
+def test_round_trip_number_text_number(spec, n):
+    # number -> text -> number must return the original value.
+    assert spec.text_to_number(spec.number_to_text(n)) == n
+
+
+@pytest.mark.parametrize("n", range(0, 101))
+def test_round_trip_text_number_text(spec, n):
+    # text -> number -> text must be stable for canonical text.
+    text = spec.number_to_text(n)
+    assert spec.number_to_text(spec.text_to_number(text)) == text
+
+
+def test_connector_word_is_ignored(spec):
+    # "leh" is a connector (parse.connectors in mizo.yaml) and must not
+    # affect parsing even though number_to_text() never produces it.
+    assert spec.text_to_number("sawm hnih leh pahnih") == 22
+    assert spec.text_to_number("sawm leh pahnih") == spec.text_to_number("sawm pahnih")
+
+
+def test_text_to_number_is_case_insensitive(spec):
+    assert spec.text_to_number("SAWM HNIH") == 20
+
+
+def test_unparseable_text_raises(spec):
+    with pytest.raises(ValueError):
+        spec.text_to_number("not mizo words")

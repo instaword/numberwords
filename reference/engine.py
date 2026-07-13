@@ -4,9 +4,16 @@ docs/architecture.md -- the definition of correctness that target packages
 (Python, npm, ...) are eventually checked against, instead of each
 reimplementing a language's rules by hand.
 
-Scope: number -> text only, for specs shaped like the current
-languages/mizo.yaml (positional variables ones_digit/tens_digit only,
-i.e. the 0-100 range). text -> number and larger ranges are follow-up work.
+Scope: specs shaped like the current languages/mizo.yaml (positional
+variables ones_digit/tens_digit only, i.e. the 0-100 range). Larger ranges
+are follow-up work.
+
+text -> number is implemented by normalising the input per the spec's
+`parse` section and searching the supported range for the number whose
+number_to_text() output matches -- see Spec.text_to_number(). That keeps
+number_to_text() as the single source of truth (no separate parsing
+grammar to keep in sync) and is cheap enough for a 0-100 range; it will
+need to become a real parser once milestone 7 extends the range.
 """
 
 import ast
@@ -114,6 +121,7 @@ class Spec:
         self.lexicon = data["lexicon"]
         self.rules = data["grammar"]["rules"]
         self.supports = data["meta"]["supports"]
+        self.parse_config = data.get("parse", {})
 
     def number_to_text(self, n: int) -> str:
         if not (self.supports["min"] <= n <= self.supports["max"]):
@@ -124,6 +132,26 @@ class Spec:
         variables = _positional_variables(n)
         rule = _find_rule(self.rules, n, variables)
         return _render(rule["output"], self.lexicon, variables)
+
+    def text_to_number(self, text: str) -> int:
+        tokens = self._tokenize(text)
+        for n in range(self.supports["min"], self.supports["max"] + 1):
+            if self._tokenize(self.number_to_text(n)) == tokens:
+                return n
+        raise ValueError(f"{text!r} does not match any number in the supported range")
+
+    def _tokenize(self, text: str) -> list:
+        """Normalise text per the spec's `parse` section: lowercase (if
+        configured), split on word_separators, and drop connector words.
+        Mirrors docs/spec-format.md's description of the reverse direction.
+        """
+        if self.parse_config.get("case_insensitive", False):
+            text = text.lower()
+        separators = self.parse_config.get("word_separators", [" "])
+        pattern = "|".join(re.escape(sep) for sep in separators)
+        words = [w for w in re.split(pattern, text) if w]
+        connectors = set(self.parse_config.get("connectors", []))
+        return [w for w in words if w not in connectors]
 
     @property
     def examples(self) -> list:
