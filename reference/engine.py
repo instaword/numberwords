@@ -9,11 +9,18 @@ variables ones_digit/tens_digit only, i.e. the 0-100 range). Larger ranges
 are follow-up work.
 
 text -> number is implemented by normalising the input per the spec's
-`parse` section and searching the supported range for the number whose
-number_to_text() output matches -- see Spec.text_to_number(). That keeps
-number_to_text() as the single source of truth (no separate parsing
-grammar to keep in sync) and is cheap enough for a 0-100 range; it will
-need to become a real parser once milestone 7 extends the range.
+`parse` section, then searching the supported range for the number whose
+grammar rule matches the input token-by-token -- see Spec.text_to_number().
+Matching is placeholder-aware rather than a plain string comparison against
+number_to_text()'s output: a freestanding single-digit phrase (one token,
+one placeholder) accepts either bound or standalone form per
+parse.accepted_forms (e.g. "khat" as well as "pakhat" for 1), while
+multi-word rules (teens, exact_tens, compound_tens, ...) match each field
+exactly as the canonical template names it, to avoid cross-rule ambiguity
+(see _rule_matches). number_to_text() stays the single source of truth for
+the canonical form. This is cheap enough for a 0-100 range by brute-force
+search; it will need to become a real parser once milestone 7 extends the
+range.
 """
 
 import ast
@@ -136,9 +143,59 @@ class Spec:
     def text_to_number(self, text: str) -> int:
         tokens = self._tokenize(text)
         for n in range(self.supports["min"], self.supports["max"] + 1):
-            if self._tokenize(self.number_to_text(n)) == tokens:
+            variables = _positional_variables(n)
+            rule = _find_rule(self.rules, n, variables)
+            if self._rule_matches(rule["output"], tokens, variables):
                 return n
         raise ValueError(f"{text!r} does not match any number in the supported range")
+
+    def _rule_matches(self, output: str, tokens: list, variables: dict) -> bool:
+        placeholders = _PLACEHOLDER_RE.findall(output)
+        if len(placeholders) != len(tokens):
+            return False
+        # Leniency (accepting either bound or standalone form) only applies
+        # to a phrase that's a single freestanding digit -- e.g. "khat" as
+        # well as "pakhat" for 1. A multi-word template (teens, exact_tens,
+        # compound_tens, ...) must match each field exactly as named:
+        # relaxing e.g. the tens-digit slot would let "sawm hnih" (20) also
+        # match teens' ones-digit slot for 12, which is a real ambiguity,
+        # not an accepted alternate spelling.
+        lenient = len(placeholders) == 1
+        return all(
+            self._token_matches_entry(table, raw_key, field, variables, token, lenient)
+            for (table, raw_key, field), token in zip(placeholders, tokens)
+        )
+
+    def _token_matches_entry(
+        self, table: str, raw_key: str, field: str, variables: dict, token: str,
+        lenient: bool,
+    ) -> bool:
+        """A token matches a placeholder if it equals the lexicon entry's
+        value in the field the template names -- or, when `lenient`, any
+        field accepted for that table (parse.accepted_forms).
+        """
+        key = _resolve_key(raw_key, variables)
+        entry = self.lexicon[table][key]
+        for candidate_field in self._acceptable_fields(table, field, lenient):
+            value = entry.get(candidate_field)
+            if value is not None and self._normalize_word(value) == token:
+                return True
+        return False
+
+    def _acceptable_fields(self, table: str, default_field: str, lenient: bool) -> list:
+        if not lenient or table != "units":
+            return [default_field]
+        accepted = self.parse_config.get("accepted_forms", {})
+        fields = [
+            f
+            for f, enabled in (("standalone", accepted.get("standalone_units", True)),
+                               ("bound", accepted.get("bound_units", True)))
+            if enabled
+        ]
+        return fields or [default_field]
+
+    def _normalize_word(self, word: str) -> str:
+        return word.lower() if self.parse_config.get("case_insensitive", False) else word
 
     def _tokenize(self, text: str) -> list:
         """Normalise text per the spec's `parse` section: lowercase (if
