@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from engine import load
+from engine import Spec, load
 
 MIZO_SPEC_PATH = Path(__file__).resolve().parent.parent / "languages" / "mizo.yaml"
 
@@ -92,3 +92,22 @@ def test_bound_form_is_not_accepted_mid_phrase(spec):
     # not also match teens' ones-digit slot via bound-form leniency -- that
     # would make 12 and 20 ambiguous for the same input.
     assert spec.text_to_number("sawm hnih") == 20
+
+
+def test_aliases_resolve_to_canonical_word_before_matching():
+    # parse.aliases (mizo.yaml's is currently empty/unverified, so this uses
+    # synthetic placeholder words rather than asserting real Mizo spelling
+    # variants) lets an alternate spelling resolve to the canonical lexicon
+    # word before rule matching -- same mechanism as parse.connectors, just
+    # substituting instead of dropping.
+    data = {
+        "meta": {"supports": {"min": 5, "max": 5}},
+        "lexicon": {"units": {5: {"standalone": "canonical_five", "bound": "canonical_five"}}},
+        "grammar": {
+            "rules": [{"name": "units", "range": [0, 9], "output": "{units[ones_digit].standalone}"}]
+        },
+        "parse": {"aliases": {"alt_five": "canonical_five"}},
+    }
+    spec = Spec(data)
+    assert spec.text_to_number("alt_five") == 5
+    assert spec.text_to_number("canonical_five") == 5

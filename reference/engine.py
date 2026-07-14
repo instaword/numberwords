@@ -199,8 +199,10 @@ class Spec:
 
     def _tokenize(self, text: str) -> list:
         """Normalise text per the spec's `parse` section: lowercase (if
-        configured), split on word_separators, and drop connector words.
-        Mirrors docs/spec-format.md's description of the reverse direction.
+        configured), split on word_separators, drop connector words, and
+        resolve spelling-variant aliases to their canonical word. Mirrors
+        docs/spec-format.md's description of the reverse direction ("drop
+        connectors, resolve aliases").
         """
         if self.parse_config.get("case_insensitive", False):
             text = text.lower()
@@ -208,7 +210,8 @@ class Spec:
         pattern = "|".join(re.escape(sep) for sep in separators)
         words = [w for w in re.split(pattern, text) if w]
         connectors = set(self.parse_config.get("connectors", []))
-        return [w for w in words if w not in connectors]
+        aliases = self.parse_config.get("aliases", {})
+        return [aliases.get(w, w) for w in words if w not in connectors]
 
     @property
     def examples(self) -> list:
