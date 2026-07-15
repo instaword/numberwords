@@ -141,13 +141,25 @@ class Spec:
         return _render(rule["output"], self.lexicon, variables)
 
     def text_to_number(self, text: str) -> int:
+        # Collect every matching n rather than returning on the first hit.
+        # This engine is the oracle -- the definition of correctness -- so an
+        # ambiguous spelling (two numbers both accepting the same text) must
+        # be a loud error, not a silent "whichever came first in the range."
+        # There's no ambiguity today (verified across the full supported
+        # range), but a future grammar change could introduce one, and this
+        # is what would catch it.
         tokens = self._tokenize(text)
+        matches = []
         for n in range(self.supports["min"], self.supports["max"] + 1):
             variables = _positional_variables(n)
             rule = _find_rule(self.rules, n, variables)
             if self._rule_matches(rule["output"], tokens, variables):
-                return n
-        raise ValueError(f"{text!r} does not match any number in the supported range")
+                matches.append(n)
+        if not matches:
+            raise ValueError(f"{text!r} does not match any number in the supported range")
+        if len(matches) > 1:
+            raise ValueError(f"{text!r} is ambiguous: matches {matches}")
+        return matches[0]
 
     def _rule_matches(self, output: str, tokens: list, variables: dict) -> bool:
         placeholders = _PLACEHOLDER_RE.findall(output)
@@ -183,6 +195,13 @@ class Spec:
         return False
 
     def _acceptable_fields(self, table: str, default_field: str, lenient: bool) -> list:
+        # TODO: "units" and the "standalone"/"bound" field names are
+        # hardcoded Mizo-specific assumptions living inside code that's
+        # otherwise language-agnostic -- a small tension with "the spec is
+        # the source of truth" (docs/architecture.md). Fine while Mizo is
+        # the only language; when a second language is added, this should
+        # be driven from the spec (e.g. which table/fields are
+        # leniency-eligible) instead of a fixed string check.
         if not lenient or table != "units":
             return [default_field]
         accepted = self.parse_config.get("accepted_forms", {})

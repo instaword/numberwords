@@ -111,3 +111,28 @@ def test_aliases_resolve_to_canonical_word_before_matching():
     spec = Spec(data)
     assert spec.text_to_number("alt_five") == 5
     assert spec.text_to_number("canonical_five") == 5
+
+
+def test_ambiguous_match_raises():
+    # If a future grammar ever let two different numbers accept the same
+    # spelling, text_to_number() must raise rather than silently returning
+    # whichever number happened to come first in the range -- this is the
+    # oracle, so an ambiguous spelling is a data bug to surface loudly, not
+    # a thing to guess through. Uses synthetic data since mizo.yaml has no
+    # such collision today (verified across the full 0-100 range).
+    data = {
+        "meta": {"supports": {"min": 0, "max": 1}},
+        "lexicon": {
+            "units": {
+                0: {"standalone": "same_word", "bound": "same_word"},
+                1: {"standalone": "same_word", "bound": "same_word"},
+            }
+        },
+        "grammar": {
+            "rules": [{"name": "units", "range": [0, 1], "output": "{units[ones_digit].standalone}"}]
+        },
+        "parse": {},
+    }
+    spec = Spec(data)
+    with pytest.raises(ValueError, match="ambiguous"):
+        spec.text_to_number("same_word")
