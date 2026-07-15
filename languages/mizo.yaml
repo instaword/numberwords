@@ -83,7 +83,7 @@ parse:
   case_insensitive: true
   word_separators: [" ", "-"]
   accepted_forms: { standalone_units: true, bound_units: true }
-  connectors: []      # TODO(verify): any ignorable connector/filler words when parsing?
+  connectors: ["leh"]      # TODO(verify): "leh" as an ignorable connector between compound-number parts, e.g. "sawm hnih leh pahnih" for 22.
   aliases: {}         # TODO(verify): accepted spelling/diacritic variants → canonical form.
 
 

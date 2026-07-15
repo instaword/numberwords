@@ -4,9 +4,23 @@ docs/architecture.md -- the definition of correctness that target packages
 (Python, npm, ...) are eventually checked against, instead of each
 reimplementing a language's rules by hand.
 
-Scope: number -> text only, for specs shaped like the current
-languages/mizo.yaml (positional variables ones_digit/tens_digit only,
-i.e. the 0-100 range). text -> number and larger ranges are follow-up work.
+Scope: specs shaped like the current languages/mizo.yaml (positional
+variables ones_digit/tens_digit only, i.e. the 0-100 range). Larger ranges
+are follow-up work.
+
+text -> number is implemented by normalising the input per the spec's
+`parse` section, then searching the supported range for the number whose
+grammar rule matches the input token-by-token -- see Spec.text_to_number().
+Matching is placeholder-aware rather than a plain string comparison against
+number_to_text()'s output: a freestanding single-digit phrase (one token,
+one placeholder) accepts either bound or standalone form per
+parse.accepted_forms (e.g. "khat" as well as "pakhat" for 1), while
+multi-word rules (teens, exact_tens, compound_tens, ...) match each field
+exactly as the canonical template names it, to avoid cross-rule ambiguity
+(see _rule_matches). number_to_text() stays the single source of truth for
+the canonical form. This is cheap enough for a 0-100 range by brute-force
+search; it will need to become a real parser once milestone 7 extends the
+range.
 """
 
 import ast
@@ -114,6 +128,7 @@ class Spec:
         self.lexicon = data["lexicon"]
         self.rules = data["grammar"]["rules"]
         self.supports = data["meta"]["supports"]
+        self.parse_config = data.get("parse", {})
 
     def number_to_text(self, n: int) -> str:
         if not (self.supports["min"] <= n <= self.supports["max"]):
@@ -124,6 +139,98 @@ class Spec:
         variables = _positional_variables(n)
         rule = _find_rule(self.rules, n, variables)
         return _render(rule["output"], self.lexicon, variables)
+
+    def text_to_number(self, text: str) -> int:
+        # Collect every matching n rather than returning on the first hit.
+        # This engine is the oracle -- the definition of correctness -- so an
+        # ambiguous spelling (two numbers both accepting the same text) must
+        # be a loud error, not a silent "whichever came first in the range."
+        # There's no ambiguity today (verified across the full supported
+        # range), but a future grammar change could introduce one, and this
+        # is what would catch it.
+        tokens = self._tokenize(text)
+        matches = []
+        for n in range(self.supports["min"], self.supports["max"] + 1):
+            variables = _positional_variables(n)
+            rule = _find_rule(self.rules, n, variables)
+            if self._rule_matches(rule["output"], tokens, variables):
+                matches.append(n)
+        if not matches:
+            raise ValueError(f"{text!r} does not match any number in the supported range")
+        if len(matches) > 1:
+            raise ValueError(f"{text!r} is ambiguous: matches {matches}")
+        return matches[0]
+
+    def _rule_matches(self, output: str, tokens: list, variables: dict) -> bool:
+        placeholders = _PLACEHOLDER_RE.findall(output)
+        if len(placeholders) != len(tokens):
+            return False
+        # Leniency (accepting either bound or standalone form) only applies
+        # to a phrase that's a single freestanding digit -- e.g. "khat" as
+        # well as "pakhat" for 1. A multi-word template (teens, exact_tens,
+        # compound_tens, ...) must match each field exactly as named:
+        # relaxing e.g. the tens-digit slot would let "sawm hnih" (20) also
+        # match teens' ones-digit slot for 12, which is a real ambiguity,
+        # not an accepted alternate spelling.
+        lenient = len(placeholders) == 1
+        return all(
+            self._token_matches_entry(table, raw_key, field, variables, token, lenient)
+            for (table, raw_key, field), token in zip(placeholders, tokens)
+        )
+
+    def _token_matches_entry(
+        self, table: str, raw_key: str, field: str, variables: dict, token: str,
+        lenient: bool,
+    ) -> bool:
+        """A token matches a placeholder if it equals the lexicon entry's
+        value in the field the template names -- or, when `lenient`, any
+        field accepted for that table (parse.accepted_forms).
+        """
+        key = _resolve_key(raw_key, variables)
+        entry = self.lexicon[table][key]
+        for candidate_field in self._acceptable_fields(table, field, lenient):
+            value = entry.get(candidate_field)
+            if value is not None and self._normalize_word(value) == token:
+                return True
+        return False
+
+    def _acceptable_fields(self, table: str, default_field: str, lenient: bool) -> list:
+        # TODO: "units" and the "standalone"/"bound" field names are
+        # hardcoded Mizo-specific assumptions living inside code that's
+        # otherwise language-agnostic -- a small tension with "the spec is
+        # the source of truth" (docs/architecture.md). Fine while Mizo is
+        # the only language; when a second language is added, this should
+        # be driven from the spec (e.g. which table/fields are
+        # leniency-eligible) instead of a fixed string check.
+        if not lenient or table != "units":
+            return [default_field]
+        accepted = self.parse_config.get("accepted_forms", {})
+        fields = [
+            f
+            for f, enabled in (("standalone", accepted.get("standalone_units", True)),
+                               ("bound", accepted.get("bound_units", True)))
+            if enabled
+        ]
+        return fields or [default_field]
+
+    def _normalize_word(self, word: str) -> str:
+        return word.lower() if self.parse_config.get("case_insensitive", False) else word
+
+    def _tokenize(self, text: str) -> list:
+        """Normalise text per the spec's `parse` section: lowercase (if
+        configured), split on word_separators, drop connector words, and
+        resolve spelling-variant aliases to their canonical word. Mirrors
+        docs/spec-format.md's description of the reverse direction ("drop
+        connectors, resolve aliases").
+        """
+        if self.parse_config.get("case_insensitive", False):
+            text = text.lower()
+        separators = self.parse_config.get("word_separators", [" "])
+        pattern = "|".join(re.escape(sep) for sep in separators)
+        words = [w for w in re.split(pattern, text) if w]
+        connectors = set(self.parse_config.get("connectors", []))
+        aliases = self.parse_config.get("aliases", {})
+        return [aliases.get(w, w) for w in words if w not in connectors]
 
     @property
     def examples(self) -> list:

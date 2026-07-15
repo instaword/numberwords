@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from engine import load
+from engine import Spec, load
 
 MIZO_SPEC_PATH = Path(__file__).resolve().parent.parent / "languages" / "mizo.yaml"
 
@@ -40,3 +40,99 @@ def test_out_of_range_raises(spec):
         spec.number_to_text(101)
     with pytest.raises(ValueError):
         spec.number_to_text(-1)
+
+
+def test_examples_parse_back(spec):
+    for example in spec.examples:
+        assert spec.text_to_number(example["text"]) == example["number"]
+
+
+@pytest.mark.parametrize("n", range(0, 101))
+def test_round_trip_number_text_number(spec, n):
+    # number -> text -> number must return the original value.
+    assert spec.text_to_number(spec.number_to_text(n)) == n
+
+
+@pytest.mark.parametrize("n", range(0, 101))
+def test_round_trip_text_number_text(spec, n):
+    # text -> number -> text must be stable for canonical text.
+    text = spec.number_to_text(n)
+    assert spec.number_to_text(spec.text_to_number(text)) == text
+
+
+def test_connector_word_is_ignored(spec):
+    # "leh" is a connector (parse.connectors in mizo.yaml) and must not
+    # affect parsing even though number_to_text() never produces it.
+    assert spec.text_to_number("sawm hnih leh pahnih") == 22
+    assert spec.text_to_number("sawm leh pahnih") == spec.text_to_number("sawm pahnih")
+
+
+def test_text_to_number_is_case_insensitive(spec):
+    assert spec.text_to_number("SAWM HNIH") == 20
+
+
+def test_unparseable_text_raises(spec):
+    with pytest.raises(ValueError):
+        spec.text_to_number("not mizo words")
+
+
+@pytest.mark.parametrize("n", range(0, 10))
+def test_freestanding_digit_accepts_bound_form(spec, n):
+    # A lone digit may be spoken in bound form too, e.g. "khat" as well as
+    # the canonical standalone "pakhat" for 1 -- parse.accepted_forms in
+    # mizo.yaml declares both acceptable, but only for a freestanding digit;
+    # multi-word rules must keep matching their named field exactly (see
+    # test_bound_form_is_not_accepted_mid_phrase).
+    bound_word = spec.lexicon["units"][n]["bound"]
+    assert spec.text_to_number(bound_word) == n
+
+
+def test_bound_form_is_not_accepted_mid_phrase(spec):
+    # "sawm hnih" must mean 20 (exact_tens' canonical bound tens-digit slot),
+    # not also match teens' ones-digit slot via bound-form leniency -- that
+    # would make 12 and 20 ambiguous for the same input.
+    assert spec.text_to_number("sawm hnih") == 20
+
+
+def test_aliases_resolve_to_canonical_word_before_matching():
+    # parse.aliases (mizo.yaml's is currently empty/unverified, so this uses
+    # synthetic placeholder words rather than asserting real Mizo spelling
+    # variants) lets an alternate spelling resolve to the canonical lexicon
+    # word before rule matching -- same mechanism as parse.connectors, just
+    # substituting instead of dropping.
+    data = {
+        "meta": {"supports": {"min": 5, "max": 5}},
+        "lexicon": {"units": {5: {"standalone": "canonical_five", "bound": "canonical_five"}}},
+        "grammar": {
+            "rules": [{"name": "units", "range": [0, 9], "output": "{units[ones_digit].standalone}"}]
+        },
+        "parse": {"aliases": {"alt_five": "canonical_five"}},
+    }
+    spec = Spec(data)
+    assert spec.text_to_number("alt_five") == 5
+    assert spec.text_to_number("canonical_five") == 5
+
+
+def test_ambiguous_match_raises():
+    # If a future grammar ever let two different numbers accept the same
+    # spelling, text_to_number() must raise rather than silently returning
+    # whichever number happened to come first in the range -- this is the
+    # oracle, so an ambiguous spelling is a data bug to surface loudly, not
+    # a thing to guess through. Uses synthetic data since mizo.yaml has no
+    # such collision today (verified across the full 0-100 range).
+    data = {
+        "meta": {"supports": {"min": 0, "max": 1}},
+        "lexicon": {
+            "units": {
+                0: {"standalone": "same_word", "bound": "same_word"},
+                1: {"standalone": "same_word", "bound": "same_word"},
+            }
+        },
+        "grammar": {
+            "rules": [{"name": "units", "range": [0, 1], "output": "{units[ones_digit].standalone}"}]
+        },
+        "parse": {},
+    }
+    spec = Spec(data)
+    with pytest.raises(ValueError, match="ambiguous"):
+        spec.text_to_number("same_word")
