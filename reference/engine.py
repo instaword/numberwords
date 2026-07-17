@@ -17,7 +17,12 @@ one placeholder) accepts either bound or standalone form per
 parse.accepted_forms (e.g. "khat" as well as "pakhat" for 1), while
 multi-word rules (teens, exact_tens, compound_tens, ...) match each field
 exactly as the canonical template names it, to avoid cross-rule ambiguity
-(see _rule_matches). number_to_text() stays the single source of truth for
+(see _rule_matches). A rule may also declare `parse_aliases`: a list of
+extra templates (same placeholder syntax as `output`) accepted when parsing
+but never produced by number_to_text() -- e.g. compound_tens' shorthand that
+drops the scale word. These are matched with the same field-exactness as
+the canonical output; only a single freestanding placeholder gets bound/
+standalone leniency. number_to_text() stays the single source of truth for
 the canonical form. This is cheap enough for a 0-100 range by brute-force
 search; it will need to become a real parser once milestone 7 extends the
 range.
@@ -153,7 +158,8 @@ class Spec:
         for n in range(self.supports["min"], self.supports["max"] + 1):
             variables = _positional_variables(n)
             rule = _find_rule(self.rules, n, variables)
-            if self._rule_matches(rule["output"], tokens, variables):
+            templates = [rule["output"], *rule.get("parse_aliases", [])]
+            if any(self._rule_matches(t, tokens, variables) for t in templates):
                 matches.append(n)
         if not matches:
             raise ValueError(f"{text!r} does not match any number in the supported range")
