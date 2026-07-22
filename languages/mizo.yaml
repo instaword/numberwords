@@ -74,6 +74,11 @@ grammar:
       range: [21, 99]
       condition: "ones_digit > 0"
       output: "{scales[10].word} {units[tens_digit].bound} {units[ones_digit].standalone}"
+      parse_aliases:                 # accepted shorthand for parsing only -- never produced by number_to_text
+        # Drops the scale word ("sawm") and uses the bound form of both digits,
+        # e.g. 23 -> "hnih thum", 66 -> "ruk ruk", 68 -> "ruk riat".
+        # TODO(verify)
+        - "{units[tens_digit].bound} {units[ones_digit].bound}"
 
     - name: hundred
       range: [100, 100]

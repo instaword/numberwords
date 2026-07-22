@@ -113,6 +113,74 @@ def test_aliases_resolve_to_canonical_word_before_matching():
     assert spec.text_to_number("canonical_five") == 5
 
 
+@pytest.mark.parametrize(
+    "shorthand, expected",
+    [("hnih thum", 23), ("ruk ruk", 66), ("ruk riat", 68)],
+)
+def test_compound_tens_shorthand_parses(spec, shorthand, expected):
+    # compound_tens' parse_aliases in mizo.yaml accept a shorthand that drops
+    # the scale word and uses the bound form of both digits -- e.g. "hnih
+    # thum" for 23, alongside the canonical "sawm hnih pathum".
+    # TODO(verify): this shorthand is unverified Mizo, see mizo.yaml.
+    assert spec.text_to_number(shorthand) == expected
+
+
+def test_compound_tens_shorthand_does_not_affect_number_to_text(spec):
+    # parse_aliases are accepted on the way in only; number_to_text() must
+    # keep producing the canonical form regardless.
+    assert spec.number_to_text(23) == "sawm hnih pathum"
+
+
+def test_parse_aliases_are_tried_in_addition_to_canonical_output():
+    # Mechanism test with synthetic data: a rule's parse_aliases template is
+    # matched alongside (not instead of) its canonical output.
+    data = {
+        "meta": {"supports": {"min": 0, "max": 0}},
+        "lexicon": {
+            "units": {0: {"standalone": "canonical_zero", "bound": "shorthand_zero"}}
+        },
+        "grammar": {
+            "rules": [{
+                "name": "units",
+                "range": [0, 0],
+                "output": "{units[ones_digit].standalone}",
+                "parse_aliases": ["{units[ones_digit].bound}"],
+            }]
+        },
+        "parse": {},
+    }
+    spec = Spec(data)
+    assert spec.text_to_number("canonical_zero") == 0
+    assert spec.text_to_number("shorthand_zero") == 0
+
+
+def test_parse_alias_collision_raises_ambiguous():
+    # If a parse_aliases template happens to match another number's
+    # canonical spelling, that's a real ambiguity and must be a loud error,
+    # same as a canonical-vs-canonical collision.
+    data = {
+        "meta": {"supports": {"min": 0, "max": 1}},
+        "lexicon": {
+            "units": {
+                0: {"standalone": "zero_word", "bound": "shared_word"},
+                1: {"standalone": "shared_word", "bound": "shared_word"},
+            }
+        },
+        "grammar": {
+            "rules": [{
+                "name": "units",
+                "range": [0, 1],
+                "output": "{units[ones_digit].standalone}",
+                "parse_aliases": ["{units[ones_digit].bound}"],
+            }]
+        },
+        "parse": {},
+    }
+    spec = Spec(data)
+    with pytest.raises(ValueError, match="ambiguous"):
+        spec.text_to_number("shared_word")
+
+
 def test_ambiguous_match_raises():
     # If a future grammar ever let two different numbers accept the same
     # spelling, text_to_number() must raise rather than silently returning
