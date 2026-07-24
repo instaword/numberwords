@@ -49,7 +49,8 @@ Add `-v` to see each test name individually.
 
 `test_engine.py` verifies that the engine correctly implements the grammar
 **as written** in `languages/mizo.yaml` — rule matching, rendering, and
-(where implemented) parsing back to a number. It does **not** verify that the
-Mizo numerals themselves are linguistically correct. Anything still marked
-`TODO(verify)` in `mizo.yaml` is an unverified guess, not a fact — see
+(where implemented) parsing back to a number. `mizo.yaml`'s numeral data has
+been verified by a native Mizo speaker (see `meta.sources`); anything still
+marked `TODO(verify)` (currently just the `leh` connector, deliberately
+unresolved — see `mizo.yaml`) is an unverified guess, not a fact — see
 [`CLAUDE.md`](../CLAUDE.md) on why that distinction matters here.
