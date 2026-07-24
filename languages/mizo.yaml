@@ -1,43 +1,43 @@
-# Mizo (Lushai) number spec — SKELETON. Numeral data is NOT yet verified.
+# Mizo (Lushai) number spec.
 #
-# This is the primary target language. The numeral words below are filled in
-# as a working draft, but they are UNVERIFIED — they still need confirmation
-# from a Mizo dictionary/grammar or a native speaker, with the source cited
-# in the PR that verifies them. Do NOT treat these as fact. See CLAUDE.md and
-# docs/spec-format.md.
+# This is the primary target language. Numeral data (lexicon, grammar, and
+# the compound-tens shorthand) has been verified by a native Mizo speaker --
+# see meta.sources. The one deliberate exception is the "leh" connector
+# (see parse.connectors below): it is genuinely ambiguous between an
+# intra-number filler and the inter-number conjunction "and", and resolving
+# that is out of scope for this rule engine by team decision -- it would
+# take more than a rule engine to disambiguate, and the expectation is that
+# callers (e.g. a post-ASR pipeline deciding phrase boundaries) hand this
+# library unambiguous single-number phrases in the first place.
 #
 # Units have two grammatical forms depending on context: a standalone form
 # (used alone, e.g. counting) and a bound form (used when combined with a
 # scale word, e.g. after "sawm"). Grammar rules below select the correct
 # form per digit position — see the comment above `grammar:`.
-# NOTE:
-# This is a proposal exploring how the specification could model
-# Mizo grammatical forms. It is intended for discussion and review
-# and does not represent the finalized specification.
 
 meta:
   language: Mizo
-  code: mizo          # TODO(verify): confirm the correct code — 'lus' (ISO 639-3) is commonly used for Lushai/Mizo.
+  code: lus           # ISO 639-3 for Lushai/Mizo.
   version: 0.1.0
   supports: { min: 0, max: 100 }   # Start small (0–100). Extend once round-trip holds.
   sources:
-    - "TODO(verify): cite the dictionary / grammar / native-speaker source used."
+    - "Verified by Rosie Malsawmtluangi, native Mizo speaker."
 
 lexicon:
   units:               # 0–9. standalone = used alone; bound = used after a scale word (e.g. "sawm").
-    0: { standalone: "bial",    bound: "bial"  }   # TODO(verify)
-    1: { standalone: "pakhat",  bound: "khat"  }   # TODO(verify)
-    2: { standalone: "pahnih",  bound: "hnih"  }   # TODO(verify)
-    3: { standalone: "pathum",  bound: "thum"  }   # TODO(verify)
-    4: { standalone: "pali",    bound: "li"    }   # TODO(verify)
-    5: { standalone: "panga",   bound: "nga"   }   # TODO(verify)
-    6: { standalone: "paruk",   bound: "ruk"   }   # TODO(verify)
-    7: { standalone: "pasarih", bound: "sarih" }   # TODO(verify)
-    8: { standalone: "pariat",  bound: "riat"  }   # TODO(verify)
-    9: { standalone: "pakua",   bound: "kua"   }   # TODO(verify)
-  scales:               # 10, 100, … — confirm which are atomic vs. composed.
-    10:  { word: "sawm" }   # TODO(verify)
-    100: { word: "za" }       # TODO(verify)
+    0: { standalone: "bial",    bound: "bial"  }
+    1: { standalone: "pakhat",  bound: "khat"  }
+    2: { standalone: "pahnih",  bound: "hnih"  }
+    3: { standalone: "pathum",  bound: "thum"  }
+    4: { standalone: "pali",    bound: "li"    }
+    5: { standalone: "panga",   bound: "nga"   }
+    6: { standalone: "paruk",   bound: "ruk"   }
+    7: { standalone: "pasarih", bound: "sarih" }
+    8: { standalone: "pariat",  bound: "riat"  }
+    9: { standalone: "pakua",   bound: "kua"   }
+  scales:               # 10, 100, … -- each atomic, not composed.
+    10:  { word: "sawm" }
+    100: { word: "za" }
     # Add 1000+ once the pattern is confirmed with a source.
 
 # Positional variables available to `condition` and `output` below, derived
@@ -77,7 +77,6 @@ grammar:
       parse_aliases:                 # accepted shorthand for parsing only -- never produced by number_to_text
         # Drops the scale word ("sawm") and uses the bound form of both digits,
         # e.g. 23 -> "hnih thum", 66 -> "ruk ruk", 68 -> "ruk riat".
-        # TODO(verify)
         - "{units[tens_digit].bound} {units[ones_digit].bound}"
 
     - name: hundred

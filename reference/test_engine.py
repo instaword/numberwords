@@ -1,9 +1,11 @@
 """Tests for the reference engine (engine.py), run against
 languages/mizo.yaml's own `examples:` block -- see docs/architecture.md's
-"conformance vectors" idea. These examples are still UNVERIFIED Mizo
-(see the TODO(verify) tags in mizo.yaml itself); these tests check that the
-engine correctly implements the grammar as written, not that the grammar is
-linguistically correct.
+"conformance vectors" idea. mizo.yaml's numeral data has been verified by a
+native Mizo speaker (see meta.sources), with one deliberate exception: the
+"leh" connector (parse.connectors) is still TODO(verify) -- disambiguating
+it is out of scope for this engine (see mizo.yaml). These tests check that
+the engine correctly implements the grammar as written, not that the
+grammar is linguistically correct.
 """
 
 from pathlib import Path
@@ -121,7 +123,6 @@ def test_compound_tens_shorthand_parses(spec, shorthand, expected):
     # compound_tens' parse_aliases in mizo.yaml accept a shorthand that drops
     # the scale word and uses the bound form of both digits -- e.g. "hnih
     # thum" for 23, alongside the canonical "sawm hnih pathum".
-    # TODO(verify): this shorthand is unverified Mizo, see mizo.yaml.
     assert spec.text_to_number(shorthand) == expected
 
 
