@@ -87,7 +87,7 @@ parse:
   case_insensitive: true
   word_separators: [" ", "-"]
   accepted_forms: { standalone_units: true, bound_units: true }
-  connectors: ["leh"]      # TODO(verify): "leh" as an ignorable connector between compound-number parts, e.g. "sawm hnih leh pahnih" for 22.
+  connectors: ["leh"]      # Decision (#10): genuinely ambiguous connector; disambiguating it is out of scope by design -- see file header above.
   aliases: {}         # TODO(verify): accepted spelling/diacritic variants → canonical form.
 
 
