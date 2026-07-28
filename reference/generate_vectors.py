@@ -29,7 +29,7 @@ def main() -> None:
         {"number": n, "text": spec.number_to_text(n)}
         for n in range(spec.supports["min"], spec.supports["max"] + 1)
     ]
-    VECTORS_PATH.parent.mkdir(exist_ok=True)
+    VECTORS_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(VECTORS_PATH, "w", encoding="utf-8") as f:
         json.dump(vectors, f, ensure_ascii=False, indent=2)
         f.write("\n")
