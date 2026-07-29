@@ -54,3 +54,22 @@ been verified by a native Mizo speaker (see `meta.sources`); anything still
 marked `TODO(verify)` (currently just the `leh` connector, deliberately
 unresolved — see `mizo.yaml`) is an unverified guess, not a fact — see
 [`CLAUDE.md`](../CLAUDE.md) on why that distinction matters here.
+
+## Conformance vectors
+
+[`../vectors/mizo.json`](../vectors/mizo.json) is the checked-in `{ number,
+text }` table described in [`docs/architecture.md`](../docs/architecture.md)
+— the shared contract every target package (Python, npm, …) will eventually
+be tested against, not just this reference engine.
+
+It's generated from `languages/mizo.yaml` via the reference engine, not
+hand-maintained. **Regenerate and commit it whenever `mizo.yaml`'s lexicon or
+grammar changes:**
+
+```
+python generate_vectors.py
+```
+
+If you change the spec and forget to regenerate, `test_vectors_match_number_to_text`
+and `test_vectors_parse_back` in `test_engine.py` will fail, since they assert
+the engine's current output against the checked-in vectors file.
