@@ -1,0 +1,44 @@
+name: tests
+
+# The reference engine's test suite is the project's only automated check that
+# the Mizo spec still behaves as written. Until now it only ran when someone
+# remembered to run pytest locally, which undermines the drift detection the
+# conformance vectors were added for -- so run it on every PR.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only token: this workflow only needs the checkout.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r reference/requirements.txt
+
+      # pytest runs from inside reference/ -- test_engine.py imports engine.py
+      # as a top-level module. Same convention as reference/README.md.
+      - name: Run tests
+        working-directory: reference
+        run: pytest
+
+      # vectors/mizo.json is a checked-in snapshot, not computed at test time.
+      # If this step fails, mizo.yaml changed without a regenerate: run
+      # `python generate_vectors.py` from reference/ and commit the result.
+      - name: Check vectors are up to date
+        working-directory: reference
+        run: |
+          python generate_vectors.py
+          git diff --exit-code ../vectors/mizo.json
