@@ -16,6 +16,14 @@ to convert numbers ↔ text, and nothing runtime-specific.
 - **Round-trippable.** The format must carry enough information to both *format*
   (`number → text`) and *parse* (`text → number`) unambiguously.
 - **Explicit about the supported range** so tests know what to cover.
+- **Distinguish unverified guesses from settled decisions.** `TODO(verify)`
+  marks a linguistic guess awaiting confirmation from a source or native
+  speaker — never assert one as fact. A settled team decision (e.g. "this
+  ambiguity is out of scope by design") is a different thing and shouldn't
+  wear the same tag, since it reads as "nobody's checked this yet" when the
+  opposite is true. Reference the discussion instead, e.g.
+  `# Decision (#10): ...`, pointing at where the reasoning is written up
+  rather than repeating it inline.
 
 ## Anatomy of a spec
 

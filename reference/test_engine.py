@@ -9,12 +9,13 @@ checked against, on purpose, because they prove different things:
   wrong-but-dutifully-regenerated numeral, since it's generated from the
   same engine it's tested against -- that's what the examples: test is for.
 
-mizo.yaml's numeral data has been verified by a native Mizo speaker (see
-meta.sources), with one deliberate exception: the "leh" connector
-(parse.connectors) is still TODO(verify) -- disambiguating it is out of
-scope for this engine (see mizo.yaml). These tests check that the engine
-correctly implements the grammar as written, not that the grammar is
-linguistically correct.
+mizo.yaml's core numeral data has been verified by a native Mizo speaker
+(see meta.sources). The "leh" connector (parse.connectors) is a separate,
+deliberate exception -- not unverified, but a documented team decision to
+leave it unresolved (see mizo.yaml's header and its `# Decision (#10)` tag).
+What's still genuinely TODO(verify) is parse.aliases. These tests check that
+the engine correctly implements the grammar as written, not that the grammar
+is linguistically correct.
 """
 
 import json
