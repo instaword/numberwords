@@ -8,9 +8,10 @@ Scope: specs shaped like the current languages/mizo.yaml (positional
 variables ones_digit/tens_digit only, i.e. the 0-100 range). Larger ranges
 are follow-up work.
 
-text -> number is implemented by normalising the input per the spec's
-`parse` section, then searching the supported range for the number whose
-grammar rule matches the input token-by-token -- see Spec.text_to_number().
+text -> number first normalises both the input *and* the lexicon words
+using the spec's `parse` section (see Spec._normalize_word). It then
+searches the supported range for the number whose grammar rule matches
+the input token by token -- see Spec.text_to_number().
 Matching is placeholder-aware rather than a plain string comparison against
 number_to_text()'s output: a freestanding single-digit phrase (one token,
 one placeholder) accepts either bound or standalone form per
@@ -31,6 +32,7 @@ range.
 import ast
 import operator
 import re
+import unicodedata
 
 import yaml
 
@@ -87,6 +89,16 @@ def _eval_node(node, variables):
     if isinstance(node, ast.Constant) and isinstance(node.value, int):
         return node.value
     raise ValueError(f"Unsupported expression in condition: {ast.dump(node)}")
+
+
+def _strip_diacritics(word: str) -> str:
+    """Remove diacritics by splitting letters and their marks (NFD), then
+    keep only the base letters. This is used for parse.strip_diacritics, so
+    input typed without diacritics can still match lexicon words that
+    include them ("sawm" -> "sâwm").
+    """
+    decomposed = unicodedata.normalize("NFD", word)
+    return "".join(ch for ch in decomposed if not unicodedata.combining(ch))
 
 
 def _positional_variables(n: int) -> dict:
@@ -220,22 +232,42 @@ class Spec:
         return fields or [default_field]
 
     def _normalize_word(self, word: str) -> str:
-        return word.lower() if self.parse_config.get("case_insensitive", False) else word
-
-    def _tokenize(self, text: str) -> list:
-        """Normalise text per the spec's `parse` section: lowercase (if
-        configured), split on word_separators, drop connector words, and
-        resolve spelling-variant aliases to their canonical word. Mirrors
-        docs/spec-format.md's description of the reverse direction ("drop
-        connectors, resolve aliases").
+        """Apply the same normalisation to *both* the input and the
+        lexicon before comparing them. Each parse flag makes matching more
+        flexible without changing the output of number_to_text(). The spec
+        still keeps its original casing and diacritics; only the comparison
+        is relaxed. Using one shared function keeps both sides consistent.
+        If a flag were applied only to the input, it could stop matching the
+        lexicon.
         """
         if self.parse_config.get("case_insensitive", False):
-            text = text.lower()
+            word = word.lower()
+        if self.parse_config.get("strip_diacritics", False):
+            word = _strip_diacritics(word)
+        return word
+
+    def _tokenize(self, text: str) -> list:
+        """Normalise text per the spec's `parse` section: apply the parse
+        flags (see _normalize_word), split on word_separators, remove
+        connector words, and resolve aliases. Mirrors docs/spec-format.md's
+        description of the reverse direction ("drop connectors, resolve
+        aliases").
+
+        Connector words and aliases are normalised the same way, so they
+        still match even if they are written differently in the spec.
+        Otherwise, a connector with a diacritic would no longer be removed
+        after strip_diacritics changed the input.
+        """
         separators = self.parse_config.get("word_separators", [" "])
         pattern = "|".join(re.escape(sep) for sep in separators)
-        words = [w for w in re.split(pattern, text) if w]
-        connectors = set(self.parse_config.get("connectors", []))
-        aliases = self.parse_config.get("aliases", {})
+        words = [self._normalize_word(w) for w in re.split(pattern, text) if w]
+        connectors = {
+            self._normalize_word(c) for c in self.parse_config.get("connectors", [])
+        }
+        aliases = {
+            self._normalize_word(variant): self._normalize_word(canonical)
+            for variant, canonical in self.parse_config.get("aliases", {}).items()
+        }
         return [aliases.get(w, w) for w in words if w not in connectors]
 
     @property
