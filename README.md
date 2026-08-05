@@ -1,4 +1,4 @@
-# number-utilities
+# numberwords
 
 Bidirectional **text ↔ number** conversion, starting with **Mizo** and designed
 to add more languages over time.
