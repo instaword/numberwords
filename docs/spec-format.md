@@ -44,7 +44,7 @@ to convert numbers ↔ text, and nothing runtime-specific.
 
 | Section     | Purpose                                                        |
 |-------------|---------------------------------------------------------------|
-| `meta`      | language name/code, version, supported range, sources.        |
+| `meta`      | language name/code, version, supported range, orthography, sources. |
 | `lexicon`   | the atomic words: digits, teens, tens, scale words, etc.      |
 | `grammar`   | how atoms combine (grouping, connectors, ordering).           |
 | `parse`     | hints for the reverse direction (separators, casing, diacritics, aliases). |

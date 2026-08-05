@@ -157,6 +157,45 @@ def test_strip_diacritics_is_what_accepts_undiacriticked_input():
     assert lenient.text_to_number("sâwm") == 10
 
 
+def test_connectors_are_normalised_before_being_dropped():
+    # A connector written with a diacritic must still be dropped when the
+    # input is typed without one. _tokenize normalises the connector list
+    # with the same function it uses on the input, so the two meet in the
+    # middle. If it normalised only the input, the connector would stop
+    # matching and be left behind as a token no rule can explain.
+    data = {
+        "meta": {"supports": {"min": 5, "max": 5}},
+        "lexicon": {"units": {5: {"standalone": "canonical_five", "bound": "canonical_five"}}},
+        "grammar": {
+            "rules": [{"name": "units", "range": [0, 9], "output": "{units[ones_digit].standalone}"}]
+        },
+        "parse": {"strip_diacritics": True, "connectors": ["lêh"]},
+    }
+    spec = Spec(data)
+    assert spec.text_to_number("canonical_five lêh") == 5
+    assert spec.text_to_number("canonical_five leh") == 5
+
+
+def test_aliases_are_normalised_on_both_sides():
+    # Same idea for aliases, which substitute instead of dropping. A
+    # diacritic can sit on the variant, on the canonical word it maps to, or
+    # on both. The value side is the easy one to miss: normalising only the
+    # key would resolve the alias to a spelling the rules never match, so the
+    # substitution would succeed and the parse would still fail.
+    data = {
+        "meta": {"supports": {"min": 5, "max": 5}},
+        "lexicon": {"units": {5: {"standalone": "canônical_five", "bound": "canônical_five"}}},
+        "grammar": {
+            "rules": [{"name": "units", "range": [0, 9], "output": "{units[ones_digit].standalone}"}]
+        },
+        "parse": {"strip_diacritics": True, "aliases": {"âlt_five": "canônical_five"}},
+    }
+    spec = Spec(data)
+    assert spec.text_to_number("âlt_five") == 5
+    assert spec.text_to_number("alt_five") == 5
+    assert spec.text_to_number("canonical_five") == 5
+
+
 def test_unparseable_text_raises(spec):
     with pytest.raises(ValueError):
         spec.text_to_number("not mizo words")
@@ -181,11 +220,12 @@ def test_bound_form_is_not_accepted_mid_phrase(spec):
 
 
 def test_aliases_resolve_to_canonical_word_before_matching():
-    # parse.aliases (mizo.yaml's is currently empty/unverified, so this uses
-    # synthetic placeholder words rather than asserting real Mizo spelling
-    # variants) lets an alternate spelling resolve to the canonical lexicon
-    # word before rule matching -- same mechanism as parse.connectors, just
-    # substituting instead of dropping.
+    # parse.aliases lets an alternate spelling resolve to the canonical
+    # lexicon word before rule matching. Same mechanism as parse.connectors,
+    # just substituting instead of dropping. mizo.yaml's alias list is empty
+    # and settled -- a native speaker confirmed Mizo 0-100 has no
+    # non-diacritic spelling variants -- so this uses synthetic placeholder
+    # words rather than asserting real Mizo spellings.
     data = {
         "meta": {"supports": {"min": 5, "max": 5}},
         "lexicon": {"units": {5: {"standalone": "canonical_five", "bound": "canonical_five"}}},
