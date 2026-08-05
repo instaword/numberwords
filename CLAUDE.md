@@ -32,7 +32,7 @@ Concretely, that means:
 
 ## What this project is
 
-**number-utilities** is a library for **bidirectional text ↔ number conversion**,
+**numberwords** is a library for **bidirectional text ↔ number conversion**,
 starting with **Mizo** (Lushai) and designed to add more languages over time.
 
 Examples of what the library must do:

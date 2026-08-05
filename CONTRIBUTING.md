@@ -1,4 +1,4 @@
-# Contributing to number-utilities
+# Contributing to numberwords
 
 Welcome! This guide covers how we work day to day. If you're using **Claude
 Code**, it also reads [`CLAUDE.md`](CLAUDE.md), which mirrors these rules.
@@ -6,8 +6,8 @@ Code**, it also reads [`CLAUDE.md`](CLAUDE.md), which mirrors these rules.
 ## One-time setup
 
 ```bash
-git clone https://github.com/instaword/number-utilities.git
-cd number-utilities
+git clone https://github.com/instaword/numberwords.git
+cd numberwords
 
 # Enable the shared git hooks (blocks accidental pushes to main).
 git config core.hooksPath .githooks
@@ -98,5 +98,5 @@ add or change numeral data for a language:
 
 ## Questions
 
-Open a [discussion or issue](https://github.com/instaword/number-utilities/issues),
+Open a [discussion or issue](https://github.com/instaword/numberwords/issues),
 or ask in the PR. There are no silly questions during onboarding.
