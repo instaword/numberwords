@@ -53,10 +53,10 @@ Add `-v` to see each test name individually.
 data has been verified by a native Mizo speaker (see `meta.sources`); the
 `leh` connector is a separate, deliberate exception — not unverified, but a
 documented team decision to leave it unresolved (see `mizo.yaml`'s header
-and the `# Decision (#10)` tag on `parse.connectors`). Anything still marked
-`TODO(verify)` (currently `parse.aliases`) is a genuine open question, not a
-settled fact — see [`CLAUDE.md`](../CLAUDE.md) on why that distinction
-matters here.
+and the `# Decision (#10)` tag on `parse.connectors`). Nothing in `mizo.yaml`
+is marked `TODO(verify)` as of #15. If something is tagged that way later, it
+means a genuine open question rather than a settled fact — see
+[`CLAUDE.md`](../CLAUDE.md) on why that distinction matters here.
 
 ## Conformance vectors
 

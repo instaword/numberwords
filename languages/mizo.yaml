@@ -14,14 +14,29 @@
 # (used alone, e.g. counting) and a bound form (used when combined with a
 # scale word, e.g. after "sawm"). Grammar rules below select the correct
 # form per digit position — see the comment above `grammar:`.
+#
+# Scale words also have two forms for a different reason. The circumflex on
+# a scale word is part of the grammar, not just decoration. It shows the
+# scale word is *not multiplied*. If a digit comes after it, the circumflex
+# stays (11 = 10+1 -> "sâwm pakhat"). If a digit multiplies it, the
+# circumflex is removed (20 = 10×2 -> "sawm hnih", 200 = 100×2 -> "za hnih").
+# This is why we use `standalone` and `multiplied` below. The condition is
+# different from units' `bound`: it depends on whether a multiplying digit
+# comes before the scale word, not whether it follows one.
 
 meta:
   language: Mizo
   code: lus           # ISO 639-3 for Lushai/Mizo.
   version: 0.1.0
   supports: { min: 0, max: 100 }   # Start small (0–100). Extend once round-trip holds.
+  orthography: missionary   # The writing system used by this spec. The
+                            # diacritics depend on it, so a different writing
+                            # system would change them throughout the lexicon.
   sources:
     - "Verified by Rosie Malsawmtluangi, native Mizo speaker."
+    - "Diacritics and missionary orthography confirmed by the repo owner,
+       a native Mizo speaker (#15). The earlier review checked the words
+       without diacritics; this review confirms the spelling."
 
 lexicon:
   units:               # 0–9. standalone = used alone; bound = used after a scale word (e.g. "sawm").
@@ -36,9 +51,13 @@ lexicon:
     8: { standalone: "pariat",  bound: "riat"  }
     9: { standalone: "pakua",   bound: "kua"   }
   scales:               # 10, 100, … -- each atomic, not composed.
-    10:  { word: "sawm" }
-    100: { word: "za" }
-    # Add 1000+ once the pattern is confirmed with a source.
+                        # standalone = not multiplied (keeps the circumflex);
+                        # multiplied = has a multiplying digit before it.
+    10:  { standalone: "sâwm", multiplied: "sawm" }
+    100: { standalone: "zâ",   multiplied: "za"   }
+    # Add 1000+ after the pattern is confirmed with a source. If both forms
+    # of a scale word are the same, just repeat the word, like 0 in the
+    # units table. No special handling is needed.
 
 # Positional variables available to `condition` and `output` below, derived
 # from the number being rendered (not looked up in the lexicon):
@@ -46,9 +65,10 @@ lexicon:
 #   tens_digit = (n // 10) % 10
 #
 # Lexicon addressing is always <table>[<key>].<field>, e.g.:
-#   units[tens_digit].bound      -> bound form of the digit in the tens place
-#   units[ones_digit].standalone -> standalone form of the digit in the ones place
-#   scales[10].word              -> the word for the 10-scale ("sawm")
+#   units[tens_digit].bound       -> bound form of the digit in the tens place
+#   units[ones_digit].standalone  -> standalone form of the digit in the ones place
+#   scales[10].standalone         -> the unmultiplied word for 10 ("sâwm")
+#   scales[10].multiplied         -> the multiplied word for 10 ("sawm")
 #
 
 grammar:
@@ -57,51 +77,58 @@ grammar:
       range: [0, 9]
       output: "{units[ones_digit].standalone}"
 
-    - name: ten
+    - name: ten                      # sâwm -- not multiplied
       range: [10, 10]
-      output: "{scales[10].word}"
+      output: "{scales[10].standalone}"
 
-    - name: teens                    # sawm pakhat, sawm pahnih, …
+    - name: teens                    # sâwm pakhat, sâwm pahnih, … (digit adds to it, circumflex kept)
       range: [11, 19]
-      output: "{scales[10].word} {units[ones_digit].standalone}"
+      output: "{scales[10].standalone} {units[ones_digit].standalone}"
 
-    - name: exact_tens               # sawm hnih, sawm thum, … (bound form of tens digit)
+    - name: exact_tens               # sawm hnih, sawm thum, … (digit multiplies it, circumflex removed)
       range: [20, 99]
       condition: "ones_digit == 0"
-      output: "{scales[10].word} {units[tens_digit].bound}"
+      output: "{scales[10].multiplied} {units[tens_digit].bound}"
 
     - name: compound_tens            # sawm hnih pahnih, sawm nga pariat, …
       range: [21, 99]
       condition: "ones_digit > 0"
-      output: "{scales[10].word} {units[tens_digit].bound} {units[ones_digit].standalone}"
+      output: "{scales[10].multiplied} {units[tens_digit].bound} {units[ones_digit].standalone}"
       parse_aliases:                 # accepted shorthand for parsing only -- never produced by number_to_text
         # Drops the scale word ("sawm") and uses the bound form of both digits,
         # e.g. 23 -> "hnih thum", 66 -> "ruk ruk", 68 -> "ruk riat".
         - "{units[tens_digit].bound} {units[ones_digit].bound}"
 
-    - name: hundred
+    - name: hundred                  # zâ -- not multiplied
       range: [100, 100]
-      output: "{scales[100].word}"
+      output: "{scales[100].standalone}"
 
 parse:
   case_insensitive: true
+  strip_diacritics: true   # Decision (#15): accept input typed without
+                           # diacritics, since most people type on an ASCII
+                           # keyboard. Applied to both sides before comparing,
+                           # like case_insensitive above. number_to_text()
+                           # still writes the correct diacritics.
   word_separators: [" ", "-"]
   accepted_forms: { standalone_units: true, bound_units: true }
   connectors: ["leh"]      # Decision (#10): genuinely ambiguous connector; disambiguating it is out of scope by design -- see file header above.
-  aliases: {}         # TODO(verify): accepted spelling/diacritic variants → canonical form.
+  aliases: {}   # Decision (#15): no non-diacritic spelling variants in Mizo
+                # (confirmed by native speaker). Diacritics are handled by
+                # strip_diacritics above.
 
 
 examples:
   - { number: 0,  text: "bial" }
   - { number: 1,  text: "pakhat" }
   - { number: 2,  text: "pahnih" }
-  - { number: 10, text: "sawm" }
-  - { number: 11, text: "sawm pakhat" }
-  - { number: 12, text: "sawm pahnih" }
+  - { number: 10, text: "sâwm" }
+  - { number: 11, text: "sâwm pakhat" }
+  - { number: 12, text: "sâwm pahnih" }
   - { number: 20, text: "sawm hnih" }
   - { number: 21, text: "sawm hnih pakhat" }
   - { number: 22, text: "sawm hnih pahnih" }
   - { number: 30, text: "sawm thum" }
   - { number: 58, text: "sawm nga pariat" }
-  - { number: 100, text: "za" }
+  - { number: 100, text: "zâ" }
 

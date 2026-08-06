@@ -24,15 +24,30 @@ to convert numbers ↔ text, and nothing runtime-specific.
   opposite is true. Reference the discussion instead, e.g.
   `# Decision (#10): ...`, pointing at where the reasoning is written up
   rather than repeating it inline.
+- **A lexicon entry may carry several forms, chosen by grammatical context.**
+  Mizo units have `standalone`/`bound`; its scale words have
+  `standalone`/`multiplied`. Grammar templates name the field they need
+  (`{units[ones_digit].bound}`), so selecting a form stays data, not engine
+  logic. Name each field after *the condition that selects it*, and don't
+  reuse a name across tables where the condition differs — Mizo's `bound`
+  means "follows a scale word" while a scale's `multiplied` means "has a
+  multiplier before it", which is the opposite direction.
+- **Prefer normalising both sides to enumerating variants.** Where a language
+  accepts input that differs from the canonical spelling in a systematic way,
+  express it as a `parse` flag applied to the input *and* the lexicon word
+  before comparing — `case_insensitive`, `strip_diacritics` — rather than
+  listing every variant under `aliases`. A flag is one line and covers every
+  word in every language; an alias list grows per word and starts over for
+  the next language. Keep `aliases` for genuinely irregular one-offs.
 
 ## Anatomy of a spec
 
 | Section     | Purpose                                                        |
 |-------------|---------------------------------------------------------------|
-| `meta`      | language name/code, version, supported range, sources.        |
+| `meta`      | language name/code, version, supported range, orthography, sources. |
 | `lexicon`   | the atomic words: digits, teens, tens, scale words, etc.      |
 | `grammar`   | how atoms combine (grouping, connectors, ordering).           |
-| `parse`     | hints for the reverse direction (separators, casing, aliases).|
+| `parse`     | hints for the reverse direction (separators, casing, diacritics, aliases). |
 | `examples`  | a few `{ number, text }` pairs — sanity checks + docs.        |
 
 The **worked example below is English**, chosen because its correctness is
@@ -112,9 +127,11 @@ examples:
 - **`number → text`:** find the first `grammar.rules` entry whose `range`
   contains the number, expand its `form` (recursing into sub-ranges via
   `{0-99}`-style references), and substitute lexicon words.
-- **`text → number`:** normalise the text using `parse` (lowercase, split on
-  separators, drop `connectors`, resolve `aliases`), then match against the same
-  grammar to recover the value.
+- **`text → number`:** normalise the text using `parse` (lowercase, strip
+  diacritics, split on separators, drop `connectors`, resolve `aliases`), then
+  match against the same grammar to recover the value. The normalising flags
+  apply to the lexicon word too, so only the comparison is loosened —
+  `number → text` still emits the canonical spelling, diacritics and all.
 
 The exact `form` mini-syntax above is **illustrative** — pinning it down
 precisely (and validating it with a schema) is the first real design task. The
