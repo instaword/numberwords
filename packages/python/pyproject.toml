@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "numberwords"
+version = "0.0.0"
+description = "Bidirectional text-number conversion driven by a single language-agnostic rule spec. Placeholder release; under active development."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "instaword" }]
+keywords = ["numbers", "numerals", "number-to-words", "words-to-number", "mizo", "i18n"]
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Programming Language :: Python :: 3",
+  "Topic :: Text Processing :: Linguistic",
+]
+
+[project.urls]
+Homepage = "https://github.com/instaword/numberwords"
+Source = "https://github.com/instaword/numberwords"
+
+[tool.hatch.build.targets.wheel]
+packages = ["numberwords"]
