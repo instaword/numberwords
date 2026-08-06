@@ -1,0 +1,28 @@
+{
+  "name": "@instaword/numberwords",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Bidirectional text-number conversion driven by a single language-agnostic rule spec. Placeholder release; under active development.",
+  "license": "MIT",
+  "author": "instaword",
+  "keywords": [
+    "numbers",
+    "numerals",
+    "number-to-words",
+    "words-to-number",
+    "mizo",
+    "i18n"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/instaword/numberwords.git"
+  },
+  "homepage": "https://github.com/instaword/numberwords",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ]
+}
