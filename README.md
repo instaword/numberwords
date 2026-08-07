@@ -13,9 +13,20 @@ authored once per language and "compiled" into idiomatic packages for multiple
 runtimes — a Python package, an npm package for JS/TS, and more later. One
 source of truth; many published targets.
 
+## Install
+
+**These packages are placeholder releases and are not yet implemented.**
+They reserve the names on PyPI and npm while the library is under development.
+
+```bash
+pip install numberwords              # Python
+npm install @instaword/numberwords   # JS/TS
+```
+
 ## Status
 
-Early scaffolding. The design and onboarding milestones live in
+Early scaffolding. The published packages are placeholders rather than working
+libraries. The design and onboarding milestones live in
 [`docs/architecture.md`](docs/architecture.md).
 
 ## For contributors
