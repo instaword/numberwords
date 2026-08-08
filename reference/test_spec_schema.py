@@ -20,9 +20,10 @@ docs/spec-format.md ("YAML for authoring; it normalises to JSON as the IR").
 That is not incidental: YAML gives integer lexicon keys, JSON object keys are
 always strings, and the schema's key patterns are written for the JSON form.
 
-languages/en.yaml is deliberately NOT checked here -- it is written in the
-older illustrative `form:` syntax and does not load in engine.py either. See
-the module note at the bottom of this file.
+Both checked-in specs are validated. That matters more than it looks: until
+#29 the only spec in the current format was Mizo, so nothing could tell the
+difference between "the schema describes the format" and "the schema
+describes Mizo". en.yaml is the control.
 """
 
 import copy
@@ -36,6 +37,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "spec" / "spec.schema.json"
 MIZO_SPEC_PATH = REPO_ROOT / "languages" / "mizo.yaml"
+ALL_SPEC_PATHS = sorted((REPO_ROOT / "languages").glob("*.yaml"))
 
 
 def _as_ir(path: Path) -> dict:
@@ -65,8 +67,17 @@ def test_schema_is_itself_a_valid_json_schema(schema):
     jsonschema.Draft202012Validator.check_schema(schema)
 
 
-def test_mizo_spec_validates(schema, mizo_ir):
-    jsonschema.validate(instance=mizo_ir, schema=schema)
+@pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
+def test_checked_in_spec_validates(schema, path):
+    # Globbed rather than listed: a new languages/*.yaml is validated the
+    # moment it lands, instead of when someone remembers to add it here.
+    jsonschema.validate(instance=_as_ir(path), schema=schema)
+
+
+def test_every_checked_in_spec_is_covered():
+    # Guards the glob above: if languages/ is ever emptied or renamed, the
+    # parametrised test would silently pass zero cases.
+    assert len(ALL_SPEC_PATHS) >= 2, ALL_SPEC_PATHS
 
 
 # --- Negative cases -------------------------------------------------------
@@ -215,17 +226,9 @@ def test_mizo_spec_is_unchanged_by_the_negative_cases(schema, mizo_ir):
 
 # --- Note on languages/en.yaml --------------------------------------------
 #
-# en.yaml is NOT validated here, and that is a finding rather than an
-# oversight. It is written in the illustrative `form:` mini-syntax from
-# docs/spec-format.md ({tens}[-{units:1-9}], {0-99} recursion, lexicon
-# entries as bare strings), while mizo.yaml and engine.py use `output:` with
-# {table[key].field} placeholders and multi-field lexicon entries.
-#
-# The two have diverged: `load("languages/en.yaml")` raises KeyError: 'output'.
-# Schemaing both formats would bless the divergence, so this schema describes
-# the one the engine implements.
-#
-# en.yaml also cannot simply be rewritten into the current format: English
-# above 99 needs recursion ("three hundred and five" = {units} hundred and
-# {0-99}), and the current format has no recursive placeholder. That gap is
-# tracked on #27.
+# en.yaml was ported to the current format in #29; before that it was written
+# in the older illustrative `form:` mini-syntax and did not load in engine.py
+# at all. It is capped at 0-99 rather than the 0-999 it used to claim, because
+# English above 99 needs recursion ("three hundred and five" = {units} hundred
+# and {0-99}) and the format has no recursive placeholder. That gap is tracked
+# on #27, and the hundreds return with it.

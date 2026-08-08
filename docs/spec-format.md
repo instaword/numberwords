@@ -1,8 +1,10 @@
 # The rule-spec format
 
-> Status: **proposal / starting point.** This sketch exists so the spec doesn't
-> start from a blank page. Formalising it (and its JSON Schema in `spec/`) is an
-> early onboarding task — expect it to change. Discuss changes in a PR.
+> Status: **formalised.** The machine-checkable definition is
+> [`spec/spec.schema.json`](../spec/spec.schema.json), validated against every
+> file in `languages/` on each test run. This document is its prose companion:
+> the schema says *what* is allowed, this says *why*. Where they disagree the
+> schema wins, and this file is the bug. Discuss changes in a PR.
 
 A rule spec is a single declarative file per language (YAML for authoring; it
 normalises to JSON as the IR). It describes **the words and the grammar** needed
@@ -50,99 +52,98 @@ to convert numbers ↔ text, and nothing runtime-specific.
 | `parse`     | hints for the reverse direction (separators, casing, diacritics, aliases). |
 | `examples`  | a few `{ number, text }` pairs — sanity checks + docs.        |
 
-The **worked example below is English**, chosen because its correctness is
-easy for any reviewer to check. Mizo is modelled the same way in
-`languages/mizo.yaml`.
+The **worked example is English**, chosen because its correctness is easy for
+any reviewer to check. Mizo is modelled the same way in `languages/mizo.yaml`.
 
-## Worked example (English, 0–999)
+## Worked example (English, 0–99)
+
+**The example lives in [`languages/en.yaml`](../languages/en.yaml). Read it
+there.** It is a real spec: it loads in the reference engine, round-trips all
+of 0–99, and is validated against the schema on every test run.
+
+This document deliberately does *not* reproduce it in full. An earlier version
+did, and the copy here and the file drifted apart until `en.yaml` described a
+format the engine had never implemented (#29). A worked example that can go
+stale isn't one. What follows is the shape, with the file as the authority.
 
 ```yaml
-meta:
-  language: English
-  code: en
-  version: 0.1.0
-  supports: { min: 0, max: 999 }        # declared, tested range
-  sources:
-    - "Illustrative example, not a shipping language."
-
 lexicon:
-  # Atomic number words, keyed by the value they represent.
-  units:                                 # 0–9
-    0: zero
-    1: one
-    2: two
-    3: three
-    4: four
-    5: five
-    6: six
-    7: seven
-    8: eight
-    9: nine
-  teens:                                 # 10–19 (irregular, so listed)
-    10: ten
-    11: eleven
-    12: twelve
-    13: thirteen
-    14: fourteen
-    15: fifteen
-    16: sixteen
-    17: seventeen
-    18: eighteen
-    19: nineteen
-  tens:                                  # 20,30,…,90
-    20: twenty
-    30: thirty
-    40: forty
-    50: fifty
-    60: sixty
-    70: seventy
-    80: eighty
-    90: ninety
-  scales:
-    100: hundred
+  units:                              # keyed by the value each entry represents
+    7: { word: "seven" }              # field names are per-language; English
+                                      # words have one form, so just `word`
 
 grammar:
-  # Rules are tried in order; the first whose range matches applies.
-  rules:
-    - range: [0, 9]      form: "{units}"
-    - range: [10, 19]    form: "{teens}"
-    - range: [20, 99]    form: "{tens}[-{units:1-9}]"      # "twenty", "twenty-one"
-    - range: [100, 999]  form: "{units:1-9} hundred[ and {0-99}]"  # recursion
-
-parse:
-  case_insensitive: true
-  word_separators: [" ", "-"]
-  connectors: ["and"]          # ignorable filler words when parsing
-  aliases: {}                  # e.g. accepted spelling variants → canonical
-
-examples:
-  - { number: 7,   text: "seven" }
-  - { number: 42,  text: "forty-two" }
-  - { number: 305, text: "three hundred and five" }
-  - { number: 999, text: "nine hundred and ninety-nine" }
+  rules:                              # tried in order; first match applies
+    - name: compound_tens
+      range: [21, 99]
+      condition: "ones_digit > 0"     # restricted expression, not eval()
+      output: "{tens[tens_digit].word}-{units[ones_digit].word}"
 ```
+
+Three things that example is carrying:
+
+- **Lexicon addressing is always `{table[key].field}`.** The key is either a
+  positional variable (`ones_digit`, `tens_digit`) or a literal integer
+  (`scales[10]`). There is no whole-number key — which is why `en.yaml` keys
+  its irregular teens by `ones_digit` rather than by value.
+- **Literal text between placeholders survives rendering**, which is how the
+  hyphen in `forty-two` gets there. The same hyphen is a `word_separator` when
+  parsing, so `forty two` is accepted too.
+- **`condition` is evaluated by a restricted AST walker**, not `eval()` —
+  comparisons, `and`/`or`, names and integer constants only. Anything else
+  raises rather than executing. `condition` is data from a YAML file, not code
+  we wrote.
+
+English above 99 is **not** in the example, and that's a real limitation rather
+than a simplification: "three hundred and five" needs a rule that recurses into
+a sub-range, and the format has no recursive placeholder. Mizo hits the same
+wall from the other direction at 10⁹ (#27). Two unrelated languages needing the
+same missing feature is good evidence it's genuinely required.
 
 ## How the engine uses it
 
 - **`number → text`:** find the first `grammar.rules` entry whose `range`
-  contains the number, expand its `form` (recursing into sub-ranges via
-  `{0-99}`-style references), and substitute lexicon words.
+  contains the number *and* whose `condition` passes, then substitute lexicon
+  words into its `output`. Rule order is significant.
 - **`text → number`:** normalise the text using `parse` (lowercase, strip
   diacritics, split on separators, drop `connectors`, resolve `aliases`), then
   match against the same grammar to recover the value. The normalising flags
   apply to the lexicon word too, so only the comparison is loosened —
   `number → text` still emits the canonical spelling, diacritics and all.
 
-The exact `form` mini-syntax above is **illustrative** — pinning it down
-precisely (and validating it with a schema) is the first real design task. The
-point is the *shape*: lexicon + ordered ranged rules + parse hints, all as data.
+A rule may also declare `parse_aliases`: extra templates accepted when parsing
+but never produced. `number_to_text` stays the single source of truth for the
+canonical form; everything in `parse` and `parse_aliases` only widens what is
+*accepted*, never what is *emitted*.
 
-## Open questions to resolve while formalising
+The current `text → number` implementation brute-forces the supported range and
+match-tests each candidate. That is honest at 0–100 and won't survive a larger
+range — see the note in `reference/engine.py`, and #27, which establishes that
+Mizo needs genuine evaluation rather than template matching.
+
+## Known gaps in the format
+
+Not speculative — each has been hit by a real language.
+
+- **No recursive placeholder.** A rule can't say "this slot holds a number
+  rendered by the same rules". English needs it above 99 (`{units} hundred and
+  {0-99}`); Mizo needs it at 10⁹ (`tlûklehdingâwn sawm hnih`, where the
+  multiplier is itself a compound). Tracked in #27. This is the largest gap.
+- **No way to declare a scale's ×1 behaviour.** Mizo writes `sâwm` for 10 but
+  `sâng khat` for 1,000 — an explicit multiplier is obligatory above 10², and
+  that's currently implicit in hand-written rules rather than stated as data.
+  #27.
+- **Parse leniency is hardcoded to Mizo's field names.** `accepted_forms` keys
+  off `standalone`/`bound`, so a language whose entries name their fields
+  differently has to switch Mizo's flags off to parse single digits. #31.
+- **Canonical vs. accepted forms aren't fully expressible.** Above 10⁵ Mizo
+  accepts productive scale-stacking (`nuai za hnih`) that no rule generates, so
+  accepted input can't be enumerated from the rules. #27, #12.
+
+Still genuinely open, no data yet:
 
 - How to express irregular joins (elision, mutation, tone changes) that some
-  languages have — Mizo especially may not decompose as cleanly as English.
-- Canonical vs. accepted forms for parsing (one output, many valid inputs).
-- Ordinals, negatives, decimals, and large scales — in scope later; keep the
-  format open to them.
+  languages have.
+- Ordinals, negatives, decimals — in scope later; keep the format open to them.
 - Whether to adopt CLDR RBNF's rule syntax outright instead of inventing this.
   (See [`architecture.md`](architecture.md) → Prior art.)

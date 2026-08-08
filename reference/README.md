@@ -76,9 +76,17 @@ The schema is **descriptive, not aspirational**: it encodes the format that
 exists today, not anything merely proposed. Extend it in the same PR that
 extends the format, never ahead of it.
 
-Note that `languages/en.yaml` is *not* validated — it's written in the older
-illustrative `form:` syntax and doesn't load in `engine.py` either. See the
-note at the foot of `test_spec_schema.py`.
+Every file in `languages/` is validated, found by glob rather than listed, so
+a new spec is checked the moment it lands. That both specs validate is the
+point: with Mizo alone, nothing could distinguish "the schema describes the
+format" from "the schema describes Mizo".
+
+`test_en_spec.py` does the same job for the engine. `languages/en.yaml` is the
+worked reference example, and English is a useful control precisely because it
+is unlike Mizo where it matters — irregular teens that can't be composed, a
+hyphen that is both canonical output and a word separator, and lexicon entries
+with one form rather than two. It's capped at 0–99: English above 99 needs
+recursion the format doesn't have yet (#27).
 
 ## Conformance vectors
 
