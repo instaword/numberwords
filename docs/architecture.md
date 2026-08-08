@@ -69,10 +69,13 @@ Five pieces:
 5. **Target packages** (`packages/python`, `packages/npm`, …) — the actual
    published, idiomatic libraries a consumer installs.
 
-## The key architectural decision: interpret vs. generate
+## The key architectural decision: interpret vs. generate — **decided**
 
-There are two ways a target package can implement the rules. We should decide
-deliberately and document it.
+> **Decision (2026-08-08, #20): Option A — data plus a thin interpreter per
+> runtime, with the data normalised at build time rather than at import.**
+> Rationale and the one bounded exception are below the options.
+
+There are two ways a target package can implement the rules.
 
 **Option A — Ship the spec as data + a thin interpreter per runtime.**
 Each target package embeds the spec (or the normalised IR) and contains a small
@@ -80,6 +83,9 @@ engine that walks it at runtime.
 
 - ➕ One algorithm to reason about; rules can't drift from the spec.
 - ➕ Adding a language = shipping new data, often no code change.
+  *Aspirational today, not yet true: some language behaviour has leaked into
+  engine code — see #31 — which is a bug against this principle rather than a
+  refutation of it.*
 - ➕ Much easier to keep Python and npm identical.
 - ➖ A little runtime overhead and interpreter code to maintain per language.
 
@@ -90,11 +96,79 @@ A codegen step emits hand-written-looking Python/TS from the spec.
 - ➖ A code generator per target is real work and a bug surface.
 - ➖ Easiest place for targets to subtly diverge.
 
-**Recommendation:** start with **Option A (interpreter + data)**. It gets us
-correct, agreeing packages fastest and is far easier for a small team to
-maintain. Treat **Option B as a later optimisation** *if and only if*
-performance or dependency footprint demands it — and even then, keep the
-conformance vectors as the shared guarantee. Ship correctness first.
+### The decision, and why "compile" caused confusion
+
+**We chose Option A.** The grammar stays data; a small engine walks it at
+runtime.
+
+For a while this looked like a contradiction, because #20 settled on
+*"compile the spec at build time, don't interpret it at runtime"*, which reads
+as Option B. It isn't. Note the parenthetical in Option A above: a target
+embeds **the spec *or the normalised IR***. Compiling the spec into a checked-in
+module is producing that normalised IR. The build step moves normalisation from
+import time to build time — a decision about *when*, not about *what*.
+
+Concretely, in the first target package (#20):
+
+| Component | What it is |
+|---|---|
+| `_mizo.py` — generated literals, pre-parsed templates, normalised parse config | the **normalised IR** |
+| `_render.py` — selects the rule, matches tokens, collects matches | the **thin interpreter** |
+
+**What we are deliberately *not* doing** is Option B proper: emitting code where
+the grammar becomes control flow (`if n < 20: return TEENS[n % 10]`). No target
+should contain a hand-shaped implementation of a language's rules. That is the
+"third source of truth" the warning below is about.
+
+Two consequences worth stating, because they're easy to get wrong:
+
+- **Precompute anything input-independent** — conditions, output templates,
+  parse configuration. This is free correctness: it happens once, in tooling we
+  already have, under review.
+- **Anything input-dependent stays runtime algorithm, in every target.**
+  Tokenising, matching and evaluating cannot be precomputed. Compiling reduces
+  how much each target reimplements; it does not eliminate it. The conformance
+  vectors — not this decision — are what keep those implementations honest.
+
+### The one bounded exception
+
+The compiler emits each rule's `condition` as an executable expression rather
+than as data. That is genuinely codegen, and it's recorded here as an exception
+rather than glossed over. It is acceptable because it is small (two expressions
+in `mizo.yaml` today), and guarded: the compiler validates every condition
+against the same restricted allowlist the engine uses, and only then emits.
+Never emit an unvalidated string.
+
+If that exception ever grows beyond simple predicates, revisit this decision
+rather than widening it quietly.
+
+### Why this is more clearly right than when first written
+
+Three things we've learned since strengthen Option A:
+
+- **The grammar is recursive** (#27, rules 5–6) and `text → number` has to
+  become genuine evaluation, not template matching. Under real Option B every
+  target would codegen an evaluator from grammar data — hard, and precisely
+  where targets would diverge.
+- **Mizo accepts productive scale-stacking** above 10⁵ (`nuai za hnih`), so
+  accepted input can't be enumerated from the rules. More runtime algorithm,
+  less that can be precomputed.
+- **#31 shows the data/code boundary already leaks.** Keeping behaviour in data
+  is a discipline that needs active maintenance, not a property we get for free.
+
+### Still open: one artifact or one per target
+
+Deciding A-vs-B leaves a real question underneath it. The compiled IR can be:
+
+1. **Per-target source** — a `.py` for Python, a `.js` for npm. Avoids
+   package-data inclusion problems, which are a genuine and irritating class of
+   bug. Costs a compiler backend per target.
+2. **One shared normalised JSON IR** every target embeds. One compiler total, at
+   the cost of each target bundling a data file and parsing it at import.
+
+Option 1 is what #20 builds, and is right for now — the packaging pitfalls are
+real and the compiler is small. **Revisit at the npm target**, when the cost of a
+second backend is concrete rather than hypothetical.
 
 > This is the single most important decision in the repo. Don't let a target
 > package quietly hard-code rules and become a third source of truth.
