@@ -27,7 +27,8 @@ source .venv/Scripts/activate
 .venv\Scripts\Activate.ps1
 ```
 
-Then install dependencies (`pyyaml`, `pytest` — not installed by default):
+Then install dependencies (`pyyaml`, `pytest`, `jsonschema` — not installed by
+default):
 
 ```
 pip install -r requirements.txt
@@ -57,6 +58,27 @@ and the `# Decision (#10)` tag on `parse.connectors`). Nothing in `mizo.yaml`
 is marked `TODO(verify)` as of #15. If something is tagged that way later, it
 means a genuine open question rather than a settled fact — see
 [`CLAUDE.md`](../CLAUDE.md) on why that distinction matters here.
+
+## Spec schema
+
+[`../spec/spec.schema.json`](../spec/spec.schema.json) is the JSON Schema for
+the rule-spec format. Before it existed, the format's real definition was
+"whatever `engine.py` happens to accept", and a malformed spec surfaced as a
+`KeyError` from deep inside the engine.
+
+`test_spec_schema.py` validates `languages/mizo.yaml` against it on every run.
+That file's negative cases matter more than the positive one: they assert that
+specific authoring mistakes — a typo'd parse flag, a placeholder missing its
+field, an unsourced spec — are *rejected*. A schema that accepted every
+document would pass a positive-only test and be worthless.
+
+The schema is **descriptive, not aspirational**: it encodes the format that
+exists today, not anything merely proposed. Extend it in the same PR that
+extends the format, never ahead of it.
+
+Note that `languages/en.yaml` is *not* validated — it's written in the older
+illustrative `form:` syntax and doesn't load in `engine.py` either. See the
+note at the foot of `test_spec_schema.py`.
 
 ## Conformance vectors
 
