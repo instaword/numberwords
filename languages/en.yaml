@@ -1,72 +1,130 @@
 # English number spec — WORKED REFERENCE EXAMPLE.
 #
 # This file exists to demonstrate the rule-spec format with a language whose
-# correctness any reviewer can verify at a glance. It is intentionally limited
-# to 0–999. See docs/spec-format.md for the full explanation of each section.
+# correctness any reviewer can verify at a glance. It is NOT a shipping
+# target language — it's the teaching example, and the second spec that
+# proves the format isn't shaped around Mizo.
 #
-# It is NOT a shipping target language — it's the teaching example.
+# Range: 0–99. Deliberately narrower than the 0–999 this file used to claim.
+# English above 99 needs recursion — "three hundred and five" is
+# {units} hundred and {0-99} — and the format has no recursive placeholder
+# yet (see #27, #29). A valid 0–99 spec is worth more than an invalid 0–999
+# one; the hundreds return when recursion lands.
+#
+# See docs/spec-format.md for the prose description of each section, and
+# spec/spec.schema.json for the machine-checkable version.
 
 meta:
   language: English
-  code: en
-  version: 0.1.0
-  supports: { min: 0, max: 999 }
+  code: eng          # ISO 639-3, matching mizo.yaml's `lus`.
+  version: 0.2.0     # 0.2.0: ported from the old illustrative `form:` syntax.
+  supports: { min: 0, max: 99 }
   sources:
-    - "Illustrative reference example."
+    - "Illustrative reference example; English numerals need no citation."
 
 lexicon:
-  units:
-    0: zero
-    1: one
-    2: two
-    3: three
-    4: four
-    5: five
-    6: six
-    7: seven
-    8: eight
-    9: nine
-  teens:
-    10: ten
-    11: eleven
-    12: twelve
-    13: thirteen
-    14: fourteen
-    15: fifteen
-    16: sixteen
-    17: seventeen
-    18: eighteen
-    19: nineteen
-  tens:
-    20: twenty
-    30: thirty
-    40: forty
-    50: fifty
-    60: sixty
-    70: seventy
-    80: eighty
-    90: ninety
-  scales:
-    100: hundred
+  # Every entry names its fields after the condition that selects them
+  # (docs/spec-format.md). English words have exactly one form each, so the
+  # single field is just `word` — compare Mizo, whose units carry
+  # standalone/bound because context selects between them.
+  units:               # 0–9
+    0: { word: "zero"  }
+    1: { word: "one"   }
+    2: { word: "two"   }
+    3: { word: "three" }
+    4: { word: "four"  }
+    5: { word: "five"  }
+    6: { word: "six"   }
+    7: { word: "seven" }
+    8: { word: "eight" }
+    9: { word: "nine"  }
+
+  teens:               # 10–19, irregular, so listed rather than composed.
+                       # KEYED BY ones_digit, not by value: 3 -> "thirteen".
+                       # That isn't a workaround — it's the actual pattern.
+                       # English teens are irregular forms of the ones digit
+                       # sitting in the 10s (one/eleven, three/thirteen,
+                       # nine/nineteen), and 10 itself is the ones_digit == 0
+                       # case. Keying by value would need a whole-number
+                       # lookup key, which the format doesn't have: keys are
+                       # either a positional variable or a literal integer.
+    0: { word: "ten"       }
+    1: { word: "eleven"    }
+    2: { word: "twelve"    }
+    3: { word: "thirteen"  }
+    4: { word: "fourteen"  }
+    5: { word: "fifteen"   }
+    6: { word: "sixteen"   }
+    7: { word: "seventeen" }
+    8: { word: "eighteen"  }
+    9: { word: "nineteen"  }
+
+  tens:                # 20,30,…,90. Keyed by tens_digit: 2 -> "twenty".
+    2: { word: "twenty"  }
+    3: { word: "thirty"  }
+    4: { word: "forty"   }
+    5: { word: "fifty"   }
+    6: { word: "sixty"   }
+    7: { word: "seventy" }
+    8: { word: "eighty"  }
+    9: { word: "ninety"  }
+
+# Positional variables available to `condition` and `output`, derived from the
+# number being rendered (not looked up in the lexicon):
+#   ones_digit = n % 10
+#   tens_digit = (n // 10) % 10
+#
+# Lexicon addressing is always <table>[<key>].<field>.
 
 grammar:
   rules:
-    - { range: [0, 9],     form: "{units}" }
-    - { range: [10, 19],   form: "{teens}" }
-    - { range: [20, 99],   form: "{tens}[-{units:1-9}]" }
-    - { range: [100, 999], form: "{units:1-9} hundred[ and {0-99}]" }
+    # Tried in order; the first whose range contains n and whose condition
+    # passes is applied. Same structure as mizo.yaml, which is the point.
+    - name: units
+      range: [0, 9]
+      output: "{units[ones_digit].word}"
+
+    - name: teens                    # ten, eleven, … nineteen
+      range: [10, 19]
+      output: "{teens[ones_digit].word}"
+
+    - name: exact_tens               # twenty, thirty, …
+      range: [20, 99]
+      condition: "ones_digit == 0"
+      output: "{tens[tens_digit].word}"
+
+    - name: compound_tens            # twenty-one, forty-two, …
+      range: [21, 99]
+      condition: "ones_digit > 0"
+      output: "{tens[tens_digit].word}-{units[ones_digit].word}"
 
 parse:
   case_insensitive: true
-  word_separators: [" ", "-"]
-  connectors: ["and"]
-  aliases: {}
+  word_separators: [" ", "-"]   # "forty-two" and "forty two" both parse.
+  connectors: ["and"]           # ignorable filler when parsing.
+  accepted_forms:
+    # English units have exactly one form, so there is no alternate form to
+    # accept. Both flags off; the engine then matches only the field the
+    # template names.
+    #
+    # These two flag names are Mizo's (`standalone`/`bound` unit forms), and
+    # having to set them in an English spec is a known wart -- see the TODO
+    # in reference/engine.py's _acceptable_fields, which says this should be
+    # driven from the spec rather than a fixed string check once a second
+    # language exists. This is that second language. Tracked in #31.
+    standalone_units: false
+    bound_units: false
+  aliases: {}                   # no irregular spelling variants in this range.
 
 examples:
-  - { number: 0,   text: "zero" }
-  - { number: 7,   text: "seven" }
-  - { number: 19,  text: "nineteen" }
-  - { number: 42,  text: "forty-two" }
-  - { number: 100, text: "one hundred" }
-  - { number: 305, text: "three hundred and five" }
-  - { number: 999, text: "nine hundred and ninety-nine" }
+  # Hand-written, independent of the engine — these catch a rule change that
+  # silently alters output.
+  - { number: 0,  text: "zero" }
+  - { number: 7,  text: "seven" }
+  - { number: 10, text: "ten" }
+  - { number: 13, text: "thirteen" }
+  - { number: 19, text: "nineteen" }
+  - { number: 20, text: "twenty" }
+  - { number: 42, text: "forty-two" }
+  - { number: 70, text: "seventy" }
+  - { number: 99, text: "ninety-nine" }

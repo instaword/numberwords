@@ -118,20 +118,33 @@ CONTRIBUTING.md        Contributor workflow (branching, PRs, setup).
 LICENSE                MIT.
 docs/
   architecture.md      The design: spec → multi-target, trade-offs, prior art.
-  spec-format.md       The rule-spec format, with a worked example.
+  spec-format.md       The rule-spec format, prose companion to the schema.
 languages/
-  en.yaml              Worked reference example (English) of the spec format.
-  mizo.yaml            Mizo spec — skeleton with TODOs to fill in.
+  en.yaml              Worked reference example (English, 0–99) — a real spec,
+                       not a sketch: it loads, round-trips, and validates.
+  mizo.yaml            Mizo spec, 0–100. Numeral data verified by native
+                       speakers; nothing marked TODO(verify).
+spec/
+  spec.schema.json     Machine-checkable definition of the spec format.
+                       Authoritative where it and spec-format.md disagree.
+reference/
+  engine.py            The oracle — interprets a spec directly.
+  generate_vectors.py  Regenerates vectors/mizo.json. Run after spec edits.
+  test_*.py            Engine, English control, and schema validation.
+vectors/
+  mizo.json            Checked-in conformance vectors. Generated, not edited.
+packages/
+  python/  npm/        Published placeholder packages (0.0.0). See its README.
 .githooks/
   pre-push             Local guard that blocks pushes to main.
 .github/
   pull_request_template.md
   ISSUE_TEMPLATE/
+  workflows/tests.yml  Runs the reference suite and the vectors drift check.
 ```
 
-Directories like `spec/`, `reference/`, `vectors/`, and `packages/` are described
-in the architecture doc and will be created as the work reaches them. Don't
-scaffold empty structure ahead of need.
+Directories still unbuilt are described in the architecture doc and get created
+as the work reaches them. Don't scaffold empty structure ahead of need.
 
 ## When in doubt
 
