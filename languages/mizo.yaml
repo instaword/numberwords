@@ -113,9 +113,16 @@ parse:
   word_separators: [" ", "-"]
   accepted_forms: { standalone_units: true, bound_units: true }
   connectors: ["leh"]      # Decision (#10): genuinely ambiguous connector; disambiguating it is out of scope by design -- see file header above.
-  aliases: {}   # Decision (#15): no non-diacritic spelling variants in Mizo
-                # (confirmed by native speaker). Diacritics are handled by
-                # strip_diacritics above.
+  aliases: {}   # Decision (#15): no non-diacritic spelling variants among the
+                # numerals in this spec's 0-100 range (confirmed by native
+                # speaker). Diacritics are handled by strip_diacritics above.
+                #
+                # This is NOT true of Mizo generally, so don't read it as a
+                # claim about the language: the 10^5 and 10^6 scale words take
+                # an optional trailing -h (nuai/nuaih, maktaduai/maktaduaih)
+                # that strip_diacritics cannot collapse. Those need entries
+                # here when the range is extended -- number_to_text() must
+                # still emit the h-less form. See #27.
 
 
 examples:
