@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/instaword/numberwords/spec/spec.schema.json",
+  "title": "numberwords language rule spec",
+  "description": "Validates a language rule spec as implemented today by reference/engine.py -- see docs/spec-format.md for the prose description. This schema is deliberately DESCRIPTIVE, not aspirational: it encodes the format that currently exists for a 0-100 style range, and nothing that has only been proposed. Extend it in the same PR that extends the format, never ahead of it.\n\nValidation runs against the JSON normalisation of the YAML file (docs/spec-format.md: 'YAML for authoring; it normalises to JSON as the IR'). That matters because YAML gives integer lexicon keys while JSON object keys are always strings -- hence the numeric-string key patterns below.",
+
+  "type": "object",
+  "required": ["meta", "lexicon", "grammar"],
+  "additionalProperties": false,
+
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Language identity and the declared supported range.",
+      "required": ["language", "code", "version", "supports", "sources"],
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable language name, e.g. 'Mizo'."
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z]{3}$",
+          "description": "ISO 639-3 code, e.g. 'lus' for Mizo. Three lowercase letters -- 639-3 rather than 639-1 so languages without a two-letter code are representable."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Spec version, independent of any package version."
+        },
+        "supports": {
+          "type": "object",
+          "description": "The inclusive range this spec claims to convert. The engine refuses anything outside it rather than guessing.",
+          "required": ["min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "integer" },
+            "max": { "type": "integer" }
+          }
+        },
+        "orthography": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional. The writing system this spec's lexicon is spelled in, e.g. 'missionary' for Mizo. Diacritics depend on it, so a different orthography changes the lexicon throughout."
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Where the numeral data came from -- dictionary, grammar, or named native speaker. Required, and required non-empty: CONTRIBUTING.md forbids asserting linguistic facts without a source, and an unsourced spec is exactly what that rule exists to prevent."
+        }
+      }
+    },
+
+    "lexicon": {
+      "type": "object",
+      "description": "The atomic number words, grouped into tables. Table names (units, scales, teens, ...) are open -- languages differ in which groupings they need.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "description": "One lexicon table, keyed by the integer value each entry represents.",
+        "minProperties": 1,
+        "propertyNames": {
+          "pattern": "^-?[0-9]+$",
+          "description": "Keys are the numeric value, as a string after JSON normalisation."
+        },
+        "additionalProperties": {
+          "type": "object",
+          "description": "One entry, holding every grammatical form of that word. Field names are open by design: docs/spec-format.md asks that each be named after the condition that selects it (Mizo units use standalone/bound; its scales use standalone/multiplied, which is a different condition).",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+
+    "grammar": {
+      "type": "object",
+      "description": "How the atoms combine.",
+      "required": ["rules"],
+      "additionalProperties": false,
+      "properties": {
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Tried in order; the first whose range contains the number AND whose condition passes is applied. Order is therefore significant.",
+          "items": {
+            "type": "object",
+            "required": ["name", "range", "output"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$",
+                "description": "Identifies the rule in tests, errors and review discussion. Not used for matching."
+              },
+              "range": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": { "type": "integer" },
+                "description": "Inclusive [low, high] bounds this rule can apply to."
+              },
+              "condition": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Optional extra test beyond the range, over the positional variables (ones_digit, tens_digit). Evaluated by a restricted AST walker in engine.py -- comparisons, and/or, names and integer constants only. NOT eval(). Anything outside that subset raises rather than executing."
+              },
+              "output": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^[^{}]*(\\{\\w+\\[\\w+\\]\\.\\w+\\}[^{}]*)*$",
+                "description": "The canonical rendering this rule produces, as literal text plus {table[key].field} placeholders. The key is either a positional variable name or a literal integer. The pattern here enforces that every brace group is a well-formed placeholder and that no stray brace survives -- a typo like {units[ones_digit]} fails validation instead of failing at render time."
+              },
+              "parse_aliases": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[^{}]*(\\{\\w+\\[\\w+\\]\\.\\w+\\}[^{}]*)*$"
+                },
+                "description": "Optional. Extra templates accepted when parsing but NEVER produced by number_to_text -- e.g. Mizo's compound-tens shorthand. Same placeholder syntax as output, so the same pattern applies."
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "parse": {
+      "type": "object",
+      "description": "Hints for the reverse direction. Every flag here loosens matching only; none of it changes what number_to_text emits. Optional -- engine.py treats a missing parse section as all-defaults.",
+      "additionalProperties": false,
+      "properties": {
+        "case_insensitive": {
+          "type": "boolean",
+          "description": "Lowercase input and lexicon before comparing."
+        },
+        "strip_diacritics": {
+          "type": "boolean",
+          "description": "Remove combining marks from input and lexicon before comparing, so ASCII-typed input matches. Applied to both sides -- applying it to input alone would stop it matching the lexicon."
+        },
+        "word_separators": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Strings the input may be split on, e.g. [' ', '-']."
+        },
+        "accepted_forms": {
+          "type": "object",
+          "description": "Which lexicon fields a freestanding single-digit phrase may match, beyond the one its template names. Open-ended: engine.py currently understands standalone_units and bound_units, and has a standing TODO that these are Mizo-specific names living in otherwise language-agnostic code.",
+          "additionalProperties": { "type": "boolean" }
+        },
+        "connectors": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Filler words dropped when parsing, e.g. Mizo 'leh'. A tolerance, not a claim about meaning."
+        },
+        "aliases": {
+          "type": "object",
+          "description": "Irregular spelling variants that normalisation flags cannot express, mapped variant -> canonical. Prefer a parse flag where one applies: a flag is one line and covers every word, an alias list grows per word.",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+
+    "examples": {
+      "type": "array",
+      "description": "Optional hand-written {number, text} pairs. These are independent ground truth -- written by hand, not generated from the engine -- so they catch a spec change that silently alters output.",
+      "items": {
+        "type": "object",
+        "required": ["number", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "number": { "type": "integer" },
+          "text": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
