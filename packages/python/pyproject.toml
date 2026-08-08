@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "numberwords"
-version = "0.0.0"
+version = "0.1.0"
 description = "Bidirectional text-number conversion driven by a single language-agnostic rule spec. Placeholder release; under active development."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -22,4 +22,4 @@ Homepage = "https://github.com/instaword/numberwords"
 Source = "https://github.com/instaword/numberwords"
 
 [tool.hatch.build.targets.wheel]
-packages = ["numberwords"]
+packages = ["src/numberwords"]

@@ -223,3 +223,29 @@ If you change the spec and forget to regenerate,
 assert the engine's current output against the checked-in vectors file. CI
 additionally re-runs the generator and diffs the result, so a stale snapshot
 can't merge.
+
+## Compiled artifact
+
+`compile_spec.py` compiles `languages/mizo.yaml` into
+[`_mizo.py`](../packages/python/src/numberwords/_mizo.py) — a plain Python
+module holding the lexicon, the grammar rules, and the parse settings, which
+the Python package ships. Compiling at build time is what lets that package
+avoid a PyYAML dependency and avoid reading the spec at import time (#20).
+
+Like the vectors, it is a checked-in snapshot rather than something computed
+at install time. **Regenerate and commit it whenever `mizo.yaml` changes:**
+
+```
+python compile_spec.py
+```
+
+`test_compile_spec.py` fails if the checked-in copy is stale. It compiles to a
+temporary file rather than to the real path, so a failing test never rewrites
+the artifact it is supposed to be checking.
+
+Each rule's `condition` is emitted as a lambda derived from the validated
+syntax tree with `ast.unparse`, rather than assembled as a string by hand.
+That keeps Python itself the single definition of what a condition means,
+instead of one definition in `engine.py` and a second in the compiler. The
+compiler accepts only what `engine._eval_node` accepts, and raises at build
+time on anything else.
