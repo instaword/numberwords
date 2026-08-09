@@ -137,18 +137,35 @@ listing every-gap forms would promote it into a requirement every future
 target has to implement.
 
 Last-gap-only needs one qualification, because the last gap isn't always the
-same kind of place. Where the final digit *adds* to the scale word (`sâwm leh
-pakhat`, 10 + 1) the connector reads correctly. Where it *multiplies* it, as
-in `exact_tens` (20 = 10 × 2), the only gap sits between the scale word and
-its multiplier, and `sawm leh hnih` reads as "ten and two" — that is, as 12.
-Same objection that made placement last-gap-only in the first place, applied
-to a case that hadn't come up. Those variants are not generated. The rule is
-detected positionally (does the final placeholder address the least
-significant digit?) rather than by looking for the field name `bound`, since
-field names are Mizo's and hardcoding them in language-agnostic code is what
-#31 is about. It is still a proxy with a known expiry — #27 notes positional
-variables don't generalise past two digits, and #19 has to settle `leh`
-placement for multi-scale numbers regardless.
+same kind of place. The linguistic fact, from the repo owner as a native
+speaker (#34): **`leh` is followed by a standalone unit form.** `teens` and
+`compound_tens` end in one — `sâwm leh pakhat` (11), `sawm nga leh pariat`
+(58) — so their last gap takes the connector. `exact_tens` ends in a bound
+form, and `sawm leh hnih` is not a competing reading of 20; it is
+meaningless. Those variants are not generated.
+
+Nothing real is lost by excluding them. The string a speaker would use for
+"10 and 2" is `sawm leh pahnih`, which is `teens`' connector variant for 12
+and is certified there. Whether that phrase is one number or two is the
+inter-number ambiguity `# Decision (#10)` deliberately puts out of scope.
+
+The generator detects this **positionally** — does the final placeholder
+address the least significant digit? — rather than by looking for the field
+name `standalone`, since field names are Mizo's and hardcoding them in
+language-agnostic code is what #31 is about. Both select the same three rules
+today, which makes the positional test a *proxy* for the standalone rule
+rather than a statement of it;
+`test_certified_connectors_are_followed_by_a_standalone_form` is what would
+notice them coming apart. The proxy has a known expiry regardless — #27 notes
+positional variables don't generalise past two digits, and #19 has to settle
+`leh` placement for multi-scale numbers anyway.
+
+One related trap, since it bit the first version: an entry's canonical
+spelling is taken from the renderer verbatim, never rebuilt by re-joining its
+words with `word_separators[0]`. The literal text a template puts between
+placeholders isn't always the first separator — English writes `forty-two` —
+so rebuilding drops the very string the list has to contain, and the
+"alternate separator" is whichever one the canonical rendering *didn't* use.
 
 These are *representative* accepted spellings, **not every accepted
 spelling**, and the format should not be documented as if it were exhaustive.
