@@ -8,6 +8,11 @@ checked against, on purpose, because they prove different things:
   spec edit whose output changed without a regenerate. It canNOT catch a
   wrong-but-dutifully-regenerated numeral, since it's generated from the
   same engine it's tested against -- that's what the examples: test is for.
+  Each entry also carries accepted_inputs: representative spellings
+  text_to_number() must accept, one per applicable parse feature (#12). That
+  is the half of the contract `text` alone can't state -- a target package
+  can match every canonical string and still reject everything a Mizo
+  speaker types. See generate_vectors.accepted_inputs() for the rule.
 
 mizo.yaml's core numeral data has been verified by a native Mizo speaker
 (see meta.sources). The "leh" connector (parse.connectors) is a separate,
@@ -24,6 +29,7 @@ from pathlib import Path
 
 import pytest
 
+import generate_vectors
 from engine import Spec, load
 
 MIZO_SPEC_PATH = Path(__file__).resolve().parent.parent / "languages" / "mizo.yaml"
@@ -51,7 +57,18 @@ def test_examples_match(spec):
 
 def test_vectors_match_number_to_text(spec, vectors):
     for vector in vectors:
-        assert spec.number_to_text(vector["number"]) == vector["text"], f"n={vector['number']}"
+        n = int(vector["number"])
+        assert spec.number_to_text(n) == vector["text"], f"n={n}"
+
+
+def test_vector_numbers_are_strings(vectors):
+    # #12: `number` is deliberately a string, so that a JS target reading
+    # this file cannot silently lose precision above 2^53 - 1 once the range
+    # grows (#27 puts Mizo's ceiling at 10^18 - 1). Nothing in the current
+    # 0-100 range needs it; the format does. Asserted so that a future
+    # regenerate cannot quietly drop back to a JSON number.
+    for vector in vectors:
+        assert isinstance(vector["number"], str), vector
 
 
 @pytest.mark.parametrize("n", range(0, 101))
@@ -71,7 +88,110 @@ def test_out_of_range_raises(spec):
 
 def test_vectors_parse_back(spec, vectors):
     for vector in vectors:
-        assert spec.text_to_number(vector["text"]) == vector["number"]
+        assert spec.text_to_number(vector["text"]) == int(vector["number"])
+
+
+def test_every_accepted_input_parses(spec, vectors):
+    # The contract the accepted_inputs field exists to state: a target that
+    # passes the vectors accepts every one of these spellings, not just the
+    # canonical one. Without it a package could score 101/101 with a parser
+    # that handles nothing a Mizo speaker would actually type.
+    for vector in vectors:
+        n = int(vector["number"])
+        for candidate in vector["accepted_inputs"]:
+            assert spec.text_to_number(candidate) == n, f"n={n} input={candidate!r}"
+
+
+def test_canonical_text_is_an_accepted_input(spec, vectors):
+    # number_to_text()'s output must always be something text_to_number()
+    # accepts. Listing it keeps accepted_inputs self-contained -- a target
+    # iterates one field -- and it is the invariant #19 has to preserve when
+    # it decides where number_to_text() emits "leh".
+    for vector in vectors:
+        assert vector["text"] in vector["accepted_inputs"], vector["number"]
+
+
+def test_accepted_inputs_are_sorted_and_unique(vectors):
+    # The file is compared byte-for-byte in CI to catch a spec edit that
+    # wasn't followed by a regenerate, so its ordering has to be stable.
+    for vector in vectors:
+        inputs = vector["accepted_inputs"]
+        assert inputs == sorted(set(inputs)), vector["number"]
+
+
+@pytest.mark.parametrize(
+    "n, feature, expected",
+    [
+        (11, "case", "SÂWM PAKHAT"),
+        (11, "diacritics", "sawm pakhat"),
+        (11, "separator", "sâwm-pakhat"),
+        (11, "connector", "sâwm leh pakhat"),
+        (11, "combined", "SAWM-LEH-PAKHAT"),
+        (1, "unit form", "khat"),
+        (23, "parse alias", "hnih thum"),
+    ],
+)
+def test_each_parse_feature_is_represented(vectors, n, feature, expected):
+    # One entry per parse feature is the whole point of the bounded rule
+    # (#12): when a target fails, the variant that failed names the feature
+    # that is broken. These spellings are spelled out by hand rather than
+    # recomputed from the generator, so a generator change that silently
+    # stopped covering a feature fails here instead of passing against its
+    # own new output.
+    vector = next(v for v in vectors if v["number"] == str(n))
+    assert expected in vector["accepted_inputs"], feature
+
+
+def test_accepted_inputs_do_not_bless_every_connector_gap(vectors):
+    # Placement is the last gap only (#10, #12). The engine drops "leh"
+    # anywhere by design, but that is engine tolerance, not a target
+    # contract: certifying "sawm leh nga leh pariat" would require every
+    # future target to accept a string that reads as "10 and 5 and 8"
+    # rather than as 58.
+    vector = next(v for v in vectors if v["number"] == "58")
+    assert "sawm nga leh pariat" in vector["accepted_inputs"]
+    assert "sawm leh nga leh pariat" not in vector["accepted_inputs"]
+
+
+def test_connector_is_not_blessed_before_a_multiplying_digit(vectors):
+    # exact_tens' last gap is its only gap, and it sits between the scale
+    # word and the digit that multiplies it -- so last-gap-only would
+    # certify "sawm leh hnih" for 20, which reads as "ten and two", i.e. as
+    # 12. Native-speaker judgement (#12): the engine tolerates it, we don't
+    # bless it. Contrast 11 and 58, where the final digit is additive.
+    twenty = next(v for v in vectors if v["number"] == "20")
+    assert not any("leh" in candidate.lower() for candidate in twenty["accepted_inputs"])
+    for n, expected in ((11, "sâwm leh pakhat"), (58, "sawm nga leh pariat")):
+        vector = next(v for v in vectors if v["number"] == str(n))
+        assert expected in vector["accepted_inputs"]
+
+
+def test_engine_still_tolerates_what_the_vectors_do_not_certify(spec):
+    # The other half of both decisions above: the narrower vectors must not
+    # be read as the engine having become stricter. These strings still
+    # parse -- they are simply not certified, so no target is required to
+    # accept them.
+    assert spec.text_to_number("sawm leh nga leh pariat") == 58
+    assert spec.text_to_number("sawm leh hnih") == 20
+
+
+def test_exhaustive_variants_all_parse(spec):
+    # The bounded vectors assume parse features compose: each is one stage
+    # of a pipeline, so covering them separately covers them together. That
+    # assumption is what makes one representative per feature sufficient,
+    # and this is where it is actually checked -- the full cross product of
+    # every template, every respelling, and the connector in every gap.
+    #
+    # It lives here rather than in vectors/mizo.json on purpose. A target
+    # package cannot import reference/, so this proves the property for the
+    # oracle; what protects a target is the composition assumption plus the
+    # fact that #20's package is compiled from the same spec.
+    checked = 0
+    for n in generate_vectors.numbers_to_cover(spec):
+        for candidate in generate_vectors.accepted_inputs(spec, n, exhaustive=True):
+            assert spec.text_to_number(candidate) == n, f"n={n} input={candidate!r}"
+            checked += 1
+    assert checked > 1000, checked
 
 
 @pytest.mark.parametrize("n", range(0, 101))
