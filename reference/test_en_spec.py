@@ -15,11 +15,13 @@ Scope is 0-99. English above 99 needs recursion the format doesn't have yet
 (#27); a valid 0-99 spec proves more than an invalid 0-999 one.
 """
 
+import copy
 from pathlib import Path
 
 import pytest
 
-from engine import load
+import generate_vectors
+from engine import Spec, load
 
 EN_SPEC_PATH = Path(__file__).resolve().parent.parent / "languages" / "en.yaml"
 
@@ -126,6 +128,29 @@ def test_hyphen_is_both_canonical_output_and_a_separator(en):
     assert en.number_to_text(42) == "forty-two"
     assert en.text_to_number("forty-two") == 42
     assert en.text_to_number("forty two") == 42
+
+
+def test_generator_keeps_the_canonical_output_verbatim(en):
+    # Regression guard for the same hyphen, one layer up. generate_vectors
+    # used to build its "canonical" variant by splitting the rendered string
+    # into words and re-joining them with word_separators[0] -- which assumes
+    # the literal text between placeholders is always the first separator.
+    # That is true of Mizo and false here: it produced "forty two", and the
+    # real canonical survived only as the alternate-separator variant,
+    # because "-" happened to be second in the list below.
+    #
+    # Reordering removes the coincidence, so this fails if the assumption
+    # comes back. It matters because vectors/mizo.json asserts that `text`
+    # appears in `accepted_inputs`, and that invariant should hold by
+    # construction rather than by luck -- for the second vectors file as much
+    # as the first.
+    assert generate_vectors.accepted_inputs(en, 42).count("forty-two") == 1
+
+    shuffled = copy.deepcopy(en._data)
+    shuffled["parse"]["word_separators"] = [" ", "/", "-"]
+    reordered = Spec(shuffled)
+    assert reordered.number_to_text(42) == "forty-two"
+    assert "forty-two" in generate_vectors.accepted_inputs(reordered, 42)
 
 
 def test_single_digits_parse_without_mizo_form_names(en):

@@ -25,6 +25,7 @@ not whether the grammar itself is linguistically correct.
 """
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -153,17 +154,41 @@ def test_accepted_inputs_do_not_bless_every_connector_gap(vectors):
     assert "sawm leh nga leh pariat" not in vector["accepted_inputs"]
 
 
-def test_connector_is_not_blessed_before_a_multiplying_digit(vectors):
-    # exact_tens' last gap is its only gap, and it sits between the scale
-    # word and the digit that multiplies it -- so last-gap-only would
-    # certify "sawm leh hnih" for 20, which reads as "ten and two", i.e. as
-    # 12. Native-speaker judgement (#12): the engine tolerates it, we don't
-    # bless it. Contrast 11 and 58, where the final digit is additive.
+def test_connector_is_not_blessed_where_it_would_be_meaningless(vectors):
+    # exact_tens' last gap is its only gap, and it sits before a bound form
+    # -- so last-gap-only would certify "sawm leh hnih" for 20. Owner's
+    # judgement as a native speaker (#34): that string is meaningless, not a
+    # rival reading of 20. Contrast 11 and 58, which end in a standalone
+    # form, which is what "leh" takes after it.
     twenty = next(v for v in vectors if v["number"] == "20")
     assert not any("leh" in candidate.lower() for candidate in twenty["accepted_inputs"])
     for n, expected in ((11, "sâwm leh pakhat"), (58, "sawm nga leh pariat")):
         vector = next(v for v in vectors if v["number"] == str(n))
         assert expected in vector["accepted_inputs"]
+
+
+def test_certified_connectors_are_followed_by_a_standalone_form(spec, vectors):
+    # The rule the test above is a consequence of, stated directly and over
+    # every entry rather than the three hand-picked ones: "leh" takes a
+    # standalone unit form after it (#34).
+    #
+    # generate_vectors detects this positionally -- does the last placeholder
+    # address the ones digit? -- because keying off the field name
+    # "standalone" would hardcode Mizo's vocabulary into language-agnostic
+    # code (#31). That makes it a proxy, and this is the test that would
+    # notice if the proxy and the rule ever came apart. Being Mizo-specific
+    # is fine here; this file is Mizo's.
+    standalone = {
+        spec._normalize_word(entry["standalone"]) for entry in spec.lexicon["units"].values()
+    }
+    separators = spec.parse_config["word_separators"]
+    connector = spec._normalize_word(spec.parse_config["connectors"][0])
+    for vector in vectors:
+        for candidate in vector["accepted_inputs"]:
+            words = [spec._normalize_word(w) for w in re.split("|".join(separators), candidate)]
+            for before, after in zip(words, words[1:]):
+                if before == connector:
+                    assert after in standalone, f"{candidate!r} in n={vector['number']}"
 
 
 def test_engine_still_tolerates_what_the_vectors_do_not_certify(spec):
@@ -173,6 +198,18 @@ def test_engine_still_tolerates_what_the_vectors_do_not_certify(spec):
     # accept them.
     assert spec.text_to_number("sawm leh nga leh pariat") == 58
     assert spec.text_to_number("sawm leh hnih") == 20
+
+
+def test_the_string_that_does_mean_ten_and_two_is_certified(spec, vectors):
+    # The counterpart to the exact_tens exclusion, and the reason it costs
+    # nothing: "sawm leh pahnih" is what a speaker says for "10 and 2" (#34).
+    # It parses as 12 -- teens, whose ones digit is standalone -- and is
+    # already certified there, so declining to bless "sawm leh hnih" removes
+    # no real spelling from the contract. Whether it is one number or two is
+    # the inter-number ambiguity #10 put out of scope by design.
+    assert spec.text_to_number("sawm leh pahnih") == 12
+    twelve = next(v for v in vectors if v["number"] == "12")
+    assert "sâwm leh pahnih" in twelve["accepted_inputs"]
 
 
 def test_exhaustive_variants_all_parse(spec):
