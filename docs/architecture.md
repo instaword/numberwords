@@ -62,9 +62,12 @@ Five pieces:
    every other target against them.
 
 4. **Conformance vectors** (`vectors/<lang>.json`) — a big shared table of
-   `{ number, text }` pairs (and edge cases). Language-agnostic format. **Every
-   published target package must pass every vector.** This is what keeps Python
-   and npm in agreement.
+   `{ number, text, accepted_inputs }` entries (and edge cases).
+   Language-agnostic format. `text` is the canonical output; `accepted_inputs`
+   lists representative spellings the parser must accept, one per parse
+   feature, so that a target can't pass by handling canonical strings alone
+   (#12). **Every published target package must pass every vector.** This is
+   what keeps Python and npm in agreement.
 
 5. **Target packages** (`packages/python`, `packages/npm`, …) — the actual
    published, idiomatic libraries a consumer installs.

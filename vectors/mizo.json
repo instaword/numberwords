@@ -1,406 +1,1163 @@
 [
   {
-    "number": 0,
-    "text": "bial"
-  },
-  {
-    "number": 1,
-    "text": "pakhat"
-  },
-  {
-    "number": 2,
-    "text": "pahnih"
-  },
-  {
-    "number": 3,
-    "text": "pathum"
-  },
-  {
-    "number": 4,
-    "text": "pali"
-  },
-  {
-    "number": 5,
-    "text": "panga"
-  },
-  {
-    "number": 6,
-    "text": "paruk"
-  },
-  {
-    "number": 7,
-    "text": "pasarih"
-  },
-  {
-    "number": 8,
-    "text": "pariat"
-  },
-  {
-    "number": 9,
-    "text": "pakua"
-  },
-  {
-    "number": 10,
-    "text": "sâwm"
-  },
-  {
-    "number": 11,
-    "text": "sâwm pakhat"
-  },
-  {
-    "number": 12,
-    "text": "sâwm pahnih"
-  },
-  {
-    "number": 13,
-    "text": "sâwm pathum"
-  },
-  {
-    "number": 14,
-    "text": "sâwm pali"
-  },
-  {
-    "number": 15,
-    "text": "sâwm panga"
-  },
-  {
-    "number": 16,
-    "text": "sâwm paruk"
-  },
-  {
-    "number": 17,
-    "text": "sâwm pasarih"
-  },
-  {
-    "number": 18,
-    "text": "sâwm pariat"
-  },
-  {
-    "number": 19,
-    "text": "sâwm pakua"
-  },
-  {
-    "number": 20,
-    "text": "sawm hnih"
-  },
-  {
-    "number": 21,
-    "text": "sawm hnih pakhat"
-  },
-  {
-    "number": 22,
-    "text": "sawm hnih pahnih"
-  },
-  {
-    "number": 23,
-    "text": "sawm hnih pathum"
-  },
-  {
-    "number": 24,
-    "text": "sawm hnih pali"
-  },
-  {
-    "number": 25,
-    "text": "sawm hnih panga"
-  },
-  {
-    "number": 26,
-    "text": "sawm hnih paruk"
-  },
-  {
-    "number": 27,
-    "text": "sawm hnih pasarih"
-  },
-  {
-    "number": 28,
-    "text": "sawm hnih pariat"
-  },
-  {
-    "number": 29,
-    "text": "sawm hnih pakua"
-  },
-  {
-    "number": 30,
-    "text": "sawm thum"
-  },
-  {
-    "number": 31,
-    "text": "sawm thum pakhat"
-  },
-  {
-    "number": 32,
-    "text": "sawm thum pahnih"
-  },
-  {
-    "number": 33,
-    "text": "sawm thum pathum"
-  },
-  {
-    "number": 34,
-    "text": "sawm thum pali"
-  },
-  {
-    "number": 35,
-    "text": "sawm thum panga"
-  },
-  {
-    "number": 36,
-    "text": "sawm thum paruk"
-  },
-  {
-    "number": 37,
-    "text": "sawm thum pasarih"
-  },
-  {
-    "number": 38,
-    "text": "sawm thum pariat"
-  },
-  {
-    "number": 39,
-    "text": "sawm thum pakua"
-  },
-  {
-    "number": 40,
-    "text": "sawm li"
-  },
-  {
-    "number": 41,
-    "text": "sawm li pakhat"
-  },
-  {
-    "number": 42,
-    "text": "sawm li pahnih"
-  },
-  {
-    "number": 43,
-    "text": "sawm li pathum"
-  },
-  {
-    "number": 44,
-    "text": "sawm li pali"
-  },
-  {
-    "number": 45,
-    "text": "sawm li panga"
-  },
-  {
-    "number": 46,
-    "text": "sawm li paruk"
-  },
-  {
-    "number": 47,
-    "text": "sawm li pasarih"
-  },
-  {
-    "number": 48,
-    "text": "sawm li pariat"
-  },
-  {
-    "number": 49,
-    "text": "sawm li pakua"
-  },
-  {
-    "number": 50,
-    "text": "sawm nga"
-  },
-  {
-    "number": 51,
-    "text": "sawm nga pakhat"
-  },
-  {
-    "number": 52,
-    "text": "sawm nga pahnih"
-  },
-  {
-    "number": 53,
-    "text": "sawm nga pathum"
-  },
-  {
-    "number": 54,
-    "text": "sawm nga pali"
-  },
-  {
-    "number": 55,
-    "text": "sawm nga panga"
-  },
-  {
-    "number": 56,
-    "text": "sawm nga paruk"
-  },
-  {
-    "number": 57,
-    "text": "sawm nga pasarih"
-  },
-  {
-    "number": 58,
-    "text": "sawm nga pariat"
-  },
-  {
-    "number": 59,
-    "text": "sawm nga pakua"
-  },
-  {
-    "number": 60,
-    "text": "sawm ruk"
-  },
-  {
-    "number": 61,
-    "text": "sawm ruk pakhat"
-  },
-  {
-    "number": 62,
-    "text": "sawm ruk pahnih"
-  },
-  {
-    "number": 63,
-    "text": "sawm ruk pathum"
-  },
-  {
-    "number": 64,
-    "text": "sawm ruk pali"
-  },
-  {
-    "number": 65,
-    "text": "sawm ruk panga"
-  },
-  {
-    "number": 66,
-    "text": "sawm ruk paruk"
-  },
-  {
-    "number": 67,
-    "text": "sawm ruk pasarih"
-  },
-  {
-    "number": 68,
-    "text": "sawm ruk pariat"
-  },
-  {
-    "number": 69,
-    "text": "sawm ruk pakua"
-  },
-  {
-    "number": 70,
-    "text": "sawm sarih"
-  },
-  {
-    "number": 71,
-    "text": "sawm sarih pakhat"
-  },
-  {
-    "number": 72,
-    "text": "sawm sarih pahnih"
-  },
-  {
-    "number": 73,
-    "text": "sawm sarih pathum"
-  },
-  {
-    "number": 74,
-    "text": "sawm sarih pali"
-  },
-  {
-    "number": 75,
-    "text": "sawm sarih panga"
-  },
-  {
-    "number": 76,
-    "text": "sawm sarih paruk"
-  },
-  {
-    "number": 77,
-    "text": "sawm sarih pasarih"
-  },
-  {
-    "number": 78,
-    "text": "sawm sarih pariat"
-  },
-  {
-    "number": 79,
-    "text": "sawm sarih pakua"
-  },
-  {
-    "number": 80,
-    "text": "sawm riat"
-  },
-  {
-    "number": 81,
-    "text": "sawm riat pakhat"
-  },
-  {
-    "number": 82,
-    "text": "sawm riat pahnih"
-  },
-  {
-    "number": 83,
-    "text": "sawm riat pathum"
-  },
-  {
-    "number": 84,
-    "text": "sawm riat pali"
-  },
-  {
-    "number": 85,
-    "text": "sawm riat panga"
-  },
-  {
-    "number": 86,
-    "text": "sawm riat paruk"
-  },
-  {
-    "number": 87,
-    "text": "sawm riat pasarih"
-  },
-  {
-    "number": 88,
-    "text": "sawm riat pariat"
-  },
-  {
-    "number": 89,
-    "text": "sawm riat pakua"
-  },
-  {
-    "number": 90,
-    "text": "sawm kua"
-  },
-  {
-    "number": 91,
-    "text": "sawm kua pakhat"
-  },
-  {
-    "number": 92,
-    "text": "sawm kua pahnih"
-  },
-  {
-    "number": 93,
-    "text": "sawm kua pathum"
-  },
-  {
-    "number": 94,
-    "text": "sawm kua pali"
-  },
-  {
-    "number": 95,
-    "text": "sawm kua panga"
-  },
-  {
-    "number": 96,
-    "text": "sawm kua paruk"
-  },
-  {
-    "number": 97,
-    "text": "sawm kua pasarih"
-  },
-  {
-    "number": 98,
-    "text": "sawm kua pariat"
-  },
-  {
-    "number": 99,
-    "text": "sawm kua pakua"
-  },
-  {
-    "number": 100,
-    "text": "zâ"
+    "number": "0",
+    "text": "bial",
+    "accepted_inputs": [
+      "BIAL",
+      "bial"
+    ]
+  },
+  {
+    "number": "1",
+    "text": "pakhat",
+    "accepted_inputs": [
+      "PAKHAT",
+      "khat",
+      "pakhat"
+    ]
+  },
+  {
+    "number": "2",
+    "text": "pahnih",
+    "accepted_inputs": [
+      "PAHNIH",
+      "hnih",
+      "pahnih"
+    ]
+  },
+  {
+    "number": "3",
+    "text": "pathum",
+    "accepted_inputs": [
+      "PATHUM",
+      "pathum",
+      "thum"
+    ]
+  },
+  {
+    "number": "4",
+    "text": "pali",
+    "accepted_inputs": [
+      "PALI",
+      "li",
+      "pali"
+    ]
+  },
+  {
+    "number": "5",
+    "text": "panga",
+    "accepted_inputs": [
+      "PANGA",
+      "nga",
+      "panga"
+    ]
+  },
+  {
+    "number": "6",
+    "text": "paruk",
+    "accepted_inputs": [
+      "PARUK",
+      "paruk",
+      "ruk"
+    ]
+  },
+  {
+    "number": "7",
+    "text": "pasarih",
+    "accepted_inputs": [
+      "PASARIH",
+      "pasarih",
+      "sarih"
+    ]
+  },
+  {
+    "number": "8",
+    "text": "pariat",
+    "accepted_inputs": [
+      "PARIAT",
+      "pariat",
+      "riat"
+    ]
+  },
+  {
+    "number": "9",
+    "text": "pakua",
+    "accepted_inputs": [
+      "PAKUA",
+      "kua",
+      "pakua"
+    ]
+  },
+  {
+    "number": "10",
+    "text": "sâwm",
+    "accepted_inputs": [
+      "SAWM",
+      "SÂWM",
+      "sawm",
+      "sâwm"
+    ]
+  },
+  {
+    "number": "11",
+    "text": "sâwm pakhat",
+    "accepted_inputs": [
+      "SAWM-LEH-PAKHAT",
+      "SÂWM PAKHAT",
+      "sawm pakhat",
+      "sâwm leh pakhat",
+      "sâwm pakhat",
+      "sâwm-pakhat"
+    ]
+  },
+  {
+    "number": "12",
+    "text": "sâwm pahnih",
+    "accepted_inputs": [
+      "SAWM-LEH-PAHNIH",
+      "SÂWM PAHNIH",
+      "sawm pahnih",
+      "sâwm leh pahnih",
+      "sâwm pahnih",
+      "sâwm-pahnih"
+    ]
+  },
+  {
+    "number": "13",
+    "text": "sâwm pathum",
+    "accepted_inputs": [
+      "SAWM-LEH-PATHUM",
+      "SÂWM PATHUM",
+      "sawm pathum",
+      "sâwm leh pathum",
+      "sâwm pathum",
+      "sâwm-pathum"
+    ]
+  },
+  {
+    "number": "14",
+    "text": "sâwm pali",
+    "accepted_inputs": [
+      "SAWM-LEH-PALI",
+      "SÂWM PALI",
+      "sawm pali",
+      "sâwm leh pali",
+      "sâwm pali",
+      "sâwm-pali"
+    ]
+  },
+  {
+    "number": "15",
+    "text": "sâwm panga",
+    "accepted_inputs": [
+      "SAWM-LEH-PANGA",
+      "SÂWM PANGA",
+      "sawm panga",
+      "sâwm leh panga",
+      "sâwm panga",
+      "sâwm-panga"
+    ]
+  },
+  {
+    "number": "16",
+    "text": "sâwm paruk",
+    "accepted_inputs": [
+      "SAWM-LEH-PARUK",
+      "SÂWM PARUK",
+      "sawm paruk",
+      "sâwm leh paruk",
+      "sâwm paruk",
+      "sâwm-paruk"
+    ]
+  },
+  {
+    "number": "17",
+    "text": "sâwm pasarih",
+    "accepted_inputs": [
+      "SAWM-LEH-PASARIH",
+      "SÂWM PASARIH",
+      "sawm pasarih",
+      "sâwm leh pasarih",
+      "sâwm pasarih",
+      "sâwm-pasarih"
+    ]
+  },
+  {
+    "number": "18",
+    "text": "sâwm pariat",
+    "accepted_inputs": [
+      "SAWM-LEH-PARIAT",
+      "SÂWM PARIAT",
+      "sawm pariat",
+      "sâwm leh pariat",
+      "sâwm pariat",
+      "sâwm-pariat"
+    ]
+  },
+  {
+    "number": "19",
+    "text": "sâwm pakua",
+    "accepted_inputs": [
+      "SAWM-LEH-PAKUA",
+      "SÂWM PAKUA",
+      "sawm pakua",
+      "sâwm leh pakua",
+      "sâwm pakua",
+      "sâwm-pakua"
+    ]
+  },
+  {
+    "number": "20",
+    "text": "sawm hnih",
+    "accepted_inputs": [
+      "SAWM HNIH",
+      "SAWM-HNIH",
+      "sawm hnih",
+      "sawm-hnih"
+    ]
+  },
+  {
+    "number": "21",
+    "text": "sawm hnih pakhat",
+    "accepted_inputs": [
+      "SAWM HNIH PAKHAT",
+      "SAWM-HNIH-LEH-PAKHAT",
+      "hnih khat",
+      "sawm hnih leh pakhat",
+      "sawm hnih pakhat",
+      "sawm-hnih-pakhat"
+    ]
+  },
+  {
+    "number": "22",
+    "text": "sawm hnih pahnih",
+    "accepted_inputs": [
+      "SAWM HNIH PAHNIH",
+      "SAWM-HNIH-LEH-PAHNIH",
+      "hnih hnih",
+      "sawm hnih leh pahnih",
+      "sawm hnih pahnih",
+      "sawm-hnih-pahnih"
+    ]
+  },
+  {
+    "number": "23",
+    "text": "sawm hnih pathum",
+    "accepted_inputs": [
+      "SAWM HNIH PATHUM",
+      "SAWM-HNIH-LEH-PATHUM",
+      "hnih thum",
+      "sawm hnih leh pathum",
+      "sawm hnih pathum",
+      "sawm-hnih-pathum"
+    ]
+  },
+  {
+    "number": "24",
+    "text": "sawm hnih pali",
+    "accepted_inputs": [
+      "SAWM HNIH PALI",
+      "SAWM-HNIH-LEH-PALI",
+      "hnih li",
+      "sawm hnih leh pali",
+      "sawm hnih pali",
+      "sawm-hnih-pali"
+    ]
+  },
+  {
+    "number": "25",
+    "text": "sawm hnih panga",
+    "accepted_inputs": [
+      "SAWM HNIH PANGA",
+      "SAWM-HNIH-LEH-PANGA",
+      "hnih nga",
+      "sawm hnih leh panga",
+      "sawm hnih panga",
+      "sawm-hnih-panga"
+    ]
+  },
+  {
+    "number": "26",
+    "text": "sawm hnih paruk",
+    "accepted_inputs": [
+      "SAWM HNIH PARUK",
+      "SAWM-HNIH-LEH-PARUK",
+      "hnih ruk",
+      "sawm hnih leh paruk",
+      "sawm hnih paruk",
+      "sawm-hnih-paruk"
+    ]
+  },
+  {
+    "number": "27",
+    "text": "sawm hnih pasarih",
+    "accepted_inputs": [
+      "SAWM HNIH PASARIH",
+      "SAWM-HNIH-LEH-PASARIH",
+      "hnih sarih",
+      "sawm hnih leh pasarih",
+      "sawm hnih pasarih",
+      "sawm-hnih-pasarih"
+    ]
+  },
+  {
+    "number": "28",
+    "text": "sawm hnih pariat",
+    "accepted_inputs": [
+      "SAWM HNIH PARIAT",
+      "SAWM-HNIH-LEH-PARIAT",
+      "hnih riat",
+      "sawm hnih leh pariat",
+      "sawm hnih pariat",
+      "sawm-hnih-pariat"
+    ]
+  },
+  {
+    "number": "29",
+    "text": "sawm hnih pakua",
+    "accepted_inputs": [
+      "SAWM HNIH PAKUA",
+      "SAWM-HNIH-LEH-PAKUA",
+      "hnih kua",
+      "sawm hnih leh pakua",
+      "sawm hnih pakua",
+      "sawm-hnih-pakua"
+    ]
+  },
+  {
+    "number": "30",
+    "text": "sawm thum",
+    "accepted_inputs": [
+      "SAWM THUM",
+      "SAWM-THUM",
+      "sawm thum",
+      "sawm-thum"
+    ]
+  },
+  {
+    "number": "31",
+    "text": "sawm thum pakhat",
+    "accepted_inputs": [
+      "SAWM THUM PAKHAT",
+      "SAWM-THUM-LEH-PAKHAT",
+      "sawm thum leh pakhat",
+      "sawm thum pakhat",
+      "sawm-thum-pakhat",
+      "thum khat"
+    ]
+  },
+  {
+    "number": "32",
+    "text": "sawm thum pahnih",
+    "accepted_inputs": [
+      "SAWM THUM PAHNIH",
+      "SAWM-THUM-LEH-PAHNIH",
+      "sawm thum leh pahnih",
+      "sawm thum pahnih",
+      "sawm-thum-pahnih",
+      "thum hnih"
+    ]
+  },
+  {
+    "number": "33",
+    "text": "sawm thum pathum",
+    "accepted_inputs": [
+      "SAWM THUM PATHUM",
+      "SAWM-THUM-LEH-PATHUM",
+      "sawm thum leh pathum",
+      "sawm thum pathum",
+      "sawm-thum-pathum",
+      "thum thum"
+    ]
+  },
+  {
+    "number": "34",
+    "text": "sawm thum pali",
+    "accepted_inputs": [
+      "SAWM THUM PALI",
+      "SAWM-THUM-LEH-PALI",
+      "sawm thum leh pali",
+      "sawm thum pali",
+      "sawm-thum-pali",
+      "thum li"
+    ]
+  },
+  {
+    "number": "35",
+    "text": "sawm thum panga",
+    "accepted_inputs": [
+      "SAWM THUM PANGA",
+      "SAWM-THUM-LEH-PANGA",
+      "sawm thum leh panga",
+      "sawm thum panga",
+      "sawm-thum-panga",
+      "thum nga"
+    ]
+  },
+  {
+    "number": "36",
+    "text": "sawm thum paruk",
+    "accepted_inputs": [
+      "SAWM THUM PARUK",
+      "SAWM-THUM-LEH-PARUK",
+      "sawm thum leh paruk",
+      "sawm thum paruk",
+      "sawm-thum-paruk",
+      "thum ruk"
+    ]
+  },
+  {
+    "number": "37",
+    "text": "sawm thum pasarih",
+    "accepted_inputs": [
+      "SAWM THUM PASARIH",
+      "SAWM-THUM-LEH-PASARIH",
+      "sawm thum leh pasarih",
+      "sawm thum pasarih",
+      "sawm-thum-pasarih",
+      "thum sarih"
+    ]
+  },
+  {
+    "number": "38",
+    "text": "sawm thum pariat",
+    "accepted_inputs": [
+      "SAWM THUM PARIAT",
+      "SAWM-THUM-LEH-PARIAT",
+      "sawm thum leh pariat",
+      "sawm thum pariat",
+      "sawm-thum-pariat",
+      "thum riat"
+    ]
+  },
+  {
+    "number": "39",
+    "text": "sawm thum pakua",
+    "accepted_inputs": [
+      "SAWM THUM PAKUA",
+      "SAWM-THUM-LEH-PAKUA",
+      "sawm thum leh pakua",
+      "sawm thum pakua",
+      "sawm-thum-pakua",
+      "thum kua"
+    ]
+  },
+  {
+    "number": "40",
+    "text": "sawm li",
+    "accepted_inputs": [
+      "SAWM LI",
+      "SAWM-LI",
+      "sawm li",
+      "sawm-li"
+    ]
+  },
+  {
+    "number": "41",
+    "text": "sawm li pakhat",
+    "accepted_inputs": [
+      "SAWM LI PAKHAT",
+      "SAWM-LI-LEH-PAKHAT",
+      "li khat",
+      "sawm li leh pakhat",
+      "sawm li pakhat",
+      "sawm-li-pakhat"
+    ]
+  },
+  {
+    "number": "42",
+    "text": "sawm li pahnih",
+    "accepted_inputs": [
+      "SAWM LI PAHNIH",
+      "SAWM-LI-LEH-PAHNIH",
+      "li hnih",
+      "sawm li leh pahnih",
+      "sawm li pahnih",
+      "sawm-li-pahnih"
+    ]
+  },
+  {
+    "number": "43",
+    "text": "sawm li pathum",
+    "accepted_inputs": [
+      "SAWM LI PATHUM",
+      "SAWM-LI-LEH-PATHUM",
+      "li thum",
+      "sawm li leh pathum",
+      "sawm li pathum",
+      "sawm-li-pathum"
+    ]
+  },
+  {
+    "number": "44",
+    "text": "sawm li pali",
+    "accepted_inputs": [
+      "SAWM LI PALI",
+      "SAWM-LI-LEH-PALI",
+      "li li",
+      "sawm li leh pali",
+      "sawm li pali",
+      "sawm-li-pali"
+    ]
+  },
+  {
+    "number": "45",
+    "text": "sawm li panga",
+    "accepted_inputs": [
+      "SAWM LI PANGA",
+      "SAWM-LI-LEH-PANGA",
+      "li nga",
+      "sawm li leh panga",
+      "sawm li panga",
+      "sawm-li-panga"
+    ]
+  },
+  {
+    "number": "46",
+    "text": "sawm li paruk",
+    "accepted_inputs": [
+      "SAWM LI PARUK",
+      "SAWM-LI-LEH-PARUK",
+      "li ruk",
+      "sawm li leh paruk",
+      "sawm li paruk",
+      "sawm-li-paruk"
+    ]
+  },
+  {
+    "number": "47",
+    "text": "sawm li pasarih",
+    "accepted_inputs": [
+      "SAWM LI PASARIH",
+      "SAWM-LI-LEH-PASARIH",
+      "li sarih",
+      "sawm li leh pasarih",
+      "sawm li pasarih",
+      "sawm-li-pasarih"
+    ]
+  },
+  {
+    "number": "48",
+    "text": "sawm li pariat",
+    "accepted_inputs": [
+      "SAWM LI PARIAT",
+      "SAWM-LI-LEH-PARIAT",
+      "li riat",
+      "sawm li leh pariat",
+      "sawm li pariat",
+      "sawm-li-pariat"
+    ]
+  },
+  {
+    "number": "49",
+    "text": "sawm li pakua",
+    "accepted_inputs": [
+      "SAWM LI PAKUA",
+      "SAWM-LI-LEH-PAKUA",
+      "li kua",
+      "sawm li leh pakua",
+      "sawm li pakua",
+      "sawm-li-pakua"
+    ]
+  },
+  {
+    "number": "50",
+    "text": "sawm nga",
+    "accepted_inputs": [
+      "SAWM NGA",
+      "SAWM-NGA",
+      "sawm nga",
+      "sawm-nga"
+    ]
+  },
+  {
+    "number": "51",
+    "text": "sawm nga pakhat",
+    "accepted_inputs": [
+      "SAWM NGA PAKHAT",
+      "SAWM-NGA-LEH-PAKHAT",
+      "nga khat",
+      "sawm nga leh pakhat",
+      "sawm nga pakhat",
+      "sawm-nga-pakhat"
+    ]
+  },
+  {
+    "number": "52",
+    "text": "sawm nga pahnih",
+    "accepted_inputs": [
+      "SAWM NGA PAHNIH",
+      "SAWM-NGA-LEH-PAHNIH",
+      "nga hnih",
+      "sawm nga leh pahnih",
+      "sawm nga pahnih",
+      "sawm-nga-pahnih"
+    ]
+  },
+  {
+    "number": "53",
+    "text": "sawm nga pathum",
+    "accepted_inputs": [
+      "SAWM NGA PATHUM",
+      "SAWM-NGA-LEH-PATHUM",
+      "nga thum",
+      "sawm nga leh pathum",
+      "sawm nga pathum",
+      "sawm-nga-pathum"
+    ]
+  },
+  {
+    "number": "54",
+    "text": "sawm nga pali",
+    "accepted_inputs": [
+      "SAWM NGA PALI",
+      "SAWM-NGA-LEH-PALI",
+      "nga li",
+      "sawm nga leh pali",
+      "sawm nga pali",
+      "sawm-nga-pali"
+    ]
+  },
+  {
+    "number": "55",
+    "text": "sawm nga panga",
+    "accepted_inputs": [
+      "SAWM NGA PANGA",
+      "SAWM-NGA-LEH-PANGA",
+      "nga nga",
+      "sawm nga leh panga",
+      "sawm nga panga",
+      "sawm-nga-panga"
+    ]
+  },
+  {
+    "number": "56",
+    "text": "sawm nga paruk",
+    "accepted_inputs": [
+      "SAWM NGA PARUK",
+      "SAWM-NGA-LEH-PARUK",
+      "nga ruk",
+      "sawm nga leh paruk",
+      "sawm nga paruk",
+      "sawm-nga-paruk"
+    ]
+  },
+  {
+    "number": "57",
+    "text": "sawm nga pasarih",
+    "accepted_inputs": [
+      "SAWM NGA PASARIH",
+      "SAWM-NGA-LEH-PASARIH",
+      "nga sarih",
+      "sawm nga leh pasarih",
+      "sawm nga pasarih",
+      "sawm-nga-pasarih"
+    ]
+  },
+  {
+    "number": "58",
+    "text": "sawm nga pariat",
+    "accepted_inputs": [
+      "SAWM NGA PARIAT",
+      "SAWM-NGA-LEH-PARIAT",
+      "nga riat",
+      "sawm nga leh pariat",
+      "sawm nga pariat",
+      "sawm-nga-pariat"
+    ]
+  },
+  {
+    "number": "59",
+    "text": "sawm nga pakua",
+    "accepted_inputs": [
+      "SAWM NGA PAKUA",
+      "SAWM-NGA-LEH-PAKUA",
+      "nga kua",
+      "sawm nga leh pakua",
+      "sawm nga pakua",
+      "sawm-nga-pakua"
+    ]
+  },
+  {
+    "number": "60",
+    "text": "sawm ruk",
+    "accepted_inputs": [
+      "SAWM RUK",
+      "SAWM-RUK",
+      "sawm ruk",
+      "sawm-ruk"
+    ]
+  },
+  {
+    "number": "61",
+    "text": "sawm ruk pakhat",
+    "accepted_inputs": [
+      "SAWM RUK PAKHAT",
+      "SAWM-RUK-LEH-PAKHAT",
+      "ruk khat",
+      "sawm ruk leh pakhat",
+      "sawm ruk pakhat",
+      "sawm-ruk-pakhat"
+    ]
+  },
+  {
+    "number": "62",
+    "text": "sawm ruk pahnih",
+    "accepted_inputs": [
+      "SAWM RUK PAHNIH",
+      "SAWM-RUK-LEH-PAHNIH",
+      "ruk hnih",
+      "sawm ruk leh pahnih",
+      "sawm ruk pahnih",
+      "sawm-ruk-pahnih"
+    ]
+  },
+  {
+    "number": "63",
+    "text": "sawm ruk pathum",
+    "accepted_inputs": [
+      "SAWM RUK PATHUM",
+      "SAWM-RUK-LEH-PATHUM",
+      "ruk thum",
+      "sawm ruk leh pathum",
+      "sawm ruk pathum",
+      "sawm-ruk-pathum"
+    ]
+  },
+  {
+    "number": "64",
+    "text": "sawm ruk pali",
+    "accepted_inputs": [
+      "SAWM RUK PALI",
+      "SAWM-RUK-LEH-PALI",
+      "ruk li",
+      "sawm ruk leh pali",
+      "sawm ruk pali",
+      "sawm-ruk-pali"
+    ]
+  },
+  {
+    "number": "65",
+    "text": "sawm ruk panga",
+    "accepted_inputs": [
+      "SAWM RUK PANGA",
+      "SAWM-RUK-LEH-PANGA",
+      "ruk nga",
+      "sawm ruk leh panga",
+      "sawm ruk panga",
+      "sawm-ruk-panga"
+    ]
+  },
+  {
+    "number": "66",
+    "text": "sawm ruk paruk",
+    "accepted_inputs": [
+      "SAWM RUK PARUK",
+      "SAWM-RUK-LEH-PARUK",
+      "ruk ruk",
+      "sawm ruk leh paruk",
+      "sawm ruk paruk",
+      "sawm-ruk-paruk"
+    ]
+  },
+  {
+    "number": "67",
+    "text": "sawm ruk pasarih",
+    "accepted_inputs": [
+      "SAWM RUK PASARIH",
+      "SAWM-RUK-LEH-PASARIH",
+      "ruk sarih",
+      "sawm ruk leh pasarih",
+      "sawm ruk pasarih",
+      "sawm-ruk-pasarih"
+    ]
+  },
+  {
+    "number": "68",
+    "text": "sawm ruk pariat",
+    "accepted_inputs": [
+      "SAWM RUK PARIAT",
+      "SAWM-RUK-LEH-PARIAT",
+      "ruk riat",
+      "sawm ruk leh pariat",
+      "sawm ruk pariat",
+      "sawm-ruk-pariat"
+    ]
+  },
+  {
+    "number": "69",
+    "text": "sawm ruk pakua",
+    "accepted_inputs": [
+      "SAWM RUK PAKUA",
+      "SAWM-RUK-LEH-PAKUA",
+      "ruk kua",
+      "sawm ruk leh pakua",
+      "sawm ruk pakua",
+      "sawm-ruk-pakua"
+    ]
+  },
+  {
+    "number": "70",
+    "text": "sawm sarih",
+    "accepted_inputs": [
+      "SAWM SARIH",
+      "SAWM-SARIH",
+      "sawm sarih",
+      "sawm-sarih"
+    ]
+  },
+  {
+    "number": "71",
+    "text": "sawm sarih pakhat",
+    "accepted_inputs": [
+      "SAWM SARIH PAKHAT",
+      "SAWM-SARIH-LEH-PAKHAT",
+      "sarih khat",
+      "sawm sarih leh pakhat",
+      "sawm sarih pakhat",
+      "sawm-sarih-pakhat"
+    ]
+  },
+  {
+    "number": "72",
+    "text": "sawm sarih pahnih",
+    "accepted_inputs": [
+      "SAWM SARIH PAHNIH",
+      "SAWM-SARIH-LEH-PAHNIH",
+      "sarih hnih",
+      "sawm sarih leh pahnih",
+      "sawm sarih pahnih",
+      "sawm-sarih-pahnih"
+    ]
+  },
+  {
+    "number": "73",
+    "text": "sawm sarih pathum",
+    "accepted_inputs": [
+      "SAWM SARIH PATHUM",
+      "SAWM-SARIH-LEH-PATHUM",
+      "sarih thum",
+      "sawm sarih leh pathum",
+      "sawm sarih pathum",
+      "sawm-sarih-pathum"
+    ]
+  },
+  {
+    "number": "74",
+    "text": "sawm sarih pali",
+    "accepted_inputs": [
+      "SAWM SARIH PALI",
+      "SAWM-SARIH-LEH-PALI",
+      "sarih li",
+      "sawm sarih leh pali",
+      "sawm sarih pali",
+      "sawm-sarih-pali"
+    ]
+  },
+  {
+    "number": "75",
+    "text": "sawm sarih panga",
+    "accepted_inputs": [
+      "SAWM SARIH PANGA",
+      "SAWM-SARIH-LEH-PANGA",
+      "sarih nga",
+      "sawm sarih leh panga",
+      "sawm sarih panga",
+      "sawm-sarih-panga"
+    ]
+  },
+  {
+    "number": "76",
+    "text": "sawm sarih paruk",
+    "accepted_inputs": [
+      "SAWM SARIH PARUK",
+      "SAWM-SARIH-LEH-PARUK",
+      "sarih ruk",
+      "sawm sarih leh paruk",
+      "sawm sarih paruk",
+      "sawm-sarih-paruk"
+    ]
+  },
+  {
+    "number": "77",
+    "text": "sawm sarih pasarih",
+    "accepted_inputs": [
+      "SAWM SARIH PASARIH",
+      "SAWM-SARIH-LEH-PASARIH",
+      "sarih sarih",
+      "sawm sarih leh pasarih",
+      "sawm sarih pasarih",
+      "sawm-sarih-pasarih"
+    ]
+  },
+  {
+    "number": "78",
+    "text": "sawm sarih pariat",
+    "accepted_inputs": [
+      "SAWM SARIH PARIAT",
+      "SAWM-SARIH-LEH-PARIAT",
+      "sarih riat",
+      "sawm sarih leh pariat",
+      "sawm sarih pariat",
+      "sawm-sarih-pariat"
+    ]
+  },
+  {
+    "number": "79",
+    "text": "sawm sarih pakua",
+    "accepted_inputs": [
+      "SAWM SARIH PAKUA",
+      "SAWM-SARIH-LEH-PAKUA",
+      "sarih kua",
+      "sawm sarih leh pakua",
+      "sawm sarih pakua",
+      "sawm-sarih-pakua"
+    ]
+  },
+  {
+    "number": "80",
+    "text": "sawm riat",
+    "accepted_inputs": [
+      "SAWM RIAT",
+      "SAWM-RIAT",
+      "sawm riat",
+      "sawm-riat"
+    ]
+  },
+  {
+    "number": "81",
+    "text": "sawm riat pakhat",
+    "accepted_inputs": [
+      "SAWM RIAT PAKHAT",
+      "SAWM-RIAT-LEH-PAKHAT",
+      "riat khat",
+      "sawm riat leh pakhat",
+      "sawm riat pakhat",
+      "sawm-riat-pakhat"
+    ]
+  },
+  {
+    "number": "82",
+    "text": "sawm riat pahnih",
+    "accepted_inputs": [
+      "SAWM RIAT PAHNIH",
+      "SAWM-RIAT-LEH-PAHNIH",
+      "riat hnih",
+      "sawm riat leh pahnih",
+      "sawm riat pahnih",
+      "sawm-riat-pahnih"
+    ]
+  },
+  {
+    "number": "83",
+    "text": "sawm riat pathum",
+    "accepted_inputs": [
+      "SAWM RIAT PATHUM",
+      "SAWM-RIAT-LEH-PATHUM",
+      "riat thum",
+      "sawm riat leh pathum",
+      "sawm riat pathum",
+      "sawm-riat-pathum"
+    ]
+  },
+  {
+    "number": "84",
+    "text": "sawm riat pali",
+    "accepted_inputs": [
+      "SAWM RIAT PALI",
+      "SAWM-RIAT-LEH-PALI",
+      "riat li",
+      "sawm riat leh pali",
+      "sawm riat pali",
+      "sawm-riat-pali"
+    ]
+  },
+  {
+    "number": "85",
+    "text": "sawm riat panga",
+    "accepted_inputs": [
+      "SAWM RIAT PANGA",
+      "SAWM-RIAT-LEH-PANGA",
+      "riat nga",
+      "sawm riat leh panga",
+      "sawm riat panga",
+      "sawm-riat-panga"
+    ]
+  },
+  {
+    "number": "86",
+    "text": "sawm riat paruk",
+    "accepted_inputs": [
+      "SAWM RIAT PARUK",
+      "SAWM-RIAT-LEH-PARUK",
+      "riat ruk",
+      "sawm riat leh paruk",
+      "sawm riat paruk",
+      "sawm-riat-paruk"
+    ]
+  },
+  {
+    "number": "87",
+    "text": "sawm riat pasarih",
+    "accepted_inputs": [
+      "SAWM RIAT PASARIH",
+      "SAWM-RIAT-LEH-PASARIH",
+      "riat sarih",
+      "sawm riat leh pasarih",
+      "sawm riat pasarih",
+      "sawm-riat-pasarih"
+    ]
+  },
+  {
+    "number": "88",
+    "text": "sawm riat pariat",
+    "accepted_inputs": [
+      "SAWM RIAT PARIAT",
+      "SAWM-RIAT-LEH-PARIAT",
+      "riat riat",
+      "sawm riat leh pariat",
+      "sawm riat pariat",
+      "sawm-riat-pariat"
+    ]
+  },
+  {
+    "number": "89",
+    "text": "sawm riat pakua",
+    "accepted_inputs": [
+      "SAWM RIAT PAKUA",
+      "SAWM-RIAT-LEH-PAKUA",
+      "riat kua",
+      "sawm riat leh pakua",
+      "sawm riat pakua",
+      "sawm-riat-pakua"
+    ]
+  },
+  {
+    "number": "90",
+    "text": "sawm kua",
+    "accepted_inputs": [
+      "SAWM KUA",
+      "SAWM-KUA",
+      "sawm kua",
+      "sawm-kua"
+    ]
+  },
+  {
+    "number": "91",
+    "text": "sawm kua pakhat",
+    "accepted_inputs": [
+      "SAWM KUA PAKHAT",
+      "SAWM-KUA-LEH-PAKHAT",
+      "kua khat",
+      "sawm kua leh pakhat",
+      "sawm kua pakhat",
+      "sawm-kua-pakhat"
+    ]
+  },
+  {
+    "number": "92",
+    "text": "sawm kua pahnih",
+    "accepted_inputs": [
+      "SAWM KUA PAHNIH",
+      "SAWM-KUA-LEH-PAHNIH",
+      "kua hnih",
+      "sawm kua leh pahnih",
+      "sawm kua pahnih",
+      "sawm-kua-pahnih"
+    ]
+  },
+  {
+    "number": "93",
+    "text": "sawm kua pathum",
+    "accepted_inputs": [
+      "SAWM KUA PATHUM",
+      "SAWM-KUA-LEH-PATHUM",
+      "kua thum",
+      "sawm kua leh pathum",
+      "sawm kua pathum",
+      "sawm-kua-pathum"
+    ]
+  },
+  {
+    "number": "94",
+    "text": "sawm kua pali",
+    "accepted_inputs": [
+      "SAWM KUA PALI",
+      "SAWM-KUA-LEH-PALI",
+      "kua li",
+      "sawm kua leh pali",
+      "sawm kua pali",
+      "sawm-kua-pali"
+    ]
+  },
+  {
+    "number": "95",
+    "text": "sawm kua panga",
+    "accepted_inputs": [
+      "SAWM KUA PANGA",
+      "SAWM-KUA-LEH-PANGA",
+      "kua nga",
+      "sawm kua leh panga",
+      "sawm kua panga",
+      "sawm-kua-panga"
+    ]
+  },
+  {
+    "number": "96",
+    "text": "sawm kua paruk",
+    "accepted_inputs": [
+      "SAWM KUA PARUK",
+      "SAWM-KUA-LEH-PARUK",
+      "kua ruk",
+      "sawm kua leh paruk",
+      "sawm kua paruk",
+      "sawm-kua-paruk"
+    ]
+  },
+  {
+    "number": "97",
+    "text": "sawm kua pasarih",
+    "accepted_inputs": [
+      "SAWM KUA PASARIH",
+      "SAWM-KUA-LEH-PASARIH",
+      "kua sarih",
+      "sawm kua leh pasarih",
+      "sawm kua pasarih",
+      "sawm-kua-pasarih"
+    ]
+  },
+  {
+    "number": "98",
+    "text": "sawm kua pariat",
+    "accepted_inputs": [
+      "SAWM KUA PARIAT",
+      "SAWM-KUA-LEH-PARIAT",
+      "kua riat",
+      "sawm kua leh pariat",
+      "sawm kua pariat",
+      "sawm-kua-pariat"
+    ]
+  },
+  {
+    "number": "99",
+    "text": "sawm kua pakua",
+    "accepted_inputs": [
+      "SAWM KUA PAKUA",
+      "SAWM-KUA-LEH-PAKUA",
+      "kua kua",
+      "sawm kua leh pakua",
+      "sawm kua pakua",
+      "sawm-kua-pakua"
+    ]
+  },
+  {
+    "number": "100",
+    "text": "zâ",
+    "accepted_inputs": [
+      "ZA",
+      "ZÂ",
+      "za",
+      "zâ"
+    ]
   }
 ]
