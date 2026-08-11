@@ -10,7 +10,7 @@ The published target packages — the libraries a consumer actually installs.
 ## What's here right now
 
 `python/` is being built into the first real target package (#20). It has the
-`src/` layout, version `0.1.0`, and `_mizo.py` — a module compiled from
+`src/` layout, version `0.0.0`, and `_mizo.py` — a module compiled from
 `languages/mizo.yaml` by `reference/compile_spec.py`. It does **not** export a
 public API yet; that lands in the follow-up PR.
 
@@ -45,7 +45,10 @@ so when you change one, change the other. If this starts to bite, generating bot
 from a single source is the fix — but that's not worth building for two fields
 and two packages.
 
-The **versions** are deliberately allowed to diverge. `python/` has moved to
-`0.1.0` while `npm/` stays at `0.0.0`, because only one of the two is being
-built out. Whether they should share a version line once the npm target becomes
-real is a question for #23, not something to fix by bumping npm now.
+The **versions** are deliberately allowed to diverge. Each package is versioned
+by what it actually ships, so `python/` will move to `0.1.0` when it exports a
+public API while `npm/` stays at `0.0.0` until there is an npm target to
+release. A version is most useful attached to the release that publishes it, so
+the bump belongs to that PR rather than to the groundwork before it. Whether the
+two should share a version line once the npm target becomes real is a question
+for #23, not something to fix by bumping npm now.
