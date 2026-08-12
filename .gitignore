@@ -36,7 +36,11 @@ coverage/
 out/
 
 # --- Generated / build artifacts ---
-# Compiled target packages are generated from the spec; keep sources, ignore output.
+# Compiled target-package artifacts (e.g.
+# packages/python/src/numberwords/_mizo.py) are generated from the spec but are
+# checked in on purpose (#20), so installing a package never needs PyYAML. A CI
+# step regenerates them and fails on any difference. Only throwaway build
+# output belongs below.
 /generated/
 *.local
 

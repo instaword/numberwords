@@ -22,4 +22,4 @@ Homepage = "https://github.com/instaword/numberwords"
 Source = "https://github.com/instaword/numberwords"
 
 [tool.hatch.build.targets.wheel]
-packages = ["numberwords"]
+packages = ["src/numberwords"]
