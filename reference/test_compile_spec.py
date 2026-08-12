@@ -282,6 +282,15 @@ def test_compiled_parse_config_matches_the_spec(spec, artifact):
     # Already normalised, so the renderer never has to do it again. If a
     # value still changes under normalisation, the compiler missed it and
     # the renderer would silently fail to match that word.
+    #
+    # This cannot fail on today's data. Mizo's only connector is "leh",
+    # which is already lowercase and diacritic-free, so normalising it
+    # changes nothing -- removing the compiler's normalisation step still
+    # produces a byte-identical artifact and this still passes. The
+    # aliases table is empty, so that loop does not run at all. The
+    # assert holds the invariant for the first value that is not already
+    # normalised, the way en.yaml holds the engine's rules for a spec
+    # that is not Mizo.
     for connector in parse["connectors"]:
         assert spec._normalize_word(connector) == connector
     for variant, canonical in parse["aliases"].items():
