@@ -80,6 +80,26 @@ def test_every_checked_in_spec_is_covered():
     assert len(ALL_SPEC_PATHS) >= 2, ALL_SPEC_PATHS
 
 
+@pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
+def test_accepted_forms_names_tables_and_fields_that_exist(path):
+    # accepted_forms points at the lexicon in the same file (#31), and JSON
+    # Schema cannot check a cross-reference like that -- it can only say the
+    # keys are names and the values are lists of names. A typo would validate
+    # cleanly and then do nothing at all: leniency would quietly stop
+    # applying, which is the same silent degradation #31 was filed about.
+    spec = _as_ir(path)
+    lexicon = spec["lexicon"]
+    accepted = spec.get("parse", {}).get("accepted_forms", {})
+    for table, fields in accepted.items():
+        assert table in lexicon, f"unknown lexicon table {table!r}"
+        for field in fields:
+            # At least one entry, not every entry: a language may well have
+            # an alternate form for only some of its numerals.
+            assert any(
+                field in entry for entry in lexicon[table].values()
+            ), f"no {table} entry has a {field!r} field"
+
+
 # --- Negative cases -------------------------------------------------------
 #
 # Each entry mutates a valid spec in one specific way and must be rejected.
@@ -175,6 +195,28 @@ MUTATIONS = {
         s, ["parse"], {**s["parse"], "case_insensitive": "yes"}
     ),
     "example missing its text": lambda s: _mutate(s, ["examples"], [{"number": 7}]),
+    # accepted_forms maps a lexicon table to field names (#31). The boolean
+    # flags are the shape it had before that, so a spec written against the
+    # old format should fail loudly rather than be silently ignored.
+    "accepted_forms using the old boolean flags": lambda s: _mutate(
+        s,
+        ["parse"],
+        {**s["parse"], "accepted_forms": {"standalone_units": True}},
+    ),
+    "accepted_forms listing an empty field list": lambda s: _mutate(
+        s, ["parse"], {**s["parse"], "accepted_forms": {"units": []}}
+    ),
+    "accepted_forms repeating a field": lambda s: _mutate(
+        s,
+        ["parse"],
+        {
+            **s["parse"],
+            "accepted_forms": {"units": ["standalone", "standalone"]},
+        },
+    ),
+    "accepted_forms holding a bare string": lambda s: _mutate(
+        s, ["parse"], {**s["parse"], "accepted_forms": {"units": "standalone"}}
+    ),
 }
 
 

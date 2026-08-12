@@ -153,8 +153,13 @@
         },
         "accepted_forms": {
           "type": "object",
-          "description": "Which lexicon fields a freestanding single-digit phrase may match, beyond the one its template names. Open-ended: engine.py currently understands standalone_units and bound_units, and has a standing TODO that these are Mizo-specific names living in otherwise language-agnostic code.",
-          "additionalProperties": { "type": "boolean" }
+          "description": "Extra lexicon fields a freestanding single-digit phrase may match, keyed by lexicon table. The field a template names always matches, so this only widens: Mizo's 'units': ['standalone', 'bound'] also accepts the bound form of a lone digit. Omit the section entirely for exact matching -- a language whose entries have one form each declares nothing. Leniency applies only where a template is a single placeholder; that rule belongs to the engine, being about ambiguity rather than about any one language.",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1,
+            "uniqueItems": true
+          }
         },
         "connectors": {
           "type": "array",

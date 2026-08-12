@@ -86,9 +86,9 @@ engine that walks it at runtime.
 
 - ➕ One algorithm to reason about; rules can't drift from the spec.
 - ➕ Adding a language = shipping new data, often no code change.
-  *Aspirational today, not yet true: some language behaviour has leaked into
-  engine code — see #31 — which is a bug against this principle rather than a
-  refutation of it.*
+  *Holds so far, but only with maintenance: adding English leaked Mizo's field
+  names into engine code (#31), and that was fixed by moving the decision into
+  the spec rather than by accepting the leak.*
 - ➕ Much easier to keep Python and npm identical.
 - ➖ A little runtime overhead and interpreter code to maintain per language.
 
@@ -156,8 +156,11 @@ Three things we've learned since strengthen Option A:
 - **Mizo accepts productive scale-stacking** above 10⁵ (`nuai za hnih`), so
   accepted input can't be enumerated from the rules. More runtime algorithm,
   less that can be precomputed.
-- **#31 shows the data/code boundary already leaks.** Keeping behaviour in data
-  is a discipline that needs active maintenance, not a property we get for free.
+- **#31 showed the data/code boundary can leak.** Parse leniency sat in engine
+  code keyed to Mizo's own field names, and the second language hit it at once.
+  Fixed by moving it into the spec — but it took someone noticing. Keeping
+  behaviour in data is a discipline that needs active maintenance, not a
+  property we get for free.
 
 ### Still open: one artifact or one per target
 

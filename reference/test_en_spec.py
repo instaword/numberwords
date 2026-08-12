@@ -154,11 +154,15 @@ def test_generator_keeps_the_canonical_output_verbatim(en):
 
 
 def test_single_digits_parse_without_mizo_form_names(en):
-    # Regression guard for #31. English lexicon entries have one field,
-    # `word`; the engine's leniency path is hardcoded to Mizo's `standalone`
-    # and `bound`. en.yaml disables that path via accepted_forms. If the
-    # workaround is removed before #31 is fixed, every single digit stops
-    # parsing -- this catches it as 10 clear failures rather than a puzzling
-    # round-trip break.
+    # #31: English lexicon entries have one field, `word`, and en.yaml
+    # declares no accepted_forms at all. Single digits still parse, because
+    # the field a template names always matches and leniency only widens
+    # from there.
+    #
+    # This used to pass for the opposite reason: the engine looked for
+    # Mizo's `standalone`/`bound` on every one-placeholder template, and
+    # en.yaml had to switch them off by name to get exact matching back.
+    # The assertion is unchanged; what it proves is not.
+    assert "accepted_forms" not in en.parse_config
     for n in range(0, 10):
         assert en.text_to_number(en.number_to_text(n)) == n

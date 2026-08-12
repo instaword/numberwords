@@ -219,8 +219,9 @@ def _alternate_templates(spec, rule) -> list:
     through the same render path.
 
     Which fields leniency allows comes from the engine rather than from a
-    "standalone"/"bound" list written out here, so this keeps working when
-    #31 moves that decision into the spec.
+    "standalone"/"bound" list written out here. That is why this kept
+    working unchanged when #31 moved the decision into the spec, and why
+    the vectors did not move.
     """
     templates = list(rule.get("parse_aliases", []))
 

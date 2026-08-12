@@ -116,6 +116,20 @@ but never produced. `number_to_text` stays the single source of truth for the
 canonical form; everything in `parse` and `parse_aliases` only widens what is
 *accepted*, never what is *emitted*.
 
+`parse.accepted_forms` widens matching a second way, for lexicon entries that
+carry several forms of one word. It maps a lexicon table to the extra fields a
+token may match there: Mizo's `units: [standalone, bound]` accepts `khat` as
+well as the canonical `pakhat` for 1. The field a template names always
+matches, so the section only ever widens — a spec cannot break its own
+canonical spelling by leaving that field out of the list. A language whose
+entries have one form each, like English, declares nothing at all.
+
+That leniency applies only where a template is a **single placeholder**, and
+that rule lives in the engine rather than the spec. Relaxing a multi-word
+template would let `sawm hnih` (20) also match `teens`' ones-digit slot for 12
+— genuine ambiguity, not an alternate spelling. It is a fact about when a
+phrase is ambiguous, not about any one language.
+
 The current `text → number` implementation brute-forces the supported range and
 match-tests each candidate. That is honest at 0–100 and won't survive a larger
 range — see the note in `reference/engine.py`, and #27, which establishes that
@@ -133,9 +147,6 @@ Not speculative — each has been hit by a real language.
   `sâng khat` for 1,000 — an explicit multiplier is obligatory above 10², and
   that's currently implicit in hand-written rules rather than stated as data.
   #27.
-- **Parse leniency is hardcoded to Mizo's field names.** `accepted_forms` keys
-  off `standalone`/`bound`, so a language whose entries name their fields
-  differently has to switch Mizo's flags off to parse single digits. #31.
 - **Canonical vs. accepted forms aren't fully expressible.** Above 10⁵ Mizo
   accepts productive scale-stacking (`nuai za hnih`) that no rule generates, so
   accepted input can't be enumerated from the rules. #27, #12.
