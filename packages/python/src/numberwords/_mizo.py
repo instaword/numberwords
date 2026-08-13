@@ -77,7 +77,7 @@ PARSE = {
     'case_insensitive': True,
     'strip_diacritics': True,
     'word_separators': (' ', '-'),
-    'accepted_forms': {'units': ('standalone', 'bound')},
+    'accepted_forms': {'units': ('bound',)},
     'connectors': ('leh',),
     'aliases': {},
 }

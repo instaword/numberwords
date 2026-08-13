@@ -153,7 +153,7 @@
         },
         "accepted_forms": {
           "type": "object",
-          "description": "Extra lexicon fields a freestanding single-digit phrase may match, keyed by lexicon table. The field a template names always matches, so this only widens: Mizo's 'units': ['standalone', 'bound'] also accepts the bound form of a lone digit. Omit the section entirely for exact matching -- a language whose entries have one form each declares nothing. Leniency applies only where a template is a single placeholder; that rule belongs to the engine, being about ambiguity rather than about any one language.",
+          "description": "Extra lexicon fields a freestanding single-digit phrase may match, keyed by lexicon table. The field a template names always matches, so list only the extras: Mizo's 'units': ['bound'] also accepts the bound form of a lone digit, whose template names 'standalone'. Omit the section entirely for exact matching -- a language whose entries have one form each declares nothing. Leniency applies only where a template is a single placeholder; that rule belongs to the engine, being about ambiguity rather than about any one language.",
           "additionalProperties": {
             "type": "array",
             "items": { "type": "string", "minLength": 1 },

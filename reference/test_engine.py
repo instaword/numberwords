@@ -363,9 +363,10 @@ def test_unparseable_text_raises(spec):
 def test_freestanding_digit_accepts_bound_form(spec, n):
     # A lone digit may be spoken in bound form too, e.g. "khat" as well as
     # the canonical standalone "pakhat" for 1 -- parse.accepted_forms in
-    # mizo.yaml declares both acceptable, but only for a freestanding digit;
-    # multi-word rules must keep matching their named field exactly (see
-    # test_bound_form_is_not_accepted_mid_phrase).
+    # mizo.yaml lists `bound` as an extra form, the standalone form being
+    # accepted anyway as the field the template names. Both apply only to a
+    # freestanding digit; multi-word rules must keep matching their named
+    # field exactly (see test_bound_form_is_not_accepted_mid_phrase).
     bound_word = spec.lexicon["units"][n]["bound"]
     assert spec.text_to_number(bound_word) == n
 
@@ -413,8 +414,12 @@ def test_a_spec_that_declares_nothing_gets_exact_matching(spec):
 def test_the_field_a_template_names_always_matches(spec):
     # A spec cannot break its own canonical spelling by leaving that field
     # out of the list: number_to_text() emits the field the template names,
-    # so it has to parse back. Here units names `standalone` and the list
-    # mentions only `bound`, and the round-trip still holds.
+    # so it has to parse back. units names `standalone` and the list mentions
+    # only `bound`, and the round-trip still holds. mizo.yaml is written that
+    # way, so the vectors cover this too -- deliberately, since a renderer
+    # that reads only the list would otherwise pass conformance while
+    # dropping the rule. This states it directly rather than by side effect;
+    # it is set explicitly so the test keeps its meaning if the spec changes.
     data = copy.deepcopy(spec._data)
     data["parse"]["accepted_forms"] = {"units": ["bound"]}
     partial = Spec(data)

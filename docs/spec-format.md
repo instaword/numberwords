@@ -118,11 +118,12 @@ canonical form; everything in `parse` and `parse_aliases` only widens what is
 
 `parse.accepted_forms` widens matching a second way, for lexicon entries that
 carry several forms of one word. It maps a lexicon table to the extra fields a
-token may match there: Mizo's `units: [standalone, bound]` accepts `khat` as
-well as the canonical `pakhat` for 1. The field a template names always
-matches, so the section only ever widens — a spec cannot break its own
-canonical spelling by leaving that field out of the list. A language whose
-entries have one form each, like English, declares nothing at all.
+token may match there: Mizo's `units: [bound]` accepts `khat` as well as the
+canonical `pakhat` for 1. The field a template names always matches, so the
+section only ever widens — a spec cannot break its own canonical spelling by
+leaving that field out of the list, and listing it would say nothing. That is
+why `standalone`, which the units template names, is absent above. A language
+whose entries have one form each, like English, declares nothing at all.
 
 That leniency applies only where a template is a **single placeholder**, and
 that rule lives in the engine rather than the spec. Relaxing a multi-word

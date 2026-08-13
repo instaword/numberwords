@@ -223,7 +223,8 @@ class Spec:
         (#31).
 
         Which table and which fields are eligible is spec data, not something
-        this engine knows: Mizo declares `units: [standalone, bound]`, English
+        this engine knows: Mizo declares `units: [bound]` -- the extra form
+        only, `standalone` being the field its template names -- and English
         declares nothing because its entries have one form each.
         """
         if not lenient:
