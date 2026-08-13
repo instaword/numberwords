@@ -92,8 +92,10 @@ recursion the format doesn't have yet (#27).
 
 [`../vectors/mizo.json`](../vectors/mizo.json) is the checked-in table
 described in [`docs/architecture.md`](../docs/architecture.md) — the shared
-contract every target package (Python, npm, …) will eventually be tested
-against, not just this reference engine. Each entry looks like:
+contract every target package (Python, npm, …) is tested against, not just
+this reference engine. The Python package does so today, in
+[`../packages/python/tests/`](../packages/python/tests/); npm follows when it
+exists. Each entry looks like:
 
 ```json
 {

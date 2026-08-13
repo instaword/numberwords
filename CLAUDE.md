@@ -134,7 +134,9 @@ reference/
 vectors/
   mizo.json            Checked-in conformance vectors. Generated, not edited.
 packages/
-  python/  npm/        Published placeholder packages (0.0.0). See its README.
+  python/              The first real target package: _mizo.py (compiled spec),
+                       _render.py (thin interpreter), and its own test suite.
+  npm/                 Still a name-reservation placeholder (0.0.0).
 .githooks/
   pre-push             Local guard that blocks pushes to main.
 .github/

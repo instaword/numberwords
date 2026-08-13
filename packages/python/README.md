@@ -3,12 +3,27 @@
 Bidirectional text ↔ number conversion, driven by a single language-agnostic
 rule spec — starting with Mizo (Lushai), designed to add more languages over time.
 
-```
-2026  ->  the Mizo words for 2026
-the Mizo words for 2026  ->  2026
+```python
+>>> import numberwords
+>>> numberwords.number_to_text(58)
+'sawm nga pariat'
+>>> numberwords.text_to_number("sawm nga pariat")
+58
 ```
 
-**This is a placeholder release. The package is not yet implemented.**
+Parsing is the lenient direction: case and diacritics are ignored, `-` works
+as a word separator, the connector `leh` is dropped, and a lone digit may be
+given in either of its forms (`khat` as well as `pakhat`). `number_to_text()`
+always emits the canonical spelling.
+
+## Supported range
+
+Mizo (Lushai) **0–100**. Anything outside it raises `NumberWordsError`, which
+subclasses `ValueError`. There is no language argument yet — adding one before
+a second language exists would mean guessing at its shape.
+
+**Not published yet.** The release on PyPI is still the `0.0.0` name
+placeholder; this version is not on the index.
 
 Development happens at
 [github.com/instaword/numberwords](https://github.com/instaword/numberwords).

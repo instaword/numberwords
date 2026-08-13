@@ -48,6 +48,13 @@ jobs:
         working-directory: reference
         run: pytest
 
+      # The target package has its own suite: the public API, and conformance
+      # against vectors/mizo.json. It imports numberwords from src/ and never
+      # from reference/, so this proves the shipped code stands on its own.
+      - name: Run the package tests
+        working-directory: packages/python
+        run: pytest
+
       # vectors/mizo.json is a checked-in snapshot, not computed at test time.
       # If this step fails, mizo.yaml changed without a regenerate: run
       # `python generate_vectors.py` from reference/ and commit the result.
@@ -68,3 +75,44 @@ jobs:
         run: |
           python compile_spec.py
           git diff --exit-code ../packages/python/src/numberwords/_mizo.py
+
+  # Everything above tests the source tree. None of it can tell whether the
+  # built distribution actually contains _mizo.py and py.typed -- a src/
+  # layout will happily ship a wheel that imports and does nothing. So build
+  # the wheel, install it somewhere with no repository in sight, and convert
+  # a number.
+  wheel:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          # The oldest version pyproject claims to support. If the wheel
+          # works here it works on the rest of the matrix.
+          python-version: "3.9"
+
+      - name: Build the wheel
+        working-directory: packages/python
+        run: |
+          pip install build
+          python -m build --wheel
+
+      - name: Install it in a clean environment and use it
+        working-directory: packages/python
+        run: |
+          python -m venv /tmp/smoke
+          /tmp/smoke/bin/pip install dist/*.whl
+          cd /tmp
+          /tmp/smoke/bin/python -c "
+          import pathlib
+          import numberwords
+          assert numberwords.__version__ == '0.1.0', numberwords.__version__
+          assert numberwords.number_to_text(58) == 'sawm nga pariat'
+          assert numberwords.text_to_number('sawm nga pariat') == 58
+          installed = pathlib.Path(numberwords.__file__).parent
+          assert (installed / '_mizo.py').is_file(), 'no compiled spec'
+          assert (installed / 'py.typed').is_file(), 'no py.typed'
+          print('wheel smoke test ok')
+          "

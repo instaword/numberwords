@@ -15,18 +15,21 @@ source of truth; many published targets.
 
 ## Install
 
-**These packages are placeholder releases and are not yet implemented.**
-They reserve the names on PyPI and npm while the library is under development.
+**What is published on PyPI and npm today is still the `0.0.0` name
+placeholder.** The Python package now converts Mizo 0–100 in this repository,
+but that version has not been released yet — publishing is tracked in #23.
 
 ```bash
-pip install numberwords              # Python
-npm install @instaword/numberwords   # JS/TS
+pip install numberwords              # Python -- placeholder release for now
+npm install @instaword/numberwords   # JS/TS -- placeholder release
 ```
 
 ## Status
 
-Early scaffolding. The published packages are placeholders rather than working
-libraries. The design and onboarding milestones live in
+The Python target works: it exports `number_to_text`, `text_to_number` and
+`NumberWordsError`, and passes the checked-in conformance vectors in both
+directions for Mizo 0–100. The npm target is still a name reservation. The
+design and the remaining milestones live in
 [`docs/architecture.md`](docs/architecture.md).
 
 ## For contributors
