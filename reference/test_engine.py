@@ -24,6 +24,7 @@ These tests check that the engine correctly follows the grammar as written,
 not whether the grammar itself is linguistically correct.
 """
 
+import copy
 import json
 import re
 from pathlib import Path
@@ -362,9 +363,10 @@ def test_unparseable_text_raises(spec):
 def test_freestanding_digit_accepts_bound_form(spec, n):
     # A lone digit may be spoken in bound form too, e.g. "khat" as well as
     # the canonical standalone "pakhat" for 1 -- parse.accepted_forms in
-    # mizo.yaml declares both acceptable, but only for a freestanding digit;
-    # multi-word rules must keep matching their named field exactly (see
-    # test_bound_form_is_not_accepted_mid_phrase).
+    # mizo.yaml lists `bound` as an extra form, the standalone form being
+    # accepted anyway as the field the template names. Both apply only to a
+    # freestanding digit; multi-word rules must keep matching their named
+    # field exactly (see test_bound_form_is_not_accepted_mid_phrase).
     bound_word = spec.lexicon["units"][n]["bound"]
     assert spec.text_to_number(bound_word) == n
 
@@ -374,6 +376,56 @@ def test_bound_form_is_not_accepted_mid_phrase(spec):
     # not also match teens' ones-digit slot via bound-form leniency -- that
     # would make 12 and 20 ambiguous for the same input.
     assert spec.text_to_number("sawm hnih") == 20
+
+
+def test_leniency_follows_the_table_the_spec_names(spec):
+    # #31: the engine used to check `table != "units"`, so a language whose
+    # digits lived in a differently named table lost leniency no matter what
+    # it declared. Rename the table throughout and behaviour must follow the
+    # spec, not the name.
+    data = copy.deepcopy(spec._data)
+    data["lexicon"]["digits"] = data["lexicon"].pop("units")
+    for rule in data["grammar"]["rules"]:
+        rule["output"] = rule["output"].replace("{units[", "{digits[")
+        if "parse_aliases" in rule:
+            rule["parse_aliases"] = [
+                template.replace("{units[", "{digits[")
+                for template in rule["parse_aliases"]
+            ]
+    data["parse"]["accepted_forms"] = {"digits": ["standalone", "bound"]}
+    renamed = Spec(data)
+
+    assert renamed.text_to_number("pakhat") == 1
+    assert renamed.text_to_number("khat") == 1
+
+
+def test_a_spec_that_declares_nothing_gets_exact_matching(spec):
+    # The English case (#31), reproduced against Mizo's data: with no
+    # accepted_forms at all, only the field each template names matches.
+    data = copy.deepcopy(spec._data)
+    del data["parse"]["accepted_forms"]
+    strict = Spec(data)
+
+    assert strict.text_to_number("pakhat") == 1
+    with pytest.raises(ValueError):
+        strict.text_to_number("khat")
+
+
+def test_the_field_a_template_names_always_matches(spec):
+    # A spec cannot break its own canonical spelling by leaving that field
+    # out of the list: number_to_text() emits the field the template names,
+    # so it has to parse back. units names `standalone` and the list mentions
+    # only `bound`, and the round-trip still holds. mizo.yaml is written that
+    # way, so the vectors cover this too -- deliberately, since a renderer
+    # that reads only the list would otherwise pass conformance while
+    # dropping the rule. This states it directly rather than by side effect;
+    # it is set explicitly so the test keeps its meaning if the spec changes.
+    data = copy.deepcopy(spec._data)
+    data["parse"]["accepted_forms"] = {"units": ["bound"]}
+    partial = Spec(data)
+
+    for n in range(0, 10):
+        assert partial.text_to_number(partial.number_to_text(n)) == n
 
 
 def test_aliases_resolve_to_canonical_word_before_matching():

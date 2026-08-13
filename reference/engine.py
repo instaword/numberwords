@@ -213,23 +213,24 @@ class Spec:
         return False
 
     def _acceptable_fields(self, table: str, default_field: str, lenient: bool) -> list:
-        # TODO: "units" and the "standalone"/"bound" field names are
-        # hardcoded Mizo-specific assumptions living inside code that's
-        # otherwise language-agnostic -- a small tension with "the spec is
-        # the source of truth" (docs/architecture.md). Fine while Mizo is
-        # the only language; when a second language is added, this should
-        # be driven from the spec (e.g. which table/fields are
-        # leniency-eligible) instead of a fixed string check.
-        if not lenient or table != "units":
+        """Which lexicon fields a token may match for this placeholder.
+
+        The field the template names always matches -- that is what
+        number_to_text() emits, so it has to parse back. parse.accepted_forms
+        widens that for the tables it names, and a spec that declares nothing
+        gets exact matching. Listing the named field first also means a spec
+        cannot break its own canonical spelling by leaving it out of the list
+        (#31).
+
+        Which table and which fields are eligible is spec data, not something
+        this engine knows: Mizo declares `units: [bound]` -- the extra form
+        only, `standalone` being the field its template names -- and English
+        declares nothing because its entries have one form each.
+        """
+        if not lenient:
             return [default_field]
-        accepted = self.parse_config.get("accepted_forms", {})
-        fields = [
-            f
-            for f, enabled in (("standalone", accepted.get("standalone_units", True)),
-                               ("bound", accepted.get("bound_units", True)))
-            if enabled
-        ]
-        return fields or [default_field]
+        eligible = self.parse_config.get("accepted_forms", {}).get(table, ())
+        return [default_field] + [f for f in eligible if f != default_field]
 
     def _normalize_word(self, word: str) -> str:
         """Apply the same normalisation to *both* the input and the

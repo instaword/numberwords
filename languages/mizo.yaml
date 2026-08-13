@@ -27,7 +27,8 @@
 meta:
   language: Mizo
   code: lus           # ISO 639-3 for Lushai/Mizo.
-  version: 0.1.0
+  version: 0.2.0      # 0.2.0: accepted_forms now names the table and fields
+                      # it applies to, instead of Mizo-specific flags (#31).
   supports: { min: 0, max: 100 }   # Start small (0–100). Extend once round-trip holds.
   orthography: missionary   # The writing system used by this spec. The
                             # diacritics depend on it, so a different writing
@@ -111,7 +112,14 @@ parse:
                            # like case_insensitive above. number_to_text()
                            # still writes the correct diacritics.
   word_separators: [" ", "-"]
-  accepted_forms: { standalone_units: true, bound_units: true }
+  # The *extra* fields a lone digit may also be spoken in, per lexicon
+  # table. The units rule writes `standalone` ("pakhat" for 1), and the
+  # field a rule writes is always accepted, so only the extra form is
+  # listed here: "khat" parses as 1 too. Naming the table and its fields
+  # keeps the decision in the spec (#31). Restricting that leniency to a
+  # phrase that is a single freestanding digit stays the engine's rule --
+  # it is a fact about ambiguity, not about Mizo.
+  accepted_forms: { units: [bound] }
   connectors: ["leh"]      # Decision (#10): genuinely ambiguous connector; disambiguating it is out of scope by design -- see file header above.
   aliases: {}   # Decision (#15): no non-diacritic spelling variants among the
                 # numerals in this spec's 0-100 range (confirmed by native

@@ -269,7 +269,14 @@ def test_compiled_parse_config_matches_the_spec(spec, artifact):
     assert parse["word_separators"] == tuple(
         config.get("word_separators", [" "])
     )
-    assert parse["accepted_forms"] == config.get("accepted_forms", {})
+    # accepted_forms keeps its tables and the order of each field list --
+    # order decides which form a target tries first. The lists become
+    # tuples on the way in, so compare contents rather than types.
+    declared = config.get("accepted_forms", {})
+    assert set(parse["accepted_forms"]) == set(declared)
+    for table, fields in declared.items():
+        assert isinstance(parse["accepted_forms"][table], tuple)
+        assert list(parse["accepted_forms"][table]) == list(fields)
 
     # Nothing dropped: normalising can collapse two spellings into one, so
     # compare counts against the spec before comparing contents.

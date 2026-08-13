@@ -17,7 +17,8 @@
 meta:
   language: English
   code: eng          # ISO 639-3, matching mizo.yaml's `lus`.
-  version: 0.2.0     # 0.2.0: ported from the old illustrative `form:` syntax.
+  version: 0.3.0     # 0.2.0: ported from the old illustrative `form:` syntax.
+                     # 0.3.0: dropped the accepted_forms workaround (#31).
   supports: { min: 0, max: 99 }
   sources:
     - "Illustrative reference example; English numerals need no citation."
@@ -102,18 +103,9 @@ parse:
   case_insensitive: true
   word_separators: [" ", "-"]   # "forty-two" and "forty two" both parse.
   connectors: ["and"]           # ignorable filler when parsing.
-  accepted_forms:
-    # English units have exactly one form, so there is no alternate form to
-    # accept. Both flags off; the engine then matches only the field the
-    # template names.
-    #
-    # These two flag names are Mizo's (`standalone`/`bound` unit forms), and
-    # having to set them in an English spec is a known wart -- see the TODO
-    # in reference/engine.py's _acceptable_fields, which says this should be
-    # driven from the spec rather than a fixed string check once a second
-    # language exists. This is that second language. Tracked in #31.
-    standalone_units: false
-    bound_units: false
+  # No accepted_forms: English units have exactly one field, `word`, so
+  # there is no alternate form to accept. A spec that declares nothing gets
+  # exact matching.
   aliases: {}                   # no irregular spelling variants in this range.
 
 examples:

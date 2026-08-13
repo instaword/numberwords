@@ -205,7 +205,13 @@ def _format_parse(spec):
         spec._normalize_word(variant): spec._normalize_word(canonical)
         for variant, canonical in sorted(config.get("aliases", {}).items())
     }
-    accepted = dict(sorted(config.get("accepted_forms", {}).items()))
+    # Field lists become tuples, like connectors and word_separators above:
+    # the renderer only reads them, and a literal tuple cannot be mutated by
+    # accident once it ships inside the package.
+    accepted = {
+        table: tuple(fields)
+        for table, fields in sorted(config.get("accepted_forms", {}).items())
+    }
     lines = [
         "PARSE = {",
         f"    'case_insensitive': {config.get('case_insensitive', False)!r},",
