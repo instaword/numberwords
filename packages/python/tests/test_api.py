@@ -63,6 +63,17 @@ def test_text_to_number_rejects_anything_that_is_not_a_str(text):
         numberwords.text_to_number(text)
 
 
+def test_the_error_reports_the_public_module_in_a_traceback():
+    # The class is defined in _render.py, so an uncorrected __module__ makes
+    # every traceback name a private module. Part of the public shape rather
+    # than cosmetics: it is what a user pastes into a bug report or searches
+    # for. Catching is unaffected either way, which is why nothing else here
+    # would notice the name being wrong.
+    assert numberwords.NumberWordsError.__module__ == "numberwords"
+    with pytest.raises(numberwords.NumberWordsError):
+        numberwords.number_to_text(101)
+
+
 def test_the_error_is_a_valueerror():
     # Callers who already catch ValueError keep working; this is why the
     # exception subclasses it rather than Exception.

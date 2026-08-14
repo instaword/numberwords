@@ -25,6 +25,13 @@ See https://github.com/instaword/numberwords
 from . import _render
 from ._render import NumberWordsError
 
+# Defined in _render.py but public from here, so tracebacks should say so.
+# Without this every user-visible traceback ends "numberwords._render.
+# NumberWordsError", naming a private module a caller must not import.
+# __module__ is only cosmetic -- it changes the printed name, not
+# identity -- so `except numberwords.NumberWordsError` is unaffected.
+NumberWordsError.__module__ = "numberwords"
+
 __all__ = ["number_to_text", "text_to_number", "NumberWordsError"]
 
 __version__ = "0.1.0"

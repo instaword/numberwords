@@ -69,6 +69,15 @@ Five pieces:
    (#12). **Every published target package must pass every vector.** This is
    what keeps Python and npm in agreement.
 
+   What they govern is **conversion**: which text a number produces, and
+   which text parses back to it. Every vector names a whole number in the
+   supported range, and the engine is never handed a caller's arguments, so
+   a target being **stricter than the oracle about argument types is not a
+   conformance divergence** — it is the part of a published API the vectors
+   say nothing about. Each target still decides it deliberately, in its own
+   primitives: Python rejects `bool` because it subclasses `int`, and a JS
+   target has no int type, so `5.5` needs a check of its own there.
+
 5. **Target packages** (`packages/python`, `packages/npm`, …) — the actual
    published, idiomatic libraries a consumer installs.
 

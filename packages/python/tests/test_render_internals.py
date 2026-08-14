@@ -84,6 +84,26 @@ def test_parse_aliases_are_accepted():
     assert numberwords.number_to_text(22) == "sawm hnih pahnih"
 
 
+def test_spelling_aliases_resolve_to_the_canonical_word(monkeypatch):
+    # parse.aliases (spec-wide spelling variants), not a rule's
+    # parse_aliases (alternate templates) tested above -- the names are
+    # unhelpfully close. mizo.yaml declares `aliases: {}` (#15), so no
+    # vector reaches this path and the suite passes with the lookup deleted
+    # from _tokenize. #27 populates it later; the code ships before that.
+    #
+    # The alias is a placeholder, not Mizo, and the circumflex sits on the
+    # invented part so nothing here reads as a claim about spelling.
+    # Patching the built dict skips the build-time normalisation of the
+    # table itself; the engine's test covers that side.
+    monkeypatch.setattr(_render, "_ALIASES", {"alt_spelling": "pakhat"})
+
+    assert numberwords.text_to_number("alt_spelling") == 1
+    assert numberwords.text_to_number("pakhat") == 1
+    # Normalised before the lookup, not after -- otherwise an alias would
+    # only work when typed one exact way.
+    assert numberwords.text_to_number("ÂLT_SPELLING") == 1
+
+
 def test_ambiguity_raises_instead_of_returning_the_first_match(monkeypatch):
     # parse_text collects every matching number and only then decides. The
     # tempting version returns on the first hit, which is indistinguishable
