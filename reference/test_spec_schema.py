@@ -34,6 +34,11 @@ import jsonschema
 import pytest
 import yaml
 
+# Placeholder syntax is defined once, in the engine. The cross-reference
+# tests below read templates, so they borrow that definition rather than
+# restating the pattern and drifting from it.
+from engine import _PLACEHOLDER_RE
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "spec" / "spec.schema.json"
 MIZO_SPEC_PATH = REPO_ROOT / "languages" / "mizo.yaml"
@@ -98,6 +103,44 @@ def test_accepted_forms_names_tables_and_fields_that_exist(path):
             assert any(
                 field in entry for entry in lexicon[table].values()
             ), f"no {table} entry has a {field!r} field"
+
+
+@pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
+def test_accepted_forms_lists_only_fields_no_template_already_names(path):
+    # accepted_forms holds the *extra* fields, per the schema: the field a
+    # template names is accepted anyway, so listing it adds nothing -- and
+    # adds nothing harmfully, because it hides the mistake where a target
+    # reads only the list and drops the always-accept half of the rule.
+    # Mizo lists `units: [bound]` and not `standalone` for exactly that
+    # reason: a target with that mistake then fails on "pakhat", which every
+    # vector's accepted_inputs contains.
+    #
+    # This test is what keeps that property from decaying silently. If a
+    # canonical form ever moves -- say the units template came to name
+    # `bound` -- the list would quietly become a no-op, and leniency would
+    # disappear with every test still green. Here it fails instead.
+    #
+    # Only single-placeholder templates count: leniency applies nowhere else,
+    # so a field named solely by a multi-word template (units.bound, in
+    # exact_tens) is still a legitimate extra. Scanning parse_aliases as well
+    # as output is inert on today's data -- neither spec has a
+    # single-placeholder alias -- but one would fall into the same trap, so
+    # it is scanned rather than left for later.
+    spec = _as_ir(path)
+    accepted = spec.get("parse", {}).get("accepted_forms", {})
+    named = {}
+    for rule in spec["grammar"]["rules"]:
+        for template in [rule["output"], *rule.get("parse_aliases", [])]:
+            placeholders = _PLACEHOLDER_RE.findall(template)
+            if len(placeholders) == 1:
+                table, _key, field = placeholders[0]
+                named.setdefault(table, set()).add(field)
+    for table, fields in accepted.items():
+        redundant = sorted(set(fields) & named.get(table, set()))
+        assert not redundant, (
+            f"{table}: {redundant} is already accepted as the field a "
+            f"single-placeholder template names -- list only the extras"
+        )
 
 
 # --- Negative cases -------------------------------------------------------
