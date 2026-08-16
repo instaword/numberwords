@@ -104,6 +104,35 @@ def test_spelling_aliases_resolve_to_the_canonical_word(monkeypatch):
     assert numberwords.text_to_number("ÂLT_SPELLING") == 1
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        " sawm nga pariat",       # leading
+        "sawm nga pariat ",       # trailing
+        "sawm  nga pariat",       # repeated
+        " sawm  nga   pariat ",   # all three at once
+        "sawm-nga pariat",        # a mix of the two separators
+        "sawm--nga-pariat",       # repeated, on the other separator
+    ],
+)
+def test_stray_and_repeated_separators_are_ignored(text):
+    # #40. Splitting on word_separators leaves an empty string wherever two
+    # separators meet or one sits at either end, and _tokenize drops those.
+    # The vectors cannot reach it -- every accepted_input is built by
+    # joining words, so all of them are well-formed -- and the engine has
+    # the same behaviour and the same gap.
+    assert numberwords.text_to_number(text) == 58
+
+
+@pytest.mark.parametrize("text", [" ", "   ", "-", " - "])
+def test_text_that_is_only_separators_raises(text):
+    # Same code path, opposite outcome: no tokens survive, so nothing
+    # matches. "" is covered in test_api.py with the other bad input; these
+    # are the cases that only exist because the filter runs.
+    with pytest.raises(numberwords.NumberWordsError):
+        numberwords.text_to_number(text)
+
+
 def test_ambiguity_raises_instead_of_returning_the_first_match(monkeypatch):
     # parse_text collects every matching number and only then decides. The
     # tempting version returns on the first hit, which is indistinguishable
