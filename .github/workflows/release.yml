@@ -89,6 +89,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
+      # A job-level permissions block REPLACES the default set rather than
+      # adding to it, so contents: read has to be restated here even though
+      # the workflow declares it. Without it actions/checkout gets no token
+      # and a private repository reports itself as "Repository not found",
+      # which reads like the repo is gone rather than like a permissions bug.
+      contents: read
       # Mints the OIDC token trusted publishing exchanges for an upload token.
       # No registry credential is stored in this repository.
       id-token: write
