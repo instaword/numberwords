@@ -17,13 +17,31 @@ from pathlib import Path
 import pytest
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
-REPO_ROOT = PACKAGE_ROOT.parent.parent
-VECTORS_PATH = REPO_ROOT / "vectors" / "mizo.json"
+
+# Two places the vectors can be, and both are normal.
+#
+# In the repository they sit at the root, two levels up. In an unpacked sdist
+# there is no repository -- pyproject force-includes them at the distribution
+# root instead, which is PACKAGE_ROOT there. Checking for the file rather than
+# guessing from the layout keeps `pytest` working in both, which is what lets a
+# downstream packager verify the release the same way CI does.
+_CANDIDATE_VECTORS = (
+    PACKAGE_ROOT.parent.parent / "vectors" / "mizo.json",
+    PACKAGE_ROOT / "vectors" / "mizo.json",
+)
 
 sys.path.insert(0, str(PACKAGE_ROOT / "src"))
 
 
 @pytest.fixture(scope="session")
 def vectors():
-    with open(VECTORS_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+    for path in _CANDIDATE_VECTORS:
+        if path.is_file():
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+    # Never skip. A conformance suite that quietly runs zero tests when it
+    # cannot find its table is worse than one that fails.
+    raise AssertionError(
+        "conformance vectors not found; looked in "
+        + ", ".join(str(p) for p in _CANDIDATE_VECTORS)
+    )
