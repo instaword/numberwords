@@ -23,3 +23,14 @@ Source = "https://github.com/instaword/numberwords"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/numberwords"]
+
+# The sdist carries the test suite, and the suite is worth nothing without the
+# conformance vectors it checks against -- they live at the repository root,
+# outside this directory, so without this the sdist ships five tests that fail
+# with FileNotFoundError. Downstream packagers run the suite from the sdist;
+# that is the whole reason to include it.
+#
+# The wheel deliberately does not get them. What an installed package needs is
+# the compiled spec, not the table used to verify it.
+[tool.hatch.build.targets.sdist.force-include]
+"../../vectors/mizo.json" = "vectors/mizo.json"

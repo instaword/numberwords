@@ -1,0 +1,138 @@
+name: release
+
+# Publishes packages/python to PyPI (#23).
+#
+# Deliberately manual: you run it from the Actions tab and type the version.
+# The alternative triggers -- a tag push, or publishing a GitHub Release --
+# both create the marker *before* the publish is attempted, so a failed run
+# leaves a tag or a release naming a version that never shipped. Here the tag
+# is the last step, which makes a tag in this repository mean "this was
+# released" rather than "someone intended to release this".
+#
+# Only the Python package is published. packages/npm is still a 0.0.0 name
+# reservation whose version deliberately diverges (see packages/README.md);
+# it gets its own job when there is an npm target to gate on.
+#
+# One-time setup on PyPI, before this can run -- Manage project -> Publishing
+# -> Add a new publisher:
+#
+#     Owner:        instaword
+#     Repository:   numberwords
+#     Workflow:     release.yml
+#     Environment:  pypi
+#
+# That is trusted publishing: PyPI verifies a short-lived OIDC token minted by
+# this workflow, so there is no API token to store, rotate or leak. The
+# `pypi` GitHub environment should also carry a required reviewer, which is
+# what keeps every release a watched one.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish, e.g. 0.1.0 (must match packages/python/pyproject.toml)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify the version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Tags are needed to tell whether this version was already released.
+          fetch-depth: 0
+
+      # The version is written in pyproject.toml and __init__.py, and typing it
+      # here makes a third copy. The package suite already asserts the first
+      # two agree; this ties what you typed to what gets built and tagged, so a
+      # typo fails in ten seconds rather than after a full test run.
+      - name: Check the version matches the package
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          declared=$(grep -m1 '^version = ' packages/python/pyproject.toml | cut -d'"' -f2)
+          if [ "$declared" != "$VERSION" ]; then
+            echo "::error::asked to publish $VERSION, but pyproject.toml declares $declared"
+            exit 1
+          fi
+          if git rev-parse --verify "refs/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "::error::tag v$VERSION already exists -- that version was already released"
+            exit 1
+          fi
+          echo "publishing $VERSION"
+
+  # The full suite, across the supported Python matrix, plus the vectors and
+  # compiled-artifact drift checks and the wheel smoke test. Called rather
+  # than copied, so a release cannot pass a weaker gate than a pull request.
+  test:
+    name: Gate
+    uses: ./.github/workflows/tests.yml
+
+  publish:
+    name: Publish to PyPI
+    needs: [verify, test]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      # Mints the OIDC token trusted publishing exchanges for an upload token.
+      # No registry credential is stored in this repository.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build the sdist and wheel
+        working-directory: packages/python
+        run: |
+          pip install build
+          python -m build
+
+      # Catches the metadata problems PyPI rejects on upload -- a README that
+      # does not render, a malformed classifier -- before anything is sent.
+      - name: Check the distribution metadata
+        working-directory: packages/python
+        run: |
+          pip install twine
+          twine check --strict dist/*
+
+      # What is about to be published, in the log, so a release can be
+      # reconstructed from its run without downloading anything.
+      - name: List what will be published
+        working-directory: packages/python
+        run: ls -l dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/python/dist/
+          print-hash: true
+
+  tag:
+    name: Tag the release
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Last, and only on success: the tag records what shipped rather than
+      # what was attempted. Points at the commit this run built.
+      - name: Create the tag and GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          gh release create "v$VERSION" \
+            --title "v$VERSION" \
+            --target "$GITHUB_SHA" \
+            --generate-notes

@@ -9,6 +9,10 @@ on:
   pull_request:
   push:
     branches: [main]
+  # release.yml calls this rather than restating the checks. The gate a
+  # release passes must be the same gate a PR passes, and the only way to
+  # guarantee that is for there to be one copy of it.
+  workflow_call:
 
 # Read-only token: this workflow only needs the checkout.
 permissions:

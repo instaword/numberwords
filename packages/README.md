@@ -35,9 +35,37 @@ The `0.0.0` releases are already out and, like all registry releases, immutable 
 nothing here changes what's published. Edits to the metadata below take effect on
 the **next** version bump.
 
-Both packages are hand-assembled today: build from the relevant directory and
-upload. Once there's real code to ship, this should move into a CI workflow so
-releases aren't dependent on someone's laptop.
+`python/` is published by
+[`.github/workflows/release.yml`](../.github/workflows/release.yml), not from a
+laptop (#23). Run it from the Actions tab and type the version. It checks the
+version against `pyproject.toml`, refuses a version already tagged, runs the
+full test gate, builds, and only then publishes — creating the git tag and
+GitHub release last, so a tag here always means "this shipped" rather than
+"this was attempted".
+
+Credentials: there are none. PyPI trusted publishing verifies a short-lived
+OIDC token minted by the workflow, so nothing is stored in the repository. The
+one-time PyPI configuration is written at the top of the workflow file.
+
+`npm/` is still published by hand, which is fine while it is a name
+reservation exporting nothing. It gets a job in the same workflow when there is
+an npm target with tests to gate on.
+
+### After the first real release
+
+These read correctly today and become false the moment `python/` is published.
+Update them in the same pass — grep for `0.0.0` and "placeholder", which is how
+the last batch of stale claims was found:
+
+- `README.md` — the install section and the status paragraph both say what is
+  on PyPI is still the placeholder.
+- `packages/README.md` — this file: "both **published** releases are still the
+  `0.0.0` placeholders", and the sentence above about the `0.0.0` releases
+  being what is out.
+- `packages/python/README.md` — "**Not published yet.**"
+
+What stays true: everything describing `npm/` as a placeholder, and `CLAUDE.md`'s
+repo map.
 
 ## Keep the two in step
 
