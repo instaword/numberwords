@@ -15,21 +15,34 @@ source of truth; many published targets.
 
 ## Install
 
-**What is published on PyPI and npm today is still the `0.0.0` name
-placeholder.** The Python package now converts Mizo 0–100 in this repository,
-but that version has not been released yet — publishing is tracked in #23.
-
 ```bash
-pip install numberwords              # Python -- placeholder release for now
-npm install @instaword/numberwords   # JS/TS -- placeholder release
+pip install numberwords              # Python -- Mizo 0-100
+npm install @instaword/numberwords   # JS/TS -- placeholder release, exports nothing
 ```
+
+```python
+>>> import numberwords
+>>> numberwords.number_to_text(58)
+'sawm nga pariat'
+>>> numberwords.text_to_number("sawm nga pariat")
+58
+```
+
+**The Python package handles Mizo 0–100 and nothing above it** — `101` raises
+`NumberWordsError`. That is narrow enough to be useless for most real work; the
+range is being extended (see below). The npm package is still a name
+reservation that exports nothing.
 
 ## Status
 
-The Python target works: it exports `number_to_text`, `text_to_number` and
-`NumberWordsError`, and passes the checked-in conformance vectors in both
-directions for Mizo 0–100. The npm target is still a name reservation. The
-design and the remaining milestones live in
+`numberwords` 0.1.0 is on PyPI, released from CI against the checked-in
+conformance vectors. It exports `number_to_text`, `text_to_number` and
+`NumberWordsError`, and passes those vectors in both directions for Mizo 0–100.
+The npm target is still a name reservation.
+
+Next is the range: Mizo's scale ladder runs to 10⁹, and reaching it needs the
+spec format to grow a recursive placeholder and to stop hardcoding two
+positional variables. The design and the remaining milestones live in
 [`docs/architecture.md`](docs/architecture.md).
 
 ## For contributors
