@@ -257,6 +257,40 @@ def test_text_to_number_is_case_insensitive(spec):
 
 
 @pytest.mark.parametrize(
+    "text",
+    [
+        " sawm nga pariat",       # leading
+        "sawm nga pariat ",       # trailing
+        "sawm  nga pariat",       # repeated
+        " sawm  nga   pariat ",   # all three at once
+        "sawm-nga pariat",        # a mix of the two separators
+        "sawm--nga-pariat",       # repeated, on the other separator
+    ],
+)
+def test_stray_and_repeated_separators_are_ignored(spec, text):
+    # Splitting on word_separators leaves an empty string wherever two
+    # separators meet or one sits at either end; _tokenize drops those.
+    # No vector can reach this (#40): generate_vectors.py builds every
+    # accepted_input by joining words, so all of them are well-formed by
+    # construction.
+    #
+    # It is real input rather than a curiosity. mizo.yaml's header names a
+    # post-ASR pipeline as the expected caller, and that is exactly where
+    # ragged spacing comes from.
+    assert spec.text_to_number(text) == 58
+
+
+@pytest.mark.parametrize("text", ["", " ", "   ", "-", " - "])
+def test_text_that_is_only_separators_raises(spec, text):
+    # The other half of the same code path: dropping the empty strings
+    # leaves no tokens at all, and no rule matches nothing. Worth pinning
+    # so leniency about stray separators never turns into accepting a
+    # phrase that names no number.
+    with pytest.raises(ValueError):
+        spec.text_to_number(text)
+
+
+@pytest.mark.parametrize(
     "n, expected",
     [
         (10, "sâwm"),          # not multiplied -- circumflex kept
