@@ -18,9 +18,8 @@ passes `vectors/mizo.json` in both directions.
 `npm/` is still a name-reservation placeholder at version `0.0.0` that exports
 nothing. It exists so the name is ours before we need it.
 
-Note that both **published** releases are still the `0.0.0` placeholders. The
-`0.1.0` above describes this directory, not PyPI: nothing here has been
-released, and publishing is #23.
+`python/` `0.1.0` is **on PyPI**, released from CI on 2026-08-16 (#23). `npm/`
+has only ever had its `0.0.0` placeholder published.
 
 `python/` is the reference for how a target package is laid out. Read it
 alongside `docs/architecture.md`, which records the interpret-vs-generate
@@ -31,9 +30,8 @@ the package ships a generated module rather than reading YAML.
 
 ## Publishing
 
-The `0.0.0` releases are already out and, like all registry releases, immutable —
-nothing here changes what's published. Edits to the metadata below take effect on
-the **next** version bump.
+Registry releases are immutable — nothing edited here changes what is already
+published. Metadata changes take effect on the **next** version bump.
 
 `python/` is published by
 [`.github/workflows/release.yml`](../.github/workflows/release.yml), not from a
@@ -51,21 +49,17 @@ one-time PyPI configuration is written at the top of the workflow file.
 reservation exporting nothing. It gets a job in the same workflow when there is
 an npm target with tests to gate on.
 
-### After the first real release
+### Every release makes some prose false
 
-These read correctly today and become false the moment `python/` is published.
-Update them in the same pass — grep for `0.0.0` and "placeholder", which is how
-the last batch of stale claims was found:
+A version bump silently invalidates whatever described the previous state.
+Before publishing, grep for the old version and for "placeholder" across
+`README.md`, `packages/README.md`, `packages/python/README.md` and `CLAUDE.md`,
+and fix what the release is about to contradict.
 
-- `README.md` — the install section and the status paragraph both say what is
-  on PyPI is still the placeholder.
-- `packages/README.md` — this file: "both **published** releases are still the
-  `0.0.0` placeholders", and the sentence above about the `0.0.0` releases
-  being what is out.
-- `packages/python/README.md` — "**Not published yet.**"
-
-What stays true: everything describing `npm/` as a placeholder, and `CLAUDE.md`'s
-repo map.
+This is not hypothetical: `0.1.0` went out with three files still saying PyPI
+carried only the `0.0.0` placeholder. They were caught because #23 listed them
+in advance. Keep doing that — write the list while making the claims, not while
+trying to remember them afterwards.
 
 ## Keep the two in step
 

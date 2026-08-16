@@ -22,8 +22,8 @@ Mizo (Lushai) **0–100**. Anything outside it raises `NumberWordsError`, which
 subclasses `ValueError`. There is no language argument yet — adding one before
 a second language exists would mean guessing at its shape.
 
-**Not published yet.** The release on PyPI is still the `0.0.0` name
-placeholder; this version is not on the index.
+Published from CI (`.github/workflows/release.yml`), gated on the conformance
+vectors passing — a release that fails them cannot be built.
 
 Development happens at
 [github.com/instaword/numberwords](https://github.com/instaword/numberwords).
