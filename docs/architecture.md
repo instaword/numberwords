@@ -17,6 +17,67 @@ runtime** (a Python backend package, an npm package for JS/TS, more later). We d
 **not** want to hand-write and separately maintain the same rules in every
 language — that's how implementations drift and disagree.
 
+## Not the problem: digit grouping
+
+**Digit grouping — `2000` → `2,000`, `100000` → `1,00,000` — is out of scope,
+permanently.** Written down because the question recurs, and the answer is more
+useful with the measurements attached than rediscovered each time.
+
+It is a *different* problem. Ours is digits ↔ words. Grouping is digits →
+digits: it shares no data with the rule specs, gains nothing from the compile
+step, and the conformance vectors cannot express it. None of this
+architecture's leverage applies to it.
+
+It is also already solved where it is needed. Measured 2026-08-16:
+
+| | `2000` | `100000` | `12345678` |
+|---|---|---|---|
+| `Intl.NumberFormat("en-US")` | 2,000 | 100,000 | 12,345,678 |
+| `Intl.NumberFormat("en-IN")` | 2,000 | 1,00,000 | 1,23,45,678 |
+
+JavaScript covers both grouping systems with no dependency. Python's stdlib
+gives Western grouping only (`f"{n:,}"`); the lakh/crore style needs `locale`
+with an installed `en_IN` — process-global and not thread-safe — or `babel`.
+That asymmetry is a gap in the Python ecosystem, not one for this library to
+fill.
+
+**Grouping belongs in the presentation layer**, chosen from the viewer's
+locale, next to date and currency formatting which have the same shape and the
+same answer.
+
+One caveat worth knowing rather than discovering:
+
+```
+Intl.NumberFormat.supportedLocalesOf(["lus"])  ->  []
+Intl.NumberFormat.supportedLocalesOf(["kha"])  ->  []
+```
+
+**CLDR has no Mizo or Khasi locale**, so "the viewer's locale" does not resolve
+to a grouping convention for either language. A front-end picks a proxy —
+`en-IN` for lakh/crore, `en-US` otherwise.
+
+And the proxy is not chosen by audience. Per the repo owner: Indian government
+budgets and contracts read as `1,00,000`, while international finance and
+science read as `100,000` — **the same reader expects different grouping in
+different documents**. Grouping here is a property of the register, not of the
+person.
+
+That is decisive rather than incidental. A locale is typically a system or user
+property — OS settings, `navigator.language`, `Accept-Language` — so no locale
+value can express "lakh style on the budget page, Western style on the physics
+page". `Intl.NumberFormat` takes the locale as an argument precisely so a
+caller can override the default per context, and only the caller knows which
+context it is in.
+
+So this library could not make the choice correctly even in principle. It is
+handed an integer and never learns whether it is a budget figure or a
+measurement.
+
+Same reasoning as [Prior art](#prior-art--learn-from-it-before-designing)
+below: do not reinvent CLDR by accident. Building this would mean owning
+per-locale grouping data and keeping it current, for a feature the platform
+already ships.
+
 ## The core idea: one spec, many targets
 
 ```
