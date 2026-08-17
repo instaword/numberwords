@@ -52,10 +52,26 @@ Intl.NumberFormat.supportedLocalesOf(["lus"])  ->  []
 Intl.NumberFormat.supportedLocalesOf(["kha"])  ->  []
 ```
 
-**CLDR has no Mizo or Khasi locale**, so "the user's locale" does not resolve
+**CLDR has no Mizo or Khasi locale**, so "the viewer's locale" does not resolve
 to a grouping convention for either language. A front-end picks a proxy —
-`en-IN` for lakh/crore, `en-US` otherwise — and which proxy is right is a
-product decision about the audience, not something a library can look up.
+`en-IN` for lakh/crore, `en-US` otherwise.
+
+And the proxy is not chosen by audience. Per the repo owner: Indian government
+budgets and contracts read as `1,00,000`, while international finance and
+science read as `100,000` — **the same reader expects different grouping in
+different documents**. Grouping here is a property of the register, not of the
+person.
+
+That is decisive rather than incidental. A locale is typically a system or user
+property — OS settings, `navigator.language`, `Accept-Language` — so no locale
+value can express "lakh style on the budget page, Western style on the physics
+page". `Intl.NumberFormat` takes the locale as an argument precisely so a
+caller can override the default per context, and only the caller knows which
+context it is in.
+
+So this library could not make the choice correctly even in principle. It is
+handed an integer and never learns whether it is a budget figure or a
+measurement.
 
 Same reasoning as [Prior art](#prior-art--learn-from-it-before-designing)
 below: do not reinvent CLDR by accident. Building this would mean owning
