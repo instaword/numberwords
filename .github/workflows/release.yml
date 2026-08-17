@@ -24,16 +24,20 @@ name: release
 # That is trusted publishing: PyPI verifies a short-lived OIDC token minted by
 # this workflow, so there is no API token to store, rotate or leak.
 #
-# The `pypi` environment carries no protection rules. Required reviewers need
-# a paid plan for a private repository, the same limit that keeps branch
-# protection advisory here -- see CONTRIBUTING.md. The environment still has
-# to exist and be named, because PyPI's trusted publisher is configured
-# against it and the OIDC claim is checked.
+# The `pypi` environment requires a reviewer: the publish job waits for a
+# human to approve the deployment before it runs. Until this repository went
+# public that rule was unavailable -- protection rules need a paid plan for a
+# private repo -- and the trigger carried the whole burden on its own.
 #
-# What actually keeps a release watched is the trigger: workflow_dispatch
-# cannot fire on its own, only someone with write access can start it, and
-# the version has to be typed and then matched against pyproject.toml. Add
-# the reviewer rule if this repository ever goes public or onto a paid plan.
+# The trigger still does most of the work, and would be enough by itself:
+# workflow_dispatch cannot fire on its own, only someone with write access can
+# start it, and the version has to be typed and then matched against
+# pyproject.toml. The reviewer rule adds a second pair of eyes between "someone
+# started a release" and "a version exists on PyPI forever".
+#
+# The environment also has to exist and be named regardless of its rules,
+# because PyPI's trusted publisher is configured against it and the OIDC claim
+# is checked.
 
 on:
   workflow_dispatch:
