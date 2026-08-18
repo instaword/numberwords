@@ -7,6 +7,12 @@ what is *absent* is asserted as deliberately as what is present.
 import numberwords
 import pytest
 
+# mizo.yaml's meta.supports.max, stated here rather than read from the
+# compiled artifact: these tests are an independent claim about what the
+# package must accept, so a spec edit that narrowed the range should fail
+# them rather than shrink them. Widen with the spec (#19).
+SUPPORTED_MAX = 199
+
 
 def test_public_names_are_exactly_the_three_agreed():
     assert sorted(numberwords.__all__) == [
@@ -26,7 +32,7 @@ def test_nothing_else_leaks_into_the_package_namespace():
 
 
 def test_version_is_declared():
-    assert numberwords.__version__ == "0.1.0"
+    assert numberwords.__version__ == "0.2.0"
 
 
 def test_it_converts_both_ways():
@@ -34,7 +40,7 @@ def test_it_converts_both_ways():
     assert numberwords.text_to_number("sawm nga pariat") == 58
 
 
-@pytest.mark.parametrize("n", [-1, 101, 1000])
+@pytest.mark.parametrize("n", [-1, SUPPORTED_MAX + 1, 1000])
 def test_out_of_range_raises(n):
     with pytest.raises(numberwords.NumberWordsError):
         numberwords.number_to_text(n)
@@ -71,7 +77,7 @@ def test_the_error_reports_the_public_module_in_a_traceback():
     # would notice the name being wrong.
     assert numberwords.NumberWordsError.__module__ == "numberwords"
     with pytest.raises(numberwords.NumberWordsError):
-        numberwords.number_to_text(101)
+        numberwords.number_to_text(SUPPORTED_MAX + 1)
 
 
 def test_the_error_is_a_valueerror():
@@ -79,10 +85,10 @@ def test_the_error_is_a_valueerror():
     # exception subclasses it rather than Exception.
     assert issubclass(numberwords.NumberWordsError, ValueError)
     with pytest.raises(ValueError):
-        numberwords.number_to_text(101)
+        numberwords.number_to_text(SUPPORTED_MAX + 1)
 
 
 def test_the_error_message_names_the_supported_range():
     # A bare "invalid value" tells a caller nothing about what to do next.
-    with pytest.raises(numberwords.NumberWordsError, match=r"\[0, 100\]"):
-        numberwords.number_to_text(101)
+    with pytest.raises(numberwords.NumberWordsError, match=r"\[0, %d\]" % SUPPORTED_MAX):
+        numberwords.number_to_text(SUPPORTED_MAX + 1)

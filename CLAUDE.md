@@ -122,7 +122,7 @@ docs/
 languages/
   en.yaml              Worked reference example (English, 0–99) — a real spec,
                        not a sketch: it loads, round-trips, and validates.
-  mizo.yaml            Mizo spec, 0–100. Numeral data verified by native
+  mizo.yaml            Mizo spec, 0–199. Numeral data verified by native
                        speakers; nothing marked TODO(verify).
 spec/
   spec.schema.json     Machine-checkable definition of the spec format.

@@ -166,6 +166,16 @@
           "items": { "type": "string", "minLength": 1 },
           "description": "Filler words dropped when parsing, e.g. Mizo 'leh'. A tolerance, not a claim about meaning."
         },
+        "connector_precedes": {
+          "type": "object",
+          "description": "Which lexicon fields begin a top-level addend, keyed by table -- equivalently, the positions a word from 'connectors' may idiomatically stand before. Mizo's 'leh' may precede a standalone unit or any scale form, but never the bound digit that multiplies a scale word, so 'sawm leh hnih' is not certified for 20. Read only when generating conformance vectors, to decide which spellings are certified as accepted input; the parser drops connectors wherever they fall and stays deliberately more tolerant than the certified set. Omit it when a language has no connectors, or when no connector position is idiomatic -- an absent section certifies none.",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
         "aliases": {
           "type": "object",
           "description": "Irregular spelling variants that normalisation flags cannot express, mapped variant -> canonical. Prefer a parse flag where one applies: a flag is one line and covers every word, an alias list grows per word.",

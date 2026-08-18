@@ -18,7 +18,7 @@ always emits the canonical spelling.
 
 ## Supported range
 
-Mizo (Lushai) **0–100**. Anything outside it raises `NumberWordsError`, which
+Mizo (Lushai) **0–199**. Anything outside it raises `NumberWordsError`, which
 subclasses `ValueError`. There is no language argument yet — adding one before
 a second language exists would mean guessing at its shape.
 

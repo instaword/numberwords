@@ -66,9 +66,9 @@ VECTORS_PATH = REPO_ROOT / "vectors" / "mizo.json"
 def numbers_to_cover(spec) -> list:
     """Which numbers get an entry in the vectors file.
 
-    Today: every number in the supported range, which is 0-100. #19 extends
-    that to 100-199 and it stays exhaustive. The policy agreed in #12 for
-    when it stops being exhaustive:
+    Today: every number in the supported range, which is 0-199 since #19,
+    and it stays exhaustive. The policy agreed in #12 for when it stops
+    being exhaustive:
 
     - Enumerate every number while the range is under roughly 1,000 entries.
       The threshold is arbitrary -- writing it down is the point, so that
@@ -102,10 +102,12 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
       never a rebuild of it (see _joiners);
     - one variant per applicable respelling feature, applied to the
       canonical output: case, diacritics, alternate word separator, and the
-      connector in the last gap when that gap is somewhere the connector can
-      go (see _last_gap_accepts_connector);
+      connector in each gap that is somewhere the connector can go and does
+      not already hold one (see _connector_slots);
     - one combined variant with every applicable respelling applied at once,
       when more than one applies;
+    - where the canonical output itself contains a connector, the spelling
+      with it dropped (see _without_connectors);
     - one plain variant per alternate template: each of the rule's
       parse_aliases, and, for a freestanding single digit, the other unit
       forms parse.accepted_forms allows.
@@ -115,15 +117,18 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
     names the feature that is broken. A cross product would report the same
     bug several dozen times and cost 18x the bytes for it.
 
-    Connector placement is the last gap only, per #10 and the #12 decision,
-    and only where that gap is a place "leh" can idiomatically go. The engine
-    drops "leh" in any gap by deliberate design, but that is engine
+    Connector placement is every gap where the connector idiomatically goes
+    -- before a top-level addend after the first -- and no others, per #10,
+    the #12 decision and Q-M on #27. Up to 99 that is one gap, which is why
+    this used to be expressed as "the last gap"; from 100 up a number can
+    have two, and "zâ leh sawm hnih leh pariat" (128) is idiomatic. The
+    engine drops "leh" in *any* gap by deliberate design, but that is engine
     tolerance, not a target contract: listing every-gap forms would promote
     the tolerance into a requirement every future target must implement, for
     a string a Mizo speaker reads as "10 and 5 and 8" rather than as 58.
-    Whatever #19 decides about where number_to_text() emits "leh" has to stay
-    consistent with this, since the canonical output must always appear in
-    accepted_inputs.
+    Since #19 the canonical output can itself contain the connector, so the
+    certified set also has to include the spelling with it dropped, and must
+    not add a second one to a gap that already has it.
 
     Word separators are handled the same way, and for the same reason. The
     literal text a template puts between its placeholders is not necessarily
@@ -151,7 +156,7 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
     (nuai za hnih for 10^5 x 200), and any scale may take any
     scale-multiplied expression as its multiplier, so the accepted spellings
     of one number stop being a list and become a grammar. Nothing to do about
-    it at 0-100, but whoever extends the range past that boundary will need
+    it at 0-199, but whoever extends the range past that boundary will need
     generation from parse features to become generation from a grammar. See
     #27 for the data and #12 for the discussion.
     """
@@ -162,8 +167,9 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
     canonical = _render(rule["output"], spec.lexicon, variables)
     canonical_words = _split_words(canonical, separators)
     canonical_joiner, alternates = _joiners(canonical, canonical_words, separators)
+    slots = _connector_slots(spec, rule, canonical_words)
     features = _applicable_respellings(
-        spec, canonical_words, _last_gap_accepts_connector(rule), alternates
+        spec, canonical_words, bool(slots), alternates
     )
 
     variants = set()
@@ -193,13 +199,21 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
         # re-joining would drop the one string this list must contain.
         variants.add(canonical)
         for feature in features:
-            gaps = _connector_gaps(spec, canonical_words, (feature,))
+            gaps = _connector_gaps(spec, canonical_words, (feature,), slots)
             joiner = alternates[0] if feature == "separator" else canonical_joiner
             variants.add(_respell(canonical_words, spec, (feature,), gaps, joiner))
         if len(features) > 1:
-            gaps = _connector_gaps(spec, canonical_words, features)
+            gaps = _connector_gaps(spec, canonical_words, features, slots)
             joiner = alternates[0] if "separator" in features else canonical_joiner
             variants.add(_respell(canonical_words, spec, features, gaps, joiner))
+        # The connector-dropped spelling. Confirmed for 108 by the repo owner
+        # (Q-D on #27) and across 111-199 by Rosie Malsawmtluangi (#19): where
+        # canonical output emits "leh", leaving it out is equally idiomatic.
+        # It only arises once a template carries a literal connector, so
+        # nothing below 100 produces one.
+        dropped = _without_connectors(spec, canonical_words)
+        if len(dropped) != len(canonical_words):
+            variants.add(canonical_joiner.join(dropped))
         for template in _alternate_templates(spec, rule):
             variants.add(_render(template, spec.lexicon, variables))
 
@@ -286,47 +300,86 @@ def _joiners(canonical: str, words, separators) -> tuple:
     return used, [s for s in separators if s != used]
 
 
-# The positional variable for the least significant digit, per
-# engine._positional_variables().
-_LEAST_SIGNIFICANT_POSITION = "ones_digit"
+def _template_tokens(spec, rule) -> list:
+    """The rule's output template split into word-sized tokens, in order.
 
-
-def _last_gap_accepts_connector(rule) -> bool:
-    """Whether this rule's last gap is somewhere a connector belongs.
-
-    Last-gap-only (#12) is well defined mechanically, but the last gap isn't
-    always the same kind of place, and exact_tens is the case that hadn't
-    come up when #12 was settled.
-
-    The linguistic fact, from the repo owner as a native speaker (#34):
-    "leh" is followed by a *standalone* unit form. teens and compound_tens
-    end in one, so "sâwm leh pakhat" (11) and "sawm nga leh pariat" (58) are
-    Mizo. exact_tens ends in a bound form, and "sawm leh hnih" is not a rival
-    reading of 20 -- it is meaningless. The string a speaker would use for
-    "10 and 2" is "sawm leh pahnih", which is teens' certified connector
-    variant for 12 and parses that way; whether it is one number or two is
-    the inter-number ambiguity #10 put out of scope by design.
-
-    So the certified set excludes exact_tens' only gap. The engine still
-    tolerates the string (#10), which is a different thing from blessing it
-    as a target contract.
-
-    Detected positionally -- does the final placeholder address the least
-    significant digit? -- rather than by checking whether its field is named
-    "standalone". Both select the same three rules today, and the positional
-    test is the one that doesn't hardcode Mizo's field names into
-    language-agnostic code, which is what #31 is about. Note that this makes
-    it a *proxy* for the standalone rule above, not a statement of it.
-
-    The proxy has a known expiry. #27 notes that positional variables don't
-    generalise past two digits, and #19 has to decide "leh" placement for
-    multi-scale numbers anyway; whoever does that revisits this.
+    Each token is either a whole placeholder or a literal word. Callers use
+    it to line template positions up with rendered words, so they must check
+    the two lists are the same length rather than zip them -- a lexicon
+    value containing a separator would break the correspondence silently.
     """
-    placeholders = _PLACEHOLDER_RE.findall(rule["output"])
-    if len(placeholders) < 2:
-        return False
-    _table, raw_key, _field = placeholders[-1]
-    return raw_key == _LEAST_SIGNIFICANT_POSITION
+    separators = spec.parse_config.get("word_separators", [" "])
+    pattern = "|".join(re.escape(sep) for sep in separators)
+    return [token for token in re.split(pattern, rule["output"]) if token]
+
+
+def _connector_slots(spec, rule, words) -> tuple:
+    """Which gaps between `words` a connector may idiomatically be added to.
+
+    Two independent questions, and #19 is the first range where they give
+    different answers, so they are now asked separately.
+
+    1. Is this gap a place a connector belongs? The linguistic fact, from
+       the repo owner as a native speaker (#34, and Q-E on #27): "leh"
+       precedes a *top-level addend*, never a bound digit inside one. So
+       "sâwm leh pakhat" (11) and "sawm nga leh pariat" (58) are Mizo, while
+       "sawm leh hnih" (20) and "zâ sawm leh thum" (130) are not -- the
+       trailing digit there multiplies the scale word rather than adding to
+       it. Confirmed for 100-199 by Rosie Malsawmtluangi (#19).
+
+       Declared, not inferred: parse.connector_precedes names the lexicon
+       fields that begin a top-level addend, and this function only looks
+       that declaration up. Inferring it here meant one of two bad options.
+       Keying off the field names "standalone"/"bound" would hardcode Mizo's
+       vocabulary into language-agnostic code, which is what #31 removed;
+       reading template positions was a proxy with a known expiry, since the
+       recursive multiplier at 10^9 gives "the next addend up" a shape no
+       positional test can see (#27). #19 retired the proxy rather than
+       widening it.
+
+    2. Is the gap still empty? From #19 the canonical output itself contains
+       "leh", because the output convention emits it before the final addend
+       (Q-M on #27). A gap whose neighbour is already a connector is spoken
+       for; adding another produces "zâ leh leh pariat", which is not Mizo
+       and which nothing downstream would catch -- the generator's own
+       parse-back check passes it, since _tokenize drops connectors however
+       many there are.
+
+    The certified set stays deliberately narrower than what the engine
+    tolerates (#12, #34): the engine drops a connector from any gap, so it
+    parses strings this never certifies. Nothing here decides that -- the
+    spec does, by naming only the fields a connector may precede.
+    """
+    connectors = {spec._normalize_word(c) for c in spec.parse_config.get("connectors", [])}
+    precedes = spec.parse_config.get("connector_precedes", {})
+    if not connectors or not precedes or len(words) < 2:
+        return ()
+
+    tokens = _template_tokens(spec, rule)
+    if len(tokens) != len(words):
+        # A placeholder rendered to something other than one word, so
+        # template position and word position no longer correspond. Say so
+        # instead of certifying gaps computed from a bad alignment.
+        raise ValueError(
+            "template/word mismatch for rule %r: %d tokens, %d words"
+            % (rule["name"], len(tokens), len(words))
+        )
+
+    slots = []
+    for i in range(len(words) - 1):
+        placeholder = _PLACEHOLDER_RE.fullmatch(tokens[i + 1])
+        if placeholder is None:
+            continue                      # a literal follows; not an addend boundary
+        table, _raw_key, field = placeholder.groups()
+        # The spec says which forms begin an addend; a form it does not name
+        # is a digit bound to the scale word before it, which a connector
+        # must not split.
+        if field not in precedes.get(table, ()):
+            continue
+        if any(spec._normalize_word(w) in connectors for w in (words[i], words[i + 1])):
+            continue                      # gap already holds a connector
+        slots.append(i)
+    return tuple(slots)
 
 
 def _respell(words, spec, features, connector_gaps, joiner) -> str:
@@ -355,17 +408,25 @@ def _respell(words, spec, features, connector_gaps, joiner) -> str:
     return joiner.join(out)
 
 
-def _connector_gaps(spec, words, features, every_gap: bool = False) -> tuple:
+def _without_connectors(spec, words) -> list:
+    """`words` with any connector word removed."""
+    connectors = {spec._normalize_word(c) for c in spec.parse_config.get("connectors", [])}
+    return [w for w in words if spec._normalize_word(w) not in connectors]
+
+
+def _connector_gaps(spec, words, features, slots=(), every_gap: bool = False) -> tuple:
     """Which gaps between words the connector may be inserted into.
 
-    The last gap only, unless every_gap -- see accepted_inputs() for why the
-    certified set is narrower than what the engine tolerates.
+    `slots` comes from _connector_slots() -- the gaps that are both a place
+    a connector belongs and not already occupied by one. Unless every_gap,
+    which ignores the question and returns them all; see accepted_inputs()
+    for why the certified set is narrower than what the engine tolerates.
     """
     if "connector" not in features or not spec.parse_config.get("connectors") or len(words) < 2:
         return ()
     if every_gap:
         return tuple(range(len(words) - 1))
-    return (len(words) - 2,)
+    return tuple(slots)
 
 
 def _all_renderings(spec, rule, variables, separators) -> list:

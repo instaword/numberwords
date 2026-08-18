@@ -106,13 +106,18 @@ jobs:
       - name: Install it in a clean environment and use it
         working-directory: packages/python
         run: |
+          # Read the expected version out of pyproject rather than repeating
+          # it here, the same way release.yml checks it. A hardcoded copy is
+          # one more place a version bump has to be remembered, and this job
+          # is the one that notices last.
+          expected=$(grep -m1 '^version = ' pyproject.toml | cut -d'"' -f2)
           python -m venv /tmp/smoke
           /tmp/smoke/bin/pip install dist/*.whl
           cd /tmp
           /tmp/smoke/bin/python -c "
           import pathlib
           import numberwords
-          assert numberwords.__version__ == '0.1.0', numberwords.__version__
+          assert numberwords.__version__ == '$expected', numberwords.__version__
           assert numberwords.number_to_text(58) == 'sawm nga pariat'
           assert numberwords.text_to_number('sawm nga pariat') == 58
           installed = pathlib.Path(numberwords.__file__).parent
