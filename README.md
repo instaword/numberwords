@@ -35,10 +35,11 @@ reservation that exports nothing.
 
 ## Status
 
-`numberwords` 0.1.0 is on PyPI, released from CI against the checked-in
-conformance vectors. It exports `number_to_text`, `text_to_number` and
-`NumberWordsError`, and passes those vectors in both directions for Mizo 0–100.
-The npm target is still a name reservation.
+`numberwords` 0.1.0 is on PyPI, released from CI against the conformance
+vectors as they stood at that release. It exports `number_to_text`,
+`text_to_number` and `NumberWordsError`, and handles Mizo 0–100 in both
+directions. The checked-in vectors now cover 0–199; that range reaches PyPI
+with the next release. The npm target is still a name reservation.
 
 Next is the range: Mizo's scale ladder runs to 10⁹, and reaching it needs the
 spec format to grow a recursive placeholder and to stop hardcoding two

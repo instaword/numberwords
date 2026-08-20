@@ -180,7 +180,7 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
         # is not a claim about which strings are Mizo -- it is a check that
         # the engine's tolerances genuinely compose.
         for words in _all_renderings(spec, rule, variables, separators):
-            available = _connector_gaps(spec, words, ("connector",), every_gap=True)
+            available = _connector_gaps(spec, words, ("connector",), (), every_gap=True)
             # Connector and separator are varied explicitly here -- by gap and
             # by joiner -- so neither is also varied as a respelling feature,
             # which would generate every string twice.
@@ -313,6 +313,11 @@ def _template_tokens(spec, rule) -> list:
     return [token for token in re.split(pattern, rule["output"]) if token]
 
 
+def _connectors(spec) -> set:
+    """The spec's connector words, normalised, as a set."""
+    return {spec._normalize_word(c) for c in spec.parse_config.get("connectors", [])}
+
+
 def _connector_slots(spec, rule, words) -> tuple:
     """Which gaps between `words` a connector may idiomatically be added to.
 
@@ -350,7 +355,7 @@ def _connector_slots(spec, rule, words) -> tuple:
     parses strings this never certifies. Nothing here decides that -- the
     spec does, by naming only the fields a connector may precede.
     """
-    connectors = {spec._normalize_word(c) for c in spec.parse_config.get("connectors", [])}
+    connectors = _connectors(spec)
     precedes = spec.parse_config.get("connector_precedes", {})
     if not connectors or not precedes or len(words) < 2:
         return ()
@@ -376,6 +381,12 @@ def _connector_slots(spec, rule, words) -> tuple:
         # must not split.
         if field not in precedes.get(table, ()):
             continue
+        # Only words[i] can hit on today's data: the loop has already
+        # established that tokens[i + 1] is a placeholder, so words[i + 1] is a
+        # rendered lexicon value, and no entry in either spec is spelled like a
+        # connector. The forward half is kept deliberately -- a language may
+        # well name a numeral the way it names its connector, and skipping that
+        # gap is the right answer there too.
         if any(spec._normalize_word(w) in connectors for w in (words[i], words[i + 1])):
             continue                      # gap already holds a connector
         slots.append(i)
@@ -410,17 +421,22 @@ def _respell(words, spec, features, connector_gaps, joiner) -> str:
 
 def _without_connectors(spec, words) -> list:
     """`words` with any connector word removed."""
-    connectors = {spec._normalize_word(c) for c in spec.parse_config.get("connectors", [])}
+    connectors = _connectors(spec)
     return [w for w in words if spec._normalize_word(w) not in connectors]
 
 
-def _connector_gaps(spec, words, features, slots=(), every_gap: bool = False) -> tuple:
+def _connector_gaps(spec, words, features, slots, every_gap: bool = False) -> tuple:
     """Which gaps between words the connector may be inserted into.
 
     `slots` comes from _connector_slots() -- the gaps that are both a place
     a connector belongs and not already occupied by one. Unless every_gap,
     which ignores the question and returns them all; see accepted_inputs()
     for why the certified set is narrower than what the engine tolerates.
+
+    `slots` is required rather than defaulted. It used to default to (), so a
+    caller who forgot it silently certified *fewer* spellings than it meant to
+    -- a quiet under-generation rather than an error. The every_gap caller
+    passes () explicitly, because that path ignores slots by design.
     """
     if "connector" not in features or not spec.parse_config.get("connectors") or len(words) < 2:
         return ()

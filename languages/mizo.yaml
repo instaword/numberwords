@@ -114,6 +114,14 @@ grammar:
     # template, so it renders on output and is transparently ignored on
     # input -- see parse.connectors below.
     #
+    # Below 100 none is emitted, and that asymmetry is a choice about
+    # canonical output rather than a claim about the language: "sâwm leh
+    # pakhat" (11) is as idiomatic as "sâwm pakhat" and is accepted, but
+    # number_to_text has to pick one spelling per number and Q-M sets the
+    # threshold at 100. Where the two are equivalent is the parse side --
+    # see parse.connector_precedes below. (The circumflex stays either way:
+    # the digit adds to the scale word rather than multiplying it.)
+    #
     # No hundreds_digit variable is needed here. _find_rule selects a rule
     # only when its `range` and its condition both pass, so 118 selects
     # hundred_teens and 18 selects teens even though their positional

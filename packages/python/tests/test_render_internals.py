@@ -173,9 +173,14 @@ def test_a_bound_form_is_rejected_as_the_final_addend():
 
 def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth():
     # Q-K on #27, as revised: scale words multiply each other from 10^5 up
-    # only. Under the withdrawn "every scale" reading "za sawm hnih" would
-    # have been 120 and 10^2 x 20 = 2,000 at once. Same reason as above --
-    # only a rejection test can pin the boundary.
+    # only, so "za sawm hnih" is 120 and not also 10^2 x 20 = 2,000.
+    #
+    # Unlike the test above, this one cannot currently fail for the reason it
+    # describes: parsing searches only the supported range, so at 0-199 the
+    # rival reading 2,000 is never a candidate. It pins the narrower fact that
+    # no other number in range accepts the string, plus 120's canonical form.
+    # Labelled rather than deleted (#36): it goes live when the range passes
+    # 2,000, which is when #27's stacking rule lands.
     assert numberwords.text_to_number("za sawm hnih") == 120
     assert numberwords.number_to_text(120) == "zâ leh sawm hnih"
 

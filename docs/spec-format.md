@@ -162,14 +162,16 @@ something has to say *where* a connector idiomatically stands. That is a fact
 about the language, so the spec states it rather than the vector generator
 inferring it from the shape of a template: the section maps a lexicon table to
 the fields that begin a **top-level addend**. Mizo's
-`{ units: [standalone], scales: [standalone, multiplied] }` is what certifies
-`sâwm leh pakhat` for 11 and `zâ leh sawm hnih leh pariat` for 128 — both
-spellings the generator produces by inserting `leh` into a gap — while refusing
-`sawm leh hnih` for 20, where the trailing digit multiplies the scale word
-rather than adding to it. (A `leh` written into a rule's own template, as
-120's `zâ leh sawm hnih` has, is canonical output and does not go through
-this.) Omit the section and no connector spelling is certified; a language
-with no connector has nothing to declare.
+`{ units: [standalone], scales: [standalone, multiplied] }` has one entry per
+position the generator may insert `leh` into: `units.standalone` certifies
+`sâwm leh pakhat` for 11, `scales.standalone` certifies `zâ leh sâwm leh
+pariat` for 118, and `scales.multiplied` certifies `zâ leh sawm hnih leh
+pariat` for 128. What all three refuse is `sawm leh hnih` for 20, where the
+trailing digit multiplies the scale word rather than adding to it. (A `leh`
+written into a rule's own template, as 120's `zâ leh sawm hnih` has, is
+canonical output and does not go through this.) Omit the section and no
+connector spelling is certified; a language with no connector has nothing to
+declare.
 
 The engine stays deliberately more tolerant than the certified set — it drops
 connectors from any gap, so it parses strings the vectors never bless. That

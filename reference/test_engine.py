@@ -280,6 +280,31 @@ def test_the_two_connector_spelling_is_certified(spec, vectors):
     # could not have been tested before now.
     vector = next(v for v in vectors if v["number"] == "128")
     assert "zâ leh sawm hnih leh pariat" in vector["accepted_inputs"]
+    # 128 exercises connector_precedes' scales.multiplied entry. 118 is the
+    # other half -- a standalone scale form heading an addend -- and it is the
+    # only slot scales.standalone enables, every other scale gap already
+    # holding the canonical "leh". Without this assertion, dropping that field
+    # passes the entire suite and only the CI drift check notices. Form and
+    # gap both confirmed by the repo owner in review of #50.
+    vector = next(v for v in vectors if v["number"] == "118")
+    assert "zâ leh sâwm leh pariat" in vector["accepted_inputs"]
+
+
+@pytest.mark.parametrize("n", range(0, SUPPORTED_MAX + 1))
+def test_canonical_emits_the_connector_exactly_once_above_the_first_scale(spec, n):
+    # The output convention (#19): "leh" is emitted once and only once,
+    # immediately before the final addend -- the last unit, or the smallest
+    # scale word when the last digit is 0. Below 100 it is not emitted at all,
+    # though it is still *accepted* ("sâwm leh pakhat" for 11): that asymmetry
+    # is deliberate, which is why this counts rather than bans.
+    #
+    # A property over the range, not a vectors lookup, because this is the
+    # invariant #27 must preserve as the range grows -- 10100 is
+    # "sîng khat leh zâ": one connector, same position, one magnitude up.
+    connector = spec._normalize_word(spec.parse_config["connectors"][0])
+    text = spec.number_to_text(n)
+    words = [spec._normalize_word(w) for w in text.split()]
+    assert words.count(connector) == (1 if n > 100 else 0), text
 
 
 def test_a_bound_form_is_rejected_as_the_final_addend(spec):
@@ -294,10 +319,19 @@ def test_a_bound_form_is_rejected_as_the_final_addend(spec):
 
 def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
     # Q-K on #27, as revised: scale words multiply each other from 10^5 up
-    # only. Under the withdrawn "accepted at every scale" version
-    # "za sawm hnih" would have read as both 120 and 10^2 x 20 = 2,000, and
-    # 120 would have stopped round-tripping inside this range with no
-    # obvious cause. It is 120 and nothing else.
+    # only, so "za sawm hnih" is 120 and not also 10^2 x 20 = 2,000.
+    #
+    # This cannot currently fail for that reason, and saying so is the point.
+    # text_to_number brute-forces range(supports.min, supports.max + 1), so at
+    # supports.max = 199 the rival reading 2,000 is never a candidate and no
+    # stacking rule could make it one. What the assertions actually pin is
+    # narrower: that no *other* number in 0-199 accepts "za sawm hnih", and
+    # that 120's canonical spelling is what it should be.
+    #
+    # Kept rather than deleted, on the #36 precedent -- an invariant can be
+    # correct and inert, and the honest move is to document the limit instead
+    # of implying coverage. It becomes load-bearing the moment supports.max
+    # passes 2,000, which is when #27's stacking rule arrives.
     assert spec.text_to_number("za sawm hnih") == 120
     assert spec.number_to_text(120) == "zâ leh sawm hnih"
 
