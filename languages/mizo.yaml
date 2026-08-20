@@ -27,9 +27,11 @@
 meta:
   language: Mizo
   code: lus           # ISO 639-3 for Lushai/Mizo.
-  version: 0.2.0      # 0.2.0: accepted_forms now names the table and fields
+  version: 0.3.0      # 0.3.0: supports.max raised to 199, and parse gained
+                      # connector_precedes (#19).
+                      # 0.2.0: accepted_forms now names the table and fields
                       # it applies to, instead of Mizo-specific flags (#31).
-  supports: { min: 0, max: 100 }   # Start small (0–100). Extend once round-trip holds.
+  supports: { min: 0, max: 199 }   # 0–199 (#19). Eventually 10^18-1, see #27.
   orthography: missionary   # The writing system used by this spec. The
                             # diacritics depend on it, so a different writing
                             # system would change them throughout the lexicon.
@@ -38,6 +40,8 @@ meta:
     - "Diacritics and missionary orthography confirmed by the repo owner,
        a native Mizo speaker (#15). The earlier review checked the words
        without diacritics; this review confirms the spelling."
+    - "The 101-199 forms, and where 'leh' may sit, confirmed by Rosie
+       Malsawmtluangi and the repo owner, both native Mizo speakers (#19)."
 
 lexicon:
   units:               # 0–9. standalone = used alone; bound = used after a scale word (e.g. "sawm").
@@ -104,6 +108,50 @@ grammar:
       range: [100, 100]
       output: "{scales[100].standalone}"
 
+    # 101-199. Decision (#19, from Q-M on #27): "leh" is emitted before the
+    # final addend and nowhere else, for every n >= 100. One rule, not the
+    # per-band table the issue first proposed. It is a literal in the
+    # template, so it renders on output and is transparently ignored on
+    # input -- see parse.connectors below.
+    #
+    # Below 100 none is emitted, and that asymmetry is a choice about
+    # canonical output rather than a claim about the language: "sâwm leh
+    # pakhat" (11) is as idiomatic as "sâwm pakhat" and is accepted, but
+    # number_to_text has to pick one spelling per number and Q-M sets the
+    # threshold at 100. Where the two are equivalent is the parse side --
+    # see parse.connector_precedes below. (The circumflex stays either way:
+    # the digit adds to the scale word rather than multiplying it.)
+    #
+    # No hundreds_digit variable is needed here. _find_rule selects a rule
+    # only when its `range` and its condition both pass, so 118 selects
+    # hundred_teens and 18 selects teens even though their positional
+    # variables are identical; the range does the work a variable would.
+    # The hundreds digit is also always 1 across this range, so no rule ever
+    # reads its value. A hundreds_digit becomes necessary at 200, where that
+    # digit multiplies ("za hnih") and a rule has to read it.
+
+    - name: hundred_units            # zâ leh pakhat, … zâ leh pakua
+      range: [101, 109]
+      output: "{scales[100].standalone} leh {units[ones_digit].standalone}"
+
+    - name: hundred_ten              # zâ leh sâwm -- 10 not multiplied
+      range: [110, 110]
+      output: "{scales[100].standalone} leh {scales[10].standalone}"
+
+    - name: hundred_teens            # zâ sâwm leh pariat (digit adds to sâwm)
+      range: [111, 119]
+      output: "{scales[100].standalone} {scales[10].standalone} leh {units[ones_digit].standalone}"
+
+    - name: hundred_exact_tens       # zâ leh sawm thum -- no addend after the tens
+      range: [120, 199]
+      condition: "ones_digit == 0"
+      output: "{scales[100].standalone} leh {scales[10].multiplied} {units[tens_digit].bound}"
+
+    - name: hundred_compound_tens    # zâ sawm hnih leh pariat
+      range: [121, 199]
+      condition: "ones_digit > 0"
+      output: "{scales[100].standalone} {scales[10].multiplied} {units[tens_digit].bound} leh {units[ones_digit].standalone}"
+
 parse:
   case_insensitive: true
   strip_diacritics: true   # Decision (#15): accept input typed without
@@ -121,8 +169,18 @@ parse:
   # it is a fact about ambiguity, not about Mizo.
   accepted_forms: { units: [bound] }
   connectors: ["leh"]      # Decision (#10): genuinely ambiguous connector; disambiguating it is out of scope by design -- see file header above.
+  # Decision (#19): where that connector may idiomatically stand -- immediately
+  # before a *top-level addend*, and never before a digit bound to the scale
+  # word it multiplies. So "sâwm leh pakhat" (11) and "zâ leh sawm hnih" (120)
+  # are Mizo, while "sawm leh hnih" (20) and "zâ sawm leh thum" (130) are not.
+  # Named by lexicon field, like accepted_forms above, so the fact lives in the
+  # spec instead of being inferred from template shape by the vector generator.
+  # Only vector generation reads this: the parser drops connectors wherever
+  # they fall and stays deliberately more tolerant than the certified set
+  # (#12, #34).
+  connector_precedes: { units: [standalone], scales: [standalone, multiplied] }
   aliases: {}   # Decision (#15): no non-diacritic spelling variants among the
-                # numerals in this spec's 0-100 range (confirmed by native
+                # numerals in this spec's 0-199 range (confirmed by native
                 # speaker). Diacritics are handled by strip_diacritics above.
                 #
                 # This is NOT true of Mizo generally, so don't read it as a
@@ -146,4 +204,10 @@ examples:
   - { number: 30, text: "sawm thum" }
   - { number: 58, text: "sawm nga pariat" }
   - { number: 100, text: "zâ" }
+  - { number: 108, text: "zâ leh pariat" }
+  - { number: 110, text: "zâ leh sâwm" }
+  - { number: 118, text: "zâ sâwm leh pariat" }
+  - { number: 120, text: "zâ leh sawm hnih" }
+  - { number: 128, text: "zâ sawm hnih leh pariat" }
+  - { number: 199, text: "zâ sawm kua leh pakua" }
 

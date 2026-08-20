@@ -103,6 +103,9 @@ parse:
   case_insensitive: true
   word_separators: [" ", "-"]   # "forty-two" and "forty two" both parse.
   connectors: ["and"]           # ignorable filler when parsing.
+  # No connector_precedes: this spec stops at 99 and no rule in that range
+  # emits "and" ("one hundred and five" starts at 100), so there is no
+  # connector position to certify yet. See docs/spec-format.md.
   # No accepted_forms: English units have exactly one field, `word`, so
   # there is no alternate form to accept. A spec that declares nothing gets
   # exact matching.

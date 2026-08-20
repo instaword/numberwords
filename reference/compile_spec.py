@@ -77,12 +77,11 @@ def _parse_template(template):
 # Compiling conditions means there are two places that define how a
 # condition works: engine._eval_node and the compiled lambda below.
 # What keeps them in sync today is vectors/mizo.json. It covers every
-# number from 0 to 100, so every compiled condition is tested against
-# every possible input.
-# This is still true when #19 extends the range to 100-199. Once the
-# range grows beyond that, the vectors will no longer test every case,
-# so this should have its own property test instead of relying only on
-# the vectors.
+# number from 0 to 199, so every compiled condition is tested against
+# every possible input. That held before #19 at 0-100 and still holds
+# now the range is 0-199. Once the range grows beyond that, the vectors
+# will no longer test every case, so this should have its own property
+# test instead of relying only on the vectors.
 
 
 def _validate_condition(node):

@@ -55,6 +55,30 @@ to convert numbers ↔ text, and nothing runtime-specific.
 The **worked example is English**, chosen because its correctness is easy for
 any reviewer to check. Mizo is modelled the same way in `languages/mizo.yaml`.
 
+## Versioning a spec
+
+`meta.version` belongs to the spec file, and it tracks what a *consumer* of
+that file would have to notice. Bump it when:
+
+- **the file's shape changes** — a section added or renamed, a new field, or a
+  different structure for an existing one. `accepted_forms` becoming
+  `{ table: [fields] }` took Mizo to 0.2.0 (#31), and `connector_precedes`
+  arriving took it to 0.3.0 (#19).
+- **`meta.supports` changes.** The range is the one thing a consumer cannot
+  discover without loading the spec and probing it, so widening it is a visible
+  change even though no structure moved. Raising Mizo to 199 is part of the
+  same 0.3.0 (#19).
+
+Do **not** bump it for numeral data that leaves both the shape and the range
+alone — correcting a lexicon entry, or adding an example, when nothing else
+moved (#18). Those change what the spec says, not what a consumer has to
+handle. Such edits riding along with a change that does bump, as #19's six new
+examples do, is not a reason to bump twice.
+
+Versions are per file and do not track each other: `en.yaml` and `mizo.yaml`
+move independently. Neither is the version of a *package* that compiles a spec
+— `packages/python` versions the artifact it ships, on its own schedule.
+
 ## Worked example (English, 0–99)
 
 **The example lives in [`languages/en.yaml`](../languages/en.yaml). Read it
@@ -131,8 +155,31 @@ template would let `sawm hnih` (20) also match `teens`' ones-digit slot for 12
 — genuine ambiguity, not an alternate spelling. It is a fact about when a
 phrase is ambiguous, not about any one language.
 
+`parse.connector_precedes` is the other half of `connectors`. Dropping a
+connector when parsing is a tolerance the engine applies in every gap, but the
+conformance vectors certify only spellings a speaker would actually use, so
+something has to say *where* a connector idiomatically stands. That is a fact
+about the language, so the spec states it rather than the vector generator
+inferring it from the shape of a template: the section maps a lexicon table to
+the fields that begin a **top-level addend**. Mizo's
+`{ units: [standalone], scales: [standalone, multiplied] }` has one entry per
+position the generator may insert `leh` into: `units.standalone` certifies
+`sâwm leh pakhat` for 11, `scales.standalone` certifies `zâ leh sâwm leh
+pariat` for 118, and `scales.multiplied` certifies `zâ leh sawm hnih leh
+pariat` for 128. What all three refuse is `sawm leh hnih` for 20, where the
+trailing digit multiplies the scale word rather than adding to it. (A `leh`
+written into a rule's own template, as 120's `zâ leh sawm hnih` has, is
+canonical output and does not go through this.) Omit the section and no
+connector spelling is certified; a language with no connector has nothing to
+declare.
+
+The engine stays deliberately more tolerant than the certified set — it drops
+connectors from any gap, so it parses strings the vectors never bless. That
+asymmetry is intended (#12, #34): the vectors are a floor every target must
+reach, not a ceiling.
+
 The current `text → number` implementation brute-forces the supported range and
-match-tests each candidate. That is honest at 0–100 and won't survive a larger
+match-tests each candidate. That is honest at 0–199 and won't survive a larger
 range — see the note in `reference/engine.py`, and #27, which establishes that
 Mizo needs genuine evaluation rather than template matching.
 

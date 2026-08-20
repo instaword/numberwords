@@ -16,11 +16,11 @@ import pytest
 
 import numberwords
 
-# The generated table for Mizo 0-100. Asserted rather than assumed: an
+# The generated table for Mizo 0-199. Asserted rather than assumed: an
 # empty or truncated vectors file would otherwise make every parametrised
 # test below pass by having nothing to run.
-EXPECTED_VECTORS = 101
-EXPECTED_ACCEPTED_INPUTS = 555
+EXPECTED_VECTORS = 200
+EXPECTED_ACCEPTED_INPUTS = 1230
 
 
 def test_the_vector_table_is_the_size_it_should_be(vectors):

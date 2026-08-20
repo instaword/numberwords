@@ -6,8 +6,8 @@ reference/ and commit the result.
 
 LANGUAGE = 'Mizo'
 CODE = 'lus'
-SPEC_VERSION = '0.2.0'
-SUPPORTS = (0, 100)
+SPEC_VERSION = '0.3.0'
+SUPPORTS = (0, 199)
 
 LEXICON = {
     'scales': {
@@ -69,6 +69,41 @@ RULES = (
         'range': (100, 100),
         'condition': None,
         'output': (('scales', 100, 'standalone'),),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundred_units',
+        'range': (101, 109),
+        'condition': None,
+        'output': (('scales', 100, 'standalone'), ' leh ', ('units', 'ones_digit', 'standalone')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundred_ten',
+        'range': (110, 110),
+        'condition': None,
+        'output': (('scales', 100, 'standalone'), ' leh ', ('scales', 10, 'standalone')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundred_teens',
+        'range': (111, 119),
+        'condition': None,
+        'output': (('scales', 100, 'standalone'), ' ', ('scales', 10, 'standalone'), ' leh ', ('units', 'ones_digit', 'standalone')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundred_exact_tens',
+        'range': (120, 199),
+        'condition': lambda variables: variables['ones_digit'] == 0,
+        'output': (('scales', 100, 'standalone'), ' leh ', ('scales', 10, 'multiplied'), ' ', ('units', 'tens_digit', 'bound')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundred_compound_tens',
+        'range': (121, 199),
+        'condition': lambda variables: variables['ones_digit'] > 0,
+        'output': (('scales', 100, 'standalone'), ' ', ('scales', 10, 'multiplied'), ' ', ('units', 'tens_digit', 'bound'), ' leh ', ('units', 'ones_digit', 'standalone')),
         'parse_aliases': (),
     },
 )

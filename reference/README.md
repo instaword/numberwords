@@ -132,35 +132,37 @@ cross product, which is 18× the bytes and reports the same bug several dozen
 times over. One representative per feature means a failure names its own
 cause.
 
-The connector goes in the **last gap only, and only where `leh` idiomatically
-goes**. The engine drops `leh` anywhere, by deliberate design
-(`# Decision (#10)`), but that is engine *tolerance*, not a target contract —
-listing every-gap forms would promote it into a requirement every future
-target has to implement.
+The connector goes **only where `leh` idiomatically goes**. The engine drops
+`leh` anywhere, by deliberate design (`# Decision (#10)`), but that is engine
+*tolerance*, not a target contract — listing every-gap forms would promote it
+into a requirement every future target has to implement.
 
-Last-gap-only needs one qualification, because the last gap isn't always the
-same kind of place. The linguistic fact, from the repo owner as a native
-speaker (#34): **`leh` is followed by a standalone unit form.** `teens` and
-`compound_tens` end in one — `sâwm leh pakhat` (11), `sawm nga leh pariat`
-(58) — so their last gap takes the connector. `exact_tens` ends in a bound
-form, and `sawm leh hnih` is not a competing reading of 20; it is
-meaningless. Those variants are not generated.
+Where it idiomatically goes is a linguistic fact, from the repo owner and
+Rosie Malsawmtluangi as native speakers (#34, Q-E on #27, and #19): **`leh`
+precedes a top-level addend**, never a digit bound to the scale word it
+multiplies. `teens` and `compound_tens` end in an addend — `sâwm leh pakhat`
+(11), `sawm nga leh pariat` (58) — so their last gap takes the connector.
+`exact_tens` ends in a bound form, and `sawm leh hnih` is not a competing
+reading of 20; it is meaningless. Those variants are not generated.
 
-Nothing real is lost by excluding them. The string a speaker would use for
-"10 and 2" is `sawm leh pahnih`, which is `teens`' connector variant for 12
-and is certified there. Whether that phrase is one number or two is the
+Until #19 that was describable as "the last gap", because below 100 no number
+has two top-level addends. From 100 up they do: 128 is `zâ` + `sawm hnih` +
+`pariat`, so `leh` may precede either of the last two and `zâ leh sawm hnih
+leh pariat` is certified alongside the canonical form. Canonical output still
+emits `leh` before the final addend and nowhere else.
+
+Nothing real is lost by excluding the rest. The string a speaker would use
+for "10 and 2" is `sawm leh pahnih`, which is `teens`' connector variant for
+12 and is certified there. Whether that phrase is one number or two is the
 inter-number ambiguity `# Decision (#10)` deliberately puts out of scope.
 
-The generator detects this **positionally** — does the final placeholder
-address the least significant digit? — rather than by looking for the field
-name `standalone`, since field names are Mizo's and hardcoding them in
-language-agnostic code is what #31 is about. Both select the same three rules
-today, which makes the positional test a *proxy* for the standalone rule
-rather than a statement of it;
-`test_certified_connectors_are_followed_by_a_standalone_form` is what would
-notice them coming apart. The proxy has a known expiry regardless — #27 notes
-positional variables don't generalise past two digits, and #19 has to settle
-`leh` placement for multi-scale numbers anyway.
+The generator infers none of this. `parse.connector_precedes` names the
+lexicon fields that begin a top-level addend and `_connector_slots` looks it
+up, so the fact lives in the spec and language-agnostic code never mentions
+Mizo's field names — which is what #31 is about.
+`test_certified_connectors_are_followed_by_a_top_level_addend` rebuilds the
+addend set from the lexicon instead of reading that declaration, so it checks
+the spec rather than trusting it.
 
 One related trap, since it bit the first version: an entry's canonical
 spelling is taken from the renderer verbatim, never rebuilt by re-joining its

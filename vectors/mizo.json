@@ -1159,5 +1159,1274 @@
       "za",
       "zâ"
     ]
+  },
+  {
+    "number": "101",
+    "text": "zâ leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-PAKHAT",
+      "ZÂ LEH PAKHAT",
+      "za leh pakhat",
+      "zâ leh pakhat",
+      "zâ pakhat",
+      "zâ-leh-pakhat"
+    ]
+  },
+  {
+    "number": "102",
+    "text": "zâ leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-PAHNIH",
+      "ZÂ LEH PAHNIH",
+      "za leh pahnih",
+      "zâ leh pahnih",
+      "zâ pahnih",
+      "zâ-leh-pahnih"
+    ]
+  },
+  {
+    "number": "103",
+    "text": "zâ leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-PATHUM",
+      "ZÂ LEH PATHUM",
+      "za leh pathum",
+      "zâ leh pathum",
+      "zâ pathum",
+      "zâ-leh-pathum"
+    ]
+  },
+  {
+    "number": "104",
+    "text": "zâ leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-PALI",
+      "ZÂ LEH PALI",
+      "za leh pali",
+      "zâ leh pali",
+      "zâ pali",
+      "zâ-leh-pali"
+    ]
+  },
+  {
+    "number": "105",
+    "text": "zâ leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-PANGA",
+      "ZÂ LEH PANGA",
+      "za leh panga",
+      "zâ leh panga",
+      "zâ panga",
+      "zâ-leh-panga"
+    ]
+  },
+  {
+    "number": "106",
+    "text": "zâ leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-PARUK",
+      "ZÂ LEH PARUK",
+      "za leh paruk",
+      "zâ leh paruk",
+      "zâ paruk",
+      "zâ-leh-paruk"
+    ]
+  },
+  {
+    "number": "107",
+    "text": "zâ leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-PASARIH",
+      "ZÂ LEH PASARIH",
+      "za leh pasarih",
+      "zâ leh pasarih",
+      "zâ pasarih",
+      "zâ-leh-pasarih"
+    ]
+  },
+  {
+    "number": "108",
+    "text": "zâ leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-PARIAT",
+      "ZÂ LEH PARIAT",
+      "za leh pariat",
+      "zâ leh pariat",
+      "zâ pariat",
+      "zâ-leh-pariat"
+    ]
+  },
+  {
+    "number": "109",
+    "text": "zâ leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-PAKUA",
+      "ZÂ LEH PAKUA",
+      "za leh pakua",
+      "zâ leh pakua",
+      "zâ pakua",
+      "zâ-leh-pakua"
+    ]
+  },
+  {
+    "number": "110",
+    "text": "zâ leh sâwm",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM",
+      "ZÂ LEH SÂWM",
+      "za leh sawm",
+      "zâ leh sâwm",
+      "zâ sâwm",
+      "zâ-leh-sâwm"
+    ]
+  },
+  {
+    "number": "111",
+    "text": "zâ sâwm leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LEH-PAKHAT",
+      "ZÂ SÂWM LEH PAKHAT",
+      "za sawm leh pakhat",
+      "zâ leh sâwm leh pakhat",
+      "zâ sâwm leh pakhat",
+      "zâ sâwm pakhat",
+      "zâ-sâwm-leh-pakhat"
+    ]
+  },
+  {
+    "number": "112",
+    "text": "zâ sâwm leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LEH-PAHNIH",
+      "ZÂ SÂWM LEH PAHNIH",
+      "za sawm leh pahnih",
+      "zâ leh sâwm leh pahnih",
+      "zâ sâwm leh pahnih",
+      "zâ sâwm pahnih",
+      "zâ-sâwm-leh-pahnih"
+    ]
+  },
+  {
+    "number": "113",
+    "text": "zâ sâwm leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LEH-PATHUM",
+      "ZÂ SÂWM LEH PATHUM",
+      "za sawm leh pathum",
+      "zâ leh sâwm leh pathum",
+      "zâ sâwm leh pathum",
+      "zâ sâwm pathum",
+      "zâ-sâwm-leh-pathum"
+    ]
+  },
+  {
+    "number": "114",
+    "text": "zâ sâwm leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LEH-PALI",
+      "ZÂ SÂWM LEH PALI",
+      "za sawm leh pali",
+      "zâ leh sâwm leh pali",
+      "zâ sâwm leh pali",
+      "zâ sâwm pali",
+      "zâ-sâwm-leh-pali"
+    ]
+  },
+  {
+    "number": "115",
+    "text": "zâ sâwm leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LEH-PANGA",
+      "ZÂ SÂWM LEH PANGA",
+      "za sawm leh panga",
+      "zâ leh sâwm leh panga",
+      "zâ sâwm leh panga",
+      "zâ sâwm panga",
+      "zâ-sâwm-leh-panga"
+    ]
+  },
+  {
+    "number": "116",
+    "text": "zâ sâwm leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LEH-PARUK",
+      "ZÂ SÂWM LEH PARUK",
+      "za sawm leh paruk",
+      "zâ leh sâwm leh paruk",
+      "zâ sâwm leh paruk",
+      "zâ sâwm paruk",
+      "zâ-sâwm-leh-paruk"
+    ]
+  },
+  {
+    "number": "117",
+    "text": "zâ sâwm leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LEH-PASARIH",
+      "ZÂ SÂWM LEH PASARIH",
+      "za sawm leh pasarih",
+      "zâ leh sâwm leh pasarih",
+      "zâ sâwm leh pasarih",
+      "zâ sâwm pasarih",
+      "zâ-sâwm-leh-pasarih"
+    ]
+  },
+  {
+    "number": "118",
+    "text": "zâ sâwm leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LEH-PARIAT",
+      "ZÂ SÂWM LEH PARIAT",
+      "za sawm leh pariat",
+      "zâ leh sâwm leh pariat",
+      "zâ sâwm leh pariat",
+      "zâ sâwm pariat",
+      "zâ-sâwm-leh-pariat"
+    ]
+  },
+  {
+    "number": "119",
+    "text": "zâ sâwm leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LEH-PAKUA",
+      "ZÂ SÂWM LEH PAKUA",
+      "za sawm leh pakua",
+      "zâ leh sâwm leh pakua",
+      "zâ sâwm leh pakua",
+      "zâ sâwm pakua",
+      "zâ-sâwm-leh-pakua"
+    ]
+  },
+  {
+    "number": "120",
+    "text": "zâ leh sawm hnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH",
+      "ZÂ LEH SAWM HNIH",
+      "za leh sawm hnih",
+      "zâ leh sawm hnih",
+      "zâ sawm hnih",
+      "zâ-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "121",
+    "text": "zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "ZÂ SAWM HNIH LEH PAKHAT",
+      "za sawm hnih leh pakhat",
+      "zâ leh sawm hnih leh pakhat",
+      "zâ sawm hnih leh pakhat",
+      "zâ sawm hnih pakhat",
+      "zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "122",
+    "text": "zâ sawm hnih leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH-LEH-PAHNIH",
+      "ZÂ SAWM HNIH LEH PAHNIH",
+      "za sawm hnih leh pahnih",
+      "zâ leh sawm hnih leh pahnih",
+      "zâ sawm hnih leh pahnih",
+      "zâ sawm hnih pahnih",
+      "zâ-sawm-hnih-leh-pahnih"
+    ]
+  },
+  {
+    "number": "123",
+    "text": "zâ sawm hnih leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH-LEH-PATHUM",
+      "ZÂ SAWM HNIH LEH PATHUM",
+      "za sawm hnih leh pathum",
+      "zâ leh sawm hnih leh pathum",
+      "zâ sawm hnih leh pathum",
+      "zâ sawm hnih pathum",
+      "zâ-sawm-hnih-leh-pathum"
+    ]
+  },
+  {
+    "number": "124",
+    "text": "zâ sawm hnih leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH-LEH-PALI",
+      "ZÂ SAWM HNIH LEH PALI",
+      "za sawm hnih leh pali",
+      "zâ leh sawm hnih leh pali",
+      "zâ sawm hnih leh pali",
+      "zâ sawm hnih pali",
+      "zâ-sawm-hnih-leh-pali"
+    ]
+  },
+  {
+    "number": "125",
+    "text": "zâ sawm hnih leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH-LEH-PANGA",
+      "ZÂ SAWM HNIH LEH PANGA",
+      "za sawm hnih leh panga",
+      "zâ leh sawm hnih leh panga",
+      "zâ sawm hnih leh panga",
+      "zâ sawm hnih panga",
+      "zâ-sawm-hnih-leh-panga"
+    ]
+  },
+  {
+    "number": "126",
+    "text": "zâ sawm hnih leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH-LEH-PARUK",
+      "ZÂ SAWM HNIH LEH PARUK",
+      "za sawm hnih leh paruk",
+      "zâ leh sawm hnih leh paruk",
+      "zâ sawm hnih leh paruk",
+      "zâ sawm hnih paruk",
+      "zâ-sawm-hnih-leh-paruk"
+    ]
+  },
+  {
+    "number": "127",
+    "text": "zâ sawm hnih leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH-LEH-PASARIH",
+      "ZÂ SAWM HNIH LEH PASARIH",
+      "za sawm hnih leh pasarih",
+      "zâ leh sawm hnih leh pasarih",
+      "zâ sawm hnih leh pasarih",
+      "zâ sawm hnih pasarih",
+      "zâ-sawm-hnih-leh-pasarih"
+    ]
+  },
+  {
+    "number": "128",
+    "text": "zâ sawm hnih leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH-LEH-PARIAT",
+      "ZÂ SAWM HNIH LEH PARIAT",
+      "za sawm hnih leh pariat",
+      "zâ leh sawm hnih leh pariat",
+      "zâ sawm hnih leh pariat",
+      "zâ sawm hnih pariat",
+      "zâ-sawm-hnih-leh-pariat"
+    ]
+  },
+  {
+    "number": "129",
+    "text": "zâ sawm hnih leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-HNIH-LEH-PAKUA",
+      "ZÂ SAWM HNIH LEH PAKUA",
+      "za sawm hnih leh pakua",
+      "zâ leh sawm hnih leh pakua",
+      "zâ sawm hnih leh pakua",
+      "zâ sawm hnih pakua",
+      "zâ-sawm-hnih-leh-pakua"
+    ]
+  },
+  {
+    "number": "130",
+    "text": "zâ leh sawm thum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM",
+      "ZÂ LEH SAWM THUM",
+      "za leh sawm thum",
+      "zâ leh sawm thum",
+      "zâ sawm thum",
+      "zâ-leh-sawm-thum"
+    ]
+  },
+  {
+    "number": "131",
+    "text": "zâ sawm thum leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM-LEH-PAKHAT",
+      "ZÂ SAWM THUM LEH PAKHAT",
+      "za sawm thum leh pakhat",
+      "zâ leh sawm thum leh pakhat",
+      "zâ sawm thum leh pakhat",
+      "zâ sawm thum pakhat",
+      "zâ-sawm-thum-leh-pakhat"
+    ]
+  },
+  {
+    "number": "132",
+    "text": "zâ sawm thum leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM-LEH-PAHNIH",
+      "ZÂ SAWM THUM LEH PAHNIH",
+      "za sawm thum leh pahnih",
+      "zâ leh sawm thum leh pahnih",
+      "zâ sawm thum leh pahnih",
+      "zâ sawm thum pahnih",
+      "zâ-sawm-thum-leh-pahnih"
+    ]
+  },
+  {
+    "number": "133",
+    "text": "zâ sawm thum leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM-LEH-PATHUM",
+      "ZÂ SAWM THUM LEH PATHUM",
+      "za sawm thum leh pathum",
+      "zâ leh sawm thum leh pathum",
+      "zâ sawm thum leh pathum",
+      "zâ sawm thum pathum",
+      "zâ-sawm-thum-leh-pathum"
+    ]
+  },
+  {
+    "number": "134",
+    "text": "zâ sawm thum leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM-LEH-PALI",
+      "ZÂ SAWM THUM LEH PALI",
+      "za sawm thum leh pali",
+      "zâ leh sawm thum leh pali",
+      "zâ sawm thum leh pali",
+      "zâ sawm thum pali",
+      "zâ-sawm-thum-leh-pali"
+    ]
+  },
+  {
+    "number": "135",
+    "text": "zâ sawm thum leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM-LEH-PANGA",
+      "ZÂ SAWM THUM LEH PANGA",
+      "za sawm thum leh panga",
+      "zâ leh sawm thum leh panga",
+      "zâ sawm thum leh panga",
+      "zâ sawm thum panga",
+      "zâ-sawm-thum-leh-panga"
+    ]
+  },
+  {
+    "number": "136",
+    "text": "zâ sawm thum leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM-LEH-PARUK",
+      "ZÂ SAWM THUM LEH PARUK",
+      "za sawm thum leh paruk",
+      "zâ leh sawm thum leh paruk",
+      "zâ sawm thum leh paruk",
+      "zâ sawm thum paruk",
+      "zâ-sawm-thum-leh-paruk"
+    ]
+  },
+  {
+    "number": "137",
+    "text": "zâ sawm thum leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM-LEH-PASARIH",
+      "ZÂ SAWM THUM LEH PASARIH",
+      "za sawm thum leh pasarih",
+      "zâ leh sawm thum leh pasarih",
+      "zâ sawm thum leh pasarih",
+      "zâ sawm thum pasarih",
+      "zâ-sawm-thum-leh-pasarih"
+    ]
+  },
+  {
+    "number": "138",
+    "text": "zâ sawm thum leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM-LEH-PARIAT",
+      "ZÂ SAWM THUM LEH PARIAT",
+      "za sawm thum leh pariat",
+      "zâ leh sawm thum leh pariat",
+      "zâ sawm thum leh pariat",
+      "zâ sawm thum pariat",
+      "zâ-sawm-thum-leh-pariat"
+    ]
+  },
+  {
+    "number": "139",
+    "text": "zâ sawm thum leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-THUM-LEH-PAKUA",
+      "ZÂ SAWM THUM LEH PAKUA",
+      "za sawm thum leh pakua",
+      "zâ leh sawm thum leh pakua",
+      "zâ sawm thum leh pakua",
+      "zâ sawm thum pakua",
+      "zâ-sawm-thum-leh-pakua"
+    ]
+  },
+  {
+    "number": "140",
+    "text": "zâ leh sawm li",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI",
+      "ZÂ LEH SAWM LI",
+      "za leh sawm li",
+      "zâ leh sawm li",
+      "zâ sawm li",
+      "zâ-leh-sawm-li"
+    ]
+  },
+  {
+    "number": "141",
+    "text": "zâ sawm li leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI-LEH-PAKHAT",
+      "ZÂ SAWM LI LEH PAKHAT",
+      "za sawm li leh pakhat",
+      "zâ leh sawm li leh pakhat",
+      "zâ sawm li leh pakhat",
+      "zâ sawm li pakhat",
+      "zâ-sawm-li-leh-pakhat"
+    ]
+  },
+  {
+    "number": "142",
+    "text": "zâ sawm li leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI-LEH-PAHNIH",
+      "ZÂ SAWM LI LEH PAHNIH",
+      "za sawm li leh pahnih",
+      "zâ leh sawm li leh pahnih",
+      "zâ sawm li leh pahnih",
+      "zâ sawm li pahnih",
+      "zâ-sawm-li-leh-pahnih"
+    ]
+  },
+  {
+    "number": "143",
+    "text": "zâ sawm li leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI-LEH-PATHUM",
+      "ZÂ SAWM LI LEH PATHUM",
+      "za sawm li leh pathum",
+      "zâ leh sawm li leh pathum",
+      "zâ sawm li leh pathum",
+      "zâ sawm li pathum",
+      "zâ-sawm-li-leh-pathum"
+    ]
+  },
+  {
+    "number": "144",
+    "text": "zâ sawm li leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI-LEH-PALI",
+      "ZÂ SAWM LI LEH PALI",
+      "za sawm li leh pali",
+      "zâ leh sawm li leh pali",
+      "zâ sawm li leh pali",
+      "zâ sawm li pali",
+      "zâ-sawm-li-leh-pali"
+    ]
+  },
+  {
+    "number": "145",
+    "text": "zâ sawm li leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI-LEH-PANGA",
+      "ZÂ SAWM LI LEH PANGA",
+      "za sawm li leh panga",
+      "zâ leh sawm li leh panga",
+      "zâ sawm li leh panga",
+      "zâ sawm li panga",
+      "zâ-sawm-li-leh-panga"
+    ]
+  },
+  {
+    "number": "146",
+    "text": "zâ sawm li leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI-LEH-PARUK",
+      "ZÂ SAWM LI LEH PARUK",
+      "za sawm li leh paruk",
+      "zâ leh sawm li leh paruk",
+      "zâ sawm li leh paruk",
+      "zâ sawm li paruk",
+      "zâ-sawm-li-leh-paruk"
+    ]
+  },
+  {
+    "number": "147",
+    "text": "zâ sawm li leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI-LEH-PASARIH",
+      "ZÂ SAWM LI LEH PASARIH",
+      "za sawm li leh pasarih",
+      "zâ leh sawm li leh pasarih",
+      "zâ sawm li leh pasarih",
+      "zâ sawm li pasarih",
+      "zâ-sawm-li-leh-pasarih"
+    ]
+  },
+  {
+    "number": "148",
+    "text": "zâ sawm li leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI-LEH-PARIAT",
+      "ZÂ SAWM LI LEH PARIAT",
+      "za sawm li leh pariat",
+      "zâ leh sawm li leh pariat",
+      "zâ sawm li leh pariat",
+      "zâ sawm li pariat",
+      "zâ-sawm-li-leh-pariat"
+    ]
+  },
+  {
+    "number": "149",
+    "text": "zâ sawm li leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-LI-LEH-PAKUA",
+      "ZÂ SAWM LI LEH PAKUA",
+      "za sawm li leh pakua",
+      "zâ leh sawm li leh pakua",
+      "zâ sawm li leh pakua",
+      "zâ sawm li pakua",
+      "zâ-sawm-li-leh-pakua"
+    ]
+  },
+  {
+    "number": "150",
+    "text": "zâ leh sawm nga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA",
+      "ZÂ LEH SAWM NGA",
+      "za leh sawm nga",
+      "zâ leh sawm nga",
+      "zâ sawm nga",
+      "zâ-leh-sawm-nga"
+    ]
+  },
+  {
+    "number": "151",
+    "text": "zâ sawm nga leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA-LEH-PAKHAT",
+      "ZÂ SAWM NGA LEH PAKHAT",
+      "za sawm nga leh pakhat",
+      "zâ leh sawm nga leh pakhat",
+      "zâ sawm nga leh pakhat",
+      "zâ sawm nga pakhat",
+      "zâ-sawm-nga-leh-pakhat"
+    ]
+  },
+  {
+    "number": "152",
+    "text": "zâ sawm nga leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA-LEH-PAHNIH",
+      "ZÂ SAWM NGA LEH PAHNIH",
+      "za sawm nga leh pahnih",
+      "zâ leh sawm nga leh pahnih",
+      "zâ sawm nga leh pahnih",
+      "zâ sawm nga pahnih",
+      "zâ-sawm-nga-leh-pahnih"
+    ]
+  },
+  {
+    "number": "153",
+    "text": "zâ sawm nga leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA-LEH-PATHUM",
+      "ZÂ SAWM NGA LEH PATHUM",
+      "za sawm nga leh pathum",
+      "zâ leh sawm nga leh pathum",
+      "zâ sawm nga leh pathum",
+      "zâ sawm nga pathum",
+      "zâ-sawm-nga-leh-pathum"
+    ]
+  },
+  {
+    "number": "154",
+    "text": "zâ sawm nga leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA-LEH-PALI",
+      "ZÂ SAWM NGA LEH PALI",
+      "za sawm nga leh pali",
+      "zâ leh sawm nga leh pali",
+      "zâ sawm nga leh pali",
+      "zâ sawm nga pali",
+      "zâ-sawm-nga-leh-pali"
+    ]
+  },
+  {
+    "number": "155",
+    "text": "zâ sawm nga leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA-LEH-PANGA",
+      "ZÂ SAWM NGA LEH PANGA",
+      "za sawm nga leh panga",
+      "zâ leh sawm nga leh panga",
+      "zâ sawm nga leh panga",
+      "zâ sawm nga panga",
+      "zâ-sawm-nga-leh-panga"
+    ]
+  },
+  {
+    "number": "156",
+    "text": "zâ sawm nga leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA-LEH-PARUK",
+      "ZÂ SAWM NGA LEH PARUK",
+      "za sawm nga leh paruk",
+      "zâ leh sawm nga leh paruk",
+      "zâ sawm nga leh paruk",
+      "zâ sawm nga paruk",
+      "zâ-sawm-nga-leh-paruk"
+    ]
+  },
+  {
+    "number": "157",
+    "text": "zâ sawm nga leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA-LEH-PASARIH",
+      "ZÂ SAWM NGA LEH PASARIH",
+      "za sawm nga leh pasarih",
+      "zâ leh sawm nga leh pasarih",
+      "zâ sawm nga leh pasarih",
+      "zâ sawm nga pasarih",
+      "zâ-sawm-nga-leh-pasarih"
+    ]
+  },
+  {
+    "number": "158",
+    "text": "zâ sawm nga leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA-LEH-PARIAT",
+      "ZÂ SAWM NGA LEH PARIAT",
+      "za sawm nga leh pariat",
+      "zâ leh sawm nga leh pariat",
+      "zâ sawm nga leh pariat",
+      "zâ sawm nga pariat",
+      "zâ-sawm-nga-leh-pariat"
+    ]
+  },
+  {
+    "number": "159",
+    "text": "zâ sawm nga leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-NGA-LEH-PAKUA",
+      "ZÂ SAWM NGA LEH PAKUA",
+      "za sawm nga leh pakua",
+      "zâ leh sawm nga leh pakua",
+      "zâ sawm nga leh pakua",
+      "zâ sawm nga pakua",
+      "zâ-sawm-nga-leh-pakua"
+    ]
+  },
+  {
+    "number": "160",
+    "text": "zâ leh sawm ruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK",
+      "ZÂ LEH SAWM RUK",
+      "za leh sawm ruk",
+      "zâ leh sawm ruk",
+      "zâ sawm ruk",
+      "zâ-leh-sawm-ruk"
+    ]
+  },
+  {
+    "number": "161",
+    "text": "zâ sawm ruk leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK-LEH-PAKHAT",
+      "ZÂ SAWM RUK LEH PAKHAT",
+      "za sawm ruk leh pakhat",
+      "zâ leh sawm ruk leh pakhat",
+      "zâ sawm ruk leh pakhat",
+      "zâ sawm ruk pakhat",
+      "zâ-sawm-ruk-leh-pakhat"
+    ]
+  },
+  {
+    "number": "162",
+    "text": "zâ sawm ruk leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK-LEH-PAHNIH",
+      "ZÂ SAWM RUK LEH PAHNIH",
+      "za sawm ruk leh pahnih",
+      "zâ leh sawm ruk leh pahnih",
+      "zâ sawm ruk leh pahnih",
+      "zâ sawm ruk pahnih",
+      "zâ-sawm-ruk-leh-pahnih"
+    ]
+  },
+  {
+    "number": "163",
+    "text": "zâ sawm ruk leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK-LEH-PATHUM",
+      "ZÂ SAWM RUK LEH PATHUM",
+      "za sawm ruk leh pathum",
+      "zâ leh sawm ruk leh pathum",
+      "zâ sawm ruk leh pathum",
+      "zâ sawm ruk pathum",
+      "zâ-sawm-ruk-leh-pathum"
+    ]
+  },
+  {
+    "number": "164",
+    "text": "zâ sawm ruk leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK-LEH-PALI",
+      "ZÂ SAWM RUK LEH PALI",
+      "za sawm ruk leh pali",
+      "zâ leh sawm ruk leh pali",
+      "zâ sawm ruk leh pali",
+      "zâ sawm ruk pali",
+      "zâ-sawm-ruk-leh-pali"
+    ]
+  },
+  {
+    "number": "165",
+    "text": "zâ sawm ruk leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK-LEH-PANGA",
+      "ZÂ SAWM RUK LEH PANGA",
+      "za sawm ruk leh panga",
+      "zâ leh sawm ruk leh panga",
+      "zâ sawm ruk leh panga",
+      "zâ sawm ruk panga",
+      "zâ-sawm-ruk-leh-panga"
+    ]
+  },
+  {
+    "number": "166",
+    "text": "zâ sawm ruk leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK-LEH-PARUK",
+      "ZÂ SAWM RUK LEH PARUK",
+      "za sawm ruk leh paruk",
+      "zâ leh sawm ruk leh paruk",
+      "zâ sawm ruk leh paruk",
+      "zâ sawm ruk paruk",
+      "zâ-sawm-ruk-leh-paruk"
+    ]
+  },
+  {
+    "number": "167",
+    "text": "zâ sawm ruk leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK-LEH-PASARIH",
+      "ZÂ SAWM RUK LEH PASARIH",
+      "za sawm ruk leh pasarih",
+      "zâ leh sawm ruk leh pasarih",
+      "zâ sawm ruk leh pasarih",
+      "zâ sawm ruk pasarih",
+      "zâ-sawm-ruk-leh-pasarih"
+    ]
+  },
+  {
+    "number": "168",
+    "text": "zâ sawm ruk leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK-LEH-PARIAT",
+      "ZÂ SAWM RUK LEH PARIAT",
+      "za sawm ruk leh pariat",
+      "zâ leh sawm ruk leh pariat",
+      "zâ sawm ruk leh pariat",
+      "zâ sawm ruk pariat",
+      "zâ-sawm-ruk-leh-pariat"
+    ]
+  },
+  {
+    "number": "169",
+    "text": "zâ sawm ruk leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RUK-LEH-PAKUA",
+      "ZÂ SAWM RUK LEH PAKUA",
+      "za sawm ruk leh pakua",
+      "zâ leh sawm ruk leh pakua",
+      "zâ sawm ruk leh pakua",
+      "zâ sawm ruk pakua",
+      "zâ-sawm-ruk-leh-pakua"
+    ]
+  },
+  {
+    "number": "170",
+    "text": "zâ leh sawm sarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH",
+      "ZÂ LEH SAWM SARIH",
+      "za leh sawm sarih",
+      "zâ leh sawm sarih",
+      "zâ sawm sarih",
+      "zâ-leh-sawm-sarih"
+    ]
+  },
+  {
+    "number": "171",
+    "text": "zâ sawm sarih leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH-LEH-PAKHAT",
+      "ZÂ SAWM SARIH LEH PAKHAT",
+      "za sawm sarih leh pakhat",
+      "zâ leh sawm sarih leh pakhat",
+      "zâ sawm sarih leh pakhat",
+      "zâ sawm sarih pakhat",
+      "zâ-sawm-sarih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "172",
+    "text": "zâ sawm sarih leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH-LEH-PAHNIH",
+      "ZÂ SAWM SARIH LEH PAHNIH",
+      "za sawm sarih leh pahnih",
+      "zâ leh sawm sarih leh pahnih",
+      "zâ sawm sarih leh pahnih",
+      "zâ sawm sarih pahnih",
+      "zâ-sawm-sarih-leh-pahnih"
+    ]
+  },
+  {
+    "number": "173",
+    "text": "zâ sawm sarih leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH-LEH-PATHUM",
+      "ZÂ SAWM SARIH LEH PATHUM",
+      "za sawm sarih leh pathum",
+      "zâ leh sawm sarih leh pathum",
+      "zâ sawm sarih leh pathum",
+      "zâ sawm sarih pathum",
+      "zâ-sawm-sarih-leh-pathum"
+    ]
+  },
+  {
+    "number": "174",
+    "text": "zâ sawm sarih leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH-LEH-PALI",
+      "ZÂ SAWM SARIH LEH PALI",
+      "za sawm sarih leh pali",
+      "zâ leh sawm sarih leh pali",
+      "zâ sawm sarih leh pali",
+      "zâ sawm sarih pali",
+      "zâ-sawm-sarih-leh-pali"
+    ]
+  },
+  {
+    "number": "175",
+    "text": "zâ sawm sarih leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH-LEH-PANGA",
+      "ZÂ SAWM SARIH LEH PANGA",
+      "za sawm sarih leh panga",
+      "zâ leh sawm sarih leh panga",
+      "zâ sawm sarih leh panga",
+      "zâ sawm sarih panga",
+      "zâ-sawm-sarih-leh-panga"
+    ]
+  },
+  {
+    "number": "176",
+    "text": "zâ sawm sarih leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH-LEH-PARUK",
+      "ZÂ SAWM SARIH LEH PARUK",
+      "za sawm sarih leh paruk",
+      "zâ leh sawm sarih leh paruk",
+      "zâ sawm sarih leh paruk",
+      "zâ sawm sarih paruk",
+      "zâ-sawm-sarih-leh-paruk"
+    ]
+  },
+  {
+    "number": "177",
+    "text": "zâ sawm sarih leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH-LEH-PASARIH",
+      "ZÂ SAWM SARIH LEH PASARIH",
+      "za sawm sarih leh pasarih",
+      "zâ leh sawm sarih leh pasarih",
+      "zâ sawm sarih leh pasarih",
+      "zâ sawm sarih pasarih",
+      "zâ-sawm-sarih-leh-pasarih"
+    ]
+  },
+  {
+    "number": "178",
+    "text": "zâ sawm sarih leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH-LEH-PARIAT",
+      "ZÂ SAWM SARIH LEH PARIAT",
+      "za sawm sarih leh pariat",
+      "zâ leh sawm sarih leh pariat",
+      "zâ sawm sarih leh pariat",
+      "zâ sawm sarih pariat",
+      "zâ-sawm-sarih-leh-pariat"
+    ]
+  },
+  {
+    "number": "179",
+    "text": "zâ sawm sarih leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-SARIH-LEH-PAKUA",
+      "ZÂ SAWM SARIH LEH PAKUA",
+      "za sawm sarih leh pakua",
+      "zâ leh sawm sarih leh pakua",
+      "zâ sawm sarih leh pakua",
+      "zâ sawm sarih pakua",
+      "zâ-sawm-sarih-leh-pakua"
+    ]
+  },
+  {
+    "number": "180",
+    "text": "zâ leh sawm riat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT",
+      "ZÂ LEH SAWM RIAT",
+      "za leh sawm riat",
+      "zâ leh sawm riat",
+      "zâ sawm riat",
+      "zâ-leh-sawm-riat"
+    ]
+  },
+  {
+    "number": "181",
+    "text": "zâ sawm riat leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT-LEH-PAKHAT",
+      "ZÂ SAWM RIAT LEH PAKHAT",
+      "za sawm riat leh pakhat",
+      "zâ leh sawm riat leh pakhat",
+      "zâ sawm riat leh pakhat",
+      "zâ sawm riat pakhat",
+      "zâ-sawm-riat-leh-pakhat"
+    ]
+  },
+  {
+    "number": "182",
+    "text": "zâ sawm riat leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT-LEH-PAHNIH",
+      "ZÂ SAWM RIAT LEH PAHNIH",
+      "za sawm riat leh pahnih",
+      "zâ leh sawm riat leh pahnih",
+      "zâ sawm riat leh pahnih",
+      "zâ sawm riat pahnih",
+      "zâ-sawm-riat-leh-pahnih"
+    ]
+  },
+  {
+    "number": "183",
+    "text": "zâ sawm riat leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT-LEH-PATHUM",
+      "ZÂ SAWM RIAT LEH PATHUM",
+      "za sawm riat leh pathum",
+      "zâ leh sawm riat leh pathum",
+      "zâ sawm riat leh pathum",
+      "zâ sawm riat pathum",
+      "zâ-sawm-riat-leh-pathum"
+    ]
+  },
+  {
+    "number": "184",
+    "text": "zâ sawm riat leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT-LEH-PALI",
+      "ZÂ SAWM RIAT LEH PALI",
+      "za sawm riat leh pali",
+      "zâ leh sawm riat leh pali",
+      "zâ sawm riat leh pali",
+      "zâ sawm riat pali",
+      "zâ-sawm-riat-leh-pali"
+    ]
+  },
+  {
+    "number": "185",
+    "text": "zâ sawm riat leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT-LEH-PANGA",
+      "ZÂ SAWM RIAT LEH PANGA",
+      "za sawm riat leh panga",
+      "zâ leh sawm riat leh panga",
+      "zâ sawm riat leh panga",
+      "zâ sawm riat panga",
+      "zâ-sawm-riat-leh-panga"
+    ]
+  },
+  {
+    "number": "186",
+    "text": "zâ sawm riat leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT-LEH-PARUK",
+      "ZÂ SAWM RIAT LEH PARUK",
+      "za sawm riat leh paruk",
+      "zâ leh sawm riat leh paruk",
+      "zâ sawm riat leh paruk",
+      "zâ sawm riat paruk",
+      "zâ-sawm-riat-leh-paruk"
+    ]
+  },
+  {
+    "number": "187",
+    "text": "zâ sawm riat leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT-LEH-PASARIH",
+      "ZÂ SAWM RIAT LEH PASARIH",
+      "za sawm riat leh pasarih",
+      "zâ leh sawm riat leh pasarih",
+      "zâ sawm riat leh pasarih",
+      "zâ sawm riat pasarih",
+      "zâ-sawm-riat-leh-pasarih"
+    ]
+  },
+  {
+    "number": "188",
+    "text": "zâ sawm riat leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT-LEH-PARIAT",
+      "ZÂ SAWM RIAT LEH PARIAT",
+      "za sawm riat leh pariat",
+      "zâ leh sawm riat leh pariat",
+      "zâ sawm riat leh pariat",
+      "zâ sawm riat pariat",
+      "zâ-sawm-riat-leh-pariat"
+    ]
+  },
+  {
+    "number": "189",
+    "text": "zâ sawm riat leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-RIAT-LEH-PAKUA",
+      "ZÂ SAWM RIAT LEH PAKUA",
+      "za sawm riat leh pakua",
+      "zâ leh sawm riat leh pakua",
+      "zâ sawm riat leh pakua",
+      "zâ sawm riat pakua",
+      "zâ-sawm-riat-leh-pakua"
+    ]
+  },
+  {
+    "number": "190",
+    "text": "zâ leh sawm kua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA",
+      "ZÂ LEH SAWM KUA",
+      "za leh sawm kua",
+      "zâ leh sawm kua",
+      "zâ sawm kua",
+      "zâ-leh-sawm-kua"
+    ]
+  },
+  {
+    "number": "191",
+    "text": "zâ sawm kua leh pakhat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA-LEH-PAKHAT",
+      "ZÂ SAWM KUA LEH PAKHAT",
+      "za sawm kua leh pakhat",
+      "zâ leh sawm kua leh pakhat",
+      "zâ sawm kua leh pakhat",
+      "zâ sawm kua pakhat",
+      "zâ-sawm-kua-leh-pakhat"
+    ]
+  },
+  {
+    "number": "192",
+    "text": "zâ sawm kua leh pahnih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA-LEH-PAHNIH",
+      "ZÂ SAWM KUA LEH PAHNIH",
+      "za sawm kua leh pahnih",
+      "zâ leh sawm kua leh pahnih",
+      "zâ sawm kua leh pahnih",
+      "zâ sawm kua pahnih",
+      "zâ-sawm-kua-leh-pahnih"
+    ]
+  },
+  {
+    "number": "193",
+    "text": "zâ sawm kua leh pathum",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA-LEH-PATHUM",
+      "ZÂ SAWM KUA LEH PATHUM",
+      "za sawm kua leh pathum",
+      "zâ leh sawm kua leh pathum",
+      "zâ sawm kua leh pathum",
+      "zâ sawm kua pathum",
+      "zâ-sawm-kua-leh-pathum"
+    ]
+  },
+  {
+    "number": "194",
+    "text": "zâ sawm kua leh pali",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA-LEH-PALI",
+      "ZÂ SAWM KUA LEH PALI",
+      "za sawm kua leh pali",
+      "zâ leh sawm kua leh pali",
+      "zâ sawm kua leh pali",
+      "zâ sawm kua pali",
+      "zâ-sawm-kua-leh-pali"
+    ]
+  },
+  {
+    "number": "195",
+    "text": "zâ sawm kua leh panga",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA-LEH-PANGA",
+      "ZÂ SAWM KUA LEH PANGA",
+      "za sawm kua leh panga",
+      "zâ leh sawm kua leh panga",
+      "zâ sawm kua leh panga",
+      "zâ sawm kua panga",
+      "zâ-sawm-kua-leh-panga"
+    ]
+  },
+  {
+    "number": "196",
+    "text": "zâ sawm kua leh paruk",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA-LEH-PARUK",
+      "ZÂ SAWM KUA LEH PARUK",
+      "za sawm kua leh paruk",
+      "zâ leh sawm kua leh paruk",
+      "zâ sawm kua leh paruk",
+      "zâ sawm kua paruk",
+      "zâ-sawm-kua-leh-paruk"
+    ]
+  },
+  {
+    "number": "197",
+    "text": "zâ sawm kua leh pasarih",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA-LEH-PASARIH",
+      "ZÂ SAWM KUA LEH PASARIH",
+      "za sawm kua leh pasarih",
+      "zâ leh sawm kua leh pasarih",
+      "zâ sawm kua leh pasarih",
+      "zâ sawm kua pasarih",
+      "zâ-sawm-kua-leh-pasarih"
+    ]
+  },
+  {
+    "number": "198",
+    "text": "zâ sawm kua leh pariat",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA-LEH-PARIAT",
+      "ZÂ SAWM KUA LEH PARIAT",
+      "za sawm kua leh pariat",
+      "zâ leh sawm kua leh pariat",
+      "zâ sawm kua leh pariat",
+      "zâ sawm kua pariat",
+      "zâ-sawm-kua-leh-pariat"
+    ]
+  },
+  {
+    "number": "199",
+    "text": "zâ sawm kua leh pakua",
+    "accepted_inputs": [
+      "ZA-LEH-SAWM-KUA-LEH-PAKUA",
+      "ZÂ SAWM KUA LEH PAKUA",
+      "za sawm kua leh pakua",
+      "zâ leh sawm kua leh pakua",
+      "zâ sawm kua leh pakua",
+      "zâ sawm kua pakua",
+      "zâ-sawm-kua-leh-pakua"
+    ]
   }
 ]

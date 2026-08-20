@@ -5,8 +5,13 @@ docs/architecture.md -- the definition of correctness that target packages
 reimplementing a language's rules by hand.
 
 Scope: specs shaped like the current languages/mizo.yaml (positional
-variables ones_digit/tens_digit only, i.e. the 0-100 range). Larger ranges
-are follow-up work.
+variables ones_digit/tens_digit only). That covers 0-199 as of #19 -- a rule
+matches on its `range` as well as its condition, so 118 and 18 select
+different rules despite identical positional variables, and the hundreds
+digit is always 1 across the range. (The order of the two checks is not what
+does this; a rule is selected only when both pass.) A third variable becomes
+necessary at 200, where the hundreds digit multiplies. Larger ranges are
+follow-up work.
 
 text -> number first normalises both the input *and* the lexicon words
 using the spec's `parse` section (see Spec._normalize_word). It then
@@ -24,9 +29,10 @@ but never produced by number_to_text() -- e.g. compound_tens' shorthand that
 drops the scale word. These are matched with the same field-exactness as
 the canonical output; only a single freestanding placeholder gets bound/
 standalone leniency. number_to_text() stays the single source of truth for
-the canonical form. This is cheap enough for a 0-100 range by brute-force
-search; it will need to become a real parser once milestone 7 extends the
-range.
+the canonical form. This is cheap enough for a 0-199 range by brute-force
+search -- 200 candidates -- and #19 extended the range without needing to
+change it. It will need to become a real parser well before Mizo's ceiling:
+see #27, which puts that at 10^18 - 1.
 """
 
 import ast

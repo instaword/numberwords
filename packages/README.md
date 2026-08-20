@@ -80,6 +80,6 @@ npm target becomes real is a question for #23, not something to fix by bumping
 npm now.
 
 The **descriptions** now diverge for the same reason. `python/` describes what
-it ships — Mizo 0–100 — while `npm/` keeps the placeholder wording, because
+it ships — Mizo 0–199 — while `npm/` keeps the placeholder wording, because
 that is still what it is. Keep the *shared* fields (keywords, repo URL) in step;
 let the fields that describe the contents follow the contents.

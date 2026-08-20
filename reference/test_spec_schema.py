@@ -106,6 +106,32 @@ def test_accepted_forms_names_tables_and_fields_that_exist(path):
 
 
 @pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
+def test_connector_precedes_names_tables_and_fields_that_exist(path):
+    # The same cross-reference JSON Schema cannot check, for the same reason as
+    # accepted_forms above (#31). connector_precedes points at the lexicon in
+    # this file, so a typo'd table or field validates cleanly and then certifies
+    # nothing: the generator quietly stops emitting the connector spellings and
+    # the only symptom is a vector table that shrank. Name the wrong key here
+    # instead of leaving that to be inferred from a count.
+    spec = _as_ir(path)
+    lexicon = spec["lexicon"]
+    parse = spec.get("parse", {})
+    precedes = parse.get("connector_precedes", {})
+    # Declaring where a connector may stand, in a language that has no
+    # connector, is a mechanism nothing can exercise (#36, #38).
+    if precedes:
+        assert parse.get("connectors"), "connector_precedes without connectors"
+    for table, fields in precedes.items():
+        assert table in lexicon, f"unknown lexicon table {table!r}"
+        for field in fields:
+            # At least one entry, not every entry: a language may carry an
+            # alternate form for only some of its numerals.
+            assert any(
+                field in entry for entry in lexicon[table].values()
+            ), f"no {table} entry has a {field!r} field"
+
+
+@pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
 def test_accepted_forms_lists_only_fields_no_template_already_names(path):
     # accepted_forms holds the *extra* fields, per the schema: the field a
     # template names is accepted anyway, so listing it adds nothing -- and
