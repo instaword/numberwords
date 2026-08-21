@@ -16,7 +16,7 @@ source of truth; many published targets.
 ## Install
 
 ```bash
-pip install numberwords              # Python -- Mizo 0-100
+pip install numberwords              # Python -- Mizo 0-199
 npm install @instaword/numberwords   # JS/TS -- placeholder release, exports nothing
 ```
 
@@ -26,20 +26,21 @@ npm install @instaword/numberwords   # JS/TS -- placeholder release, exports not
 'sawm nga pariat'
 >>> numberwords.text_to_number("sawm nga pariat")
 58
+>>> numberwords.number_to_text(128)
+'zâ sawm hnih leh pariat'
 ```
 
-**The Python package handles Mizo 0–100 and nothing above it** — `101` raises
-`NumberWordsError`. That is narrow enough to be useless for most real work; the
-range is being extended (see below). The npm package is still a name
-reservation that exports nothing.
+**The Python package handles Mizo 0–199 and nothing above it** — `200` raises
+`NumberWordsError`. That covers everyday counting, but not years, prices or
+measurements; the range is being extended (see below). The npm package is
+still a name reservation that exports nothing.
 
 ## Status
 
-`numberwords` 0.1.0 is on PyPI, released from CI against the conformance
+`numberwords` 0.2.0 is on PyPI, released from CI against the conformance
 vectors as they stood at that release. It exports `number_to_text`,
-`text_to_number` and `NumberWordsError`, and handles Mizo 0–100 in both
-directions. The checked-in vectors now cover 0–199; that range reaches PyPI
-with the next release. The npm target is still a name reservation.
+`text_to_number` and `NumberWordsError`, and handles Mizo 0–199 in both
+directions. The npm target is still a name reservation.
 
 Next is the range: Mizo's scale ladder runs to 10⁹, and reaching it needs the
 spec format to grow a recursive placeholder and to stop hardcoding two

@@ -10,7 +10,7 @@ The published target packages — the libraries a consumer actually installs.
 ## What's here right now
 
 `python/` is the first real target package (#20). It has the `src/` layout,
-version `0.1.0`, `_mizo.py` — a module compiled from `languages/mizo.yaml` by
+version `0.2.0`, `_mizo.py` — a module compiled from `languages/mizo.yaml` by
 `reference/compile_spec.py` — and `_render.py`, which interprets it. It
 exports `number_to_text`, `text_to_number` and `NumberWordsError`, and it
 passes `vectors/mizo.json` in both directions.
@@ -18,8 +18,9 @@ passes `vectors/mizo.json` in both directions.
 `npm/` is still a name-reservation placeholder at version `0.0.0` that exports
 nothing. It exists so the name is ours before we need it.
 
-`python/` `0.1.0` is **on PyPI**, released from CI on 2026-08-16 (#23). `npm/`
-has only ever had its `0.0.0` placeholder published.
+`python/` `0.2.0` is **on PyPI**, released from CI (#51), as `0.1.0` was before
+it on 2026-08-16 (#23). `npm/` has only ever had its `0.0.0` placeholder
+published.
 
 `python/` is the reference for how a target package is laid out. Read it
 alongside `docs/architecture.md`, which records the interpret-vs-generate
@@ -72,12 +73,12 @@ and two packages.
 
 The **versions** are deliberately allowed to diverge. Each package is versioned
 by what it actually ships, so `python/` moved to `0.1.0` when it started
-exporting a public API while `npm/` stays at `0.0.0` until there is an npm
-target to release. A version is most useful attached to the release that
-publishes it, so the bump belongs to the PR that makes it true rather than to
-the groundwork before it. Whether the two should share a version line once the
-npm target becomes real is a question for #23, not something to fix by bumping
-npm now.
+exporting a public API and to `0.2.0` when that API reached 0–199, while
+`npm/` stays at `0.0.0` until there is an npm target to release. A version is
+most useful attached to the release that publishes it, so the bump belongs to
+the PR that makes it true rather than to the groundwork before it. Whether the
+two should share a version line once the npm target becomes real is a question
+for #23, not something to fix by bumping npm now.
 
 The **descriptions** now diverge for the same reason. `python/` describes what
 it ships — Mizo 0–199 — while `npm/` keeps the placeholder wording, because
