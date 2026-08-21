@@ -15,6 +15,13 @@ Two kinds of test here, and the second matters more than the first:
   would pass the positive test and be worthless -- so each negative case
   names the mistake it is there to catch.
 
+Since #37 there are two layers, and they check different things. The schema
+constrains the *shape* of a document -- that `accepted_forms` maps names to
+lists of names. engine._validate_spec constrains what those names *mean* --
+that they refer to something in this file's lexicon. JSON Schema cannot
+express a cross-reference, so anything of that kind is tested against the
+loader below rather than against the schema.
+
 Validation runs against the JSON normalisation of the YAML, per
 docs/spec-format.md ("YAML for authoring; it normalises to JSON as the IR").
 That is not incidental: YAML gives integer lexicon keys, JSON object keys are
@@ -36,13 +43,26 @@ import yaml
 
 # Placeholder syntax is defined once, in the engine. The cross-reference
 # tests below read templates, so they borrow that definition rather than
-# restating the pattern and drifting from it.
-from engine import _PLACEHOLDER_RE
+# restating the pattern and drifting from it. Spec is imported because the
+# cross-reference checks now live in the loader (#37), so the tests exercise
+# it instead of reimplementing what it does.
+from engine import _PLACEHOLDER_RE, Spec
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "spec" / "spec.schema.json"
 MIZO_SPEC_PATH = REPO_ROOT / "languages" / "mizo.yaml"
 ALL_SPEC_PATHS = sorted((REPO_ROOT / "languages").glob("*.yaml"))
+
+
+def _spec_data(path: Path) -> dict:
+    """The spec as the *engine* loads it: plain YAML, integer lexicon keys.
+
+    Deliberately not _as_ir. The schema targets the JSON normalisation, where
+    keys are strings; the engine indexes the lexicon with real integers. A
+    loader test written against the IR would pass for the wrong reason.
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 
 def _as_ir(path: Path) -> dict:
@@ -86,49 +106,18 @@ def test_every_checked_in_spec_is_covered():
 
 
 @pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
-def test_accepted_forms_names_tables_and_fields_that_exist(path):
-    # accepted_forms points at the lexicon in the same file (#31), and JSON
-    # Schema cannot check a cross-reference like that -- it can only say the
-    # keys are names and the values are lists of names. A typo would validate
-    # cleanly and then do nothing at all: leniency would quietly stop
-    # applying, which is the same silent degradation #31 was filed about.
-    spec = _as_ir(path)
-    lexicon = spec["lexicon"]
-    accepted = spec.get("parse", {}).get("accepted_forms", {})
-    for table, fields in accepted.items():
-        assert table in lexicon, f"unknown lexicon table {table!r}"
-        for field in fields:
-            # At least one entry, not every entry: a language may well have
-            # an alternate form for only some of its numerals.
-            assert any(
-                field in entry for entry in lexicon[table].values()
-            ), f"no {table} entry has a {field!r} field"
-
-
-@pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
-def test_connector_precedes_names_tables_and_fields_that_exist(path):
-    # The same cross-reference JSON Schema cannot check, for the same reason as
-    # accepted_forms above (#31). connector_precedes points at the lexicon in
-    # this file, so a typo'd table or field validates cleanly and then certifies
-    # nothing: the generator quietly stops emitting the connector spellings and
-    # the only symptom is a vector table that shrank. Name the wrong key here
-    # instead of leaving that to be inferred from a count.
-    spec = _as_ir(path)
-    lexicon = spec["lexicon"]
-    parse = spec.get("parse", {})
-    precedes = parse.get("connector_precedes", {})
-    # Declaring where a connector may stand, in a language that has no
-    # connector, is a mechanism nothing can exercise (#36, #38).
-    if precedes:
-        assert parse.get("connectors"), "connector_precedes without connectors"
-    for table, fields in precedes.items():
-        assert table in lexicon, f"unknown lexicon table {table!r}"
-        for field in fields:
-            # At least one entry, not every entry: a language may carry an
-            # alternate form for only some of its numerals.
-            assert any(
-                field in entry for entry in lexicon[table].values()
-            ), f"no {table} entry has a {field!r} field"
+def test_every_checked_in_spec_loads(path):
+    # Constructing a Spec runs engine._validate_spec (#37), so this is the
+    # positive half of every cross-reference case below: both checked-in
+    # specs name tables, fields and lexicon keys that exist, every condition
+    # is inside the allowlist, and every template literal is something
+    # _tokenize removes.
+    #
+    # This replaces two tests that reimplemented those checks over the same
+    # two files. Reimplementing them meant the checked-in specs were covered
+    # and a spec loaded from anywhere else was not -- which is the gap #37
+    # was filed about, present in the test file as well as in the engine.
+    Spec(_spec_data(path))
 
 
 @pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
@@ -333,6 +322,211 @@ def test_mizo_spec_is_unchanged_by_the_negative_cases(schema, mizo_ir):
     # The mutations deep-copy, but a shallow slip in one of them would corrupt
     # the module-scoped fixture and make every later test meaningless.
     jsonschema.validate(instance=mizo_ir, schema=schema)
+
+
+# --- The loader's cross-reference checks (#37) -----------------------------
+#
+# Everything below is a mistake the schema structurally cannot catch, because
+# it is about whether a name refers to something rather than whether it is a
+# name. Each mutation changes one declared thing at a time: dropping a whole
+# key can fail for the wrong reason, and #50 showed a coarse mutation hiding a
+# gap inside the thing it mutates.
+
+
+@pytest.fixture
+def mizo_data():
+    return _spec_data(MIZO_SPEC_PATH)
+
+
+def _rule(data: dict, name: str) -> dict:
+    return next(r for r in data["grammar"]["rules"] if r["name"] == name)
+
+
+def _with_rule(data: dict, name: str, **changes) -> dict:
+    out = copy.deepcopy(data)
+    _rule(out, name).update(changes)
+    return out
+
+
+def _with_parse(data: dict, **changes) -> dict:
+    out = copy.deepcopy(data)
+    out["parse"].update(changes)
+    return out
+
+
+# The expression from #37. Accepted by the old engine when ones_digit was 0
+# and rejected when it was 1 -- the same spec valid or not depending on the
+# number being converted.
+_HIDDEN_BEHIND_OR = 'ones_digit == 0 or __import__("os").system("echo pwned") == 0'
+_HIDDEN_BEHIND_AND = 'ones_digit == 99 and __import__("os").system("echo pwned") == 0'
+
+LOAD_REJECTS = {
+    "condition hiding an unsupported node behind or": lambda s: _with_rule(
+        s, "exact_tens", condition=_HIDDEN_BEHIND_OR
+    ),
+    "condition hiding an unsupported node behind and": lambda s: _with_rule(
+        s, "exact_tens", condition=_HIDDEN_BEHIND_AND
+    ),
+    "condition naming a variable that does not exist": lambda s: _with_rule(
+        s, "exact_tens", condition="hundreds_digit == 0"
+    ),
+    "condition using an operator outside the allowlist": lambda s: _with_rule(
+        s, "exact_tens", condition="ones_digit + 1 == 1"
+    ),
+    "accepted_forms naming a table that does not exist": lambda s: _with_parse(
+        s, accepted_forms={"unitz": ["bound"]}
+    ),
+    "accepted_forms naming a field no entry has": lambda s: _with_parse(
+        s, accepted_forms={"units": ["bnud"]}
+    ),
+    "connector_precedes naming a table that does not exist": lambda s: _with_parse(
+        s, connector_precedes={"scalez": ["standalone"]}
+    ),
+    "connector_precedes naming a field no entry has": lambda s: _with_parse(
+        s, connector_precedes={"scales": ["multiplyed"]}
+    ),
+    "placeholder naming a table that does not exist": lambda s: _with_rule(
+        s, "units", output="{unitz[ones_digit].standalone}"
+    ),
+    "placeholder naming a field no entry has": lambda s: _with_rule(
+        s, "units", output="{units[ones_digit].stanalone}"
+    ),
+    "placeholder naming a lexicon key that does not exist": lambda s: _with_rule(
+        s, "ten", output="{scales[1000].standalone}"
+    ),
+    # Khasi in miniature (#48, #53): a morpheme bound to the placeholder
+    # rather than a separator between placeholders.
+    "template literal that is a bound morpheme": lambda s: _with_rule(
+        s, "exact_tens", output="{scales[10].multiplied}phew {units[tens_digit].bound}"
+    ),
+    "parse_alias literal that is a bound morpheme": lambda s: _with_rule(
+        s,
+        "compound_tens",
+        parse_aliases=["{units[tens_digit].bound}phew {units[ones_digit].bound}"],
+    ),
+    # A free-standing word literal, which is the #53 clock case: the rule
+    # renders "dar pathum" and then cannot parse it back, because the arity
+    # check sees two tokens against one placeholder.
+    "template literal that is a free word": lambda s: _with_rule(
+        s, "units", output="dar {units[ones_digit].standalone}"
+    ),
+    # Two placeholders with nothing between them: the concatenation shape
+    # from #48. Renders as one token, so the arity check can never match it.
+    "placeholders written adjacent": lambda s: _with_rule(
+        s, "teens", output="{scales[10].standalone}{units[ones_digit].standalone}"
+    ),
+    # Being a connector is not enough on its own -- it also has to separate.
+    # This renders "sawmlehpakhat" as a single token.
+    "placeholders joined by a connector with no separator": lambda s: _with_rule(
+        s, "teens", output="{scales[10].standalone}leh{units[ones_digit].standalone}"
+    ),
+    # The schema can require two integers, not that the first is the smaller.
+    # _find_rule tests low <= n <= high, so this rule can never fire, and the
+    # symptom is an error naming the number rather than the rule.
+    "range that is inverted, so the rule can never match": lambda s: _with_rule(
+        s, "exact_tens", range=[99, 20]
+    ),
+}
+
+
+@pytest.mark.parametrize("description", sorted(LOAD_REJECTS))
+def test_load_rejects_what_the_schema_cannot_express(description, mizo_data):
+    broken = LOAD_REJECTS[description](mizo_data)
+    with pytest.raises(ValueError):
+        Spec(broken)
+
+
+@pytest.mark.parametrize("description", sorted(LOAD_REJECTS))
+def test_the_schema_alone_would_accept_all_of_them(schema, description, mizo_data):
+    # This is what makes the loader pass worth having rather than schema work.
+    # Every case above is a well-formed document by the schema's rules and a
+    # broken spec by the engine's. If one of these ever starts failing schema
+    # validation, the schema has grown the ability to express it and the
+    # loader check became redundant -- worth finding out deliberately.
+    broken = LOAD_REJECTS[description](mizo_data)
+    jsonschema.validate(instance=json.loads(json.dumps(broken)), schema=schema)
+
+
+def test_a_condition_is_rejected_before_any_number_is_converted(mizo_data):
+    # The shape of #37, stated directly. The old engine checked nodes as it
+    # reached them, so this spec was accepted for numbers whose ones digit was
+    # 0 -- the short-circuit meant the offending subtree was never visited --
+    # and rejected for the rest. Validity depended on the input, which is not
+    # a property a spec is allowed to have.
+    broken = _with_rule(mizo_data, "exact_tens", condition=_HIDDEN_BEHIND_OR)
+    with pytest.raises(ValueError, match="exact_tens"):
+        Spec(broken)
+
+
+@pytest.mark.parametrize("section", ["lexicon", "grammar"])
+def test_a_spec_missing_a_whole_section_is_named_not_crashed(mizo_data, section):
+    # Deliberately NOT in LOAD_REJECTS: the schema has `required` and catches
+    # both of these, so the companion test's claim -- that the schema accepts
+    # every case in that list -- would be false for them. It said so on the
+    # first run, which is the check working.
+    #
+    # Kept anyway, because _validate_spec reaches data["lexicon"] before
+    # anything else, and a function called "validate" reporting
+    # KeyError: 'lexicon' reads as a crash rather than a verdict.
+    broken = {k: v for k, v in mizo_data.items() if k != section}
+    with pytest.raises(ValueError, match=section):
+        Spec(broken)
+
+
+# Same reasoning as the missing-section test above, and not in LOAD_REJECTS
+# for the same reason: output and condition are both `type: string` in the
+# schema, so these are schema-catchable too. Found auditing this PR, not in
+# #37 as filed -- a wrong-typed output or condition used to reach ast.parse
+# or a regex three calls down and surface as TypeError, which nothing else
+# here does.
+TYPE_MISMATCHES = {
+    "output is not a string": lambda s: _with_rule(s, "units", output=5),
+    "output is missing": lambda s: {
+        **s,
+        "grammar": {
+            "rules": [
+                {k: v for k, v in r.items() if k != "output"}
+                if r["name"] == "units" else r
+                for r in s["grammar"]["rules"]
+            ]
+        },
+    },
+    "condition is not a string": lambda s: _with_rule(s, "exact_tens", condition=True),
+    "a parse_aliases entry is not a string": lambda s: _with_rule(
+        s, "compound_tens", parse_aliases=[5]
+    ),
+}
+
+
+@pytest.mark.parametrize("description", sorted(TYPE_MISMATCHES))
+def test_a_wrong_typed_rule_field_is_named_not_crashed(description, mizo_data):
+    broken = TYPE_MISMATCHES[description](mizo_data)
+    with pytest.raises(ValueError, match="must be a string"):
+        Spec(broken)
+
+
+def test_connector_precedes_without_connectors_is_rejected():
+    # Built on English rather than Mizo, and that is the whole point of the
+    # test. Stripping `connectors` from mizo.yaml also strips the meaning of
+    # the "leh" literal in the hundreds templates, so the literal check fires
+    # first and the case passes without the connectors-required check existing
+    # at all -- found by mutating that check away and watching nothing fail.
+    #
+    # English has connectors but no rule in 0-99 emits one, so removing them
+    # leaves every template still valid and isolates the case.
+    data = _spec_data(REPO_ROOT / "languages" / "en.yaml")
+    data["parse"]["connector_precedes"] = {"units": ["word"]}
+    Spec(data)  # with connectors present, this is a fine spec
+
+    data["parse"]["connectors"] = []
+    with pytest.raises(ValueError, match="without any connectors"):
+        Spec(data)
+
+
+def test_the_checked_in_spec_survives_the_loader_mutations(mizo_data):
+    # Same guard as the schema block above: a shallow slip in any mutation
+    # would corrupt the spec every other test in this module reads.
+    Spec(mizo_data)
 
 
 # --- Note on languages/en.yaml --------------------------------------------

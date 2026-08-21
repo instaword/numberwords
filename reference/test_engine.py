@@ -550,6 +550,14 @@ def test_leniency_follows_the_table_the_spec_names(spec):
                 for template in rule["parse_aliases"]
             ]
     data["parse"]["accepted_forms"] = {"digits": ["standalone", "bound"]}
+    # connector_precedes names the same table and has to be renamed with it.
+    # It was added after this test (#19) and missed here; the reference is
+    # inert for what this test asserts -- only the vector generator reads
+    # connector_precedes, and this test only parses -- but it is still a
+    # dangling cross-reference, and the load-time check (#37) says so.
+    precedes = data["parse"].get("connector_precedes", {})
+    if "units" in precedes:
+        precedes["digits"] = precedes.pop("units")
     renamed = Spec(data)
 
     assert renamed.text_to_number("pakhat") == 1
