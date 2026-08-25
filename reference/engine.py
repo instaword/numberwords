@@ -195,6 +195,19 @@ def _validate_condition_node(node):
     raise ValueError(f"Unsupported expression in condition: {ast.dump(node)}")
 
 
+def _rule_name(rule: dict) -> str:
+    """The name to blame in an error message, or a stand-in.
+
+    A rule with no name is a schema violation, so this default should be
+    unreachable through any supported route. It exists because _validate_spec
+    promises a verdict: reporting KeyError('name') from inside a function
+    called "validate" reads as a crash rather than an answer. Defined once
+    because three separate loops need it, and three copies of the fallback
+    string is the duplication #37 is about, in miniature.
+    """
+    return rule.get("name", "<unnamed rule>")
+
+
 def _field_exists(lexicon: dict, table: str, field: str) -> bool:
     # At least one entry, not every entry: a language may carry an alternate
     # form for only some of its numerals.
@@ -252,7 +265,7 @@ def _validate_spec(data: dict) -> None:
     # calls down inside ast.parse or a regex, either of which this function
     # promises not to do. Found auditing #37 rather than filed against it.
     for rule in rules:
-        name = rule.get("name", "<unnamed rule>")
+        name = _rule_name(rule)
         output = rule.get("output")
         if not isinstance(output, str):
             raise ValueError(
@@ -297,7 +310,7 @@ def _validate_spec(data: dict) -> None:
         try:
             _validate_condition_node(ast.parse(condition, mode="eval").body)
         except (ValueError, SyntaxError) as exc:
-            raise ValueError(f"rule {rule['name']!r}: {exc}") from None
+            raise ValueError(f"rule {_rule_name(rule)!r}: {exc}") from None
 
     # accepted_forms (#31) and connector_precedes (#19) have the same shape:
     # a lexicon table mapped to a list of its fields.
@@ -316,10 +329,11 @@ def _validate_spec(data: dict) -> None:
         raise ValueError("parse.connector_precedes declared without any connectors")
 
     for rule in rules:
+        name = _rule_name(rule)
         for template in [rule["output"], *rule.get("parse_aliases", [])]:
-            _validate_placeholders(rule["name"], template, lexicon)
+            _validate_placeholders(name, template, lexicon)
             _validate_literals(
-                rule["name"], template, separator_pattern, connectors, parse
+                name, template, separator_pattern, connectors, parse
             )
 
 
@@ -358,22 +372,35 @@ def _validate_literals(
     rule_name: str, template: str, separator_pattern: str, connectors: set,
     parse_config: dict,
 ) -> None:
-    """Every template literal is a word separator or a declared connector.
+    """Every template literal is a separator or connector, and separates.
 
-    _rule_matches compares placeholders and ignores literals, so a literal
-    has to be something _tokenize also removes. A literal that is neither is
-    emitted on output and matched on neither side, and the rule then rejects
-    its own canonical output -- reproduced on #53, where a `"dâr {units[...]}"`
-    rule renders 3 as `dâr pathum` and then fails to parse it, while bare
-    `pathum` still parses. That breaks the round-trip property
-    docs/architecture.md treats as non-negotiable.
+    Two clauses, and the second is the one with teeth. _rule_matches
+    compares placeholders and ignores literals, so a literal has to be
+    something _tokenize also removes. A literal that is neither is emitted
+    on output and matched on neither side, and the rule then rejects its own
+    canonical output -- reproduced on #53, where a `"dâr {units[...]}"` rule
+    renders 3 as `dâr pathum` and then fails to parse it, while bare `pathum`
+    still parses. That breaks the round-trip property docs/architecture.md
+    treats as non-negotiable.
 
-    This is not a new restriction. It is the rule
+    Being removable is necessary and not sufficient. A literal must also put
+    a separator at every boundary where a placeholder abuts it, or the two
+    render as one token and the arity check can never match. `leh` is a
+    declared connector and every one of `"leh{a}"`, `"{a}leh"`, `"{a} leh{b}"`
+    and `"{a}leh {b}"` satisfies the first clause while failing to parse its
+    own output.
+
+    The first clause is not a new restriction: it is the rule
     packages/python/tests/test_render_internals.py already asserts over the
     compiled Mizo rules, moved to load so it covers any spec rather than the
-    checked-in ones. It is also a rule with a known expiry: #48 and #53 both
-    need literals that carry meaning, and the engine change they share is
-    exactly "require literals to be present, and segment bound ones". When
+    checked-in ones. The second is new, and that test is deliberately left
+    alone -- it reads the compiled Mizo rules, which cannot exhibit any of
+    the four shapes above, so strengthening it there would assert something
+    no input can violate. The boundary rule belongs where a spec arrives.
+
+    It is also a rule with a known expiry: #48 and #53 both need literals
+    that carry meaning, and the engine change they share is exactly
+    "require literals to be present, and segment bound ones". When
     the matcher learns that, this check narrows rather than disappears --
     and until it does, failing loudly here beats a spec that silently does
     not round-trip.
@@ -391,18 +418,42 @@ def _validate_literals(
                     f"word separator nor a connector, so it would be emitted on "
                     f"output and matched on neither side"
                 )
-        # A literal *between* two placeholders must also actually separate
-        # them. Being a connector is not enough: "{a}leh{b}" renders the two
-        # lexicon values run together as one token, so the arity check sees
-        # one token against two placeholders and the rule cannot parse its
-        # own output. Same for an empty literal, which is two placeholders
-        # written adjacent -- the concatenation shape from #48.
-        between = 0 < position < placeholder_count
-        if between and not re.search(separator_pattern, literal):
+        # Being a connector is not enough: a literal also has to separate the
+        # placeholders it abuts, and that invariant is per *boundary* rather
+        # than per literal. "Is a separator present somewhere in this literal"
+        # passes "{a} leh{b}" on the strength of the space on the left while
+        # the right-hand boundary still renders run together, and it never
+        # looks at an edge literal at all. So each side is asked separately:
+        # a placeholder on the left needs the literal to begin with a
+        # separator, a placeholder on the right needs it to end with one.
+        #
+        # An empty literal at either edge is just a template that starts or
+        # ends with a placeholder. Between two placeholders it is adjacency,
+        # and it fails both clauses -- the concatenation shape from #48.
+        #
+        # separator_pattern is a bare alternation, so the end-anchored search
+        # needs the non-capturing group: re.search(r"\ |\-$", s) parses as
+        # (space anywhere) OR (dash at the end), which is true of any literal
+        # containing a space. re.match does not need it -- every branch is
+        # anchored at the start already -- but it is written the same way so
+        # that the two read alike and neither invites the mistake.
+        if not literal and position in (0, placeholder_count):
+            continue
+        if position > 0 and not re.match(f"(?:{separator_pattern})", literal):
             raise ValueError(
-                f"rule {rule_name!r}: placeholders are joined by {literal!r}, "
-                f"which contains no word separator, so they would render as a "
-                f"single token and the rule could not parse its own output"
+                f"rule {rule_name!r}: template literal {literal!r} does not "
+                f"begin with a word separator, so it renders run together "
+                f"with the placeholder on its left as a single token and the "
+                f"rule could not parse its own output"
+            )
+        if position < placeholder_count and not re.search(
+            f"(?:{separator_pattern})$", literal
+        ):
+            raise ValueError(
+                f"rule {rule_name!r}: template literal {literal!r} does not "
+                f"end with a word separator, so it renders run together with "
+                f"the placeholder on its right as a single token and the rule "
+                f"could not parse its own output"
             )
 
 
