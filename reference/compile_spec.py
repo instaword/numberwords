@@ -22,10 +22,9 @@ import ast
 from pathlib import Path
 
 from engine import (
-    _BOOL_COMBINERS,
-    _COMPARISONS,
     _PLACEHOLDER_RE,
-    _positional_variables,
+    _VARIABLE_NAMES,
+    _validate_condition_node,
     load,
 )
 
@@ -36,8 +35,10 @@ ARTIFACT_PATH = (
 )
 
 # The positional variable names a placeholder key or a condition may use.
-# Derived from the engine so the two cannot disagree.
-VARIABLE_NAMES = frozenset(_positional_variables(0))
+# The engine builds this set for its own load-time validation (#37); take
+# that one rather than building a second from the same call, which is the
+# duplication this issue is about in miniature.
+VARIABLE_NAMES = _VARIABLE_NAMES
 
 _HEADER = '''"""Compiled from languages/mizo.yaml by reference/compile_spec.py.
 
@@ -84,36 +85,15 @@ def _parse_template(template):
 # test instead of relying only on the vectors.
 
 
-def _validate_condition(node):
-    """Raises ValueError if the condition contains anything engine._eval_node
-    would not allow. Validation runs before the tree is rewritten, so an
-    invalid expression is never turned back into code.
-    """
-    if isinstance(node, ast.Compare):
-        for op in node.ops:
-            if type(op) not in _COMPARISONS:
-                raise ValueError(
-                    f"Unsupported comparison operator: {type(op).__name__}"
-                )
-        _validate_condition(node.left)
-        for comparator in node.comparators:
-            _validate_condition(comparator)
-        return
-    if isinstance(node, ast.BoolOp):
-        if type(node.op) not in _BOOL_COMBINERS:
-            raise ValueError(
-                f"Unsupported boolean operator: {type(node.op).__name__}"
-            )
-        for value in node.values:
-            _validate_condition(value)
-        return
-    if isinstance(node, ast.Name):
-        if node.id not in VARIABLE_NAMES:
-            raise ValueError(f"Unknown variable in condition: {node.id!r}")
-        return
-    if isinstance(node, ast.Constant) and isinstance(node.value, int):
-        return
-    raise ValueError(f"Unsupported expression in condition: {ast.dump(node)}")
+# The allowlist moved into engine.py in #37, where it now also runs over the
+# whole tree when a spec is loaded. The compiler keeps validating before it
+# emits -- docs/architecture.md: "Never emit an unvalidated string" -- it just
+# stops being the only place that checks, and stops being a second
+# implementation that could drift from the oracle's.
+#
+# Kept under the local name because _compile_condition and
+# test_compile_spec.py both call it.
+_validate_condition = _validate_condition_node
 
 
 class _NameToLookup(ast.NodeTransformer):
