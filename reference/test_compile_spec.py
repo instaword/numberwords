@@ -266,9 +266,7 @@ def test_compiled_parse_config_matches_the_spec(spec, artifact):
     parse = artifact.PARSE
     assert parse["case_insensitive"] == config.get("case_insensitive", False)
     assert parse["strip_diacritics"] == config.get("strip_diacritics", False)
-    assert parse["word_separators"] == tuple(
-        config.get("word_separators", [" "])
-    )
+    assert parse["word_separators"] == tuple(config.get("word_separators", []))
     # accepted_forms keeps its tables and the order of each field list --
     # order decides which form a target tries first. The lists become
     # tuples on the way in, so compare contents rather than types.

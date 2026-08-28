@@ -34,15 +34,88 @@ class NumberWordsError(ValueError):
     """
 
 
-# --- Spec-derived constants -------------------------------------------------
+# --- Parsing constants ------------------------------------------------------
 #
-# The engine recomputes these on every call because it can be handed a new
-# spec at any time. Here the spec is compiled in and cannot change, so they
-# are built once at import. Same values, computed once.
+# The spec-derived ones the engine recomputes on every call, because it can
+# be handed a new spec at any time. Here the spec is compiled in and cannot
+# change, so they are built once at import. Same values, computed once.
+#
+# _WHITESPACE and _IGNORABLE are not spec-derived at all: since #46 they are
+# properties of text that every language shares, so they are stated here
+# rather than read out of the compiled spec.
 
-_SEPARATOR_RE = re.compile(
-    "|".join(re.escape(sep) for sep in PARSE.get("word_separators", (" ",)))
+# Unicode's White_Space property, enumerated. The engine's _WHITESPACE, and
+# it has to be stated here rather than read out of the compiled spec: after
+# #46 a spec declares only its non-whitespace separators, so
+# PARSE["word_separators"] is ("-",) and a renderer trusting it alone would
+# silently stop splitting on spaces.
+#
+# Neither runtime's convenience function is this set. Python's str.isspace()
+# -- and re's \s, which matches it exactly -- also accepts U+001C-U+001F;
+# JavaScript's \s also accepts U+FEFF. Implementing the named property is
+# what keeps two targets agreeing, and no conformance vector can check it:
+# every accepted_input is built by joining words with a separator the
+# generator chose, so none contains an exotic space. tests/ pins this
+# against str.isspace() on this side too.
+_WHITESPACE = (
+    "\t\n\v\f\r"                            # U+0009-U+000D
+    " "                                     # U+0020 SPACE
+    "\x85"                                  # U+0085 NEXT LINE
+    "\xa0"                                  # U+00A0 NO-BREAK SPACE
+    "\u1680"                                # U+1680 OGHAM SPACE MARK
+    "\u2000\u2001\u2002\u2003\u2004\u2005"
+    "\u2006\u2007\u2008\u2009\u200a"        # U+2000-U+200A
+    "\u2028"                                # U+2028 LINE SEPARATOR
+    "\u2029"                                # U+2029 PARAGRAPH SEPARATOR
+    "\u202f"                                # U+202F NARROW NO-BREAK SPACE
+    "\u205f"                                # U+205F MEDIUM MATHEMATICAL SPACE
+    "\u3000"                                # U+3000 IDEOGRAPHIC SPACE
 )
+
+_WHITESPACE_CLASS = "[{}]".format("".join(re.escape(ch) for ch in _WHITESPACE))
+
+# Declared separators first, so a multi-character one is tried before a
+# single whitespace character that could match inside it.
+_SEPARATOR_RE = re.compile(
+    "|".join(
+        [
+            *(re.escape(sep) for sep in PARSE.get("word_separators", ())),
+            _WHITESPACE_CLASS,
+        ]
+    )
+)
+
+
+# Zero-width and format characters, removed from every word before it is
+# compared.
+#
+# The engine decision (#46): strip, rather than treat as a separator or
+# reject. The dominant real case is a BOM at position 0 -- a file read as
+# utf-8-sig, a Windows copy-paste -- where stripping and separating behave
+# identically. The exotic cases decide it: rejecting is hostile, because the
+# string looks correct in a terminal and the caller did not put the character
+# there, and calling one a separator asserts a boundary meaning these
+# characters do not have. The one case where separator would win, U+200B as
+# the only thing between two words, does not arise in Latin-script Mizo.
+#
+# An explicit list rather than the Default_Ignorable_Code_Point property,
+# which covers exactly these six for our purposes but needs the third-party
+# regex package to test in Python -- and this library is deliberately
+# dependency-free. Hardcoding that property's table instead would reintroduce
+# the problem #46 exists to remove: it changes between Unicode versions, so
+# two targets built against different versions would disagree. Six characters
+# covers anything realistic and cannot drift.
+_IGNORABLE = {
+    ord(ch): None
+    for ch in (
+        "\u200b"    # ZERO WIDTH SPACE
+        "\ufeff"    # ZERO WIDTH NO-BREAK SPACE / BOM
+        "\u2060"    # WORD JOINER
+        "\u200c"    # ZERO WIDTH NON-JOINER
+        "\u200d"    # ZERO WIDTH JOINER
+        "\u00ad"    # SOFT HYPHEN
+    )
+}
 
 
 def _normalize_word(word: str) -> str:
@@ -53,7 +126,13 @@ def _normalize_word(word: str) -> str:
     never changes what number_to_text() emits, which keeps its diacritics
     and its casing. Applying it to one side only would stop the canonical
     spelling matching itself.
+
+    The ignorable-character strip is unconditional rather than a parse
+    flag, for the same reason whitespace is (#46): it is a property of
+    text, not of a language. It runs first so the flags below see the
+    word a reader would, and it is a no-op on authored lexicon entries.
     """
+    word = word.translate(_IGNORABLE)
     if PARSE.get("case_insensitive", False):
         word = word.lower()
     if PARSE.get("strip_diacritics", False):

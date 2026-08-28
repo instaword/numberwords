@@ -195,8 +195,11 @@ def _format_parse(spec):
         "PARSE = {",
         f"    'case_insensitive': {config.get('case_insensitive', False)!r},",
         f"    'strip_diacritics': {config.get('strip_diacritics', False)!r},",
+        # Default is empty, not [' ']: since #46 whitespace is a separator
+        # in every language and the renderer applies it, so a spec that
+        # declares nothing here has no *extra* separators rather than one.
         f"    'word_separators': "
-        f"{tuple(config.get('word_separators', [' ']))!r},",
+        f"{tuple(config.get('word_separators', []))!r},",
         f"    'accepted_forms': {accepted!r},",
         f"    'connectors': {connectors!r},",
         f"    'aliases': {aliases!r},",

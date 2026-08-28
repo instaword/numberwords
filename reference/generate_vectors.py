@@ -52,8 +52,10 @@ from pathlib import Path
 from engine import (
     _PLACEHOLDER_RE,
     _find_rule,
+    _joinable_separators,
     _positional_variables,
     _render,
+    _separator_pattern,
     _strip_diacritics,
     load,
 )
@@ -132,10 +134,10 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
 
     Word separators are handled the same way, and for the same reason. The
     literal text a template puts between its placeholders is not necessarily
-    word_separators[0] -- English writes "forty-two" with a hyphen that is
-    both literal output and a separator -- so the canonical string is taken
-    from the renderer and the separator variant is an *alternate* joiner
-    rather than "the second one in the list".
+    the first effective separator -- English writes "forty-two" with a hyphen
+    that is both literal output and a separator -- so the canonical string is
+    taken from the renderer and the separator variant is an *alternate*
+    joiner rather than "the second one in the list".
 
     Two assumptions hold this up, and both are load-bearing.
 
@@ -162,10 +164,11 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
     """
     variables = _positional_variables(n)
     rule = _find_rule(spec.rules, n, variables)
-    separators = spec.parse_config.get("word_separators", [" "])
+    separators = _joinable_separators(spec.parse_config)
+    separator_pattern = _separator_pattern(spec.parse_config)
 
     canonical = _render(rule["output"], spec.lexicon, variables)
-    canonical_words = _split_words(canonical, separators)
+    canonical_words = _split_words(canonical, separator_pattern)
     canonical_joiner, alternates = _joiners(canonical, canonical_words, separators)
     slots = _connector_slots(spec, rule, canonical_words)
     features = _applicable_respellings(
@@ -179,7 +182,7 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
         # joined by every separator rather than only an alternate one. This
         # is not a claim about which strings are Mizo -- it is a check that
         # the engine's tolerances genuinely compose.
-        for words in _all_renderings(spec, rule, variables, separators):
+        for words in _all_renderings(spec, rule, variables, separator_pattern):
             available = _connector_gaps(spec, words, ("connector",), (), every_gap=True)
             # Connector and separator are varied explicitly here -- by gap and
             # by joiner -- so neither is also varied as a respelling feature,
@@ -195,8 +198,8 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
                         variants.add(_respell(words, spec, subset, gaps, joiner))
     else:
         # The rendered string itself, not a rebuild of it from its words: a
-        # template's literal text is not always word_separators[0], and
-        # re-joining would drop the one string this list must contain.
+        # template's literal text is not always the first effective separator,
+        # and re-joining would drop the one string this list must contain.
         variants.add(canonical)
         for feature in features:
             gaps = _connector_gaps(spec, canonical_words, (feature,), slots)
@@ -284,9 +287,10 @@ def _joiners(canonical: str, words, separators) -> tuple:
     """The separator the canonical rendering uses, and the alternates to it.
 
     A template's placeholders are joined by whatever literal text sits
-    between them, which is not necessarily word_separators[0]: English
-    renders 42 as "forty-two", where the hyphen is both literal output and a
-    separator (docs/spec-format.md). Treating the first separator as
+    between them, which is not necessarily the first effective separator
+    (_joinable_separators, whitespace first since #46): English renders 42 as
+    "forty-two", where the hyphen is both literal output and a separator
+    (docs/spec-format.md). Treating the first separator as
     canonical produced "forty two" as the "canonical" variant and left the
     real one to arrive by luck, as the alternate-separator variant, which
     only worked because the hyphen happened to be second in en.yaml's list.
@@ -308,8 +312,7 @@ def _template_tokens(spec, rule) -> list:
     the two lists are the same length rather than zip them -- a lexicon
     value containing a separator would break the correspondence silently.
     """
-    separators = spec.parse_config.get("word_separators", [" "])
-    pattern = "|".join(re.escape(sep) for sep in separators)
+    pattern = _separator_pattern(spec.parse_config)
     return [token for token in re.split(pattern, rule["output"]) if token]
 
 
@@ -445,9 +448,12 @@ def _connector_gaps(spec, words, features, slots, every_gap: bool = False) -> tu
     return tuple(slots)
 
 
-def _all_renderings(spec, rule, variables, separators) -> list:
+def _all_renderings(spec, rule, variables, separator_pattern) -> list:
     templates = [rule["output"], *_alternate_templates(spec, rule)]
-    return [_split_words(_render(t, spec.lexicon, variables), separators) for t in templates]
+    return [
+        _split_words(_render(t, spec.lexicon, variables), separator_pattern)
+        for t in templates
+    ]
 
 
 def _subsets(items) -> list:
@@ -459,9 +465,8 @@ def _subsets(items) -> list:
     ]
 
 
-def _split_words(text: str, separators) -> list:
-    pattern = "|".join(re.escape(sep) for sep in separators)
-    return [word for word in re.split(pattern, text) if word]
+def _split_words(text: str, separator_pattern: str) -> list:
+    return [word for word in re.split(separator_pattern, text) if word]
 
 
 def build_vectors(spec) -> list:

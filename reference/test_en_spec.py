@@ -147,7 +147,10 @@ def test_generator_keeps_the_canonical_output_verbatim(en):
     assert generate_vectors.accepted_inputs(en, 42).count("forty-two") == 1
 
     shuffled = copy.deepcopy(en._data)
-    shuffled["parse"]["word_separators"] = [" ", "/", "-"]
+    # Whitespace is implicit since #46, so only the non-whitespace
+    # separators are declared; the effective list the generator sees is
+    # still (space, "/", "-"), which keeps "-" out of first place.
+    shuffled["parse"]["word_separators"] = ["/", "-"]
     reordered = Spec(shuffled)
     assert reordered.number_to_text(42) == "forty-two"
     assert "forty-two" in generate_vectors.accepted_inputs(reordered, 42)
