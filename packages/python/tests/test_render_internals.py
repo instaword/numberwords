@@ -131,8 +131,9 @@ def test_spelling_aliases_resolve_to_the_canonical_word(monkeypatch):
     ],
 )
 def test_stray_and_repeated_separators_are_ignored(text):
-    # #40. Splitting on word_separators leaves an empty string wherever two
-    # separators meet or one sits at either end, and _tokenize drops those.
+    # #40. Splitting on the effective separators leaves an empty string
+    # wherever two separators meet or one sits at either end, and _tokenize
+    # drops those.
     # The vectors cannot reach it -- every accepted_input is built by
     # joining words, so all of them are well-formed -- and the engine has
     # the same behaviour and the same gap.
@@ -197,3 +198,92 @@ def test_the_shipped_package_imports_nothing_it_promised_not_to():
     for module in modules:
         source = module.read_text(encoding="utf-8")
         assert not banned.search(source), module.name
+
+
+# --- #46: whitespace, and the characters that are only nearly whitespace ----
+#
+# Mirrored from reference/test_engine.py rather than shared, because the two
+# implementations are meant to be independent -- and because conformance
+# cannot join them here: every accepted_input in vectors/mizo.json is built by
+# joining words with a separator the generator chose, so no vector contains an
+# exotic space. Both sides pin themselves to the specification, not to each
+# other, which is what "a target implements a specification" means in #46.
+
+
+def test_the_whitespace_set_is_unicode_white_space():
+    # Same guard as the engine's, stated independently. str.isspace() is wrong
+    # by exactly four characters and never by fewer, and re's \s is the same
+    # set again, so subtracting those four is the entire correction a Python
+    # target needs. A Unicode update that moved the property would fail here.
+    over_matched = {"\x1c", "\x1d", "\x1e", "\x1f"}
+    derived = {chr(c) for c in range(0x110000) if chr(c).isspace()}
+    assert set(_render._WHITESPACE) == derived - over_matched
+    assert len(_render._WHITESPACE) == len(set(_render._WHITESPACE)) == 25
+
+
+def test_the_renderer_does_not_trust_the_compiled_separator_tuple():
+    # The mistake #46 sets up and this test closes. After the spec dropped
+    # " ", PARSE["word_separators"] is ("-",) -- a renderer that builds its
+    # split from that alone stops splitting on spaces while every other test
+    # here still passes on single-word input. Stated as a property of the
+    # compiled artifact so it fails if a future spec edit re-adds " " and
+    # hides the dependency again.
+    assert " " not in _render.PARSE["word_separators"]
+    assert numberwords.text_to_number("sawm nga pariat") == 58
+
+
+@pytest.mark.parametrize(
+    "gap",
+    [
+        "\t", "\n", "\v", "\f", "\r",   # U+0009-U+000D
+        "\x85",                         # NEXT LINE
+        "\xa0",                         # NO-BREAK SPACE
+        "\u1680",                       # OGHAM SPACE MARK
+        "\u2003",                       # EM SPACE
+        "\u2028",                       # LINE SEPARATOR
+        "\u2029",                       # PARAGRAPH SEPARATOR
+        "\u202f",                       # NARROW NO-BREAK SPACE
+        "\u205f",                       # MEDIUM MATHEMATICAL SPACE
+        "\u3000",                       # IDEOGRAPHIC SPACE
+        "  ",                           # repeated
+        " \t ",                         # mixed
+    ],
+)
+def test_any_unicode_whitespace_separates_words(gap):
+    assert numberwords.text_to_number("sawm" + gap + "nga pariat") == 58
+
+
+@pytest.mark.parametrize("char", ["\x1c", "\x1d", "\x1e", "\x1f"])
+def test_a_c0_separator_that_is_not_white_space_is_rejected(char):
+    # The case that fails closed. A target built on str.isspace() parses this
+    # and diverges from the oracle while passing every vector, so this test is
+    # the only thing standing there on this side too.
+    with pytest.raises(numberwords.NumberWordsError):
+        numberwords.text_to_number("sawm" + char + "nga pariat")
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "\ufeffsawm nga pariat",    # BOM at position 0 -- the dominant real case
+        "sawm nga pariat\ufeff",
+        "sawm \ufeffnga pariat",
+        "sa\xadwm nga pariat",      # SOFT HYPHEN inside a word
+        "\u200bsawm nga pariat",    # ZERO WIDTH SPACE at an edge
+        "sawm\u2060 nga pariat",    # WORD JOINER beside a real separator
+    ],
+)
+def test_ignorable_characters_are_stripped(text):
+    assert numberwords.text_to_number(text) == 58
+
+
+def test_a_zero_width_character_is_not_a_separator():
+    # Stripped, not treated as a separator (#46), so this reads as one
+    # run-together word and matches nothing. The intended answer, not a gap.
+    with pytest.raises(numberwords.NumberWordsError):
+        numberwords.text_to_number("sawm\u200bnga pariat")
+
+
+def test_the_declared_separator_still_works_beside_whitespace():
+    assert numberwords.text_to_number("sawm-nga pariat") == 58
+    assert numberwords.text_to_number("sawm\t-\xa0nga pariat") == 58
