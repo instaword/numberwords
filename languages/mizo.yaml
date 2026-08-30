@@ -27,7 +27,10 @@
 meta:
   language: Mizo
   code: lus           # ISO 639-3 for Lushai/Mizo.
-  version: 0.3.0      # 0.3.0: supports.max raised to 199, and parse gained
+  version: 0.4.0      # 0.4.0: word_separators declares only the
+                      # non-whitespace separators; whitespace belongs to
+                      # the engine (#46).
+                      # 0.3.0: supports.max raised to 199, and parse gained
                       # connector_precedes (#19).
                       # 0.2.0: accepted_forms now names the table and fields
                       # it applies to, instead of Mizo-specific flags (#31).
@@ -159,7 +162,15 @@ parse:
                            # keyboard. Applied to both sides before comparing,
                            # like case_insensitive above. number_to_text()
                            # still writes the correct diacritics.
-  word_separators: [" ", "-"]
+  word_separators: ["-"]   # Decision (#46): declare only the non-whitespace
+                           # separators. Unicode White_Space is a separator
+                           # everywhere and the engine applies it, so listing
+                           # " " here would be redundant -- and would let a
+                           # target split on the declared list alone, ignore
+                           # the whitespace rule, and still pass every vector,
+                           # because the canonical output uses a space. Same
+                           # reasoning as accepted_forms listing only the
+                           # extras (#31, #38).
   # The *extra* fields a lone digit may also be spoken in, per lexicon
   # table. The units rule writes `standalone` ("pakhat" for 1), and the
   # field a rule writes is always accepted, so only the extra form is

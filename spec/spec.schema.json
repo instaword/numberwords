@@ -149,7 +149,7 @@
           "type": "array",
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 },
-          "description": "Strings the input may be split on, e.g. [' ', '-']."
+          "description": "Non-whitespace strings the input may also be split on, e.g. ['-']. Unicode White_Space is a separator in every language and is applied by the engine rather than declared here (#46), so listing ' ' would be redundant -- and would let a target split on only the declared list, ignore the whitespace rule, and still pass every vector. Omit the property entirely for a language whose only separators are whitespace."
         },
         "accepted_forms": {
           "type": "object",

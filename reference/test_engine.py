@@ -32,7 +32,13 @@ from pathlib import Path
 import pytest
 
 import generate_vectors
-from engine import Spec, load
+from engine import (
+    _WHITESPACE,
+    Spec,
+    _joinable_separators,
+    _separator_pattern,
+    load,
+)
 
 MIZO_SPEC_PATH = Path(__file__).resolve().parent.parent / "languages" / "mizo.yaml"
 VECTORS_PATH = Path(__file__).resolve().parent.parent / "vectors" / "mizo.json"
@@ -203,11 +209,18 @@ def test_certified_connectors_are_followed_by_a_top_level_addend(spec, vectors):
     }
     for entry in spec.lexicon["scales"].values():
         addends.update(spec._normalize_word(form) for form in entry.values())
-    separators = spec.parse_config["word_separators"]
+    # The effective separators, not parse.word_separators: since #46 that
+    # declares only the non-whitespace ones, and splitting on it alone
+    # would silently stop examining every space-joined candidate -- which
+    # is all of the canonical ones.
+    separator_pattern = _separator_pattern(spec.parse_config)
     connector = spec._normalize_word(spec.parse_config["connectors"][0])
     for vector in vectors:
         for candidate in vector["accepted_inputs"]:
-            words = [spec._normalize_word(w) for w in re.split("|".join(separators), candidate)]
+            words = [
+                spec._normalize_word(w)
+                for w in re.split(separator_pattern, candidate)
+            ]
             for before, after in zip(words, words[1:]):
                 if before == connector:
                     assert after in addends, f"{candidate!r} in n={vector['number']}"
@@ -252,10 +265,14 @@ def test_no_generated_input_doubles_the_connector(spec):
     # removing the check from _connector_slots fails this immediately,
     # rather than only after someone regenerates.
     connector = spec._normalize_word(spec.parse_config["connectors"][0])
-    separators = spec.parse_config["word_separators"]
+    # Effective separators, for the reason given in the connector test above.
+    separator_pattern = _separator_pattern(spec.parse_config)
     for n in generate_vectors.numbers_to_cover(spec):
         for candidate in generate_vectors.accepted_inputs(spec, n):
-            words = [spec._normalize_word(w) for w in re.split("|".join(separators), candidate)]
+            words = [
+                spec._normalize_word(w)
+                for w in re.split(separator_pattern, candidate)
+            ]
             for before, after in zip(words, words[1:]):
                 assert not (before == connector and after == connector), f"{candidate!r} n={n}"
 
@@ -391,7 +408,7 @@ def test_text_to_number_is_case_insensitive(spec):
     ],
 )
 def test_stray_and_repeated_separators_are_ignored(spec, text):
-    # Splitting on word_separators leaves an empty string wherever two
+    # Splitting on the effective separators leaves an empty string wherever two
     # separators meet or one sits at either end; _tokenize drops those.
     # No vector can reach this (#40): generate_vectors.py builds every
     # accepted_input by joining words, so all of them are well-formed by
@@ -703,3 +720,129 @@ def test_ambiguous_match_raises():
     spec = Spec(data)
     with pytest.raises(ValueError, match="ambiguous"):
         spec.text_to_number("same_word")
+
+
+# --- #46: whitespace, and the characters that are only nearly whitespace ----
+#
+# None of this is reachable from vectors/mizo.json. generate_vectors.py builds
+# every accepted_input by joining words with a separator it chose, so no vector
+# contains an exotic space, and two targets could disagree here while both pass
+# conformance. That is the same structural gap as #40, one level up, and it is
+# why these are direct tests rather than data.
+
+
+def test_the_whitespace_set_is_unicode_white_space():
+    # _WHITESPACE is enumerated rather than derived, because deriving it means
+    # testing every code point and costs ~150 ms at import. This is the check
+    # that the enumeration is right, and the guard that fails loudly if a
+    # Unicode update moves the property underneath it.
+    #
+    # It also states the trap in the form a Python implementer would hit:
+    # str.isspace() is wrong by exactly four characters and never by fewer, so
+    # subtracting them is the whole correction. re's \s is the same set again,
+    # so reaching for either without this subtraction is the likely mistake.
+    over_matched = {"\x1c", "\x1d", "\x1e", "\x1f"}
+    derived = {chr(c) for c in range(0x110000) if chr(c).isspace()}
+    assert set(_WHITESPACE) == derived - over_matched
+    assert over_matched < derived, "isspace() no longer over-matches; re-check the rule"
+    assert len(_WHITESPACE) == len(set(_WHITESPACE)) == 25
+
+
+@pytest.mark.parametrize(
+    "gap",
+    [
+        "\t", "\n", "\v", "\f", "\r",   # U+0009-U+000D
+        "\x85",                         # NEXT LINE
+        "\xa0",                         # NO-BREAK SPACE
+        "\u1680",                       # OGHAM SPACE MARK
+        "\u2003",                       # EM SPACE
+        "\u2028",                       # LINE SEPARATOR
+        "\u2029",                       # PARAGRAPH SEPARATOR
+        "\u202f",                       # NARROW NO-BREAK SPACE
+        "\u205f",                       # MEDIUM MATHEMATICAL SPACE
+        "\u3000",                       # IDEOGRAPHIC SPACE
+        "  ",                           # repeated, as #45 already pinned
+        " \t ",                         # mixed
+    ],
+)
+def test_any_unicode_whitespace_separates_words(spec, gap):
+    # The point of #46: mizo.yaml declares only "-", and every one of these
+    # still splits, because whitespace belongs to the engine rather than to
+    # the language. A tab or a non-breaking space is exactly what a post-ASR
+    # pipeline or a copy-paste produces, which is the caller mizo.yaml's
+    # header names.
+    assert spec.text_to_number("sawm" + gap + "nga pariat") == 58
+
+
+@pytest.mark.parametrize("char", ["\x1c", "\x1d", "\x1e", "\x1f"])
+def test_a_c0_separator_that_is_not_white_space_is_rejected(spec, char):
+    # The case that fails closed, and the reason the format doc names the
+    # property rather than a convenience function: an implementation built on
+    # str.isspace() -- or on re's \s, which matches it -- parses this happily
+    # and diverges from one built on White_Space. Every vector still passes
+    # either way, so this test is the only thing standing there.
+    with pytest.raises(ValueError):
+        spec.text_to_number("sawm" + char + "nga pariat")
+
+
+# Enumerated by position rather than by example. The first version of this
+# list covered position 0, the end of the string, beside a word and inside a
+# word -- every position except standing alone between two separators, which
+# was the one the implementation got wrong (#56). The examples and the code
+# had come out of the same mental model, so the gap was invisible from both
+# sides. Where a check has a positional dimension, enumerate the positions.
+IGNORABLE_POSITIONS = {
+    "start of the string": "\ufeffsawm nga pariat",
+    "end of the string": "sawm nga pariat\ufeff",
+    "start of an inner word": "sawm \ufeffnga pariat",
+    "end of an inner word": "sawm\u2060 nga pariat",
+    "inside a word": "sa\xadwm nga pariat",
+    "standing alone between separators": "sawm \u200b nga pariat",
+    "standing alone, two of them": "sawm \u200b\ufeff nga pariat",
+    "standing alone at the end": "sawm nga pariat \u00ad",
+}
+
+
+@pytest.mark.parametrize("position", sorted(IGNORABLE_POSITIONS))
+def test_ignorable_characters_are_stripped(spec, position):
+    # Decision (#46): strip these rather than reject them or treat them as
+    # separators. A file read as utf-8-sig or a Windows copy-paste puts a BOM
+    # at position 0, the caller did not, and the string looks correct in a
+    # terminal -- so raising would be hostile. Stripping happens in
+    # _normalize, which runs on the lexicon word too, so the "flags apply to
+    # both sides" invariant holds and it is a no-op on authored entries.
+    assert spec.text_to_number(IGNORABLE_POSITIONS[position]) == 58
+
+
+def test_a_zero_width_character_is_not_a_separator(spec):
+    # The other half of the decision, and the case where "strip" and
+    # "separator" genuinely differ. These are format characters with no
+    # boundary meaning, so calling one a separator would assert something
+    # untrue about it. Stripped, this reads as one run-together word and
+    # matches nothing -- which is the intended answer, not a gap.
+    with pytest.raises(ValueError):
+        spec.text_to_number("sawm\u200bnga pariat")
+
+
+def test_the_declared_separator_still_works_beside_whitespace(spec):
+    # "-" is what mizo.yaml still declares, and the two compose: whitespace
+    # is added to the declared list, not substituted for it.
+    assert spec.text_to_number("sawm-nga pariat") == 58
+    assert spec.text_to_number("sawm\t-\xa0nga pariat") == 58
+
+
+def test_whitespace_comes_first_among_the_joinable_separators():
+    # _joiners takes the first separator that reproduces a rendering, and for
+    # a single-word rendering every separator does -- so this order is what
+    # decides the canonical joiner there.
+    #
+    # Pinned here because nothing downstream can currently fail on it: with
+    # the space moved to the end, vectors/mizo.json still regenerates
+    # byte-identical, since a one-word rendering has no gap to join and grows
+    # no separator variant. That makes it the #36 shape -- correct but inert
+    # -- and the mutation battery found it as an escape. Stating the contract
+    # directly is cheaper than waiting for a spec whose canonical joiner is
+    # not a space to make it observable.
+    assert _joinable_separators({"word_separators": ["-"]}) == [" ", "-"]
+    assert _joinable_separators({"word_separators": [" ", "-"]}) == [" ", "-"]
+    assert _joinable_separators({}) == [" "]

@@ -17,8 +17,9 @@
 meta:
   language: English
   code: eng          # ISO 639-3, matching mizo.yaml's `lus`.
-  version: 0.3.0     # 0.2.0: ported from the old illustrative `form:` syntax.
+  version: 0.4.0     # 0.2.0: ported from the old illustrative `form:` syntax.
                      # 0.3.0: dropped the accepted_forms workaround (#31).
+                     # 0.4.0: word_separators is non-whitespace only (#46).
   supports: { min: 0, max: 99 }
   sources:
     - "Illustrative reference example; English numerals need no citation."
@@ -101,7 +102,8 @@ grammar:
 
 parse:
   case_insensitive: true
-  word_separators: [" ", "-"]   # "forty-two" and "forty two" both parse.
+  word_separators: ["-"]        # "forty-two"; "forty two" parses too, on
+                                # the engine's implicit whitespace rule (#46).
   connectors: ["and"]           # ignorable filler when parsing.
   # No connector_precedes: this spec stops at 99 and no rule in that range
   # emits "and" ("one hundred and five" starts at 100), so there is no

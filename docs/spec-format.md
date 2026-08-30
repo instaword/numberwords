@@ -111,8 +111,10 @@ Three things that example is carrying:
   (`scales[10]`). There is no whole-number key — which is why `en.yaml` keys
   its irregular teens by `ones_digit` rather than by value.
 - **Literal text between placeholders survives rendering**, which is how the
-  hyphen in `forty-two` gets there. The same hyphen is a `word_separator` when
-  parsing, so `forty two` is accepted too.
+  hyphen in `forty-two` gets there. The same hyphen is a declared
+  `word_separator` when parsing; `forty two` is accepted as well, but by the
+  whitespace rule rather than by the declaration — see "Word separators and
+  whitespace" below.
 - **`condition` is evaluated by a restricted AST walker**, not `eval()` —
   comparisons, `and`/`or`, names and integer constants only. Anything else
   raises rather than executing. `condition` is data from a YAML file, not code
@@ -130,7 +132,8 @@ same missing feature is good evidence it's genuinely required.
   contains the number *and* whose `condition` passes, then substitute lexicon
   words into its `output`. Rule order is significant.
 - **`text → number`:** normalise the text using `parse` (lowercase, strip
-  diacritics, split on separators, drop `connectors`, resolve `aliases`), then
+  diacritics, split on the effective separators — whitespace plus whatever
+  `word_separators` declares — drop `connectors`, resolve `aliases`), then
   match against the same grammar to recover the value. The normalising flags
   apply to the lexicon word too, so only the comparison is loosened —
   `number → text` still emits the canonical spelling, diacritics and all.
@@ -182,6 +185,54 @@ The current `text → number` implementation brute-forces the supported range an
 match-tests each candidate. That is honest at 0–199 and won't survive a larger
 range — see the note in `reference/engine.py`, and #27, which establishes that
 Mizo needs genuine evaluation rather than template matching.
+
+## Word separators and whitespace
+
+`parse.word_separators` declares a language's **non-whitespace** separators
+only — `["-"]` in both current specs. Whitespace is not declared, because it is
+a property of text rather than of a language: the engine treats every character
+with the Unicode **`White_Space`** property as a separator, in every language,
+always. Omit the property entirely for a language whose only separators are
+whitespace.
+
+Declaring `" "` would be worse than redundant. A target could read
+`word_separators`, split on that list alone, ignore the whitespace rule, and
+still pass every conformance vector — because the canonical output happens to
+use a space. Leaving it out means such a target fails on the first multi-word
+input instead. Same reasoning as `accepted_forms` listing only the extra fields.
+
+**Implement the named property, not your runtime's convenience function.**
+Neither convenience function is `White_Space`, and they are wrong in opposite
+directions:
+
+| function | also accepts |
+|---|---|
+| Python `str.isspace()`, and `re`'s `\s`, which matches it exactly | `U+001C`–`U+001F` |
+| JavaScript `\s` | `U+FEFF` |
+
+So a Python target built on `str.isspace()` accepts `"sawm\x1cnga pariat"` where
+a correct one rejects it, and every vector passes either way. The vectors
+structurally cannot see this: each `accepted_input` is built by joining words
+with a separator the generator chose, so none of them contains an exotic space.
+
+The correction is exact in both runtimes. In Python, `White_Space` is
+`str.isspace()` minus those four characters and nothing else. In JavaScript,
+`\p{White_Space}` is the property directly.
+
+**Six format characters are stripped rather than separated on:** `U+200B` (zero
+width space), `U+FEFF` (BOM), `U+2060` (word joiner), `U+200C` and `U+200D`
+(zero width non-joiner and joiner), and `U+00AD` (soft hyphen). They are removed
+from each word during normalisation, so a BOM at the start of a string — a file
+read as `utf-8-sig`, a Windows copy-paste — parses instead of raising.
+Rejecting would be hostile, since the string looks correct in a terminal and the
+caller did not put the character there, and calling them separators would assert
+a boundary meaning they do not have. One consequence worth stating: `U+200B`
+alone between two words does **not** split them.
+
+An explicit list rather than the `Default_Ignorable_Code_Point` property, which
+would need a third-party dependency to test in Python and would drift between
+Unicode versions, leaving two targets built against different versions to
+disagree.
 
 ## Known gaps in the format
 

@@ -166,10 +166,11 @@ the spec rather than trusting it.
 
 One related trap, since it bit the first version: an entry's canonical
 spelling is taken from the renderer verbatim, never rebuilt by re-joining its
-words with `word_separators[0]`. The literal text a template puts between
-placeholders isn't always the first separator — English writes `forty-two` —
-so rebuilding drops the very string the list has to contain, and the
-"alternate separator" is whichever one the canonical rendering *didn't* use.
+words with the first effective separator. The literal text a template puts
+between placeholders isn't always the first separator — English writes
+`forty-two` — so rebuilding drops the very string the list has to contain,
+and the "alternate separator" is whichever one the canonical rendering
+*didn't* use.
 
 These are *representative* accepted spellings, **not every accepted
 spelling**, and the format should not be documented as if it were exhaustive.

@@ -6,7 +6,7 @@ reference/ and commit the result.
 
 LANGUAGE = 'Mizo'
 CODE = 'lus'
-SPEC_VERSION = '0.3.0'
+SPEC_VERSION = '0.4.0'
 SUPPORTS = (0, 199)
 
 LEXICON = {
@@ -111,7 +111,7 @@ RULES = (
 PARSE = {
     'case_insensitive': True,
     'strip_diacritics': True,
-    'word_separators': (' ', '-'),
+    'word_separators': ('-',),
     'accepted_forms': {'units': ('bound',)},
     'connectors': ('leh',),
     'aliases': {},

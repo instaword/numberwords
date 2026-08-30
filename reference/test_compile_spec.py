@@ -266,9 +266,7 @@ def test_compiled_parse_config_matches_the_spec(spec, artifact):
     parse = artifact.PARSE
     assert parse["case_insensitive"] == config.get("case_insensitive", False)
     assert parse["strip_diacritics"] == config.get("strip_diacritics", False)
-    assert parse["word_separators"] == tuple(
-        config.get("word_separators", [" "])
-    )
+    assert parse["word_separators"] == tuple(config.get("word_separators", []))
     # accepted_forms keeps its tables and the order of each field list --
     # order decides which form a target tries first. The lists become
     # tuples on the way in, so compare contents rather than types.
@@ -325,3 +323,70 @@ def test_package_version_is_stated_once():
     assert len(declared) == 1, "expected exactly one version in pyproject.toml"
     assert len(exported) == 1, "expected exactly one __version__ in __init__.py"
     assert declared[0] == exported[0]
+
+
+def _ignorable_table(path):
+    """The characters _IGNORABLE is built from, read out of the source.
+
+    Read rather than imported: _render.py belongs to the package and does a
+    relative import of _mizo, so it is not importable from here -- the same
+    reason test_package_version_is_stated_once reads packages/python/ as
+    text. Reading the source is also the right level for this check, since
+    a one-sided edit to the table is a source-level edit.
+
+    The shape is checked rather than assumed. Both copies are a dict
+    comprehension over one string literal today; if either is rewritten into
+    some other form, this says so instead of raising AttributeError from
+    inside an attribute chain -- the "a verdict, not a crash from three calls
+    down" rule #37 settled for _validate_spec, which applies to a helper that
+    reads source just as much.
+    """
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        targets = getattr(node, "targets", [])
+        if not any(isinstance(t, ast.Name) and t.id == "_IGNORABLE" for t in targets):
+            continue
+        value = node.value
+        if not isinstance(value, ast.DictComp) or len(value.generators) != 1:
+            raise AssertionError(
+                f"{path.name}: _IGNORABLE is no longer a single dict "
+                f"comprehension; update this helper to read its new shape"
+            )
+        try:
+            return ast.literal_eval(value.generators[0].iter)
+        except ValueError:
+            raise AssertionError(
+                f"{path.name}: _IGNORABLE is not built from a string literal"
+            ) from None
+    raise AssertionError(f"no _IGNORABLE assignment in {path.name}")
+
+
+def test_the_ignorable_table_is_identical_in_both_implementations():
+    """_IGNORABLE is duplicated across engine.py and _render.py, and nothing
+    else pins it.
+
+    _WHITESPACE is duplicated the same way, but both suites derive it
+    independently from str.isspace() minus the four characters that function
+    over-matches, so those copies cannot drift without a test failing.
+    _IGNORABLE has no external property to check against -- it is six
+    characters chosen deliberately on #46 -- so until this, a one-sided edit
+    passed both suites silently. That is the divergence #46 exists to
+    prevent, in the one table with nothing to derive it from (zoramt, #56).
+
+    Enumerating rather than deriving is defensible against Unicode drift,
+    which was the argument on #46. It says nothing about two hand-maintained
+    copies, which drift for ordinary reasons.
+    """
+    reference_table = _ignorable_table(
+        compile_spec.REPO_ROOT / "reference" / "engine.py"
+    )
+    package_table = _ignorable_table(
+        compile_spec.REPO_ROOT
+        / "packages"
+        / "python"
+        / "src"
+        / "numberwords"
+        / "_render.py"
+    )
+    assert reference_table == package_table
+    assert len(set(reference_table)) == 6

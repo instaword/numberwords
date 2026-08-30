@@ -116,6 +116,109 @@ def _strip_diacritics(word: str) -> str:
     return "".join(ch for ch in decomposed if not unicodedata.combining(ch))
 
 
+# Unicode's White_Space property, enumerated.
+#
+# Decision (#46): whitespace is a property of text rather than of a language,
+# so the engine treats it as a separator everywhere and specs declare only
+# their non-whitespace separators. The property is named rather than delegated
+# to a runtime's convenience function because neither runtime's is correct,
+# and they are wrong in opposite directions: Python's str.isspace() -- and
+# re's \s, which matches it exactly -- also accepts U+001C-U+001F, while
+# JavaScript's \s also accepts U+FEFF. A target implementing "whatever my
+# standard library calls whitespace" would diverge from one implementing the
+# property, and no conformance vector could see it: every accepted_input is
+# built by joining words with a separator the generator chose, so none of them
+# contains an exotic space.
+#
+# Enumerated rather than derived, because deriving it means testing every code
+# point, which costs ~150 ms at import. test_engine.py pins this against
+# str.isspace() so that a Unicode update fails loudly rather than drifting.
+_WHITESPACE = (
+    "\t\n\v\f\r"                            # U+0009-U+000D
+    " "                                     # U+0020 SPACE
+    "\x85"                                  # U+0085 NEXT LINE
+    "\xa0"                                  # U+00A0 NO-BREAK SPACE
+    "\u1680"                                # U+1680 OGHAM SPACE MARK
+    "\u2000\u2001\u2002\u2003\u2004\u2005"
+    "\u2006\u2007\u2008\u2009\u200a"        # U+2000-U+200A
+    "\u2028"                                # U+2028 LINE SEPARATOR
+    "\u2029"                                # U+2029 PARAGRAPH SEPARATOR
+    "\u202f"                                # U+202F NARROW NO-BREAK SPACE
+    "\u205f"                                # U+205F MEDIUM MATHEMATICAL SPACE
+    "\u3000"                                # U+3000 IDEOGRAPHIC SPACE
+)
+
+
+def _separator_pattern(parse_config: dict) -> str:
+    """A regex alternation matching one effective separator.
+
+    The effective set is whatever the spec declares plus Unicode whitespace.
+    Everything that splits or validates text goes through here rather than
+    reading parse.word_separators directly, so a spec declaring only "-"
+    still splits on spaces.
+
+    Declared separators come first so that a multi-character one is tried
+    before a single whitespace character that could match inside it.
+    """
+    declared = parse_config.get("word_separators", [])
+    whitespace = "".join(re.escape(ch) for ch in _WHITESPACE)
+    return "|".join([*(re.escape(sep) for sep in declared), f"[{whitespace}]"])
+
+
+def _joinable_separators(parse_config: dict) -> list:
+    """The effective separators as concrete strings, for code that builds
+    text rather than splitting it.
+
+    A character property cannot be joined with, so U+0020 stands in for
+    whitespace. It comes first because the vector generator falls back to
+    the first entry when no separator reproduces a rendering -- which is
+    every single-word rendering, where they all do -- and a space is the
+    right canonical joiner there for both current specs.
+
+    That ordering is currently a claim rather than an observable: both
+    orders regenerate vectors/mizo.json byte-identical, because a
+    single-word rendering has no gap to join and so grows no separator
+    variant. It is pinned directly in test_engine.py rather than left for
+    the artifact to prove, on #36's precedent -- an invariant that cannot
+    currently fail is still worth stating, provided the limit is written
+    down.
+    """
+    declared = parse_config.get("word_separators", [])
+    return [" ", *(sep for sep in declared if sep != " ")]
+
+
+# Zero-width and format characters, removed from every word before it is
+# compared.
+#
+# Decision (#46): strip, rather than treat as a separator or reject. The
+# dominant real case is a BOM at position 0 -- a file read as utf-8-sig, a
+# Windows copy-paste -- where stripping and separating behave identically.
+# The exotic cases decide it: rejecting is hostile, because the string looks
+# correct in a terminal and the caller did not put the character there, and
+# calling one a separator asserts a boundary meaning these characters do not
+# have. The one case where separator would win, U+200B as the only thing
+# between two words, does not arise in Latin-script Mizo.
+#
+# An explicit list rather than the Default_Ignorable_Code_Point property,
+# which covers exactly these six for our purposes but needs the third-party
+# regex package to test in Python -- and this library is deliberately
+# dependency-free. Hardcoding that property's table instead would reintroduce
+# the problem #46 exists to remove: it changes between Unicode versions, so
+# two targets built against different versions would disagree. Six characters
+# covers anything realistic and cannot drift.
+_IGNORABLE = {
+    ord(ch): None
+    for ch in (
+        "\u200b"    # ZERO WIDTH SPACE
+        "\ufeff"    # ZERO WIDTH NO-BREAK SPACE / BOM
+        "\u2060"    # WORD JOINER
+        "\u200c"    # ZERO WIDTH NON-JOINER
+        "\u200d"    # ZERO WIDTH JOINER
+        "\u00ad"    # SOFT HYPHEN
+    )
+}
+
+
 def _normalize(word: str, parse_config: dict) -> str:
     """Apply the spec's parse flags to one word.
 
@@ -123,7 +226,13 @@ def _normalize(word: str, parse_config: dict) -> str:
     before there is a Spec to call it on -- and writing a second copy there
     would be the duplication #37 exists to remove. Spec._normalize_word is
     the method form of this and defers to it.
+
+    The ignorable-character strip is unconditional rather than a parse
+    flag, for the same reason whitespace is (#46): it is a property of
+    text, not of a language. It runs first so the flags below see the
+    word a reader would.
     """
+    word = word.translate(_IGNORABLE)
     if parse_config.get("case_insensitive", False):
         word = word.lower()
     if parse_config.get("strip_diacritics", False):
@@ -299,8 +408,7 @@ def _validate_spec(data: dict) -> None:
                     f"so the rule can never match"
                 )
 
-    separators = parse.get("word_separators", [" "])
-    separator_pattern = "|".join(re.escape(sep) for sep in separators)
+    separator_pattern = _separator_pattern(parse)
     connectors = {_normalize(c, parse) for c in parse.get("connectors", [])}
 
     for rule in rules:
@@ -581,7 +689,8 @@ class Spec:
 
     def _tokenize(self, text: str) -> list:
         """Normalise text per the spec's `parse` section: apply the parse
-        flags (see _normalize_word), split on word_separators, remove
+        flags (see _normalize_word), split on the effective separators
+        (_separator_pattern: declared plus Unicode whitespace), remove
         connector words, and resolve aliases. Mirrors docs/spec-format.md's
         description of the reverse direction ("drop connectors, resolve
         aliases").
@@ -591,9 +700,19 @@ class Spec:
         Otherwise, a connector with a diacritic would no longer be removed
         after strip_diacritics changed the input.
         """
-        separators = self.parse_config.get("word_separators", [" "])
-        pattern = "|".join(re.escape(sep) for sep in separators)
-        words = [self._normalize_word(w) for w in re.split(pattern, text) if w]
+        pattern = _separator_pattern(self.parse_config)
+        # Filter after normalising, not before. A split piece holding only
+        # an ignorable character is truthy on the way in and empty on the
+        # way out, so filtering the raw piece lets "" into the token list,
+        # where it matches nothing and the whole phrase is rejected -- which
+        # would be rejecting a standalone ignorable rather than stripping it,
+        # against the decision on #46. A token that is run together with a
+        # word is unaffected: it does not normalise to empty.
+        words = [
+            word
+            for word in (self._normalize_word(w) for w in re.split(pattern, text))
+            if word
+        ]
         connectors = {
             self._normalize_word(c) for c in self.parse_config.get("connectors", [])
         }
