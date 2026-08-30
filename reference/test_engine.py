@@ -785,25 +785,33 @@ def test_a_c0_separator_that_is_not_white_space_is_rejected(spec, char):
         spec.text_to_number("sawm" + char + "nga pariat")
 
 
-@pytest.mark.parametrize(
-    "text",
-    [
-        "\ufeffsawm nga pariat",    # BOM at position 0 -- the dominant real case
-        "sawm nga pariat\ufeff",
-        "sawm \ufeffnga pariat",
-        "sa\xadwm nga pariat",      # SOFT HYPHEN inside a word
-        "\u200bsawm nga pariat",    # ZERO WIDTH SPACE at an edge
-        "sawm\u2060 nga pariat",    # WORD JOINER beside a real separator
-    ],
-)
-def test_ignorable_characters_are_stripped(spec, text):
+# Enumerated by position rather than by example. The first version of this
+# list covered position 0, the end of the string, beside a word and inside a
+# word -- every position except standing alone between two separators, which
+# was the one the implementation got wrong (#56). The examples and the code
+# had come out of the same mental model, so the gap was invisible from both
+# sides. Where a check has a positional dimension, enumerate the positions.
+IGNORABLE_POSITIONS = {
+    "start of the string": "\ufeffsawm nga pariat",
+    "end of the string": "sawm nga pariat\ufeff",
+    "start of an inner word": "sawm \ufeffnga pariat",
+    "end of an inner word": "sawm\u2060 nga pariat",
+    "inside a word": "sa\xadwm nga pariat",
+    "standing alone between separators": "sawm \u200b nga pariat",
+    "standing alone, two of them": "sawm \u200b\ufeff nga pariat",
+    "standing alone at the end": "sawm nga pariat \u00ad",
+}
+
+
+@pytest.mark.parametrize("position", sorted(IGNORABLE_POSITIONS))
+def test_ignorable_characters_are_stripped(spec, position):
     # Decision (#46): strip these rather than reject them or treat them as
     # separators. A file read as utf-8-sig or a Windows copy-paste puts a BOM
     # at position 0, the caller did not, and the string looks correct in a
     # terminal -- so raising would be hostile. Stripping happens in
     # _normalize, which runs on the lexicon word too, so the "flags apply to
     # both sides" invariant holds and it is a no-op on authored entries.
-    assert spec.text_to_number(text) == 58
+    assert spec.text_to_number(IGNORABLE_POSITIONS[position]) == 58
 
 
 def test_a_zero_width_character_is_not_a_separator(spec):

@@ -701,7 +701,18 @@ class Spec:
         after strip_diacritics changed the input.
         """
         pattern = _separator_pattern(self.parse_config)
-        words = [self._normalize_word(w) for w in re.split(pattern, text) if w]
+        # Filter after normalising, not before. A split piece holding only
+        # an ignorable character is truthy on the way in and empty on the
+        # way out, so filtering the raw piece lets "" into the token list,
+        # where it matches nothing and the whole phrase is rejected -- which
+        # would be rejecting a standalone ignorable rather than stripping it,
+        # against the decision on #46. A token that is run together with a
+        # word is unaffected: it does not normalise to empty.
+        words = [
+            word
+            for word in (self._normalize_word(w) for w in re.split(pattern, text))
+            if word
+        ]
         connectors = {
             self._normalize_word(c) for c in self.parse_config.get("connectors", [])
         }

@@ -228,7 +228,14 @@ def _render(template, variables: dict) -> str:
 def _tokenize(text: str) -> list:
     """Split text into comparable tokens: normalise, split on the spec's
     word separators, drop connectors, resolve aliases."""
-    words = [_normalize_word(w) for w in _SEPARATOR_RE.split(text) if w]
+    # Filter after normalising, not before: a split piece holding only an
+    # ignorable character is truthy going in and empty coming out, and an
+    # empty token matches nothing (#46). The engine does the same.
+    words = [
+        word
+        for word in (_normalize_word(w) for w in _SEPARATOR_RE.split(text))
+        if word
+    ]
     return [_ALIASES.get(w, w) for w in words if w not in _CONNECTORS]
 
 
