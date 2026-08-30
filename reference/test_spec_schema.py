@@ -47,7 +47,7 @@ import yaml
 # cross-reference checks now live in the loader (#37), so the tests exercise
 # it instead of reimplementing what it does.
 import engine
-from engine import _PLACEHOLDER_RE, _find_rule, _positional_variables, Spec
+from engine import _PLACEHOLDER_RE, _find_rule, _positional_variables, _render, Spec
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "spec" / "spec.schema.json"
@@ -650,9 +650,62 @@ def test_every_rule_parses_its_own_output(path):
     assert not unreachable, f"{path.name}: no number reaches {sorted(unreachable)}"
 
 
+def _first_alias_failure(spec):
+    """The first declared alias spelling that does not parse to its own number.
+
+    The alias counterpart to _first_round_trip_failure, and a deliberately
+    different property. `number_to_text` never emits an alias, so breaking one
+    cannot break the canonical round trip -- which is why the alias case is
+    excluded from TEMPLATE_REJECTS. What it can break is the property CLAUDE.md
+    names alongside it, `text -> number -> text` being stable: a spelling a
+    rule declares as acceptable has to parse to the number whose rule declares
+    it.
+
+    Returns (n, spelling, reason), or None if every declared alias holds across
+    the whole supported range.
+    """
+    for n in range(spec.supports["min"], spec.supports["max"] + 1):
+        variables = _positional_variables(n)
+        rule = _find_rule(spec.rules, n, variables)
+        for template in rule.get("parse_aliases", []):
+            spelling = _render(template, spec.lexicon, variables)
+            try:
+                parsed = spec.text_to_number(spelling)
+            except ValueError as exc:
+                return n, spelling, str(exc)
+            if parsed != n:
+                return n, spelling, f"parsed back to {parsed}"
+    return None
+
+
+@pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
+def test_every_declared_alias_parses_to_its_own_number(path):
+    # This is the vacuity guard on _first_alias_failure as much as it is a
+    # property test. The negative test below asserts that the helper *finds* a
+    # failure for the rejected alias; a helper broken so that it always
+    # reported one would make that pass for exactly the wrong reason. Running
+    # it over the real specs and requiring None is what rules that out.
+    #
+    # As coverage on its own it is close to redundant: generate_vectors.py
+    # emits alias spellings into accepted_inputs, so test_vectors_parse_back
+    # already exercises them. Stating the property directly still beats
+    # relying on the generator having happened to emit it.
+    #
+    # Inert on en.yaml, which declares no parse_aliases at all -- today only
+    # compound_tens in mizo.yaml has one. Said here rather than left for a
+    # reader to discover.
+    spec = Spec(_spec_data(path))
+    failure = _first_alias_failure(spec)
+    assert failure is None, (
+        f"{path.name}: {failure[0]} declares the alias spelling {failure[1]!r}, "
+        f"which {failure[2]}"
+    )
+
+
 # Every template case in LOAD_REJECTS, except the parse_aliases one: an alias
 # is an extra spelling to accept, so breaking it cannot break the round trip
-# of the canonical output, and the case is there for a different reason.
+# of the canonical output. It is demonstrated against its own property
+# instead -- see ALIAS_REJECTS below.
 TEMPLATE_REJECTS = (
     "template literal that is a bound morpheme",
     "template literal that is a free word",
@@ -682,6 +735,45 @@ def test_each_rejected_template_really_does_break_the_round_trip(
     )
 
 
+# The alias case from LOAD_REJECTS, kept in its own list because the property
+# it violates is a different one -- not because it is a weaker case.
+#
+# One entry, and one is the right number. _validate_literals runs over `output`
+# and over `parse_aliases` through the same loop with the same arguments (see
+# "for template in [rule['output'], *rule.get('parse_aliases', [])]" in
+# engine.py), so every boundary shape enumerated in TEMPLATE_REJECTS is already
+# the same code on both slots. Duplicating those eight here would add rows that
+# cannot fail independently of the ones above -- the inert-invariant trap. The
+# dimension this list covers is the *slot*: that the loop visits parse_aliases
+# at all.
+#
+# The entry is load-bearing, and measurably so: deleting the parse_aliases
+# half of that loop stops this case being rejected at load. What catches
+# that is test_load_rejects_what_the_schema_cannot_express, not the
+# ownership test below -- a case is "owned" when it *loads* with the check
+# disabled, which the mutation does not change. So the slot was already
+# covered before #55; what was missing was the demonstration.
+ALIAS_REJECTS = ("parse_alias literal that is a bound morpheme",)
+
+
+@pytest.mark.parametrize("description", ALIAS_REJECTS)
+def test_each_rejected_alias_really_does_break_the_alias_property(
+    description, mizo_data, monkeypatch
+):
+    # The same bargain as the template test above, made against the property an
+    # alias actually has. With validation switched off, a rejected alias
+    # template has to fail to accept the spelling it itself describes --
+    # otherwise the loader is rejecting a spec for a reason that is not true,
+    # and the check should be narrowed rather than defended.
+    monkeypatch.setattr(engine, "_validate_spec", lambda data: None)
+    spec = Spec(LOAD_REJECTS[description](mizo_data))
+    assert _first_alias_failure(spec) is not None, (
+        f"{description!r} is rejected at load, but every declared alias still "
+        f"parses to its own number, so the check is stricter than the property "
+        f"it cites"
+    )
+
+
 def test_every_case_the_literal_check_owns_is_justified_by_the_property(
     mizo_data, monkeypatch
 ):
@@ -690,9 +782,11 @@ def test_every_case_the_literal_check_owns_is_justified_by_the_property(
     # switched off -- asked of the engine rather than guessed from the wording
     # of a description, so a renamed case cannot drift out of scope.
     #
-    # Adding a template case to LOAD_REJECTS without adding it to
-    # TEMPLATE_REJECTS fails here, which is the point: a check is entitled to
-    # reject a spec only for a reason something demonstrates.
+    # Adding a case to LOAD_REJECTS without adding it to TEMPLATE_REJECTS or
+    # ALIAS_REJECTS fails here, which is the point: a check is entitled to
+    # reject a spec only for a reason something demonstrates. Until #55 the
+    # alias case was named here as a literal string instead -- an exception
+    # in the one test whose job is that there are none.
     owned = set()
     for description, mutate in LOAD_REJECTS.items():
         with monkeypatch.context() as without_the_check:
@@ -704,9 +798,7 @@ def test_every_case_the_literal_check_owns_is_justified_by_the_property(
             except ValueError:
                 continue  # some other check rejects it; not this one's case
         owned.add(description)
-    assert owned == set(TEMPLATE_REJECTS) | {
-        "parse_alias literal that is a bound morpheme"
-    }
+    assert owned == set(TEMPLATE_REJECTS) | set(ALIAS_REJECTS)
 
 
 # --- Note on languages/en.yaml --------------------------------------------
