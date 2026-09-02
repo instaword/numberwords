@@ -686,10 +686,16 @@ def test_every_declared_alias_parses_to_its_own_number(path):
     # reported one would make that pass for exactly the wrong reason. Running
     # it over the real specs and requiring None is what rules that out.
     #
-    # As coverage on its own it is close to redundant: generate_vectors.py
-    # emits alias spellings into accepted_inputs, so test_vectors_parse_back
-    # already exercises them. Stating the property directly still beats
-    # relying on the generator having happened to emit it.
+    # As coverage on its own it is close to redundant, and narrower than the
+    # name suggests. The property is self-referential -- the spelling is
+    # rendered from the very template it is then parsed back through -- so it
+    # can only catch a template that breaks the matcher, never one that is
+    # merely wrong. Mutating mizo's alias to take the standalone tens form,
+    # which renders "pahnih thum" for 23, passes here; four tests in
+    # test_engine.py catch that instead. It is redundant in a second way too:
+    # generate_vectors.py emits alias spellings into accepted_inputs, so
+    # test_vectors_parse_back already exercises them. Stating the property
+    # directly still beats relying on the generator having happened to emit it.
     #
     # Inert on en.yaml, which declares no parse_aliases at all -- today only
     # compound_tens in mizo.yaml has one. Said here rather than left for a
