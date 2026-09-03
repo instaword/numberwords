@@ -187,9 +187,13 @@ each separately covers them together. The engine's parse side is a pipeline
 feature is one stage, so it holds here and for #20's Python target, which is
 compiled from the same spec. It is not free, though — a target that
 reimplements parsing some other way could pass every entry and still fail on a
-combination. `test_exhaustive_variants_all_parse` checks the full cross
-product against the oracle; a target package can't run it, because
-`reference/` isn't shipped.
+combination. `test_every_dimension_of_variation_parses` checks that against
+the oracle: every value of every dimension, varied one dimension at a time,
+plus one fully crossed representative — not the whole cross product, because
+connectors are dropped before anything matches, so placement cannot interact
+with the other dimensions. That invariant is pinned directly by
+`test_connector_placement_does_not_survive_tokenisation`. A target package
+can run neither, because `reference/` isn't shipped.
 
 ### Which numbers get an entry
 

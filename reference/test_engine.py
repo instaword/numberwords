@@ -353,12 +353,58 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
     assert spec.number_to_text(120) == "zâ leh sawm hnih"
 
 
-def test_exhaustive_variants_all_parse(spec):
+def test_connector_placement_does_not_survive_tokenisation(spec):
+    # The invariant that lets accepted_inputs(every_dimension=True) certify
+    # connector placement as its own dimension instead of crossing it with
+    # the others (#27, step 1).
+    #
+    # _tokenize removes connectors after normalisation and before anything
+    # matches, so two spellings differing only in where the connector sits
+    # reduce to the *same* token list -- there is no later stage left for
+    # them to disagree at. Asserted on the token list rather than through
+    # text_to_number, because it is the reduction that is orthogonal, not
+    # merely the answer: two spellings could agree on the number for
+    # unrelated reasons.
+    #
+    # The dimension varied here is (number of gaps, whether the canonical
+    # output already carries a connector), and these are all of its values
+    # in 0-199 -- one representative each, rather than a handful of numbers
+    # that happen to share a shape and so cannot fail independently:
+    #
+    #     11  -> 1 gap,  no connector    "sâwm pakhat"
+    #     21  -> 2 gaps, no connector    "sawm hnih pakhat"
+    #     101 -> 2 gaps, has connector   "zâ leh pakhat"
+    #     111 -> 3 gaps, has connector   "zâ sâwm leh pakhat"
+    #     121 -> 4 gaps, has connector   "zâ sawm hnih leh pakhat"
+    #
+    # The sixth class, 0 gaps (0-9, "bial"), is left out deliberately: with
+    # no gap there is no placement to vary, so the assertion would compare a
+    # string to itself.
+    connector = spec.parse_config["connectors"][0]
+    for n in (11, 21, 101, 111, 121):
+        words = spec.number_to_text(n).split()
+        baseline = spec._tokenize(" ".join(words))
+        for gaps in generate_vectors._subsets(range(len(words) - 1)):
+            spelled = []
+            for i, word in enumerate(words):
+                spelled.append(word)
+                if i in gaps:
+                    spelled.append(connector)
+            assert spec._tokenize(" ".join(spelled)) == baseline, (n, gaps)
+
+
+def test_every_dimension_of_variation_parses(spec):
     # The bounded vectors assume parse features compose: each is one stage
     # of a pipeline, so covering them separately covers them together. That
     # assumption is what makes one representative per feature sufficient,
-    # and this is where it is actually checked -- the full cross product of
-    # every template, every respelling, and the connector in every gap.
+    # and this is where it is actually checked.
+    #
+    # Every value of every dimension -- template, respelling, connector
+    # placement, separator -- varied one dimension at a time, plus one fully
+    # crossed representative per template. Not the cross product: the test
+    # above pins the invariant that makes placement orthogonal to the rest,
+    # so crossing them would spend 2^gaps re-checking it. The crossed row is
+    # what still catches a stage that only breaks in combination.
     #
     # It lives here rather than in vectors/mizo.json on purpose. A target
     # package cannot import reference/, so this proves the property for the
@@ -366,7 +412,7 @@ def test_exhaustive_variants_all_parse(spec):
     # fact that #20's package is compiled from the same spec.
     checked = 0
     for n in generate_vectors.numbers_to_cover(spec):
-        for candidate in generate_vectors.accepted_inputs(spec, n, exhaustive=True):
+        for candidate in generate_vectors.accepted_inputs(spec, n, every_dimension=True):
             assert spec.text_to_number(candidate) == n, f"n={n} input={candidate!r}"
             checked += 1
     assert checked > 1000, checked
