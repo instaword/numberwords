@@ -89,7 +89,7 @@ def numbers_to_cover(spec) -> list:
     return list(range(spec.supports["min"], spec.supports["max"] + 1))
 
 
-def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
+def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
     """The spellings of `n` that text_to_number() must accept.
 
     These are *representative* accepted spellings, one per applicable parse
@@ -147,10 +147,12 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
     is one stage, so the assumption holds for the reference implementation
     and for #20's Python target, which is compiled from the same spec. It is
     not free, though: a target that reimplements parsing some other way could
-    pass every entry here and still fail on a combination. The exhaustive
+    pass every entry here and still fail on a combination. The composition
     sweep that would catch that lives in test_engine.py, and a target cannot
-    import it -- reference/ is not shipped. Pass exhaustive=True to generate
-    the full cross product.
+    import it -- reference/ is not shipped. Pass every_dimension=True for the
+    set that sweep consumes: every value of every dimension, varied one
+    dimension at a time, plus a single fully-crossed representative. It is
+    deliberately not the cross product -- see the every_dimension branch.
 
     Second, that an entry's accepted spellings can be enumerated at all.
     That is true of every parse feature in the spec today, and it stops being
@@ -176,13 +178,27 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
     )
 
     variants = set()
-    if exhaustive:
-        # Every template crossed with every subset of respellings, with the
-        # connector in every subset of gaps rather than only the last, and
-        # joined by every separator rather than only an alternate one. This
-        # is not a claim about which strings are Mizo -- it is a check that
-        # the engine's tolerances genuinely compose.
-        for words in _all_renderings(spec, rule, variables, separator_pattern):
+    if every_dimension:
+        # Each dimension varied on its own against an otherwise canonical
+        # string, plus one fully-crossed representative -- not the cross
+        # product of all three. This is not a claim about which strings are
+        # Mizo; it is a check that the engine's tolerances genuinely compose.
+        #
+        # What licenses splitting them is structural, not a sampling
+        # shortcut. engine._tokenize removes connectors after normalisation
+        # and before any matching, so where the connector sits cannot reach
+        # the matcher at all: placement is orthogonal to case, diacritics and
+        # separator choice by construction. Crossing them re-verifies that
+        # one-line invariant 2^gaps times per respelling.
+        # test_connector_placement_does_not_survive_tokenisation asserts it
+        # directly instead, which is what this split rests on (#27).
+        #
+        # The one crossed row is the thing a pure per-dimension split would
+        # lose: a target that handles each dimension alone but not in
+        # combination. One row rather than 2^k of them.
+        for words, joiner in _all_renderings(
+            spec, rule, variables, separator_pattern, separators
+        ):
             available = _connector_gaps(spec, words, ("connector",), (), every_gap=True)
             # Connector and separator are varied explicitly here -- by gap and
             # by joiner -- so neither is also varied as a respelling feature,
@@ -192,10 +208,16 @@ def accepted_inputs(spec, n: int, exhaustive: bool = False) -> list:
                 for f in _applicable_respellings(spec, words, alternate_separators=separators)
                 if f not in ("connector", "separator")
             ]
+            alternate = next((s for s in separators if s != joiner), joiner)
             for subset in _subsets(respellings):
-                for gaps in _subsets(available):
-                    for joiner in separators:
-                        variants.add(_respell(words, spec, subset, gaps, joiner))
+                variants.add(_respell(words, spec, subset, (), joiner))
+            for gaps in _subsets(available):
+                variants.add(_respell(words, spec, (), gaps, joiner))
+            for separator in separators:
+                variants.add(_respell(words, spec, (), (), separator))
+            variants.add(
+                _respell(words, spec, tuple(respellings), available, alternate)
+            )
     else:
         # The rendered string itself, not a rebuild of it from its words: a
         # template's literal text is not always the first effective separator,
@@ -448,12 +470,21 @@ def _connector_gaps(spec, words, features, slots, every_gap: bool = False) -> tu
     return tuple(slots)
 
 
-def _all_renderings(spec, rule, variables, separator_pattern) -> list:
-    templates = [rule["output"], *_alternate_templates(spec, rule)]
-    return [
-        _split_words(_render(t, spec.lexicon, variables), separator_pattern)
-        for t in templates
-    ]
+def _all_renderings(spec, rule, variables, separator_pattern, separators) -> list:
+    """Each of the rule's templates as (words, the joiner that rendering used).
+
+    The joiner is asked for rather than assumed, for the same reason _joiners
+    exists: a template's literal text is not necessarily the first effective
+    separator, so rebuilding a rendering with a guessed joiner can produce a
+    string the template never emits.
+    """
+    renderings = []
+    for template in [rule["output"], *_alternate_templates(spec, rule)]:
+        rendered = _render(template, spec.lexicon, variables)
+        words = _split_words(rendered, separator_pattern)
+        used, _ = _joiners(rendered, words, separators)
+        renderings.append((words, used))
+    return renderings
 
 
 def _subsets(items) -> list:
