@@ -358,13 +358,21 @@ def test_connector_placement_does_not_survive_tokenisation(spec):
     # connector placement as its own dimension instead of crossing it with
     # the others (#27, step 1).
     #
-    # _tokenize removes connectors after normalisation and before anything
-    # matches, so two spellings differing only in where the connector sits
-    # reduce to the *same* token list -- there is no later stage left for
-    # them to disagree at. Asserted on the token list rather than through
-    # text_to_number, because it is the reduction that is orthogonal, not
-    # merely the answer: two spellings could agree on the number for
-    # unrelated reasons.
+    # _tokenize removes connectors before anything matches, so two spellings
+    # differing only in where the connector sits reduce to the *same* token
+    # list -- there is no later stage left for them to disagree at. Asserted
+    # on the token list rather than through text_to_number, because it is
+    # the reduction that is orthogonal, not merely the answer: two spellings
+    # could agree on the number for unrelated reasons.
+    #
+    # What this pins is the removal, not its ordering against normalisation.
+    # Every connector below is inserted in its canonical lowercase spelling,
+    # so a _tokenize that stripped raw connectors *before* normalising would
+    # pass this test unchanged. That half is owned by
+    # test_connectors_are_normalised_before_being_dropped, which builds a
+    # spec whose connector carries a diacritic -- the only test in this
+    # suite that fails when the two are swapped, checked by running the
+    # whole of it against that mutation.
     #
     # The dimension varied here is (number of gaps, whether the canonical
     # output already carries a connector), and these are all of its values
@@ -380,9 +388,20 @@ def test_connector_placement_does_not_survive_tokenisation(spec):
     # The sixth class, 0 gaps (0-9, "bial"), is left out deliberately: with
     # no gap there is no placement to vary, so the assertion would compare a
     # string to itself.
+    #
+    # Splitting goes through the spec's declared separators rather than
+    # str.split(). The two agree on all 200 Mizo numbers, which is why this
+    # is not a fix -- but they already disagree on the other spec in this
+    # repo: en.yaml renders 72 numbers as "twenty-one" and friends, where
+    # the hyphen is both literal output and a declared separator. The
+    # assumption is not fragile in theory, it is already false next door.
+    # Joining with a space needs no such care: Unicode White_Space is an
+    # effective separator in every spec by the engine's own rule (#46), so
+    # a string built with one is always splittable again.
     connector = spec.parse_config["connectors"][0]
+    pattern = _separator_pattern(spec.parse_config)
     for n in (11, 21, 101, 111, 121):
-        words = spec.number_to_text(n).split()
+        words = generate_vectors._split_words(spec.number_to_text(n), pattern)
         baseline = spec._tokenize(" ".join(words))
         for gaps in generate_vectors._subsets(range(len(words) - 1)):
             spelled = []
