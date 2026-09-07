@@ -185,13 +185,19 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
         # Mizo; it is a check that the engine's tolerances genuinely compose.
         #
         # What licenses splitting them is structural, not a sampling
-        # shortcut. engine._tokenize removes connectors after normalisation
-        # and before any matching, so where the connector sits cannot reach
-        # the matcher at all: placement is orthogonal to case, diacritics and
-        # separator choice by construction. Crossing them re-verifies that
-        # one-line invariant 2^gaps times per respelling.
+        # shortcut. engine._tokenize removes connectors before any matching,
+        # so where the connector sits cannot reach the matcher at all:
+        # placement is orthogonal to case, diacritics and separator choice by
+        # construction. Crossing them re-verifies that one-line invariant
+        # 2^gaps times per respelling.
         # test_connector_placement_does_not_survive_tokenisation asserts it
         # directly instead, which is what this split rests on (#27).
+        #
+        # "One dimension at a time" is exact *between* dimensions and loose
+        # within two of them: _subsets(respellings) still crosses case with
+        # diacritics, and _placements is three points rather than every
+        # value. Both are bounded and neither is a product of the others,
+        # which is the property that matters here.
         #
         # The one crossed row is the thing a pure per-dimension split would
         # lose: a target that handles each dimension alone but not in
@@ -211,7 +217,7 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
             alternate = next((s for s in separators if s != joiner), joiner)
             for subset in _subsets(respellings):
                 variants.add(_respell(words, spec, subset, (), joiner))
-            for gaps in _subsets(available):
+            for gaps in _placements(available):
                 variants.add(_respell(words, spec, (), gaps, joiner))
             for separator in separators:
                 variants.add(_respell(words, spec, (), (), separator))
@@ -485,6 +491,45 @@ def _all_renderings(spec, rule, variables, separator_pattern, separators) -> lis
         used, _ = _joiners(rendered, words, separators)
         renderings.append((words, used))
     return renderings
+
+
+def _placements(gaps) -> tuple:
+    """Connector placements to sweep: none, each gap alone, and every gap.
+
+    Linear in the number of gaps rather than the power set of them. Every
+    subset reduces to the same token list -- that is exactly what
+    test_connector_placement_does_not_survive_tokenisation pins -- so
+    enumerating all 2^gaps of them spends exponential time re-verifying a
+    one-line invariant that is asserted directly elsewhere (#27, and the
+    review of #58).
+
+    The power set is not gone, it moved: the invariant test still walks
+    every subset, over one representative per shape class, and each step
+    there costs a tokenisation rather than a parse -- no range scan, so no
+    growth with supports.max. What is dropped here is re-deriving the same
+    fact through the parser once per number in range.
+
+    Which three points, and why not two. Against connectors-never-stripped,
+    case-folding-dropped and diacritics-dropped, `none` and `all` alone
+    catch everything the singles do -- three mutations is not a proof, but
+    no measurement here says the singles find defects. They stay for a
+    different reason: they are the only rows exhibiting the *partial*
+    placement that Q-P on #27 licenses ("a partial sprinkle is licensed
+    too"), which `none` and `all` between them never show. Accept-set
+    documentation rather than coverage, and cheap enough to keep.
+
+    Sized against a 4-gap ceiling: at supports.max 199 the longest canonical
+    output is five words. The power set this replaces was 16 rows there and
+    2,048 at the 12-word forms of 10^6. When accepted spellings stop being a
+    list and become a grammar (steps 3-4 of #27), "vary the placement" stops
+    being a subset-of-gaps at all and this helper should go with it.
+    """
+    gaps = tuple(gaps)
+    if not gaps:
+        return ((),)
+    singles = tuple((gap,) for gap in gaps)
+    every = (gaps,) if len(gaps) > 1 else ()
+    return ((),) + singles + every
 
 
 def _subsets(items) -> list:
