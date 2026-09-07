@@ -418,12 +418,17 @@ def test_every_dimension_of_variation_parses(spec):
     # assumption is what makes one representative per feature sufficient,
     # and this is where it is actually checked.
     #
-    # Every value of every dimension -- template, respelling, connector
-    # placement, separator -- varied one dimension at a time, plus one fully
-    # crossed representative per template. Not the cross product: the test
-    # above pins the invariant that makes placement orthogonal to the rest,
-    # so crossing them would spend 2^gaps re-checking it. The crossed row is
-    # what still catches a stage that only breaks in combination.
+    # Each dimension -- template, respelling, connector placement,
+    # separator -- varied on its own, plus one fully crossed representative
+    # per template. Not the cross product: the test above pins the invariant
+    # that makes placement orthogonal to the rest, so crossing them would
+    # spend 2^gaps re-checking it. The crossed row is what still catches a
+    # stage that only breaks in combination.
+    #
+    # Placement itself is three points rather than every subset -- none,
+    # each gap alone, all of them -- for the same reason one level down.
+    # See _placements in generate_vectors.py for which of those three carry
+    # detection and which are there to document the accepted set.
     #
     # It lives here rather than in vectors/mizo.json on purpose. A target
     # package cannot import reference/, so this proves the property for the
