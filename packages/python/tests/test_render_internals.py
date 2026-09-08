@@ -164,12 +164,15 @@ def test_ambiguity_raises_instead_of_returning_the_first_match(monkeypatch):
 
 
 def test_a_bound_form_is_rejected_as_the_final_addend():
-    # Q-E on #27: an addend takes the standalone form, so "zâ leh riat" is
-    # not a rival reading of 108 -- it is not Mizo. The vectors structurally
+    # Q-E on #27: an addend takes the standalone form, so "zâ leh khat" is
+    # not a rival reading of 101 -- it is not Mizo. The vectors structurally
     # cannot state this: they list what must be *accepted*, never what must
     # be rejected, so a target that accepted it would pass conformance.
+    #
+    # 1 is the only digit that keeps this assertion true as the range grows;
+    # see the engine's copy of this test for why. Keep the two in step.
     with pytest.raises(numberwords.NumberWordsError):
-        numberwords.text_to_number("zâ leh riat")
+        numberwords.text_to_number("zâ leh khat")
 
 
 def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth():

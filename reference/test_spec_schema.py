@@ -368,6 +368,14 @@ def _with_parse(data: dict, **changes) -> dict:
 _UNSUPPORTED_NODE_BEHIND_OR = 'ones_digit == 0 or len("x") == 0'
 _UNSUPPORTED_NODE_BEHIND_AND = 'ones_digit == 99 and len("x") == 0'
 
+# Every case below that means "this name does not exist" spells a real name
+# wrong -- unitz, scalez, stanalone, bnud, multiplyed. That is not whimsy, it
+# is the only way to say it that stays said. A case named after something the
+# roadmap creates stops testing what it claims the day that thing lands, and
+# fails rather than announcing itself: "hundreds_digit does not exist" was
+# true only until #27 raised supports.max past 199, and the same is true of
+# any scale key the ladder reaches. Misspell an existing name instead of
+# borrowing a future one.
 LOAD_REJECTS = {
     "condition hiding an unsupported node behind or": lambda s: _with_rule(
         s, "exact_tens", condition=_UNSUPPORTED_NODE_BEHIND_OR
@@ -376,7 +384,7 @@ LOAD_REJECTS = {
         s, "exact_tens", condition=_UNSUPPORTED_NODE_BEHIND_AND
     ),
     "condition naming a variable that does not exist": lambda s: _with_rule(
-        s, "exact_tens", condition="hundreds_digit == 0"
+        s, "exact_tens", condition="ones_digitz == 0"
     ),
     "condition using an operator outside the allowlist": lambda s: _with_rule(
         s, "exact_tens", condition="ones_digit + 1 == 1"
@@ -400,7 +408,7 @@ LOAD_REJECTS = {
         s, "units", output="{units[ones_digit].stanalone}"
     ),
     "placeholder naming a lexicon key that does not exist": lambda s: _with_rule(
-        s, "ten", output="{scales[1000].standalone}"
+        s, "ten", output="{scales[11].standalone}"
     ),
     # Khasi in miniature (#48, #53): a morpheme bound to the placeholder
     # rather than a separator between placeholders.
@@ -493,7 +501,7 @@ def test_a_separated_edge_connector_is_still_accepted(mizo_data):
 # is how the placeholder loop's default came to be uncovered while a test
 # named "an unnamed rule gets a verdict" was passing.
 UNNAMED_RULE_BREAKAGE = {
-    "condition loop": {"condition": "hundreds_digit == 0"},
+    "condition loop": {"condition": "ones_digitz == 0"},
     "placeholder loop": {"output": "{unitz[ones_digit].standalone}"},
     "literal loop": {"output": "dar {units[ones_digit].standalone}"},
 }
