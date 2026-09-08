@@ -89,6 +89,62 @@ def numbers_to_cover(spec) -> list:
     return list(range(spec.supports["min"], spec.supports["max"] + 1))
 
 
+def numbers_to_sweep(spec) -> list:
+    """Which numbers the composition sweep visits, as against every number.
+
+    The sweep asks whether the engine's parse tolerances compose. That is a
+    question about the *shape* of a rendering -- how many words, whether any
+    carries a diacritic, how many distinct spellings the rule's templates
+    produce -- and not about which lexemes fill it. Two numbers of the same
+    shape generate the same set of variant forms with different words in
+    them, so the second re-runs the first one's check and pays a whole
+    range scan to do it.
+
+    Two dimensions, enumerated rather than sampled:
+
+    - **Shape**, keyed by (rule; per template its word count and whether it
+      carries a diacritic; and how many of the rule's templates render to
+      *distinct* strings). The diacritic flag is not decoration: it is what
+      makes the "diacritics" respelling applicable at all, so a shape
+      without one generates a strictly smaller variant set. Nor is the
+      distinct count -- 0 renders "bial" for both its standalone and its
+      bound form, so the units rule collapses to one spelling there and to
+      two everywhere else. Without that term the class picks 0 as its
+      representative and stops exercising the engine's single-placeholder
+      leniency at all; a mutation disabling leniency escaped the sweep
+      until this was added.
+    - **Position in the range**, which is why supports.min and supports.max
+      are always included even when their shape is already covered. They are
+      the boundaries of the scan in text_to_number, where an off-by-one
+      lives; that is a different failure from anything shape covers.
+
+    What this does *not* weaken is per-number correctness. Every number in
+    range is still round-tripped and still has its certified spellings
+    parsed, by test_round_trip_number_text_number and the vector-driven
+    tests. Those carry the lexical guarantee; this carries the structural
+    one, and only the structural one needs every shape rather than every
+    number.
+
+    It is computed rather than listed, so a spec growing new rules or new
+    collapsed-form cases grows new representatives on its own.
+    """
+    separators = _joinable_separators(spec.parse_config)
+    pattern = _separator_pattern(spec.parse_config)
+    representatives = {}
+    for n in numbers_to_cover(spec):
+        variables = _positional_variables(n)
+        rule = _find_rule(spec.rules, n, variables)
+        renderings = _all_renderings(spec, rule, variables, pattern, separators)
+        shape = tuple(
+            (len(words), any(w != _strip_diacritics(w) for w in words))
+            for words, _joiner in renderings
+        )
+        distinct = len({joiner.join(words) for words, joiner in renderings})
+        representatives.setdefault((rule["name"], shape, distinct), n)
+    bounds = {spec.supports["min"], spec.supports["max"]}
+    return sorted(set(representatives.values()) | bounds)
+
+
 def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
     """The spellings of `n` that text_to_number() must accept.
 
