@@ -434,12 +434,38 @@ def test_every_dimension_of_variation_parses(spec):
     # package cannot import reference/, so this proves the property for the
     # oracle; what protects a target is the composition assumption plus the
     # fact that #20's package is compiled from the same spec.
-    checked = 0
-    for n in generate_vectors.numbers_to_cover(spec):
-        for candidate in generate_vectors.accepted_inputs(spec, n, every_dimension=True):
+    #
+    # Over one number per shape rather than every number, for the same
+    # reason placement is three points rather than every subset: two numbers
+    # of the same shape generate the same variant structure with different
+    # words in it, and each costs a full range scan to say so. Per-number
+    # correctness is not this test's job and is not weakened -- the
+    # round-trip tests and the vector-driven ones still visit every number.
+    # See numbers_to_sweep for the dimensions it enumerates.
+    swept = generate_vectors.numbers_to_sweep(spec)
+    for n in swept:
+        candidates = generate_vectors.accepted_inputs(spec, n, every_dimension=True)
+        assert candidates, f"n={n} generated no candidates to check"
+        for candidate in candidates:
             assert spec.text_to_number(candidate) == n, f"n={n} input={candidate!r}"
-            checked += 1
-    assert checked > 1000, checked
+
+    # Vacuity guard, aimed at numbers_to_sweep rather than at a total. The
+    # count of candidates used to be the guard, which worked while the sweep
+    # visited every number; against a sampled set it would not notice the
+    # thing that actually goes wrong, which is a shape class silently
+    # dropping out and taking a rule's only representative with it. Ask the
+    # engine which rules fire in range and require each to be represented.
+    def rules_firing(numbers):
+        return {
+            generate_vectors._find_rule(
+                spec.rules, n, generate_vectors._positional_variables(n)
+            )["name"]
+            for n in numbers
+        }
+
+    every = rules_firing(generate_vectors.numbers_to_cover(spec))
+    missing = every - rules_firing(swept)
+    assert not missing, f"no number in the sweep reaches {sorted(missing)}"
 
 
 @pytest.mark.parametrize("n", range(0, SUPPORTED_MAX + 1))
