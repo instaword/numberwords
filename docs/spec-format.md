@@ -67,7 +67,8 @@ that file would have to notice. Bump it when:
 - **`meta.supports` changes.** The range is the one thing a consumer cannot
   discover without loading the spec and probing it, so widening it is a visible
   change even though no structure moved. Raising Mizo to 199 is part of the
-  same 0.3.0 (#19).
+  same 0.3.0 (#19), and raising it to 999 is 0.5.0 on its own (#27 step 2b) --
+  a range change alone is enough.
 
 Do **not** bump it for numeral data that leaves both the shape and the range
 alone — correcting a lexicon entry, or adding an example, when nothing else
@@ -182,9 +183,17 @@ asymmetry is intended (#12, #34): the vectors are a floor every target must
 reach, not a ceiling.
 
 The current `text → number` implementation brute-forces the supported range and
-match-tests each candidate. That is honest at 0–199 and won't survive a larger
-range — see the note in `reference/engine.py`, and #27, which establishes that
-Mizo needs genuine evaluation rather than template matching.
+match-tests each candidate, so its cost grows with the range on every parse.
+#27 step 2b raised Mizo to 0–999 and the reference suite went from about 20
+seconds to **16–20 minutes** — six runs on one machine spanned 15:32 to 19:30,
+so it is a band rather than a figure. That is a factor of roughly 35–60: the
+range itself, times the parametrised tests that cover it, times a
+per-candidate rise from the rule table growing. The measured shape of the
+problem rather than a prediction about it. It does not survive another step: at 10⁵ the
+candidate loop is arithmetically impossible, and the Mizo ladder runs to 10⁹
+(#27 rule 4). This has to become genuine evaluation rather than template
+matching before the range grows again — see the note in
+`reference/engine.py`, and #27.
 
 ## Word separators and whitespace
 

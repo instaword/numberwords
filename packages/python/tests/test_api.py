@@ -11,7 +11,7 @@ import pytest
 # compiled artifact: these tests are an independent claim about what the
 # package must accept, so a spec edit that narrowed the range should fail
 # them rather than shrink them. Widen with the spec (#19).
-SUPPORTED_MAX = 199
+SUPPORTED_MAX = 999
 
 
 def test_public_names_are_exactly_the_three_agreed():

@@ -27,14 +27,21 @@
 meta:
   language: Mizo
   code: lus           # ISO 639-3 for Lushai/Mizo.
-  version: 0.4.0      # 0.4.0: word_separators declares only the
+  version: 0.5.0      # 0.5.0: supports.max raised to 999, hundreds_digit
+                      # added, and the six 200-999 rules (#27 step 2b).
+                      # 0.4.0: word_separators declares only the
                       # non-whitespace separators; whitespace belongs to
                       # the engine (#46).
                       # 0.3.0: supports.max raised to 199, and parse gained
                       # connector_precedes (#19).
                       # 0.2.0: accepted_forms now names the table and fields
                       # it applies to, instead of Mizo-specific flags (#31).
-  supports: { min: 0, max: 199 }   # 0–199 (#19). Eventually 10^18-1, see #27.
+  supports: { min: 0, max: 999 }   # 0–999 (#27 step 2b). The ladder's top
+                                   # lexeme is 10^9 (#27 rule 4), but rule 5
+                                   # lets that scale take a multi-digit
+                                   # multiplier (10^12 = "tlûklehdingâwn
+                                   # sâng khat"), so the eventual ceiling is a
+                                   # project decision, not a linguistic one.
   orthography: missionary   # The writing system used by this spec. The
                             # diacritics depend on it, so a different writing
                             # system would change them throughout the lexicon.
@@ -45,6 +52,11 @@ meta:
        without diacritics; this review confirms the spelling."
     - "The 101-199 forms, and where 'leh' may sit, confirmed by Rosie
        Malsawmtluangi and the repo owner, both native Mizo speakers (#19)."
+    - "The 200-999 forms confirmed by Rosie Malsawmtluangi, native Mizo
+       speaker, on #27 (Q-N, 2026-09-02), with the derivation recorded there:
+       each mirrors its own 100-199 case, the hundreds digit multiplying za
+       exactly as the tens digit multiplies sawm. The x1 and x2 behaviour of
+       the scale words is the repo owner's, in #27's ladder table."
 
 lexicon:
   units:               # 0–9. standalone = used alone; bound = used after a scale word (e.g. "sawm").
@@ -69,8 +81,9 @@ lexicon:
 
 # Positional variables available to `condition` and `output` below, derived
 # from the number being rendered (not looked up in the lexicon):
-#   ones_digit = n % 10
-#   tens_digit = (n // 10) % 10
+#   ones_digit     = n % 10
+#   tens_digit     = (n // 10) % 10
+#   hundreds_digit = (n // 100) % 10
 #
 # Lexicon addressing is always <table>[<key>].<field>, e.g.:
 #   units[tens_digit].bound       -> bound form of the digit in the tens place
@@ -125,13 +138,16 @@ grammar:
     # see parse.connector_precedes below. (The circumflex stays either way:
     # the digit adds to the scale word rather than multiplying it.)
     #
-    # No hundreds_digit variable is needed here. _find_rule selects a rule
-    # only when its `range` and its condition both pass, so 118 selects
-    # hundred_teens and 18 selects teens even though their positional
-    # variables are identical; the range does the work a variable would.
-    # The hundreds digit is also always 1 across this range, so no rule ever
-    # reads its value. A hundreds_digit becomes necessary at 200, where that
-    # digit multiplies ("za hnih") and a rule has to read it.
+    # These 100-199 rules still name no hundreds_digit, and that is not an
+    # oversight. _find_rule selects a rule only when its `range` and its
+    # condition both pass, so 118 selects hundred_teens and 18 selects teens
+    # even though their positional variables are identical; the range does
+    # the work a variable would. The hundreds digit is always 1 here, and
+    # #27 rule 1 says x1 is absent below 10^3 -- 100 is "zâ", never
+    # "za khat" -- so there is no digit to render and nothing to read.
+    #
+    # From 200 up that stops being true: the digit multiplies ("za hnih")
+    # and the rules below do read it. That is why hundreds_digit exists.
 
     - name: hundred_units            # zâ leh pakhat, … zâ leh pakua
       range: [101, 109]
@@ -154,6 +170,53 @@ grammar:
       range: [121, 199]
       condition: "ones_digit > 0"
       output: "{scales[100].standalone} {scales[10].multiplied} {units[tens_digit].bound} leh {units[ones_digit].standalone}"
+
+    # 200-999. Six rules mirroring the six above one-for-one: the hundreds
+    # digit multiplies zâ (so scales[100].multiplied, circumflex dropped, #27
+    # rule 2) exactly as the tens digit multiplies sâwm, and everything after
+    # the hundreds group is the 0-99 grammar unchanged. Forms confirmed by a
+    # native speaker on #27 under Q-N -- see meta.sources.
+    #
+    # The conditions read tens_digit and ones_digit rather than splitting the
+    # range, because unlike 100-199 these rules span every hundred: the shape
+    # depends on the last two digits, not on where the number sits.
+    #
+    # Naming: singular hundred_* is 100-199, where za stands alone and there
+    # is no digit to read; plural hundreds_* is 200-999, where a digit
+    # multiplies it. The pairs differ by one character on purpose -- they are
+    # the same six shapes -- but that also means a typo names a real rule
+    # rather than failing loudly, so check the prefix when editing. The
+    # examples: block and the vectors are what catch it if you do not.
+
+    - name: hundreds                 # za hnih -- exact multiple, no addend
+      range: [200, 999]
+      condition: "tens_digit == 0 and ones_digit == 0"
+      output: "{scales[100].multiplied} {units[hundreds_digit].bound}"
+
+    - name: hundreds_units           # za hnih leh pakhat
+      range: [200, 999]
+      condition: "tens_digit == 0 and ones_digit > 0"
+      output: "{scales[100].multiplied} {units[hundreds_digit].bound} leh {units[ones_digit].standalone}"
+
+    - name: hundreds_ten             # za hnih leh sâwm -- 10 not multiplied
+      range: [200, 999]
+      condition: "tens_digit == 1 and ones_digit == 0"
+      output: "{scales[100].multiplied} {units[hundreds_digit].bound} leh {scales[10].standalone}"
+
+    - name: hundreds_teens           # za hnih sâwm leh pakhat (digit adds to sâwm)
+      range: [200, 999]
+      condition: "tens_digit == 1 and ones_digit > 0"
+      output: "{scales[100].multiplied} {units[hundreds_digit].bound} {scales[10].standalone} leh {units[ones_digit].standalone}"
+
+    - name: hundreds_exact_tens      # za hnih leh sawm nga -- no addend after the tens
+      range: [200, 999]
+      condition: "tens_digit > 1 and ones_digit == 0"
+      output: "{scales[100].multiplied} {units[hundreds_digit].bound} leh {scales[10].multiplied} {units[tens_digit].bound}"
+
+    - name: hundreds_compound_tens   # za hnih sawm nga leh pariat
+      range: [200, 999]
+      condition: "tens_digit > 1 and ones_digit > 0"
+      output: "{scales[100].multiplied} {units[hundreds_digit].bound} {scales[10].multiplied} {units[tens_digit].bound} leh {units[ones_digit].standalone}"
 
 parse:
   case_insensitive: true
@@ -191,8 +254,11 @@ parse:
   # (#12, #34).
   connector_precedes: { units: [standalone], scales: [standalone, multiplied] }
   aliases: {}   # Decision (#15): no non-diacritic spelling variants among the
-                # numerals in this spec's 0-199 range (confirmed by native
-                # speaker). Diacritics are handled by strip_diacritics above.
+                # numerals in this spec's 0-999 range. Confirmed by a native
+                # speaker for 0-199 (#15); it carries to 999 because 200-999
+                # introduces no new lexemes -- the same units and the same two
+                # scale words, recombined (#27 Q-N). Diacritics are handled by
+                # strip_diacritics above.
                 #
                 # This is NOT true of Mizo generally, so don't read it as a
                 # claim about the language: the 10^5 and 10^6 scale words take
@@ -221,4 +287,13 @@ examples:
   - { number: 120, text: "zâ leh sawm hnih" }
   - { number: 128, text: "zâ sawm hnih leh pariat" }
   - { number: 199, text: "zâ sawm kua leh pakua" }
+  # 200-999, exactly as confirmed on #27 Q-N. Independent ground truth: these
+  # are written down from a native speaker, not generated from the rules, so
+  # a wrong rule fails here rather than being dutifully regenerated.
+  - { number: 200, text: "za hnih" }
+  - { number: 201, text: "za hnih leh pakhat" }
+  - { number: 210, text: "za hnih leh sâwm" }
+  - { number: 211, text: "za hnih sâwm leh pakhat" }
+  - { number: 250, text: "za hnih leh sawm nga" }
+  - { number: 258, text: "za hnih sawm nga leh pariat" }
 

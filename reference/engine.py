@@ -5,13 +5,15 @@ docs/architecture.md -- the definition of correctness that target packages
 reimplementing a language's rules by hand.
 
 Scope: specs shaped like the current languages/mizo.yaml (positional
-variables ones_digit/tens_digit only). That covers 0-199 as of #19 -- a rule
-matches on its `range` as well as its condition, so 118 and 18 select
-different rules despite identical positional variables, and the hundreds
-digit is always 1 across the range. (The order of the two checks is not what
-does this; a rule is selected only when both pass.) A third variable becomes
-necessary at 200, where the hundreds digit multiplies. Larger ranges are
-follow-up work.
+variables ones_digit/tens_digit/hundreds_digit). That covers 0-999 as of #27
+step 2b -- a rule matches on its `range` as well as its condition, so 118 and
+18 select different rules despite identical positional variables. (The order
+of the two checks is not what does this; a rule is selected only when both
+pass.) A fourth variable becomes necessary at 1000, where the thousands
+digit multiplies; that scale word also behaves differently -- #27 rule 1
+makes x1 obligatory from 10^3 up ("sang khat", never bare "sang") and rule 2
+keeps its circumflex under multiplication, neither of which any rule here
+has to express yet. Larger ranges are follow-up work.
 
 text -> number first normalises both the input *and* the lexicon words
 using the spec's `parse` section (see Spec._normalize_word). It then
@@ -29,10 +31,22 @@ but never produced by number_to_text() -- e.g. compound_tens' shorthand that
 drops the scale word. These are matched with the same field-exactness as
 the canonical output; only a single freestanding placeholder gets bound/
 standalone leniency. number_to_text() stays the single source of truth for
-the canonical form. This is cheap enough for a 0-199 range by brute-force
-search -- 200 candidates -- and #19 extended the range without needing to
-change it. It will need to become a real parser well before Mizo's ceiling:
-see #27, which puts that at 10^18 - 1.
+the canonical form. Every parse brute-forces the supported range and
+match-tests each candidate: 1,000 candidates per parse at 0-999, against 200
+before. When #27 step 2b raised the ceiling the reference suite went from
+about 20 s to 16-20 minutes -- six runs on one machine spanned 15:32 to
+19:30, so treat it as a band rather than a figure; it is sensitive to what
+else the machine is doing. That is a factor somewhere between 35 and 60, and
+it is not range^2 alone: it is the range (5x more candidates per parse),
+times 3.5x more tests because the parametrised ones cover the range, times a
+per-candidate rise from the rule table growing 11 to 17 (measured separately
+at 33us -> 90us, since _find_rule scans rules in order and AST-walks their
+conditions).
+
+That is tolerable here and is not a strategy -- at 10^5 it is arithmetically
+impossible, and the Mizo ladder runs to 10^9 (#27 rule 4, with rule 5
+allowing multi-digit multipliers above it). This has to become a real parser
+before the range grows again; see #27 and docs/spec-format.md.
 """
 
 import ast
@@ -241,9 +255,16 @@ def _normalize(word: str, parse_config: dict) -> str:
 
 
 def _positional_variables(n: int) -> dict:
+    # Kept in step with the same function in the Python target's _render.py.
+    # There are deliberately two copies -- the target does not import the
+    # oracle -- so a name added here without adding it there makes every
+    # rule that reads it raise KeyError in the package while the reference
+    # suite stays green. compile_spec.py imports _VARIABLE_NAMES from here,
+    # so the compiler needs no third edit.
     return {
         "ones_digit": n % 10,
         "tens_digit": (n // 10) % 10,
+        "hundreds_digit": (n // 100) % 10,
     }
 
 
