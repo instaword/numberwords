@@ -318,20 +318,50 @@ def test_canonical_emits_the_connector_exactly_once_above_the_first_scale(spec, 
     # A property over the range, not a vectors lookup, because this is the
     # invariant #27 must preserve as the range grows -- 10100 is
     # "sîng khat leh zâ": one connector, same position, one magnitude up.
+    #
+    # Whether there IS a final addend is asked of the scale ladder the spec
+    # declares, rather than written as a test on n. Two shorter spellings are
+    # tempting and both encode a ceiling. "1 if n > 100" is true only while
+    # 199 is the ceiling: at 999 the pure multiples 200, 300, ... 900 are
+    # single terms ("za hnih") that correctly emit nothing, and that form
+    # fails on all eight. "n % 100 != 0" survives 999 and then fails one
+    # magnitude further out on the 10100 above, which is a multiple of 100
+    # and does take a connector. Reading the ladder is the form that holds at
+    # 199, at 999, and at that 10100 -- the three points we can actually
+    # check. That is the point: the test outlives the range it was written at.
+    scales = sorted(spec.lexicon["scales"])
+    enclosing = [s for s in scales if s <= n]
+    has_final_addend = bool(enclosing) and n % max(enclosing) != 0
+    # The convention starts at the second scale: below 100 nothing is emitted
+    # even though 11 has an addend, per the deliberate asymmetry above.
+    expected = 1 if (n >= scales[1] and has_final_addend) else 0
+
     connector = spec._normalize_word(spec.parse_config["connectors"][0])
     text = spec.number_to_text(n)
     words = [spec._normalize_word(w) for w in text.split()]
-    assert words.count(connector) == (1 if n > 100 else 0), text
+    assert words.count(connector) == expected, text
 
 
 def test_a_bound_form_is_rejected_as_the_final_addend(spec):
-    # Q-E on #27: the trailing digit of "zâ sâwm leh pariat" adds to what
-    # precedes it, so it takes the standalone form. "zâ leh riat" uses the
-    # bound form and is not a rival reading of 108 -- it is not Mizo.
-    # Leniency does not rescue it: that applies only to a phrase which is a
-    # single freestanding placeholder, and this one has two.
+    # Q-E on #27: the trailing digit of "zâ leh pakhat" adds to what precedes
+    # it, so it takes the standalone form. "zâ leh khat" uses the bound form
+    # and is not a rival reading of 101 -- it is not Mizo. Leniency does not
+    # rescue it: that applies only to a phrase which is a single freestanding
+    # placeholder, and this one has two.
+    #
+    # The digit is load-bearing, so do not "tidy" it to another one. This
+    # assertion says a string does not parse, which stays true only while no
+    # *other* number claims those two tokens. 1 is the only digit for which
+    # none ever can, and that is a fact about Mizo rather than about this
+    # range: #27 records it as a confirmed rule -- "x1 is obligatory from
+    # 10^3 up, and absent below it. sâwm, zâ -- never sâwm khat." So 100 is
+    # "zâ", never "za khat", and no rule will ever multiply the hundred by 1.
+    # Every other digit acquires a rival the moment #27 raises supports.max
+    # past 199 -- "za riat" becomes 800 and "za hnih" becomes 200 (#27's own
+    # x2 table), at which point the same test written with 8 or 2 fails on
+    # correct code. Confirmed against a 0-999 prototype of the next step.
     with pytest.raises(ValueError):
-        spec.text_to_number("zâ leh riat")
+        spec.text_to_number("zâ leh khat")
 
 
 def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
