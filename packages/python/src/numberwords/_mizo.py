@@ -6,8 +6,8 @@ reference/ and commit the result.
 
 LANGUAGE = 'Mizo'
 CODE = 'lus'
-SPEC_VERSION = '0.4.0'
-SUPPORTS = (0, 199)
+SPEC_VERSION = '0.5.0'
+SUPPORTS = (0, 999)
 
 LEXICON = {
     'scales': {
@@ -104,6 +104,48 @@ RULES = (
         'range': (121, 199),
         'condition': lambda variables: variables['ones_digit'] > 0,
         'output': (('scales', 100, 'standalone'), ' ', ('scales', 10, 'multiplied'), ' ', ('units', 'tens_digit', 'bound'), ' leh ', ('units', 'ones_digit', 'standalone')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundreds',
+        'range': (200, 999),
+        'condition': lambda variables: variables['tens_digit'] == 0 and variables['ones_digit'] == 0,
+        'output': (('scales', 100, 'multiplied'), ' ', ('units', 'hundreds_digit', 'bound')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundreds_units',
+        'range': (200, 999),
+        'condition': lambda variables: variables['tens_digit'] == 0 and variables['ones_digit'] > 0,
+        'output': (('scales', 100, 'multiplied'), ' ', ('units', 'hundreds_digit', 'bound'), ' leh ', ('units', 'ones_digit', 'standalone')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundreds_ten',
+        'range': (200, 999),
+        'condition': lambda variables: variables['tens_digit'] == 1 and variables['ones_digit'] == 0,
+        'output': (('scales', 100, 'multiplied'), ' ', ('units', 'hundreds_digit', 'bound'), ' leh ', ('scales', 10, 'standalone')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundreds_teens',
+        'range': (200, 999),
+        'condition': lambda variables: variables['tens_digit'] == 1 and variables['ones_digit'] > 0,
+        'output': (('scales', 100, 'multiplied'), ' ', ('units', 'hundreds_digit', 'bound'), ' ', ('scales', 10, 'standalone'), ' leh ', ('units', 'ones_digit', 'standalone')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundreds_exact_tens',
+        'range': (200, 999),
+        'condition': lambda variables: variables['tens_digit'] > 1 and variables['ones_digit'] == 0,
+        'output': (('scales', 100, 'multiplied'), ' ', ('units', 'hundreds_digit', 'bound'), ' leh ', ('scales', 10, 'multiplied'), ' ', ('units', 'tens_digit', 'bound')),
+        'parse_aliases': (),
+    },
+    {
+        'name': 'hundreds_compound_tens',
+        'range': (200, 999),
+        'condition': lambda variables: variables['tens_digit'] > 1 and variables['ones_digit'] > 0,
+        'output': (('scales', 100, 'multiplied'), ' ', ('units', 'hundreds_digit', 'bound'), ' ', ('scales', 10, 'multiplied'), ' ', ('units', 'tens_digit', 'bound'), ' leh ', ('units', 'ones_digit', 'standalone')),
         'parse_aliases': (),
     },
 )

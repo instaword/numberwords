@@ -12,7 +12,7 @@ The language behaviour is not written in this package. It is compiled from
 languages/mizo.yaml -- one declarative spec per language -- into _mizo.py,
 and interpreted by _render.py. See docs/architecture.md.
 
-Mizo 0-199 is what this version supports; anything outside that range
+Mizo 0-999 is what this version supports; anything outside that range
 raises NumberWordsError. There is no language parameter yet: adding one
 before a second language exists would be guessing at its shape.
 

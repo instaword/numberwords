@@ -180,9 +180,10 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth():
     # only, so "za sawm hnih" is 120 and not also 10^2 x 20 = 2,000.
     #
     # Unlike the test above, this one cannot currently fail for the reason it
-    # describes: parsing searches only the supported range, so at 0-199 the
-    # rival reading 2,000 is never a candidate. It pins the narrower fact that
-    # no other number in range accepts the string, plus 120's canonical form.
+    # describes: parsing searches only the supported range, so at 0-999 the
+    # rival reading 2,000 is still never a candidate. It pins the narrower
+    # fact that no other number in range accepts the string, plus 120's
+    # canonical form.
     # Labelled rather than deleted (#36): it goes live when the range passes
     # 2,000, which is when #27's stacking rule lands.
     assert numberwords.text_to_number("za sawm hnih") == 120

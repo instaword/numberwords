@@ -47,7 +47,7 @@ VECTORS_PATH = Path(__file__).resolve().parent.parent / "vectors" / "mizo.json"
 # these tests are meant to be an independent claim about what must work, so
 # a spec edit that narrowed the range should fail them rather than shrink
 # them. Widen it in the same PR that widens the spec (#19).
-SUPPORTED_MAX = 199
+SUPPORTED_MAX = 999
 
 
 @pytest.fixture(scope="module")
@@ -78,9 +78,10 @@ def test_vectors_match_number_to_text(spec, vectors):
 def test_vector_numbers_are_strings(vectors):
     # #12: `number` is deliberately a string, so that a JS target reading
     # this file cannot silently lose precision above 2^53 - 1 once the range
-    # grows (#27 puts Mizo's ceiling at 10^18 - 1). Nothing in the current
-    # 0-199 range needs it; the format does. Asserted so that a future
-    # regenerate cannot quietly drop back to a JSON number.
+    # grows (#27 rule 4 puts the top of the Mizo ladder at 10^9, and rule 5
+    # allows multipliers above it). Nothing in the current 0-999 range needs
+    # it; the format does. Asserted so that a future regenerate cannot
+    # quietly drop back to a JSON number.
     for vector in vectors:
         assert isinstance(vector["number"], str), vector
 
@@ -370,10 +371,11 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
     #
     # This cannot currently fail for that reason, and saying so is the point.
     # text_to_number brute-forces range(supports.min, supports.max + 1), so at
-    # supports.max = 199 the rival reading 2,000 is never a candidate and no
-    # stacking rule could make it one. What the assertions actually pin is
-    # narrower: that no *other* number in 0-199 accepts "za sawm hnih", and
-    # that 120's canonical spelling is what it should be.
+    # supports.max = 999 the rival reading 2,000 is still never a candidate
+    # and no stacking rule could make it one. What the assertions actually pin
+    # is narrower: that no *other* number in 0-999 accepts "za sawm hnih", and
+    # that 120's canonical spelling is what it should be. Step 2b raised the
+    # ceiling without reaching 2,000, so this stays inert -- deliberately.
     #
     # Kept rather than deleted, on the #36 precedent -- an invariant can be
     # correct and inert, and the honest move is to document the limit instead
@@ -406,7 +408,7 @@ def test_connector_placement_does_not_survive_tokenisation(spec):
     #
     # The dimension varied here is (number of gaps, whether the canonical
     # output already carries a connector), and these are all of its values
-    # in 0-199 -- one representative each, rather than a handful of numbers
+    # in 0-999 -- one representative each, rather than a handful of numbers
     # that happen to share a shape and so cannot fail independently:
     #
     #     11  -> 1 gap,  no connector    "sâwm pakhat"
@@ -741,8 +743,10 @@ def test_aliases_resolve_to_canonical_word_before_matching():
     # lexicon word before rule matching. Same mechanism as parse.connectors,
     # just substituting instead of dropping. mizo.yaml's alias list is empty
     # and settled -- a native speaker confirmed Mizo 0-199 has no
-    # non-diacritic spelling variants -- so this uses synthetic placeholder
-    # words rather than asserting real Mizo spellings.
+    # non-diacritic spelling variants, and 200-999 introduced no new scale
+    # words, so the finding carries (#27 puts the first real aliases at 10^5,
+    # nuai/nuaih) -- so this uses synthetic placeholder words rather than
+    # asserting real Mizo spellings.
     data = {
         "meta": {"supports": {"min": 5, "max": 5}},
         "lexicon": {"units": {5: {"standalone": "canonical_five", "bound": "canonical_five"}}},
@@ -829,7 +833,7 @@ def test_ambiguous_match_raises():
     # whichever number happened to come first in the range -- this is the
     # oracle, so an ambiguous spelling is a data bug to surface loudly, not
     # a thing to guess through. Uses synthetic data since mizo.yaml has no
-    # such collision today (verified across the full 0-199 range).
+    # such collision today (verified across the full 0-999 range).
     data = {
         "meta": {"supports": {"min": 0, "max": 1}},
         "lexicon": {

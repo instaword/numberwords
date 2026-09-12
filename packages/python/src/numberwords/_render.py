@@ -175,11 +175,22 @@ def _placeholders(template) -> list:
 def _positional_variables(n: int) -> dict:
     """The variables a placeholder key or a rule condition may refer to.
 
-    Hardcoded to two names, matching the engine and the compiler. #27 notes
-    these do not generalise past two digits; that is a known limit of the
-    format, not of this module.
+    Hardcoded to three names, matching the engine and the compiler. Adding a
+    name here without adding it to reference/engine.py (or the reverse) makes
+    every rule that reads it raise KeyError in one implementation while the
+    other stays green -- the two are separate copies on purpose, since this
+    module never imports the oracle.
+
+    #27 notes these do not generalise up the ladder: one variable per digit
+    position stops working long before 10^9, and the multiplier there can be
+    any numeral the grammar produces rather than a single digit. That is a
+    known limit of the format, not of this module.
     """
-    return {"ones_digit": n % 10, "tens_digit": (n // 10) % 10}
+    return {
+        "ones_digit": n % 10,
+        "tens_digit": (n // 10) % 10,
+        "hundreds_digit": (n // 100) % 10,
+    }
 
 
 def _resolve_key(raw_key, variables: dict):

@@ -68,8 +68,10 @@ VECTORS_PATH = REPO_ROOT / "vectors" / "mizo.json"
 def numbers_to_cover(spec) -> list:
     """Which numbers get an entry in the vectors file.
 
-    Today: every number in the supported range, which is 0-199 since #19,
-    and it stays exhaustive. The policy agreed in #12 for when it stops
+    Today: every number in the supported range, which is 0-999 since #27
+    step 2b, and it stays exhaustive. Note that 1,000 entries sits exactly on
+    the #12 threshold below -- the next extension is the one that has to
+    choose, not this one. The policy agreed in #12 for when it stops
     being exhaustive:
 
     - Enumerate every number while the range is under roughly 1,000 entries.
@@ -216,7 +218,7 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
     (nuai za hnih for 10^5 x 200), and any scale may take any
     scale-multiplied expression as its multiplier, so the accepted spellings
     of one number stop being a list and become a grammar. Nothing to do about
-    it at 0-199, but whoever extends the range past that boundary will need
+    it at 0-999, but whoever extends the range past that boundary will need
     generation from parse features to become generation from a grammar. See
     #27 for the data and #12 for the discussion.
     """
@@ -417,7 +419,9 @@ def _connector_slots(spec, rule, words) -> tuple:
        "sâwm leh pakhat" (11) and "sawm nga leh pariat" (58) are Mizo, while
        "sawm leh hnih" (20) and "zâ sawm leh thum" (130) are not -- the
        trailing digit there multiplies the scale word rather than adding to
-       it. Confirmed for 100-199 by Rosie Malsawmtluangi (#19).
+       it. Confirmed for 100-199 by Rosie Malsawmtluangi (#19), and for
+       200-999 by the same speaker on #27 (Q-N) -- the 200-999 forms mirror
+       their 100-199 cases, so connector placement carries with them.
 
        Declared, not inferred: parse.connector_precedes names the lexicon
        fields that begin a top-level addend, and this function only looks
@@ -574,11 +578,14 @@ def _placements(gaps) -> tuple:
     too"), which `none` and `all` between them never show. Accept-set
     documentation rather than coverage, and cheap enough to keep.
 
-    Sized against a 4-gap ceiling: at supports.max 199 the longest canonical
-    output is five words. The power set this replaces was 16 rows there and
-    2,048 at the 12-word forms of 10^6. When accepted spellings stop being a
-    list and become a grammar (steps 3-4 of #27), "vary the placement" stops
-    being a subset-of-gaps at all and this helper should go with it.
+    Sized against a 5-gap ceiling: at supports.max 999 the longest canonical
+    output is six words (221, "za hnih sawm hnih leh pakhat"), and 576 of the
+    1,000 numbers sit at that ceiling rather than below it. The power set
+    this replaces was 32 rows there -- 16 at the 4-gap ceiling of 199 -- and
+    2,048 at the 12-word forms of 10^6; this helper is 7, 6 and 13. When
+    accepted spellings stop being a list and become a grammar (steps 3-4 of
+    #27), "vary the placement" stops being a subset-of-gaps at all and this
+    helper should go with it.
     """
     gaps = tuple(gaps)
     if not gaps:
