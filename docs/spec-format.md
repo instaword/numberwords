@@ -186,11 +186,13 @@ The current `text → number` implementation brute-forces the supported range an
 match-tests each candidate, so its cost grows with the range on every parse.
 #27 step 2b raised Mizo to 0–999 and the reference suite went from about 20
 seconds to **16–20 minutes** — six runs on one machine spanned 15:32 to 19:30,
-so it is a band rather than a figure. That is a factor of roughly 35–60: the
-range itself, times the parametrised tests that cover it, times a
-per-candidate rise from the rule table growing. The measured shape of the
-problem rather than a prediction about it. It does not survive another step: at 10⁵ the
-candidate loop is arithmetically impossible, and the Mizo ladder runs to 10⁹
+so it is a band rather than a figure. Roughly a factor of 35–60: the range
+itself, times the parametrised tests that cover it, times a per-candidate
+rise from the rule table growing. That is the measured shape of the problem
+rather than a prediction about it.
+
+It does not survive another step: at 10⁵ the candidate loop is
+arithmetically impossible, and the Mizo ladder runs to 10⁹
 (#27 rule 4). This has to become genuine evaluation rather than template
 matching before the range grows again — see the note in
 `reference/engine.py`, and #27.

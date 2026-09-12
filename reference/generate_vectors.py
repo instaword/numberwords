@@ -582,9 +582,10 @@ def _placements(gaps) -> tuple:
     output is six words (221, "za hnih sawm hnih leh pakhat"), and 576 of the
     1,000 numbers sit at that ceiling rather than below it. The power set
     this replaces was 32 rows there -- 16 at the 4-gap ceiling of 199 -- and
-    2,048 at the 12-word forms of 10^6; this helper is 7, 6 and 13. When accepted spellings stop being a
-    list and become a grammar (steps 3-4 of #27), "vary the placement" stops
-    being a subset-of-gaps at all and this helper should go with it.
+    2,048 at the 12-word forms of 10^6; this helper is 7, 6 and 13. When
+    accepted spellings stop being a list and become a grammar (steps 3-4 of
+    #27), "vary the placement" stops being a subset-of-gaps at all and this
+    helper should go with it.
     """
     gaps = tuple(gaps)
     if not gaps:
