@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/instaword/numberwords/spec/spec.schema.json",
   "title": "numberwords language rule spec",
-  "description": "Validates a language rule spec as implemented today by reference/engine.py -- see docs/spec-format.md for the prose description. This schema is deliberately DESCRIPTIVE, not aspirational: it encodes the format that currently exists for a 0-100 style range, and nothing that has only been proposed. Extend it in the same PR that extends the format, never ahead of it.\n\nValidation runs against the JSON normalisation of the YAML file (docs/spec-format.md: 'YAML for authoring; it normalises to JSON as the IR'). That matters because YAML gives integer lexicon keys while JSON object keys are always strings -- hence the numeric-string key patterns below.",
+  "description": "Validates a language rule spec as implemented today by reference/engine.py -- see docs/spec-format.md for the prose description. This schema is deliberately DESCRIPTIVE, not aspirational: it encodes the format that currently exists, and nothing that has only been proposed. Extend it in the same PR that extends the format, never ahead of it.\n\nValidation runs against the JSON normalisation of the YAML file (docs/spec-format.md: 'YAML for authoring; it normalises to JSON as the IR'). That matters because YAML gives integer lexicon keys while JSON object keys are always strings -- hence the numeric-string key patterns below.",
 
   "type": "object",
   "required": ["meta", "lexicon", "grammar"],
@@ -81,16 +81,48 @@
     "grammar": {
       "type": "object",
       "description": "How the atoms combine.",
-      "required": ["rules"],
+      "required": [
+        "rules"
+      ],
       "additionalProperties": false,
       "properties": {
+        "connector": {
+          "type": "object",
+          "description": "Optional. A connector number_to_text writes into every number from `min` up, before its final addend -- the innermost {remainder}. Mizo's 'leh' (#27 Q-M). A property of the whole number rather than of a rule, which is why it is declared here once rather than written into templates. The word must also be listed in parse.connectors, or the canonical spelling would not parse back; the engine checks that at load. Its placement also says where else a connector may idiomatically stand -- before any addend -- which is what the vector generator certifies.",
+          "required": [
+            "word",
+            "placement",
+            "min"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "word": {
+              "type": "string",
+              "minLength": 1
+            },
+            "placement": {
+              "enum": [
+                "final_addend"
+              ],
+              "description": "Where the connector goes. One placement exists because one has been needed."
+            },
+            "min": {
+              "type": "integer",
+              "description": "The smallest number that gets the connector."
+            }
+          }
+        },
         "rules": {
           "type": "array",
           "minItems": 1,
-          "description": "Tried in order; the first whose range contains the number AND whose condition passes is applied. Order is therefore significant.",
+          "description": "number_to_text takes the largest scale any emitting rule is keyed by that is not above the number, then the first rule at that scale, in order, whose `multiplier` and `condition` both hold. Order is significant only between rules of the same scale. text_to_number parses by recursive descent over all of them.",
           "items": {
             "type": "object",
-            "required": ["name", "range", "output"],
+            "required": [
+              "name",
+              "scale",
+              "output"
+            ],
             "additionalProperties": false,
             "properties": {
               "name": {
@@ -98,33 +130,38 @@
                 "pattern": "^[a-z][a-z0-9_]*$",
                 "description": "Identifies the rule in tests, errors and review discussion. Not used for matching."
               },
-              "range": {
-                "type": "array",
-                "minItems": 2,
-                "maxItems": 2,
-                "items": { "type": "integer" },
-                "description": "Inclusive [low, high] bounds this rule can apply to."
+              "scale": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "The power of ten this rule consumes (CLDR RBNF's base value). The rule sees multiplier = n // scale and remainder = n % scale."
+              },
+              "multiplier": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Optional. A fixed multiplier: the rule applies only when n // scale is this value. For a rule whose template does not write the multiplier -- Mizo's bare 'sâwm' for 10 -- this is how a parser learns it. A condition cannot do that job: it can check a multiplier, not supply one (#65). The engine refuses, at load, a rule that neither writes its multiplier outside a [...] segment nor fixes it here."
               },
               "condition": {
                 "type": "string",
                 "minLength": 1,
-                "description": "Optional extra test beyond the range, over the positional variables (ones_digit, tens_digit). Evaluated by a restricted AST walker in engine.py -- comparisons, and/or, names and integer constants only. NOT eval(). Anything outside that subset raises rather than executing."
+                "description": "Optional extra test over the variables `multiplier` and `remainder`. Evaluated by a restricted AST walker in engine.py -- comparisons, and/or, names and integer constants only. NOT eval(). Anything outside that subset raises rather than executing."
               },
               "output": {
                 "type": "string",
                 "minLength": 1,
-                "pattern": "^[^{}]*(\\{\\w+\\[\\w+\\]\\.\\w+\\}[^{}]*)*$",
-                "description": "The canonical rendering this rule produces, as literal text plus {table[key].field} placeholders. The key is either a positional variable name or a literal integer. The pattern here enforces that every brace group is a well-formed placeholder and that no stray brace survives -- a typo like {units[ones_digit]} fails validation instead of failing at render time."
+                "pattern": "^([^{}\\[\\]]|\\{\\w+\\[\\w+\\]\\.\\w+\\}|\\{remainder\\}|\\[([^{}\\[\\]]|\\{\\w+\\[\\w+\\]\\.\\w+\\}|\\{remainder\\})*\\])*$",
+                "description": "The rendering this rule produces: literal text, {table[key].field} lexicon placeholders whose key is multiplier, remainder or a literal integer, and {remainder} -- the remainder rendered by the same rules. A [...] segment is dropped when the remainder is zero; {remainder} may only appear inside one, and segments do not nest (the engine enforces those two). The pattern enforces that every brace group is a well-formed placeholder and every bracket closes, so a typo like {units[multiplier]} fails validation instead of failing at render time."
               },
-              "parse_aliases": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "string",
-                  "minLength": 1,
-                  "pattern": "^[^{}]*(\\{\\w+\\[\\w+\\]\\.\\w+\\}[^{}]*)*$"
-                },
-                "description": "Optional. Extra templates accepted when parsing but NEVER produced by number_to_text -- e.g. Mizo's compound-tens shorthand. Same placeholder syntax as output, so the same pattern applies."
+              "emit": {
+                "enum": [
+                  "never"
+                ],
+                "description": "Optional. 'never' makes the rule accepted when parsing but never produced by number_to_text -- e.g. Mizo's compound-tens shorthand 'hnih thum' for 23."
+              },
+              "scope": {
+                "enum": [
+                  "whole"
+                ],
+                "description": "Optional, and only on an 'emit: never' rule. 'whole' accepts the rule for an entire input only, never as the remainder inside a longer number: without it Mizo's shorthand would let 'za hnih khat' parse as 121 (#65)."
               }
             }
           }
@@ -153,7 +190,7 @@
         },
         "accepted_forms": {
           "type": "object",
-          "description": "Extra lexicon fields a freestanding single-digit phrase may match, keyed by lexicon table. The field a template names always matches, so list only the extras: Mizo's 'units': ['bound'] also accepts the bound form of a lone digit, whose template names 'standalone'. Omit the section entirely for exact matching -- a language whose entries have one form each declares nothing. Leniency applies only where a template is a single placeholder; that rule belongs to the engine, being about ambiguity rather than about any one language.",
+          "description": "Extra lexicon fields a freestanding single-word phrase may match, keyed by lexicon table. The field a template names always matches, so list only the extras: Mizo's 'units': ['bound'] also accepts the bound form of a lone digit, whose template names 'standalone'. Omit the section entirely for exact matching -- a language whose entries have one form each declares nothing. Leniency applies only where the whole input is a single word; that rule belongs to the engine, being about ambiguity rather than about any one language.",
           "additionalProperties": {
             "type": "array",
             "items": { "type": "string", "minLength": 1 },
@@ -164,17 +201,7 @@
         "connectors": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
-          "description": "Filler words dropped when parsing, e.g. Mizo 'leh'. A tolerance, not a claim about meaning."
-        },
-        "connector_precedes": {
-          "type": "object",
-          "description": "Which lexicon fields begin a top-level addend, keyed by table -- equivalently, the positions a word from 'connectors' may idiomatically stand before. Mizo's 'leh' may precede a standalone unit or any scale form, but never the bound digit that multiplies a scale word, so 'sawm leh hnih' is not certified for 20. Read only when generating conformance vectors, to decide which spellings are certified as accepted input; the parser drops connectors wherever they fall and stays deliberately more tolerant than the certified set. Omit it when a language has no connectors, or when no connector position is idiomatic -- an absent section certifies none.",
-          "additionalProperties": {
-            "type": "array",
-            "items": { "type": "string", "minLength": 1 },
-            "minItems": 1,
-            "uniqueItems": true
-          }
+          "description": "Filler words dropped when parsing, wherever they fall, e.g. Mizo 'leh'. A tolerance, not a claim about meaning. Where a connector is written on output is grammar.connector's business."
         },
         "aliases": {
           "type": "object",

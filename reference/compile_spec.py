@@ -14,16 +14,16 @@ changes. test_compile_spec.py fails if the checked-in copy is out of date.
 
 This module intentionally uses a few private names from engine.py. The
 compiler is part of the same reference implementation, so sharing the
-placeholder pattern and positional variable names avoids keeping duplicate
-copies that could drift apart.
+template parser and the variable names avoids keeping duplicate copies that
+could drift apart.
 """
 
 import ast
 from pathlib import Path
 
 from engine import (
-    _PLACEHOLDER_RE,
     _VARIABLE_NAMES,
+    _parse_template,
     _validate_condition_node,
     load,
 )
@@ -34,10 +34,10 @@ ARTIFACT_PATH = (
     REPO_ROOT / "packages" / "python" / "src" / "numberwords" / "_mizo.py"
 )
 
-# The positional variable names a placeholder key or a condition may use.
-# The engine builds this set for its own load-time validation (#37); take
-# that one rather than building a second from the same call, which is the
-# duplication this issue is about in miniature.
+# The variable names a placeholder key or a condition may use. The engine
+# builds this set for its own load-time validation (#37); take that one
+# rather than building a second, which is the duplication this issue is
+# about in miniature.
 VARIABLE_NAMES = _VARIABLE_NAMES
 
 _HEADER = '''"""Compiled from languages/mizo.yaml by reference/compile_spec.py.
@@ -47,43 +47,24 @@ reference/ and commit the result.
 """'''
 
 
-def _placeholder_key(raw_key):
-    """A placeholder's key is either a positional variable name, which is
-    looked up at runtime, or a fixed integer, which is used directly.
-    Matches engine._resolve_key.
-    """
-    if raw_key in VARIABLE_NAMES:
-        return raw_key
-    return int(raw_key)
-
-
-def _parse_template(template):
-    """Splits a template into parts. String parts are literal text, and
-    three-tuples represent placeholders (table, key, field). The renderer
-    works with these parts directly, so it doesn't need to run a regex.
-    """
-    parts = []
-    position = 0
-    for match in _PLACEHOLDER_RE.finditer(template):
-        if match.start() > position:
-            parts.append(template[position:match.start()])
-        table, raw_key, field = match.groups()
-        parts.append((table, _placeholder_key(raw_key), field))
-        position = match.end()
-    if position < len(template):
-        parts.append(template[position:])
-    return tuple(parts)
+# Templates are compiled with the engine's own parser, engine._parse_template,
+# into the item tuples it documents: a literal string, ("lex", table, key,
+# field), ("remainder",) or ("optional", items). The renderer walks those
+# directly, so it needs neither a regex nor a bracket scanner, and there is
+# exactly one definition of what a template means. Before #65 the compiler
+# split templates with a regex of its own, which was fine while templates
+# were flat and would have been a second parser to keep in step once they
+# could hold a segment.
 
 
 # Compiling conditions means there are two places that define how a
 # condition works: engine._eval_node and the compiled lambda below.
 # What keeps them in sync today is vectors/mizo.json. It covers every
-# number from 0 to 999, so every compiled condition is tested against
-# every possible input. That held before #19 at 0-100, held at 0-199, and
-# still holds now the range is 0-999. Once the vectors stop being
+# number from 0 to 999, and so every (multiplier, remainder) pair a
+# condition is evaluated at while rendering one. test_compile_spec.py also
+# evaluates both over a grid of pairs directly. Once the vectors stop being
 # exhaustive -- #12 puts that at roughly 1,000 entries, which 0-999 sits
-# exactly on -- this should have its own property test instead of relying
-# only on the vectors.
+# exactly on -- that grid is what carries the guarantee.
 
 
 # The allowlist moved into engine.py in #37, where it now also runs over the
@@ -98,8 +79,8 @@ _validate_condition = _validate_condition_node
 
 
 class _NameToLookup(ast.NodeTransformer):
-    """Rewrites a variable name like `ones_digit` into
-    `variables['ones_digit']`, so the generated lambda reads values
+    """Rewrites a variable name like `multiplier` into
+    `variables['multiplier']`, so the generated lambda reads values
     from the dictionary provided by the renderer.
     """
 
@@ -129,7 +110,7 @@ def _compile_condition(expression):
 
 def _format_condition(condition):
     """A rule without a condition emits None; the renderer treats that as
-    "always applies", the same way engine._find_rule does.
+    "always applies", the same way engine.Spec._rule_applies does.
     """
     if condition is None:
         return "None"
@@ -152,24 +133,41 @@ def _format_lexicon(lexicon):
 
 
 def _format_rules(rules):
+    """Each rule as a dict of plain literals.
+
+    `emit` and `whole_only` are booleans rather than the spec's strings
+    ("never", "whole"): the renderer asks yes-or-no questions of them, and a
+    bool cannot be misspelt in a comparison the way a string can.
+    """
     lines = ["RULES = ("]
     for rule in rules:
-        low, high = rule["range"]
-        aliases = tuple(
-            _parse_template(t) for t in rule.get("parse_aliases", [])
-        )
         lines.append("    {")
         lines.append(f"        'name': {rule['name']!r},")
-        lines.append(f"        'range': ({low}, {high}),")
+        lines.append(f"        'scale': {rule['scale']!r},")
+        lines.append(f"        'multiplier': {rule.get('multiplier')!r},")
         lines.append(
             f"        'condition': "
             f"{_format_condition(rule.get('condition'))},"
         )
         lines.append(f"        'output': {_parse_template(rule['output'])!r},")
-        lines.append(f"        'parse_aliases': {aliases!r},")
+        lines.append(f"        'emit': {rule.get('emit') != 'never'!r},")
+        lines.append(f"        'whole_only': {rule.get('scope') == 'whole'!r},")
         lines.append("    },")
     lines.append(")")
     return "\n".join(lines)
+
+
+def _format_connector(spec):
+    """grammar.connector, or None for a language that writes none. Only the
+    two values the renderer reads: `placement` has one legal value, and the
+    schema already refuses any other."""
+    connector = spec.connector
+    if connector is None:
+        return "CONNECTOR = None"
+    return (
+        f"CONNECTOR = {{'word': {connector['word']!r}, "
+        f"'min': {connector['min']!r}}}"
+    )
 
 
 def _format_parse(spec):
@@ -225,6 +223,7 @@ def render_module(spec):
         provenance,
         _format_lexicon(spec.lexicon),
         _format_rules(spec.rules),
+        _format_connector(spec),
         _format_parse(spec),
     ]
     return "\n\n".join(sections) + "\n"

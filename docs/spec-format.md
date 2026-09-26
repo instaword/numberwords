@@ -29,7 +29,7 @@ to convert numbers ↔ text, and nothing runtime-specific.
 - **A lexicon entry may carry several forms, chosen by grammatical context.**
   Mizo units have `standalone`/`bound`; its scale words have
   `standalone`/`multiplied`. Grammar templates name the field they need
-  (`{units[ones_digit].bound}`), so selecting a form stays data, not engine
+  (`{units[multiplier].bound}`), so selecting a form stays data, not engine
   logic. Name each field after *the condition that selects it*, and don't
   reuse a name across tables where the condition differs — Mizo's `bound`
   means "follows a scale word" while a scale's `multiplied` means "has a
@@ -62,8 +62,9 @@ that file would have to notice. Bump it when:
 
 - **the file's shape changes** — a section added or renamed, a new field, or a
   different structure for an existing one. `accepted_forms` becoming
-  `{ table: [fields] }` took Mizo to 0.2.0 (#31), and `connector_precedes`
-  arriving took it to 0.3.0 (#19).
+  `{ table: [fields] }` took Mizo to 0.2.0 (#31), `connector_precedes`
+  arriving took it to 0.3.0 (#19), and rules becoming scale-keyed took Mizo to
+  0.6.0 and English to 0.5.0 (#65).
 - **`meta.supports` changes.** The range is the one thing a consumer cannot
   discover without loading the spec and probing it, so widening it is a visible
   change even though no structure moved. Raising Mizo to 199 is part of the
@@ -98,51 +99,84 @@ lexicon:
                                       # words have one form, so just `word`
 
 grammar:
-  rules:                              # tried in order; first match applies
-    - name: compound_tens
-      range: [21, 99]
-      condition: "ones_digit > 0"     # restricted expression, not eval()
-      output: "{tens[tens_digit].word}-{units[ones_digit].word}"
+  rules:
+    - name: tens
+      scale: 10                       # the power of ten this rule consumes
+      condition: "multiplier > 1"     # restricted expression, not eval()
+      output: "{tens[multiplier].word}[-{remainder}]"
 ```
 
-Three things that example is carrying:
+Four things that example is carrying:
 
-- **Lexicon addressing is always `{table[key].field}`.** The key is either a
-  positional variable (`ones_digit`, `tens_digit`) or a literal integer
-  (`scales[10]`). There is no whole-number key — which is why `en.yaml` keys
-  its irregular teens by `ones_digit` rather than by value.
-- **Literal text between placeholders survives rendering**, which is how the
-  hyphen in `forty-two` gets there. The same hyphen is a declared
-  `word_separator` when parsing; `forty two` is accepted as well, but by the
-  whitespace rule rather than by the declaration — see "Word separators and
-  whitespace" below.
+- **A rule is keyed by the scale it consumes** and sees two values derived from
+  the number and that scale: `multiplier = n // scale` and
+  `remainder = n % scale`. 42 is `tens` with multiplier 4 and remainder 2.
+  There are no per-digit variables: the same two names work at every scale,
+  which is what lets one rule describe every multiple of its scale (#65).
+- **`{remainder}` is the remainder rendered by the same rules**, and a `[...]`
+  segment is dropped when the remainder is zero. So 40 is `forty` and 42 is
+  `forty-two` from the one rule. `{remainder}` may only appear inside a
+  segment: outside one, a zero remainder would render the rules' word for zero
+  in the middle of a number. And a segment must render the remainder, through
+  `{remainder}` or a remainder-keyed word, since it is present exactly when
+  there is one; the engine refuses one that does not, rather than let it drop
+  the remainder.
+- **Lexicon addressing is always `{table[key].field}`.** The key is
+  `multiplier`, `remainder`, or a literal integer (`scales[10]`). There is no
+  whole-number key, which is why `en.yaml` keys its irregular teens by the
+  remainder of a scale-10 rule rather than by value. Literal text between
+  placeholders survives rendering, which is how the hyphen in `forty-two` gets
+  there; the same hyphen is a declared `word_separator` when parsing, and
+  `forty two` is accepted as well, by the whitespace rule rather than by the
+  declaration — see "Word separators and whitespace" below.
 - **`condition` is evaluated by a restricted AST walker**, not `eval()` —
   comparisons, `and`/`or`, names and integer constants only. Anything else
   raises rather than executing. `condition` is data from a YAML file, not code
   we wrote.
 
-English above 99 is **not** in the example, and that's a real limitation rather
-than a simplification: "three hundred and five" needs a rule that recurses into
-a sub-range, and the format has no recursive placeholder. Mizo hits the same
-wall from the other direction at 10⁹ (#27). Two unrelated languages needing the
-same missing feature is good evidence it's genuinely required.
+A rule may also fix its multiplier: `multiplier: 1`. That is how a rule whose
+template never writes its multiplier is read back. Mizo says 10 as a bare
+`sâwm` and 100 as a bare `zâ`, and a parser reading `zâ` has to be told it is
+one hundred — `condition: "multiplier == 1"` can check a multiplier the parser
+already has, but cannot supply one. The rules first proposed for #65 used the
+condition, and 190 of the 1,000 shipped spellings then parsed to nothing while
+still rendering correctly. The engine now refuses, at load, a rule that
+neither writes its multiplier outside a segment nor fixes it.
+
+English stops at 99 in this example by choice rather than necessity now.
+"Three hundred and five" is `{units[multiplier].word} {scales[100].word}[ and
+{remainder}]` at scale 100 — "hundred" as a lexicon entry, since a template
+literal has to be a separator or a connector, and "and" is one. The format can
+say that; bringing the hundreds back is a change of its own.
 
 ## How the engine uses it
 
-- **`number → text`:** find the first `grammar.rules` entry whose `range`
-  contains the number *and* whose `condition` passes, then substitute lexicon
-  words into its `output`. Rule order is significant.
+- **`number → text`:** take the largest scale any emitting rule is keyed by
+  that is not above the number, then the first rule at that scale, in order,
+  whose `multiplier` and `condition` both hold. Order only matters between
+  rules of the same scale — which is where a language's ×1 behaviour lives:
+  Mizo's `ten` (bare `sâwm`) and `tens` (`sawm hnih`) are both scale 10.
 - **`text → number`:** normalise the text using `parse` (lowercase, strip
   diacritics, split on the effective separators — whitespace plus whatever
   `word_separators` declares — drop `connectors`, resolve `aliases`), then
-  match against the same grammar to recover the value. The normalising flags
-  apply to the lexicon word too, so only the comparison is loosened —
-  `number → text` still emits the canonical spelling, diacritics and all.
+  parse it by recursive descent over the same rules, collecting every value
+  some derivation gives. More than one is an ambiguity in the spec and raises;
+  it is never resolved by picking one. The normalising flags apply to the
+  lexicon word too, so only the comparison is loosened — `number → text` still
+  emits the canonical spelling, diacritics and all.
 
-A rule may also declare `parse_aliases`: extra templates accepted when parsing
-but never produced. `number_to_text` stays the single source of truth for the
-canonical form; everything in `parse` and `parse_aliases` only widens what is
-*accepted*, never what is *emitted*.
+A rule may be marked `emit: never`: accepted when parsing but never produced.
+Mizo's `tens_shorthand` is one — `hnih thum` for 23. `number_to_text` stays the
+single source of truth for the canonical form; everything in `parse` and every
+`emit: never` rule only widens what is *accepted*, never what is *emitted*.
+
+`scope: whole` restricts an `emit: never` rule to the whole input. It exists
+because recursion unscopes things. A flat rule was scoped by its range, so the
+shorthand could only ever be the whole of 21–99; a scale-keyed rule is also a
+candidate for every remainder, and without the scope `za hnih khat` would parse
+as 121 — bare `za` for 100, then the shorthand for 21. That was found by an
+exhaustive sweep of every three-word phrase while prototyping #65 — none of the
+certified inputs could have shown it, since every one is a correct positive.
 
 `parse.accepted_forms` widens matching a second way, for lexicon entries that
 carry several forms of one word. It maps a lexicon table to the extra fields a
@@ -153,49 +187,47 @@ leaving that field out of the list, and listing it would say nothing. That is
 why `standalone`, which the units template names, is absent above. A language
 whose entries have one form each, like English, declares nothing at all.
 
-That leniency applies only where a template is a **single placeholder**, and
-that rule lives in the engine rather than the spec. Relaxing a multi-word
-template would let `sawm hnih` (20) also match `teens`' ones-digit slot for 12
-— genuine ambiguity, not an alternate spelling. It is a fact about when a
-phrase is ambiguous, not about any one language.
+That leniency applies only where the **whole input is a single word**, and that
+rule lives in the engine rather than the spec. Relaxing a word inside a longer
+phrase would let `sawm hnih` (20) also read as `sâwm` + 2 through the bound
+form of 2 — genuine ambiguity, not an alternate spelling. It is a fact about
+when a phrase is ambiguous, not about any one language. Before #65 the same
+rule was stated as "the template is a single placeholder"; a remainder is
+rendered by the units rule, which is exactly that, so the old statement would
+have let leniency leak into every remainder (`sawm khat` as 11).
 
-`parse.connector_precedes` is the other half of `connectors`. Dropping a
-connector when parsing is a tolerance the engine applies in every gap, but the
-conformance vectors certify only spellings a speaker would actually use, so
-something has to say *where* a connector idiomatically stands. That is a fact
-about the language, so the spec states it rather than the vector generator
-inferring it from the shape of a template: the section maps a lexicon table to
-the fields that begin a **top-level addend**. Mizo's
-`{ units: [standalone], scales: [standalone, multiplied] }` has one entry per
-position the generator may insert `leh` into: `units.standalone` certifies
-`sâwm leh pakhat` for 11, `scales.standalone` certifies `zâ leh sâwm leh
-pariat` for 118, and `scales.multiplied` certifies `zâ leh sawm hnih leh
-pariat` for 128. What all three refuse is `sawm leh hnih` for 20, where the
-trailing digit multiplies the scale word rather than adding to it. (A `leh`
-written into a rule's own template, as 120's `zâ leh sawm hnih` has, is
-canonical output and does not go through this.) Omit the section and no
-connector spelling is certified; a language with no connector has nothing to
-declare.
+`grammar.connector` declares a connector the output writes, once, for the
+whole number: `{ word: leh, placement: final_addend, min: 100 }` puts `leh`
+before the final addend of every number from 100 up — the innermost
+`{remainder}`, so 108 is `zâ leh pariat` and 128 is `zâ sawm hnih leh pariat`
+(#27 Q-M). It used to be a literal in ten of Mizo's seventeen templates. The
+word must also be one of `parse.connectors`, or the canonical spelling would
+not parse back; the engine checks that at load. English declares no
+`grammar.connector` — it drops "and" on input and writes it nowhere below 100.
+
+The same declaration says where else a connector may idiomatically stand:
+before any addend, never before a digit bound to the scale word it multiplies.
+Every addend after the first begins where a `{remainder}` expansion begins, so
+the grammar already knows those gaps. The conformance vectors certify a
+connector there — `sâwm leh pakhat` for 11, `zâ leh sâwm leh pariat` for 118,
+`zâ leh sawm hnih leh pariat` for 128 — and refuse `sawm leh hnih` for 20,
+where the trailing digit multiplies the scale word rather than adding to it.
+Until #65 that was a separate declaration, `parse.connector_precedes`, naming
+the lexicon fields that begin an addend; it certified exactly the same gaps,
+and the vectors regenerated byte-identical without it.
 
 The engine stays deliberately more tolerant than the certified set — it drops
 connectors from any gap, so it parses strings the vectors never bless. That
 asymmetry is intended (#12, #34): the vectors are a floor every target must
 reach, not a ceiling.
 
-The current `text → number` implementation brute-forces the supported range and
-match-tests each candidate, so its cost grows with the range on every parse.
-#27 step 2b raised Mizo to 0–999 and the reference suite went from about 20
-seconds to **16–20 minutes** — six runs on one machine spanned 15:32 to 19:30,
-so it is a band rather than a figure. Roughly a factor of 35–60: the range
-itself, times the parametrised tests that cover it, times a per-candidate
-rise from the rule table growing. That is the measured shape of the problem
-rather than a prediction about it.
-
-It does not survive another step: at 10⁵ the candidate loop is
-arithmetically impossible, and the Mizo ladder runs to 10⁹
-(#27 rule 4). This has to become genuine evaluation rather than template
-matching before the range grows again — see the note in
-`reference/engine.py`, and #27.
+**What a parse costs.** Until #65 `text → number` brute-forced the supported
+range and template-matched every candidate, so its cost grew with the range on
+every parse — the reference suite took 16–20 minutes at 0–999, and at 10⁵ the
+candidate loop was arithmetically impossible. The recursive descent loops over
+the tokens of the input and the entries of the lexicon, never over
+`supports.max`. The same suite now runs in well under a minute, and growing the
+range no longer changes what a parse costs.
 
 ## Word separators and whitespace
 
@@ -245,26 +277,67 @@ would need a third-party dependency to test in Python and would drift between
 Unicode versions, leaving two targets built against different versions to
 disagree.
 
+## Relationship to CLDR RBNF
+
+[`architecture.md`](architecture.md) asks that we either build on CLDR RBNF
+explicitly or write down why we need something different. Both apply: this
+format **adopts RBNF's model and not its syntax** (#65).
+
+| RBNF | this format |
+|---|---|
+| rule base value — `100:` | `scale: 100` |
+| `<<` — the quotient, by the same rules | `multiplier` (a lexicon key today) |
+| `>>` — the remainder, by the same rules | `{remainder}` |
+| `[...]` — dropped when the remainder is zero | `[...]`, same notation |
+
+RBNF writes English's hundreds as `100: << hundred[ >>];`. Mizo's is
+`{scales[100].multiplied} {units[multiplier].bound}[ {remainder}]`: the same
+three moving parts. Keeping the bracket notation means the debt is paid in the
+syntax itself. One consequence has to be stated: a placeholder addresses the
+lexicon as `{table[key].field}`, so `[` is overloaded — **a bracket delimits a
+segment only outside a placeholder**; inside one it is the index.
+
+The syntax is not copied, for two reasons. The format is YAML validated by
+[`spec.schema.json`](../spec/spec.schema.json), and a one-line DSL string is
+opaque to a JSON Schema — the validation #37 exists to provide. And specs carry
+`# Decision (#N)` comment blocks, which a DSL string has nowhere to put.
+
+Three things RBNF does not model, each forced by real data:
+
+- **Conditioned lexical forms.** RBNF embeds literal words; Mizo needs
+  `pakhat`/`khat` and `sâwm`/`sawm` as forms of one entry, chosen by what the
+  word is doing.
+- **A connector placed by the whole number.** RBNF puts connectors in rule
+  bodies, which works when they coincide with a rule boundary. Mizo's `leh`
+  belongs to the final addend of the whole number, which no single rule can
+  see.
+- **The reverse direction.** RBNF is a formatting system, so it says nothing
+  about parsing, or about forms that are accepted and never emitted.
+
+RBNF selects between rules at one base value by further base values; this
+format uses a fixed `multiplier` or a `condition` instead. Equivalent for Mizo,
+and it says *why* a rule differs where a bare `200:` boundary would encode it
+as a magic number.
+
 ## Known gaps in the format
 
 Not speculative — each has been hit by a real language.
 
-- **No recursive placeholder.** A rule can't say "this slot holds a number
-  rendered by the same rules". English needs it above 99 (`{units} hundred and
-  {0-99}`); Mizo needs it at 10⁹ (`tlûklehdingâwn sawm hnih`, where the
-  multiplier is itself a compound). Tracked in #27. This is the largest gap.
-- **No way to declare a scale's ×1 behaviour.** Mizo writes `sâwm` for 10 but
-  `sâng khat` for 1,000 — an explicit multiplier is obligatory above 10², and
-  that's currently implicit in hand-written rules rather than stated as data.
-  #27.
+- **No recursive multiplier.** `{remainder}` recurses; the multiplier is a
+  lexicon key, so it is always a single word. Mizo's ladder would need more
+  only at 10⁹, where the multiplier can itself be a numeral (#27 rule 5:
+  `tlûklehdingâwn sawm hnih`). Mizo's ceiling is 10¹⁰ − 1 (#27, revised
+  2026-09-25), where every 10⁹ multiplier is a single digit, so it is not
+  needed; above it, greedy binding reabsorbs a trailing addend into the
+  multiplier and no spelling round-trips. Reopening that needs a Mizo answer,
+  not a format change.
 - **Canonical vs. accepted forms aren't fully expressible.** Above 10⁵ Mizo
-  accepts productive scale-stacking (`nuai za hnih`) that no rule generates, so
-  accepted input can't be enumerated from the rules. #27, #12.
+  accepts productive scale-stacking (`nuai za hnih`) that no rule generates.
+  It is accepted from a head scale of 10⁵ up, measured against the scale word
+  heading the stacked form (#65), and arrives with the ladder. #27, #12.
 
 Still genuinely open, no data yet:
 
 - How to express irregular joins (elision, mutation, tone changes) that some
   languages have.
 - Ordinals, negatives, decimals — in scope later; keep the format open to them.
-- Whether to adopt CLDR RBNF's rule syntax outright instead of inventing this.
-  (See [`architecture.md`](architecture.md) → Prior art.)

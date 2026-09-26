@@ -25,12 +25,14 @@ not whether the grammar itself is linguistically correct.
 """
 
 import copy
+import itertools
 import json
 import re
 from pathlib import Path
 
 import pytest
 
+import engine
 import generate_vectors
 from engine import (
     _WHITESPACE,
@@ -198,13 +200,15 @@ def test_certified_connectors_are_followed_by_a_top_level_addend(spec, vectors):
     # counter-example. The bound-form exclusion is the half that carries the
     # weight and it is unchanged.
     #
-    # generate_vectors reads this from parse.connector_precedes -- the spec
-    # declares which lexicon fields begin an addend, so the generator states
-    # no linguistic fact of its own (#19; #31 is why it must not). This test
-    # deliberately rebuilds the addend set from the lexicon instead of reading
-    # that declaration, so it cross-checks the spec rather than trusting it:
-    # declaring units.bound there would certify "sawm leh hnih", which this
-    # test rejects. Being Mizo-specific is fine here; this file is Mizo's.
+    # generate_vectors reads the gaps from the grammar -- every addend after
+    # the first starts where a {remainder} expansion starts -- so the
+    # generator states no linguistic fact of its own (#31 is why it must
+    # not). Until #65 the same fact was a declaration, parse.connector_precedes.
+    # This test deliberately rebuilds the addend set from the lexicon instead
+    # of reading either, so it cross-checks the spec rather than trusting it:
+    # a grammar whose segment started before a bound digit would certify
+    # "sawm leh hnih", which this test rejects. Being Mizo-specific is fine
+    # here; this file is Mizo's.
     addends = {
         spec._normalize_word(entry["standalone"]) for entry in spec.lexicon["units"].values()
     }
@@ -298,12 +302,12 @@ def test_the_two_connector_spelling_is_certified(spec, vectors):
     # could not have been tested before now.
     vector = next(v for v in vectors if v["number"] == "128")
     assert "zâ leh sawm hnih leh pariat" in vector["accepted_inputs"]
-    # 128 exercises connector_precedes' scales.multiplied entry. 118 is the
-    # other half -- a standalone scale form heading an addend -- and it is the
-    # only slot scales.standalone enables, every other scale gap already
-    # holding the canonical "leh". Without this assertion, dropping that field
-    # passes the entire suite and only the CI drift check notices. Form and
-    # gap both confirmed by the repo owner in review of #50.
+    # 128 exercises the gap before a multiplied scale word heading an addend
+    # (sawm). 118 is the other half -- a standalone scale form heading one
+    # (sâwm) -- and it is the only such slot in range, every other scale gap
+    # already holding the canonical "leh". Without this assertion, losing
+    # that gap passes the entire suite and only the CI drift check notices.
+    # Form and gap both confirmed by the repo owner in review of #50.
     vector = next(v for v in vectors if v["number"] == "118")
     assert "zâ leh sâwm leh pariat" in vector["accepted_inputs"]
 
@@ -348,7 +352,7 @@ def test_a_bound_form_is_rejected_as_the_final_addend(spec):
     # it, so it takes the standalone form. "zâ leh khat" uses the bound form
     # and is not a rival reading of 101 -- it is not Mizo. Leniency does not
     # rescue it: that applies only to a phrase which is a single freestanding
-    # placeholder, and this one has two.
+    # word, and this one has two.
     #
     # The digit is load-bearing, so do not "tidy" it to another one. This
     # assertion says a string does not parse, which stays true only while no
@@ -370,17 +374,18 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
     # only, so "za sawm hnih" is 120 and not also 10^2 x 20 = 2,000.
     #
     # This cannot currently fail for that reason, and saying so is the point.
-    # text_to_number brute-forces range(supports.min, supports.max + 1), so at
-    # supports.max = 999 the rival reading 2,000 is still never a candidate
-    # and no stacking rule could make it one. What the assertions actually pin
-    # is narrower: that no *other* number in 0-999 accepts "za sawm hnih", and
-    # that 120's canonical spelling is what it should be. Step 2b raised the
-    # ceiling without reaching 2,000, so this stays inert -- deliberately.
+    # The spec has no stacking rule yet -- it lands with the ladder, where
+    # stacking is attested (#27 rule 6, #65) -- and 2,000 is outside
+    # supports.max besides, so no derivation could produce the rival reading.
+    # What the assertions actually pin is narrower: that no *other* number in
+    # 0-999 accepts "za sawm hnih", and that 120's canonical spelling is what
+    # it should be.
     #
     # Kept rather than deleted, on the #36 precedent -- an invariant can be
     # correct and inert, and the honest move is to document the limit instead
-    # of implying coverage. It becomes load-bearing the moment supports.max
-    # passes 2,000, which is when #27's stacking rule arrives.
+    # of implying coverage. It becomes load-bearing when stacking arrives:
+    # measured against the head scale, `za` (10^2) is below the 10^5 floor,
+    # so "za sawm hnih" must still read as 120 only.
     assert spec.text_to_number("za sawm hnih") == 120
     assert spec.number_to_text(120) == "zâ leh sawm hnih"
 
@@ -488,12 +493,7 @@ def test_every_dimension_of_variation_parses(spec):
     # dropping out and taking a rule's only representative with it. Ask the
     # engine which rules fire in range and require each to be represented.
     def rules_firing(numbers):
-        return {
-            generate_vectors._find_rule(
-                spec.rules, n, generate_vectors._positional_variables(n)
-            )["name"]
-            for n in numbers
-        }
+        return {spec._find_rule(n)["name"] for n in numbers}
 
     every = rules_firing(generate_vectors.numbers_to_cover(spec))
     missing = every - rules_firing(swept)
@@ -603,7 +603,7 @@ def test_strip_diacritics_is_what_accepts_undiacriticked_input():
         "meta": {"supports": {"min": 10, "max": 10}},
         "lexicon": {"scales": {10: {"standalone": "sâwm", "multiplied": "sawm"}}},
         "grammar": {
-            "rules": [{"name": "ten", "range": [10, 10], "output": "{scales[10].standalone}"}]
+            "rules": [{"name": "ten", "scale": 10, "multiplier": 1, "output": "{scales[10].standalone}"}]
         },
         "parse": {},
     }
@@ -627,7 +627,7 @@ def test_connectors_are_normalised_before_being_dropped():
         "meta": {"supports": {"min": 5, "max": 5}},
         "lexicon": {"units": {5: {"standalone": "canonical_five", "bound": "canonical_five"}}},
         "grammar": {
-            "rules": [{"name": "units", "range": [0, 9], "output": "{units[ones_digit].standalone}"}]
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"}]
         },
         "parse": {"strip_diacritics": True, "connectors": ["lêh"]},
     }
@@ -646,7 +646,7 @@ def test_aliases_are_normalised_on_both_sides():
         "meta": {"supports": {"min": 5, "max": 5}},
         "lexicon": {"units": {5: {"standalone": "canônical_five", "bound": "canônical_five"}}},
         "grammar": {
-            "rules": [{"name": "units", "range": [0, 9], "output": "{units[ones_digit].standalone}"}]
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"}]
         },
         "parse": {"strip_diacritics": True, "aliases": {"âlt_five": "canônical_five"}},
     }
@@ -689,20 +689,7 @@ def test_leniency_follows_the_table_the_spec_names(spec):
     data["lexicon"]["digits"] = data["lexicon"].pop("units")
     for rule in data["grammar"]["rules"]:
         rule["output"] = rule["output"].replace("{units[", "{digits[")
-        if "parse_aliases" in rule:
-            rule["parse_aliases"] = [
-                template.replace("{units[", "{digits[")
-                for template in rule["parse_aliases"]
-            ]
     data["parse"]["accepted_forms"] = {"digits": ["standalone", "bound"]}
-    # connector_precedes names the same table and has to be renamed with it.
-    # It was added after this test (#19) and missed here; the reference is
-    # inert for what this test asserts -- only the vector generator reads
-    # connector_precedes, and this test only parses -- but it is still a
-    # dangling cross-reference, and the load-time check (#37) says so.
-    precedes = data["parse"].get("connector_precedes", {})
-    if "units" in precedes:
-        precedes["digits"] = precedes.pop("units")
     renamed = Spec(data)
 
     assert renamed.text_to_number("pakhat") == 1
@@ -751,7 +738,7 @@ def test_aliases_resolve_to_canonical_word_before_matching():
         "meta": {"supports": {"min": 5, "max": 5}},
         "lexicon": {"units": {5: {"standalone": "canonical_five", "bound": "canonical_five"}}},
         "grammar": {
-            "rules": [{"name": "units", "range": [0, 9], "output": "{units[ones_digit].standalone}"}]
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"}]
         },
         "parse": {"aliases": {"alt_five": "canonical_five"}},
     }
@@ -765,45 +752,159 @@ def test_aliases_resolve_to_canonical_word_before_matching():
     [("hnih thum", 23), ("ruk ruk", 66), ("ruk riat", 68)],
 )
 def test_compound_tens_shorthand_parses(spec, shorthand, expected):
-    # compound_tens' parse_aliases in mizo.yaml accept a shorthand that drops
-    # the scale word and uses the bound form of both digits -- e.g. "hnih
-    # thum" for 23, alongside the canonical "sawm hnih pathum".
+    # mizo.yaml's tens_shorthand rule accepts a shorthand that drops the
+    # scale word and uses the bound form of both digits -- e.g. "hnih thum"
+    # for 23, alongside the canonical "sawm hnih pathum".
     assert spec.text_to_number(shorthand) == expected
 
 
 def test_compound_tens_shorthand_does_not_affect_number_to_text(spec):
-    # parse_aliases are accepted on the way in only; number_to_text() must
-    # keep producing the canonical form regardless.
+    # An `emit: never` rule is accepted on the way in only; number_to_text()
+    # must keep producing the canonical form regardless.
     assert spec.number_to_text(23) == "sawm hnih pathum"
 
 
-def test_parse_aliases_are_tried_in_addition_to_canonical_output():
-    # Mechanism test with synthetic data: a rule's parse_aliases template is
-    # matched alongside (not instead of) its canonical output.
+def test_the_shorthand_is_only_ever_a_whole_phrase(spec):
+    # `scope: whole` on tens_shorthand (#65). A flat rule was scoped by its
+    # range, so "hnih khat" could only ever be the whole of 21. A rule keyed
+    # by scale is also a candidate for every remainder, and without the scope
+    # "za hnih khat" would read as 100 + 21 -- a spelling no speaker uses,
+    # silently certified for every future target. Found by the exhaustive
+    # 3-token sweep while prototyping #65, which is also why the sweep below
+    # exists: none of the certified inputs could have shown it, since every
+    # one of them is a correct positive.
+    assert spec.text_to_number("hnih khat") == 21
+    with pytest.raises(ValueError):
+        spec.text_to_number("za hnih khat")
+    with pytest.raises(ValueError):
+        spec.text_to_number("zâ hnih thum")
+
+
+def test_leniency_does_not_leak_into_a_remainder(spec):
+    # The other thing recursion unscoped (#65). Leniency ("khat" for 1) used
+    # to be scoped by "the whole template is one placeholder"; a remainder
+    # is rendered by the units rule, whose template is exactly that. Tied to
+    # the whole input being one word instead, so "sawm khat" and "zâ khat"
+    # stay what they were before: not Mizo.
+    assert spec.text_to_number("khat") == 1
+    for text in ("sawm khat", "sâwm khat", "zâ khat", "za hnih sawm thum khat"):
+        with pytest.raises(ValueError):
+            spec.text_to_number(text)
+
+
+def test_a_condition_cannot_supply_a_multiplier(monkeypatch):
+    # Why mizo.yaml writes `multiplier: 1` on `ten` and `hundred` rather than
+    # `condition: "multiplier == 1"`. The template never writes the
+    # multiplier down, so a parser reading "sâwm" has nothing to test the
+    # condition against. The rules first proposed on #65 did it the second
+    # way; 190 of the 1,000 shipped spellings then parsed to nothing, while
+    # every one of them still rendered correctly.
+    #
+    # Since the same PR the engine refuses such a rule at load, so the
+    # demonstration switches validation off to show what it refuses.
+    lexicon = {"scales": {10: {"standalone": "sâwm"}}}
+    condition_data = {
+        "meta": {"supports": {"min": 10, "max": 10}},
+        "lexicon": lexicon,
+        "grammar": {"rules": [{"name": "ten", "scale": 10,
+                               "condition": "multiplier == 1",
+                               "output": "{scales[10].standalone}"}]},
+    }
+    with pytest.raises(ValueError, match="never writes its multiplier"):
+        Spec(condition_data)
+    monkeypatch.setattr(engine, "_validate_spec", lambda data: None)
+    as_condition = Spec(condition_data)
+    as_value = Spec({
+        "meta": {"supports": {"min": 10, "max": 10}},
+        "lexicon": lexicon,
+        "grammar": {"rules": [{"name": "ten", "scale": 10, "multiplier": 1,
+                               "output": "{scales[10].standalone}"}]},
+    })
+    assert as_condition.number_to_text(10) == as_value.number_to_text(10) == "sâwm"
+    with pytest.raises(ValueError):
+        as_condition.text_to_number("sâwm")
+    assert as_value.text_to_number("sâwm") == 10
+
+
+def test_a_rule_that_cannot_render_its_remainder_raises():
+    # A rule with no [...] segment and no remainder-keyed placeholder has no
+    # way to say anything about a nonzero remainder. Rendering 11 with one
+    # would drop the 1 and name 10 -- a wrong answer that looks like a right
+    # one -- so the engine refuses instead.
+    spec = Spec({
+        "meta": {"supports": {"min": 10, "max": 11}},
+        "lexicon": {"scales": {10: {"standalone": "sâwm"}}},
+        "grammar": {"rules": [{"name": "ten", "scale": 10, "multiplier": 1,
+                               "output": "{scales[10].standalone}"}]},
+    })
+    assert spec.number_to_text(10) == "sâwm"
+    with pytest.raises(ValueError, match="remainder"):
+        spec.number_to_text(11)
+
+
+def test_a_range_beyond_the_rules_is_named_not_crashed(spec):
+    # supports.max raised past what the rules cover is the likeliest mistake
+    # when the ladder lands: at 1,000 with nothing above scale 100, the
+    # hundreds rule asks for the digit 10. The engine names the rule and the
+    # missing word rather than surfacing KeyError: 10.
+    data = copy.deepcopy(spec._data)
+    data["meta"]["supports"]["max"] = 1000
+    widened = Spec(data)
+    assert widened.number_to_text(999) == spec.number_to_text(999)
+    with pytest.raises(ValueError, match=r"'hundreds' needs units\[10\]"):
+        widened.number_to_text(1000)
+
+
+def test_no_short_phrase_is_ambiguous(spec):
+    # The oracle raises on ambiguity rather than guessing, which only helps
+    # if something feeds it the ambiguous strings. The certified inputs
+    # cannot: every one is a correct positive. So feed it every phrase of up
+    # to three words the lexicon can spell, connector included -- 11,154
+    # strings -- and require that none denotes two numbers. Cheap now that a
+    # parse no longer scans the range; under the brute-force parser the same
+    # sweep was a separate twenty-minute job, run once while prototyping #65.
+    vocabulary = sorted(
+        {spec._normalize_word(w) for table in spec.lexicon.values()
+         for entry in table.values() for w in entry.values()}
+        | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
+    )
+    assert len(vocabulary) == 22, vocabulary
+    ambiguous = []
+    for length in (1, 2, 3):
+        for words in itertools.product(vocabulary, repeat=length):
+            if len(spec._parse_values(" ".join(words))) > 1:
+                ambiguous.append(" ".join(words))
+    assert not ambiguous, ambiguous[:10]
+
+
+def test_an_emit_never_rule_is_accepted_alongside_canonical_output():
+    # Mechanism test with synthetic data: an `emit: never` rule is matched
+    # alongside (not instead of) the rule number_to_text() uses, and is never
+    # what number_to_text() picks, even though it is listed first.
     data = {
         "meta": {"supports": {"min": 0, "max": 0}},
         "lexicon": {
             "units": {0: {"standalone": "canonical_zero", "bound": "shorthand_zero"}}
         },
         "grammar": {
-            "rules": [{
-                "name": "units",
-                "range": [0, 0],
-                "output": "{units[ones_digit].standalone}",
-                "parse_aliases": ["{units[ones_digit].bound}"],
-            }]
+            "rules": [
+                {"name": "shorthand", "scale": 1, "emit": "never",
+                 "output": "{units[multiplier].bound}"},
+                {"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"},
+            ]
         },
         "parse": {},
     }
     spec = Spec(data)
     assert spec.text_to_number("canonical_zero") == 0
     assert spec.text_to_number("shorthand_zero") == 0
+    assert spec.number_to_text(0) == "canonical_zero"
 
 
-def test_parse_alias_collision_raises_ambiguous():
-    # If a parse_aliases template happens to match another number's
-    # canonical spelling, that's a real ambiguity and must be a loud error,
-    # same as a canonical-vs-canonical collision.
+def test_an_emit_never_collision_raises_ambiguous():
+    # If an `emit: never` rule happens to match another number's canonical
+    # spelling, that's a real ambiguity and must be a loud error, same as a
+    # canonical-vs-canonical collision.
     data = {
         "meta": {"supports": {"min": 0, "max": 1}},
         "lexicon": {
@@ -813,12 +914,11 @@ def test_parse_alias_collision_raises_ambiguous():
             }
         },
         "grammar": {
-            "rules": [{
-                "name": "units",
-                "range": [0, 1],
-                "output": "{units[ones_digit].standalone}",
-                "parse_aliases": ["{units[ones_digit].bound}"],
-            }]
+            "rules": [
+                {"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"},
+                {"name": "shorthand", "scale": 1, "emit": "never",
+                 "output": "{units[multiplier].bound}"},
+            ]
         },
         "parse": {},
     }
@@ -830,10 +930,11 @@ def test_parse_alias_collision_raises_ambiguous():
 def test_ambiguous_match_raises():
     # If a future grammar ever let two different numbers accept the same
     # spelling, text_to_number() must raise rather than silently returning
-    # whichever number happened to come first in the range -- this is the
+    # whichever number the parser happened to find first -- this is the
     # oracle, so an ambiguous spelling is a data bug to surface loudly, not
     # a thing to guess through. Uses synthetic data since mizo.yaml has no
-    # such collision today (verified across the full 0-999 range).
+    # such collision today (the vectors parse every certified spelling back,
+    # and test_no_short_phrase_is_ambiguous sweeps every short phrase).
     data = {
         "meta": {"supports": {"min": 0, "max": 1}},
         "lexicon": {
@@ -843,7 +944,7 @@ def test_ambiguous_match_raises():
             }
         },
         "grammar": {
-            "rules": [{"name": "units", "range": [0, 1], "output": "{units[ones_digit].standalone}"}]
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"}]
         },
         "parse": {},
     }

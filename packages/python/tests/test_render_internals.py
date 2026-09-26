@@ -17,50 +17,57 @@ PACKAGE_SOURCE = Path(_render.__file__).resolve().parent
 
 
 def test_every_literal_in_a_template_is_a_separator_or_a_connector():
-    # _rule_matches ignores literals and compares only placeholders, so a
-    # literal must be something _tokenize also removes -- otherwise it would
-    # be emitted on one side and matched on neither. Exactly two things
+    # The parser skips literals and matches only placeholders, so a literal
+    # must be something _tokenize also removes -- otherwise it would be
+    # emitted on one side and matched on neither. Exactly two things
     # qualify: word separators, which the split consumes, and connector
     # words, which _tokenize drops by design (#10).
     #
-    # Before #19 every literal was a separator and this asserted just that.
-    # The hundreds rules put "leh" in the template (Q-M on #27) -- the first
-    # literal that is a word rather than punctuation. A literal that is
-    # neither, such as a suffix or a particle, still fails here, which is
-    # the case this test exists for.
+    # Since #65 Mizo's "leh" is written by grammar.connector rather than by
+    # a literal in ten templates, so today every literal is a separator
+    # again. A literal that is a connector stays legal; one that is neither,
+    # such as a suffix or a particle, still fails here, which is the case
+    # this test exists for. Segments are walked too: a literal inside [...]
+    # is emitted whenever the remainder is.
+    def literals(items):
+        for item in items:
+            if isinstance(item, str):
+                yield item
+            elif item[0] == "optional":
+                yield from literals(item[1])
+
     for rule in _render.RULES:
-        for template in (rule["output"],) + tuple(rule["parse_aliases"]):
-            for item in template:
-                if isinstance(item, tuple):
-                    continue
-                words = [
-                    _render._normalize_word(w)
-                    for w in _render._SEPARATOR_RE.split(item)
-                    if w
-                ]
-                # A pure separator splits to nothing, which passes vacuously
-                # -- that is the pre-#19 case, unchanged.
-                assert all(w in _render._CONNECTORS for w in words), (rule["name"], item)
+        for item in literals(rule["output"]):
+            words = [
+                _render._normalize_word(w)
+                for w in _render._SEPARATOR_RE.split(item)
+                if w
+            ]
+            # A pure separator splits to nothing, which passes vacuously.
+            assert all(w in _render._CONNECTORS for w in words), (rule["name"], item)
 
 
 @pytest.mark.parametrize(
     "n, expected",
-    [(0, (0, 0)), (7, (7, 0)), (58, (8, 5)), (100, (0, 0)), (118, (8, 1)), (199, (9, 9))],
+    [
+        (0, "units"), (9, "units"),
+        (10, "ten"), (19, "ten"),
+        (20, "tens"), (99, "tens"),
+        (100, "hundred"), (199, "hundred"),
+        (200, "hundreds"), (999, "hundreds"),
+    ],
 )
-def test_positional_variables_match_the_engines_definition(n, expected):
-    # ones_digit is n % 10 and tens_digit is (n // 10) % 10 -- the compiler
-    # emits conditions written against exactly those, so a target that
-    # computed them differently would evaluate the conditions differently.
-    #
-    # This was added when 100 was the only case no vector reached: dropping
-    # the modulo from tens_digit changed nothing in 0-100, and it was the
-    # one mutation the suite did not catch. #19 is the range extension that
-    # comment predicted -- at 118 the modulo is load-bearing ((118 // 10)
-    # is 11, which is not a units key at all), so the vectors now catch it
-    # too. Kept as the direct statement of the definition, and 118 and 199
-    # are pinned here so it stays that way.
-    variables = _render._positional_variables(n)
-    assert (variables["ones_digit"], variables["tens_digit"]) == expected
+def test_rule_selection_follows_the_scale(n, expected):
+    # The largest emitting scale not above n, then the first rule at that
+    # scale whose fixed multiplier and condition hold -- 0 falling to the
+    # smallest scale, since none is below it. Every boundary is pinned on
+    # both sides, because an off-by-one in scale selection (`<` for `<=`)
+    # moves exactly one number: 10 would render through the units rule and
+    # hit a lexicon key that does not exist, and the vectors would say so
+    # only as a KeyError. This states the definition directly. It is the
+    # successor to the test that pinned ones_digit and tens_digit before
+    # #65 removed them.
+    assert _render._find_rule(n)["name"] == expected
 
 
 def test_the_field_a_template_names_is_accepted_even_if_the_list_omits_it():
@@ -84,25 +91,48 @@ def test_a_table_the_spec_does_not_name_gets_exact_matching():
 
 
 def test_leniency_does_not_apply_inside_a_multi_word_phrase():
-    # "sawm hnih" is 20 via exact_tens. If leniency applied to every slot
-    # it would also match teens' ones-digit slot for 12, and the two
+    # "sawm hnih" is 20 via `tens`. If leniency applied to every slot it
+    # would also read as sâwm + 2 through `ten`'s remainder, and the two
     # readings would collide.
     assert numberwords.text_to_number("sawm hnih") == 20
     strict = _render._acceptable_fields("units", "bound", lenient=False)
     assert strict == ["bound"]
 
 
-def test_parse_aliases_are_accepted():
-    # compound_tens declares a shorthand that drops the scale word: "hnih
-    # hnih" for 22. Never produced by number_to_text(), always accepted.
+def test_leniency_does_not_leak_into_a_remainder():
+    # #65. A remainder is rendered by the units rule, a single placeholder,
+    # which is exactly what leniency used to be keyed on. Keyed on the whole
+    # input being one word instead, so "sawm khat" and "zâ khat" stay what
+    # they were before recursion: not Mizo. The vectors cannot say so --
+    # they list only what must be accepted.
+    assert numberwords.text_to_number("khat") == 1
+    for text in ("sawm khat", "zâ khat"):
+        with pytest.raises(numberwords.NumberWordsError):
+            numberwords.text_to_number(text)
+
+
+def test_the_shorthand_is_only_ever_a_whole_phrase():
+    # `scope: whole` (#65). Without it the shorthand could stand in as a
+    # remainder and "za hnih khat" would read as 121. Found by the 3-token
+    # sweep while prototyping the format, and invisible to the vectors for
+    # the same reason as the test above.
+    assert numberwords.text_to_number("hnih khat") == 21
+    with pytest.raises(numberwords.NumberWordsError):
+        numberwords.text_to_number("za hnih khat")
+
+
+def test_the_unemitted_shorthand_is_accepted():
+    # tens_shorthand is `emit: never`: "hnih hnih" for 22 drops the scale
+    # word. Never produced by number_to_text(), always accepted.
     assert numberwords.text_to_number("hnih hnih") == 22
     assert numberwords.number_to_text(22) == "sawm hnih pahnih"
 
 
 def test_spelling_aliases_resolve_to_the_canonical_word(monkeypatch):
-    # parse.aliases (spec-wide spelling variants), not a rule's
-    # parse_aliases (alternate templates) tested above -- the names are
-    # unhelpfully close. mizo.yaml declares `aliases: {}` (#15), so no
+    # parse.aliases (spec-wide spelling variants), not an `emit: never`
+    # rule (an alternate template) tested above -- until #65 the second was
+    # called parse_aliases, which is why these two tests used to need this
+    # note more than they do now. mizo.yaml declares `aliases: {}` (#15), so no
     # vector reaches this path and the suite passes with the lookup deleted
     # from _tokenize. #27 populates it later; the code ships before that.
     #
@@ -150,8 +180,8 @@ def test_text_that_is_only_separators_raises(text):
 
 
 def test_ambiguity_raises_instead_of_returning_the_first_match(monkeypatch):
-    # parse_text collects every matching number and only then decides. The
-    # tempting version returns on the first hit, which is indistinguishable
+    # parse_text collects every derivation's number and only then decides.
+    # The tempting version returns on the first hit, which is indistinguishable
     # on the real spec -- nothing there is ambiguous -- and hides a genuine
     # spec fault behind a plausible answer. Force an ambiguity to prove the
     # collect-all behaviour is really there.
@@ -180,12 +210,11 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth():
     # only, so "za sawm hnih" is 120 and not also 10^2 x 20 = 2,000.
     #
     # Unlike the test above, this one cannot currently fail for the reason it
-    # describes: parsing searches only the supported range, so at 0-999 the
-    # rival reading 2,000 is still never a candidate. It pins the narrower
-    # fact that no other number in range accepts the string, plus 120's
-    # canonical form.
-    # Labelled rather than deleted (#36): it goes live when the range passes
-    # 2,000, which is when #27's stacking rule lands.
+    # describes: the compiled spec has no stacking rule yet, and 2,000 is
+    # outside SUPPORTS besides. It pins the narrower fact that no other number
+    # in range accepts the string, plus 120's canonical form.
+    # Labelled rather than deleted (#36): it goes live when stacking lands
+    # with the ladder, where `za` still sits below the 10^5 head-scale floor.
     assert numberwords.text_to_number("za sawm hnih") == 120
     assert numberwords.number_to_text(120) == "zâ leh sawm hnih"
 

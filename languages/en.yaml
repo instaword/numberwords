@@ -5,11 +5,11 @@
 # target language — it's the teaching example, and the second spec that
 # proves the format isn't shaped around Mizo.
 #
-# Range: 0–99. Deliberately narrower than the 0–999 this file used to claim.
+# Range: 0–99. Deliberately narrower than the 0–999 this file once claimed.
 # English above 99 needs recursion — "three hundred and five" is
-# {units} hundred and {0-99} — and the format has no recursive placeholder
-# yet (see #27, #29). A valid 0–99 spec is worth more than an invalid 0–999
-# one; the hundreds return when recursion lands.
+# {units} hundred and {0-99} — which the format now has (`{remainder}`, #65),
+# so the hundreds can come back. That is a change of its own rather than
+# part of the format change that made it possible.
 #
 # See docs/spec-format.md for the prose description of each section, and
 # spec/spec.schema.json for the machine-checkable version.
@@ -17,9 +17,10 @@
 meta:
   language: English
   code: eng          # ISO 639-3, matching mizo.yaml's `lus`.
-  version: 0.4.0     # 0.2.0: ported from the old illustrative `form:` syntax.
+  version: 0.5.0     # 0.2.0: ported from the old illustrative `form:` syntax.
                      # 0.3.0: dropped the accepted_forms workaround (#31).
                      # 0.4.0: word_separators is non-whitespace only (#46).
+                     # 0.5.0: rules keyed by scale, with {remainder} (#65).
   supports: { min: 0, max: 99 }
   sources:
     - "Illustrative reference example; English numerals need no citation."
@@ -42,14 +43,14 @@ lexicon:
     9: { word: "nine"  }
 
   teens:               # 10–19, irregular, so listed rather than composed.
-                       # KEYED BY ones_digit, not by value: 3 -> "thirteen".
+                       # KEYED BY the remainder, not by value: 3 -> "thirteen".
                        # That isn't a workaround — it's the actual pattern.
                        # English teens are irregular forms of the ones digit
                        # sitting in the 10s (one/eleven, three/thirteen,
-                       # nine/nineteen), and 10 itself is the ones_digit == 0
+                       # nine/nineteen), and 10 itself is the remainder == 0
                        # case. Keying by value would need a whole-number
                        # lookup key, which the format doesn't have: keys are
-                       # either a positional variable or a literal integer.
+                       # multiplier, remainder or a literal integer.
     0: { word: "ten"       }
     1: { word: "eleven"    }
     2: { word: "twelve"    }
@@ -61,7 +62,7 @@ lexicon:
     8: { word: "eighteen"  }
     9: { word: "nineteen"  }
 
-  tens:                # 20,30,…,90. Keyed by tens_digit: 2 -> "twenty".
+  tens:                # 20,30,…,90. Keyed by the multiplier: 2 -> "twenty".
     2: { word: "twenty"  }
     3: { word: "thirty"  }
     4: { word: "forty"   }
@@ -71,43 +72,45 @@ lexicon:
     8: { word: "eighty"  }
     9: { word: "ninety"  }
 
-# Positional variables available to `condition` and `output`, derived from the
-# number being rendered (not looked up in the lexicon):
-#   ones_digit = n % 10
-#   tens_digit = (n // 10) % 10
+# Rules are keyed by the scale they consume, and see two variables derived
+# from the number and that scale (docs/spec-format.md):
+#   multiplier = n // scale
+#   remainder  = n %  scale
 #
 # Lexicon addressing is always <table>[<key>].<field>.
 
 grammar:
   rules:
-    # Tried in order; the first whose range contains n and whose condition
-    # passes is applied. Same structure as mizo.yaml, which is the point.
-    - name: units
-      range: [0, 9]
-      output: "{units[ones_digit].word}"
+    # The largest scale not above n is chosen, then the first rule at it
+    # whose multiplier and condition hold. Same structure as mizo.yaml, which
+    # is the point.
+    - name: units                    # zero, one, … nine
+      scale: 1
+      output: "{units[multiplier].word}"
 
+    # 10-19 are single irregular words, so the remainder is a lexicon key
+    # here rather than a number to render: there is nothing to recurse into.
     - name: teens                    # ten, eleven, … nineteen
-      range: [10, 19]
-      output: "{teens[ones_digit].word}"
+      scale: 10
+      multiplier: 1
+      output: "{teens[remainder].word}"
 
-    - name: exact_tens               # twenty, thirty, …
-      range: [20, 99]
-      condition: "ones_digit == 0"
-      output: "{tens[tens_digit].word}"
-
-    - name: compound_tens            # twenty-one, forty-two, …
-      range: [21, 99]
-      condition: "ones_digit > 0"
-      output: "{tens[tens_digit].word}-{units[ones_digit].word}"
+    # The hyphen is literal output and also a declared word separator, which
+    # is how "forty-two" parses. The segment is dropped for 20, 30, … 90.
+    - name: tens                     # twenty, forty-two, …
+      scale: 10
+      condition: "multiplier > 1"
+      output: "{tens[multiplier].word}[-{remainder}]"
 
 parse:
   case_insensitive: true
   word_separators: ["-"]        # "forty-two"; "forty two" parses too, on
                                 # the engine's implicit whitespace rule (#46).
   connectors: ["and"]           # ignorable filler when parsing.
-  # No connector_precedes: this spec stops at 99 and no rule in that range
-  # emits "and" ("one hundred and five" starts at 100), so there is no
-  # connector position to certify yet. See docs/spec-format.md.
+  # No grammar.connector: this spec stops at 99 and nothing in that range
+  # is written with "and" ("one hundred and five" starts at 100), so there
+  # is no connector to emit and no position to certify yet. See
+  # docs/spec-format.md.
   # No accepted_forms: English units have exactly one field, `word`, so
   # there is no alternate form to accept. A spec that declares nothing gets
   # exact matching.

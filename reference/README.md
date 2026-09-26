@@ -85,8 +85,9 @@ format" from "the schema describes Mizo".
 worked reference example, and English is a useful control precisely because it
 is unlike Mizo where it matters — irregular teens that can't be composed, a
 hyphen that is both canonical output and a word separator, and lexicon entries
-with one form rather than two. It's capped at 0–99: English above 99 needs
-recursion the format doesn't have yet (#27).
+with one form rather than two. It's capped at 0–99: English above 99 needed
+recursion the format did not have. It has it since #65 (`{remainder}`), and
+bringing the hundreds back is a change of its own.
 
 ## Conformance vectors
 
@@ -126,10 +127,10 @@ regenerating every vectors file and updating every target that reads them.
 **One representative per applicable parse feature, per entry** — the
 canonical output, one variant for each of case, diacritics, alternate word
 separator and the connector, one combined variant with all of them applied at
-once, and one per alternate template (a rule's `parse_aliases`, and the other
-unit forms `parse.accepted_forms` allows for a freestanding digit). Not the
-cross product, which is 18× the bytes and reports the same bug several dozen
-times over. One representative per feature means a failure names its own
+once, and one per alternate rendering (each `emit: never` rule that describes
+the number, and the other unit forms `parse.accepted_forms` allows for a
+freestanding digit). Not the cross product, which is 18× the bytes and reports
+the same bug several dozen times over. One representative per feature means a failure names its own
 cause.
 
 The connector goes **only where `leh` idiomatically goes**. The engine drops
@@ -156,10 +157,13 @@ for "10 and 2" is `sawm leh pahnih`, which is `teens`' connector variant for
 12 and is certified there. Whether that phrase is one number or two is the
 inter-number ambiguity `# Decision (#10)` deliberately puts out of scope.
 
-The generator infers none of this. `parse.connector_precedes` names the
-lexicon fields that begin a top-level addend and `_connector_slots` looks it
-up, so the fact lives in the spec and language-agnostic code never mentions
-Mizo's field names — which is what #31 is about.
+The generator infers none of this from Mizo's vocabulary. Every addend after
+the first begins where a `{remainder}` expansion begins, so `_connector_slots`
+reads the gaps off the renderer, for a spec that declares `grammar.connector`
+— the fact lives in the spec's grammar, and language-agnostic code never
+mentions Mizo's field names, which is what #31 is about. Until #65 the same
+fact was a separate declaration, `parse.connector_precedes`; the gaps it named
+and the ones the grammar gives are identical for all 1,000 numbers.
 `test_certified_connectors_are_followed_by_a_top_level_addend` rebuilds the
 addend set from the lexicon instead of reading that declaration, so it checks
 the spec rather than trusting it.

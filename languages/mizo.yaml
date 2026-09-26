@@ -13,7 +13,7 @@
 # Units have two grammatical forms depending on context: a standalone form
 # (used alone, e.g. counting) and a bound form (used when combined with a
 # scale word, e.g. after "sawm"). Grammar rules below select the correct
-# form per digit position — see the comment above `grammar:`.
+# form by what the digit does -- see the comment above `grammar:`.
 #
 # Scale words also have two forms for a different reason. The circumflex on
 # a scale word is part of the grammar, not just decoration. It shows the
@@ -27,7 +27,12 @@
 meta:
   language: Mizo
   code: lus           # ISO 639-3 for Lushai/Mizo.
-  version: 0.5.0      # 0.5.0: supports.max raised to 999, hundreds_digit
+  version: 0.6.0      # 0.6.0: rules keyed by scale, with {remainder} and
+                      # [...] segments; grammar.connector replaces the
+                      # literal "leh" in ten templates; parse_aliases
+                      # becomes an `emit: never` rule; connector_precedes
+                      # is gone, derived from the grammar instead (#65).
+                      # 0.5.0: supports.max raised to 999, hundreds_digit
                       # added, and the six 200-999 rules (#27 step 2b).
                       # 0.4.0: word_separators declares only the
                       # non-whitespace separators; whitespace belongs to
@@ -79,144 +84,96 @@ lexicon:
     # of a scale word are the same, just repeat the word, like 0 in the
     # units table. No special handling is needed.
 
-# Positional variables available to `condition` and `output` below, derived
-# from the number being rendered (not looked up in the lexicon):
-#   ones_digit     = n % 10
-#   tens_digit     = (n // 10) % 10
-#   hundreds_digit = (n // 100) % 10
+# Rules are keyed by the scale they consume (#65), and each one sees two
+# variables derived from the number being rendered and that scale:
+#   multiplier = n // scale
+#   remainder  = n %  scale
 #
 # Lexicon addressing is always <table>[<key>].<field>, e.g.:
-#   units[tens_digit].bound       -> bound form of the digit in the tens place
-#   units[ones_digit].standalone  -> standalone form of the digit in the ones place
+#   units[multiplier].bound       -> bound form of the digit multiplying the scale
+#   units[multiplier].standalone  -> standalone form of a lone digit
 #   scales[10].standalone         -> the unmultiplied word for 10 ("sâwm")
 #   scales[10].multiplied         -> the multiplied word for 10 ("sawm")
 #
+# `{remainder}` is the remainder rendered by these same rules, and `[...]` is
+# dropped when the remainder is zero. So a rule covers every number its
+# multiplier and condition allow at its scale: 20-99 is one rule, not a range
+# per shape.
 
 grammar:
+  # Decision (#19, from Q-M on #27): "leh" is emitted before the final addend
+  # and nowhere else, for every n >= 100. The final addend is the innermost
+  # remainder: 108 is "zâ leh pariat", 128 is "zâ sawm hnih leh pariat", 130
+  # is "zâ leh sawm thum". It is a property of the whole number rather than of
+  # any one rule, so it is declared once instead of written into ten of the
+  # seventeen templates this file used to carry.
+  #
+  # Below 100 none is emitted, and that asymmetry is a choice about canonical
+  # output rather than a claim about the language: "sâwm leh pakhat" (11) is
+  # as idiomatic as "sâwm pakhat" and is accepted, but number_to_text has to
+  # pick one spelling per number and Q-M sets the threshold at 100. Where the
+  # two are equivalent is the parse side -- see parse.connectors below.
+  #
+  # Where else "leh" may idiomatically stand -- before any top-level addend,
+  # never before a digit bound to the scale word it multiplies, so "sâwm leh
+  # pakhat" (11) and "zâ leh sawm hnih" (120) are Mizo while "sawm leh hnih"
+  # (20) and "zâ sawm leh thum" (130) are not (#19, #34, Q-E on #27) --
+  # follows from the same structure: every addend starts at a remainder. The
+  # vector generator reads it from there rather than from a separate
+  # declaration.
+  connector: { word: "leh", placement: final_addend, min: 100 }
+
   rules:
-    - name: units
-      range: [0, 9]
-      output: "{units[ones_digit].standalone}"
+    - name: units                    # bial, pakhat, … pakua
+      scale: 1
+      output: "{units[multiplier].standalone}"
 
-    - name: ten                      # sâwm -- not multiplied
-      range: [10, 10]
-      output: "{scales[10].standalone}"
+    # 10 and 100 are said bare: "sâwm", "zâ", never "sâwm khat" (#27 rule 1).
+    # The multiplier is stated rather than tested for, because the template
+    # never writes it down -- a parser reading "zâ" has to be told it is one
+    # hundred, and a condition can only check a value it already has (#65).
+    # The circumflex stays, because a digit that follows adds to the scale
+    # word rather than multiplying it.
+    - name: ten                      # sâwm, sâwm pakhat, … sâwm pakua
+      scale: 10
+      multiplier: 1
+      output: "{scales[10].standalone}[ {remainder}]"
 
-    - name: teens                    # sâwm pakhat, sâwm pahnih, … (digit adds to it, circumflex kept)
-      range: [11, 19]
-      output: "{scales[10].standalone} {units[ones_digit].standalone}"
+    - name: tens                     # sawm hnih, sawm nga pariat, …
+      scale: 10
+      condition: "multiplier > 1"    # the digit multiplies: circumflex removed
+      output: "{scales[10].multiplied} {units[multiplier].bound}[ {remainder}]"
 
-    - name: exact_tens               # sawm hnih, sawm thum, … (digit multiplies it, circumflex removed)
-      range: [20, 99]
-      condition: "ones_digit == 0"
-      output: "{scales[10].multiplied} {units[tens_digit].bound}"
+    - name: hundred                  # zâ, zâ leh pariat, zâ sâwm leh pakhat, …
+      scale: 100
+      multiplier: 1
+      output: "{scales[100].standalone}[ {remainder}]"
 
-    - name: compound_tens            # sawm hnih pahnih, sawm nga pariat, …
-      range: [21, 99]
-      condition: "ones_digit > 0"
-      output: "{scales[10].multiplied} {units[tens_digit].bound} {units[ones_digit].standalone}"
-      parse_aliases:                 # accepted shorthand for parsing only -- never produced by number_to_text
-        # Drops the scale word ("sawm") and uses the bound form of both digits,
-        # e.g. 23 -> "hnih thum", 66 -> "ruk ruk", 68 -> "ruk riat".
-        - "{units[tens_digit].bound} {units[ones_digit].bound}"
+    # 200-999, confirmed by a native speaker on #27 under Q-N -- see
+    # meta.sources. The hundreds digit multiplies zâ (so scales[100].multiplied,
+    # circumflex dropped, #27 rule 2) exactly as the tens digit multiplies
+    # sâwm, and everything after it is the 0-99 grammar unchanged, which is
+    # now literally true: it is the same rules, reached through {remainder}.
+    - name: hundreds                 # za hnih, za hnih leh pakhat, …
+      scale: 100
+      condition: "multiplier > 1"
+      output: "{scales[100].multiplied} {units[multiplier].bound}[ {remainder}]"
 
-    - name: hundred                  # zâ -- not multiplied
-      range: [100, 100]
-      output: "{scales[100].standalone}"
-
-    # 101-199. Decision (#19, from Q-M on #27): "leh" is emitted before the
-    # final addend and nowhere else, for every n >= 100. One rule, not the
-    # per-band table the issue first proposed. It is a literal in the
-    # template, so it renders on output and is transparently ignored on
-    # input -- see parse.connectors below.
+    # Accepted shorthand for 21-99, never produced by number_to_text: drops
+    # the scale word ("sawm") and uses the bound form of both digits, e.g.
+    # 23 -> "hnih thum", 66 -> "ruk ruk", 68 -> "ruk riat".
     #
-    # Below 100 none is emitted, and that asymmetry is a choice about
-    # canonical output rather than a claim about the language: "sâwm leh
-    # pakhat" (11) is as idiomatic as "sâwm pakhat" and is accepted, but
-    # number_to_text has to pick one spelling per number and Q-M sets the
-    # threshold at 100. Where the two are equivalent is the parse side --
-    # see parse.connector_precedes below. (The circumflex stays either way:
-    # the digit adds to the scale word rather than multiplying it.)
-    #
-    # These 100-199 rules still name no hundreds_digit, and that is not an
-    # oversight. _find_rule selects a rule only when its `range` and its
-    # condition both pass, so 118 selects hundred_teens and 18 selects teens
-    # even though their positional variables are identical; the range does
-    # the work a variable would. The hundreds digit is always 1 here, and
-    # #27 rule 1 says x1 is absent below 10^3 -- 100 is "zâ", never
-    # "za khat" -- so there is no digit to render and nothing to read.
-    #
-    # From 200 up that stops being true: the digit multiplies ("za hnih")
-    # and the rules below do read it. That is why hundreds_digit exists.
-
-    - name: hundred_units            # zâ leh pakhat, … zâ leh pakua
-      range: [101, 109]
-      output: "{scales[100].standalone} leh {units[ones_digit].standalone}"
-
-    - name: hundred_ten              # zâ leh sâwm -- 10 not multiplied
-      range: [110, 110]
-      output: "{scales[100].standalone} leh {scales[10].standalone}"
-
-    - name: hundred_teens            # zâ sâwm leh pariat (digit adds to sâwm)
-      range: [111, 119]
-      output: "{scales[100].standalone} {scales[10].standalone} leh {units[ones_digit].standalone}"
-
-    - name: hundred_exact_tens       # zâ leh sawm thum -- no addend after the tens
-      range: [120, 199]
-      condition: "ones_digit == 0"
-      output: "{scales[100].standalone} leh {scales[10].multiplied} {units[tens_digit].bound}"
-
-    - name: hundred_compound_tens    # zâ sawm hnih leh pariat
-      range: [121, 199]
-      condition: "ones_digit > 0"
-      output: "{scales[100].standalone} {scales[10].multiplied} {units[tens_digit].bound} leh {units[ones_digit].standalone}"
-
-    # 200-999. Six rules mirroring the six above one-for-one: the hundreds
-    # digit multiplies zâ (so scales[100].multiplied, circumflex dropped, #27
-    # rule 2) exactly as the tens digit multiplies sâwm, and everything after
-    # the hundreds group is the 0-99 grammar unchanged. Forms confirmed by a
-    # native speaker on #27 under Q-N -- see meta.sources.
-    #
-    # The conditions read tens_digit and ones_digit rather than splitting the
-    # range, because unlike 100-199 these rules span every hundred: the shape
-    # depends on the last two digits, not on where the number sits.
-    #
-    # Naming: singular hundred_* is 100-199, where za stands alone and there
-    # is no digit to read; plural hundreds_* is 200-999, where a digit
-    # multiplies it. The pairs differ by one character on purpose -- they are
-    # the same six shapes -- but that also means a typo names a real rule
-    # rather than failing loudly, so check the prefix when editing. The
-    # examples: block and the vectors are what catch it if you do not.
-
-    - name: hundreds                 # za hnih -- exact multiple, no addend
-      range: [200, 999]
-      condition: "tens_digit == 0 and ones_digit == 0"
-      output: "{scales[100].multiplied} {units[hundreds_digit].bound}"
-
-    - name: hundreds_units           # za hnih leh pakhat
-      range: [200, 999]
-      condition: "tens_digit == 0 and ones_digit > 0"
-      output: "{scales[100].multiplied} {units[hundreds_digit].bound} leh {units[ones_digit].standalone}"
-
-    - name: hundreds_ten             # za hnih leh sâwm -- 10 not multiplied
-      range: [200, 999]
-      condition: "tens_digit == 1 and ones_digit == 0"
-      output: "{scales[100].multiplied} {units[hundreds_digit].bound} leh {scales[10].standalone}"
-
-    - name: hundreds_teens           # za hnih sâwm leh pakhat (digit adds to sâwm)
-      range: [200, 999]
-      condition: "tens_digit == 1 and ones_digit > 0"
-      output: "{scales[100].multiplied} {units[hundreds_digit].bound} {scales[10].standalone} leh {units[ones_digit].standalone}"
-
-    - name: hundreds_exact_tens      # za hnih leh sawm nga -- no addend after the tens
-      range: [200, 999]
-      condition: "tens_digit > 1 and ones_digit == 0"
-      output: "{scales[100].multiplied} {units[hundreds_digit].bound} leh {scales[10].multiplied} {units[tens_digit].bound}"
-
-    - name: hundreds_compound_tens   # za hnih sawm nga leh pariat
-      range: [200, 999]
-      condition: "tens_digit > 1 and ones_digit > 0"
-      output: "{scales[100].multiplied} {units[hundreds_digit].bound} {scales[10].multiplied} {units[tens_digit].bound} leh {units[ones_digit].standalone}"
+    # `scope: whole` because the shorthand is a way of saying a whole number,
+    # not a way of writing the end of one. Without it, recursion would let it
+    # stand in as a remainder and "za hnih khat" would parse as 121 -- the
+    # flat rules scoped it by their range, and a scale-keyed rule has to say
+    # so instead (#65).
+    - name: tens_shorthand
+      scale: 10
+      emit: never
+      scope: whole
+      condition: "multiplier > 1 and remainder > 0"
+      output: "{units[multiplier].bound} {units[remainder].bound}"
 
 parse:
   case_insensitive: true
@@ -243,16 +200,9 @@ parse:
   # it is a fact about ambiguity, not about Mizo.
   accepted_forms: { units: [bound] }
   connectors: ["leh"]      # Decision (#10): genuinely ambiguous connector; disambiguating it is out of scope by design -- see file header above.
-  # Decision (#19): where that connector may idiomatically stand -- immediately
-  # before a *top-level addend*, and never before a digit bound to the scale
-  # word it multiplies. So "sâwm leh pakhat" (11) and "zâ leh sawm hnih" (120)
-  # are Mizo, while "sawm leh hnih" (20) and "zâ sawm leh thum" (130) are not.
-  # Named by lexicon field, like accepted_forms above, so the fact lives in the
-  # spec instead of being inferred from template shape by the vector generator.
-  # Only vector generation reads this: the parser drops connectors wherever
-  # they fall and stays deliberately more tolerant than the certified set
-  # (#12, #34).
-  connector_precedes: { units: [standalone], scales: [standalone, multiplied] }
+  # Where "leh" idiomatically stands is stated by the grammar, not here: see
+  # grammar.connector. The parser drops connectors wherever they fall and
+  # stays deliberately more tolerant than the certified set (#12, #34).
   aliases: {}   # Decision (#15): no non-diacritic spelling variants among the
                 # numerals in this spec's 0-999 range. Confirmed by a native
                 # speaker for 0-199 (#15); it carries to 999 because 200-999

@@ -41,13 +41,13 @@ import jsonschema
 import pytest
 import yaml
 
-# Placeholder syntax is defined once, in the engine. The cross-reference
-# tests below read templates, so they borrow that definition rather than
-# restating the pattern and drifting from it. Spec is imported because the
-# cross-reference checks now live in the loader (#37), so the tests exercise
-# it instead of reimplementing what it does.
+# Template syntax is defined once, in the engine. The cross-reference tests
+# below read templates, so they borrow that definition rather than restating
+# it and drifting from it. Spec is imported because the cross-reference
+# checks live in the loader (#37), so the tests exercise it instead of
+# reimplementing what it does.
 import engine
-from engine import _PLACEHOLDER_RE, _find_rule, _positional_variables, _render, Spec
+from engine import Spec, _parse_template
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "spec" / "spec.schema.json"
@@ -136,26 +136,31 @@ def test_accepted_forms_lists_only_fields_no_template_already_names(path):
     # `bound` -- the list would quietly become a no-op, and leniency would
     # disappear with every test still green. Here it fails instead.
     #
-    # Only single-placeholder templates count: leniency applies nowhere else,
-    # so a field named solely by a multi-word template (units.bound, in
-    # exact_tens) is still a legitimate extra. Scanning parse_aliases as well
-    # as output is inert on today's data -- neither spec has a
-    # single-placeholder alias -- but one would fall into the same trap, so
-    # it is scanned rather than left for later.
+    # Only a rule that can render as a single word counts: leniency applies
+    # nowhere else. That is its template with the [...] segment absent --
+    # `ten` is one word for 10 -- and never one whose remainder is rendered,
+    # which is at least two. So a field named only inside a longer rendering
+    # (units.bound, in `tens`) is still a legitimate extra. `emit: never`
+    # rules are scanned too: inert on today's data, since the shorthand is
+    # two words, but one that was a single word would fall into the same
+    # trap, so it is scanned rather than left for later.
     spec = _as_ir(path)
     accepted = spec.get("parse", {}).get("accepted_forms", {})
     named = {}
     for rule in spec["grammar"]["rules"]:
-        for template in [rule["output"], *rule.get("parse_aliases", [])]:
-            placeholders = _PLACEHOLDER_RE.findall(template)
-            if len(placeholders) == 1:
-                table, _key, field = placeholders[0]
-                named.setdefault(table, set()).add(field)
+        items = [
+            item for item in _parse_template(rule["output"])
+            if not (isinstance(item, tuple) and item[0] == "optional")
+        ]
+        placeholders = [item for item in items if not isinstance(item, str)]
+        if len(placeholders) == 1 and placeholders[0][0] == "lex":
+            _, table, _key, field = placeholders[0]
+            named.setdefault(table, set()).add(field)
     for table, fields in accepted.items():
         redundant = sorted(set(fields) & named.get(table, set()))
         assert not redundant, (
             f"{table}: {redundant} is already accepted as the field a "
-            f"single-placeholder template names -- list only the extras"
+            f"single-word rendering names -- list only the extras"
         )
 
 
@@ -200,52 +205,93 @@ MUTATIONS = {
         s, ["lexicon", "units"], {"1": "pakhat"}
     ),
     "rule with no output": lambda s: _mutate(
-        s, ["grammar", "rules"], [{"name": "units", "range": [0, 9]}]
+        s, ["grammar", "rules"], [{"name": "units", "scale": 1}]
     ),
     "rule with no name": lambda s: _mutate(
         s,
         ["grammar", "rules"],
-        [{"range": [0, 9], "output": "{units[ones_digit].standalone}"}],
+        [{"scale": 1, "output": "{units[multiplier].standalone}"}],
     ),
-    "range with three bounds": lambda s: _mutate(
+    "rule with no scale": lambda s: _mutate(
         s,
         ["grammar", "rules"],
-        [
-            {
-                "name": "units",
-                "range": [0, 9, 99],
-                "output": "{units[ones_digit].standalone}",
-            }
-        ],
+        [{"name": "units", "output": "{units[multiplier].standalone}"}],
+    ),
+    "scale of zero": lambda s: _mutate(
+        s,
+        ["grammar", "rules"],
+        [{"name": "units", "scale": 0, "output": "{units[multiplier].standalone}"}],
+    ),
+    "fixed multiplier of zero": lambda s: _mutate(
+        s,
+        ["grammar", "rules"],
+        [{"name": "units", "scale": 1, "multiplier": 0,
+          "output": "{units[multiplier].standalone}"}],
+    ),
+    # A spec written in the format before #65 has to fail loudly rather than
+    # load with its `range` silently ignored.
+    "rule still written with a range": lambda s: _mutate(
+        s,
+        ["grammar", "rules"],
+        [{"name": "units", "scale": 1, "range": [0, 9],
+          "output": "{units[multiplier].standalone}"}],
+    ),
+    "rule still carrying parse_aliases": lambda s: _mutate(
+        s,
+        ["grammar", "rules"],
+        [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone}",
+          "parse_aliases": ["{units[multiplier].bound}"]}],
+    ),
+    "emit spelt some other way": lambda s: _mutate(
+        s,
+        ["grammar", "rules"],
+        [{"name": "units", "scale": 1, "emit": "no",
+          "output": "{units[multiplier].standalone}"}],
+    ),
+    "scope spelt some other way": lambda s: _mutate(
+        s,
+        ["grammar", "rules"],
+        [{"name": "units", "scale": 1, "emit": "never", "scope": "entire",
+          "output": "{units[multiplier].standalone}"}],
     ),
     "empty rules list": lambda s: _mutate(s, ["grammar", "rules"], []),
     "placeholder missing its field": lambda s: _mutate(
         s,
         ["grammar", "rules"],
-        [{"name": "units", "range": [0, 9], "output": "{units[ones_digit]}"}],
+        [{"name": "units", "scale": 1, "output": "{units[multiplier]}"}],
     ),
     "unclosed placeholder brace": lambda s: _mutate(
         s,
         ["grammar", "rules"],
-        [
-            {
-                "name": "units",
-                "range": [0, 9],
-                "output": "{units[ones_digit].standalone",
-            }
-        ],
+        [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone"}],
     ),
-    "parse_aliases with the same brace typo": lambda s: _mutate(
+    "unclosed segment": lambda s: _mutate(
         s,
         ["grammar", "rules"],
-        [
-            {
-                "name": "units",
-                "range": [0, 9],
-                "output": "{units[ones_digit].standalone}",
-                "parse_aliases": ["{units[ones_digit]}"],
-            }
-        ],
+        [{"name": "ten", "scale": 10, "multiplier": 1,
+          "output": "{scales[10].standalone}[ {remainder}"}],
+    ),
+    "nested segment": lambda s: _mutate(
+        s,
+        ["grammar", "rules"],
+        [{"name": "ten", "scale": 10, "multiplier": 1,
+          "output": "{scales[10].standalone}[ [{remainder}]]"}],
+    ),
+    "connector with a placement that does not exist": lambda s: _mutate(
+        s,
+        ["grammar", "connector"],
+        {**s["grammar"]["connector"], "placement": "everywhere"},
+    ),
+    "connector missing its min": lambda s: _mutate(
+        s,
+        ["grammar", "connector"],
+        {k: v for k, v in s["grammar"]["connector"].items() if k != "min"},
+    ),
+    # Removed in #65: where a connector may stand is read from the grammar.
+    "parse still carrying connector_precedes": lambda s: _mutate(
+        s,
+        ["parse"],
+        {**s["parse"], "connector_precedes": {"units": ["standalone"]}},
     ),
     "typo in a parse flag name": lambda s: _mutate(
         s, ["parse"], {**s["parse"], "case_insensitve": True}
@@ -309,8 +355,8 @@ def test_schema_is_not_accidentally_mizo_specific(schema):
             "rules": [
                 {
                     "name": "digits",
-                    "range": [0, 9],
-                    "output": "{digits[ones_digit].citation}",
+                    "scale": 1,
+                    "output": "{digits[multiplier].citation}",
                 }
             ]
         },
@@ -355,9 +401,23 @@ def _with_parse(data: dict, **changes) -> dict:
     return out
 
 
-# The shape from #37. Accepted by the old engine when ones_digit was 0 and
-# rejected when it was 1 -- the same spec valid or not depending on the number
-# being converted.
+def _without_multiplier(data: dict, name: str, **changes) -> dict:
+    out = copy.deepcopy(data)
+    rule = _rule(out, name)
+    del rule["multiplier"]
+    rule.update(changes)
+    return out
+
+
+def _with_connector(data: dict, **changes) -> dict:
+    out = copy.deepcopy(data)
+    out["grammar"]["connector"].update(changes)
+    return out
+
+
+# The shape from #37. Accepted by the old engine when the variable on the left
+# made the `or` true, and rejected otherwise -- the same spec valid or not
+# depending on the number being converted.
 #
 # A call is the unsupported node here, and len() is deliberately a dull one.
 # #37 demonstrated the bug with __import__("os").system(...), which reads as a
@@ -365,12 +425,12 @@ def _with_parse(data: dict, **changes) -> dict:
 # evaluates it, so the short-circuited subtree was not executed either. What
 # was broken is only that validity depended on the input, and any unsupported
 # node shows that.
-_UNSUPPORTED_NODE_BEHIND_OR = 'ones_digit == 0 or len("x") == 0'
-_UNSUPPORTED_NODE_BEHIND_AND = 'ones_digit == 99 and len("x") == 0'
+_UNSUPPORTED_NODE_BEHIND_OR = 'multiplier > 1 or len("x") == 0'
+_UNSUPPORTED_NODE_BEHIND_AND = 'multiplier == 99 and len("x") == 0'
 
 # Every case below that means "this name does not exist" spells a real name
-# wrong -- unitz, scalez, stanalone, bnud, multiplyed. That is not whimsy, it
-# is the only way to say it that stays said. A case named after something the
+# wrong -- unitz, stanalone, bnud, multiplierz. That is not whimsy, it is the
+# only way to say it that stays said. A case named after something the
 # roadmap creates stops testing what it claims the day that thing lands, and
 # fails rather than announcing itself: "hundreds_digit does not exist" was
 # true only until #27 raised supports.max past 199, and the same is true of
@@ -378,16 +438,16 @@ _UNSUPPORTED_NODE_BEHIND_AND = 'ones_digit == 99 and len("x") == 0'
 # borrowing a future one.
 LOAD_REJECTS = {
     "condition hiding an unsupported node behind or": lambda s: _with_rule(
-        s, "exact_tens", condition=_UNSUPPORTED_NODE_BEHIND_OR
+        s, "tens", condition=_UNSUPPORTED_NODE_BEHIND_OR
     ),
     "condition hiding an unsupported node behind and": lambda s: _with_rule(
-        s, "exact_tens", condition=_UNSUPPORTED_NODE_BEHIND_AND
+        s, "tens", condition=_UNSUPPORTED_NODE_BEHIND_AND
     ),
     "condition naming a variable that does not exist": lambda s: _with_rule(
-        s, "exact_tens", condition="ones_digitz == 0"
+        s, "tens", condition="multiplierz > 1"
     ),
     "condition using an operator outside the allowlist": lambda s: _with_rule(
-        s, "exact_tens", condition="ones_digit + 1 == 1"
+        s, "tens", condition="multiplier + 1 > 2"
     ),
     "accepted_forms naming a table that does not exist": lambda s: _with_parse(
         s, accepted_forms={"unitz": ["bound"]}
@@ -395,46 +455,72 @@ LOAD_REJECTS = {
     "accepted_forms naming a field no entry has": lambda s: _with_parse(
         s, accepted_forms={"units": ["bnud"]}
     ),
-    "connector_precedes naming a table that does not exist": lambda s: _with_parse(
-        s, connector_precedes={"scalez": ["standalone"]}
+    # The schema can say the connector is a word, not that parsing drops it.
+    # One it does not drop makes every number from `min` up fail to parse its
+    # own canonical spelling.
+    "connector that parse.connectors does not drop": lambda s: _with_connector(
+        s, word="lehh"
     ),
-    "connector_precedes naming a field no entry has": lambda s: _with_parse(
-        s, connector_precedes={"scales": ["multiplyed"]}
+    "scope: whole on a rule number_to_text emits": lambda s: _with_rule(
+        s, "tens", scope="whole"
+    ),
+    # The schema's pattern accepts {remainder} anywhere; it takes the engine
+    # to say it may only stand inside a segment, where a zero remainder
+    # drops it rather than rendering "bial" mid-number.
+    "remainder outside a segment": lambda s: _with_rule(
+        s, "tens", output="{scales[10].multiplied} {units[multiplier].bound} {remainder}"
+    ),
+    # The key of a spec written before #65. Well-formed as a placeholder, and
+    # a name nothing defines any more.
+    "placeholder keyed by a positional variable": lambda s: _with_rule(
+        s, "units", output="{units[ones_digit].standalone}"
     ),
     "placeholder naming a table that does not exist": lambda s: _with_rule(
-        s, "units", output="{unitz[ones_digit].standalone}"
+        s, "units", output="{unitz[multiplier].standalone}"
     ),
     "placeholder naming a field no entry has": lambda s: _with_rule(
-        s, "units", output="{units[ones_digit].stanalone}"
+        s, "units", output="{units[multiplier].stanalone}"
     ),
     "placeholder naming a lexicon key that does not exist": lambda s: _with_rule(
-        s, "ten", output="{scales[11].standalone}"
+        s, "ten", output="{scales[11].standalone}[ {remainder}]"
     ),
     # Khasi in miniature (#48, #53): a morpheme bound to the placeholder
     # rather than a separator between placeholders.
     "template literal that is a bound morpheme": lambda s: _with_rule(
-        s, "exact_tens", output="{scales[10].multiplied}phew {units[tens_digit].bound}"
+        s, "tens", output="{scales[10].multiplied}phew {units[multiplier].bound}[ {remainder}]"
     ),
-    "parse_alias literal that is a bound morpheme": lambda s: _with_rule(
+    "emit: never literal that is a bound morpheme": lambda s: _with_rule(
         s,
-        "compound_tens",
-        parse_aliases=["{units[tens_digit].bound}phew {units[ones_digit].bound}"],
+        "tens_shorthand",
+        output="{units[multiplier].bound}phew {units[remainder].bound}",
+    ),
+    # The 190-spellings defect from #65, as a load error: `ten` never writes
+    # its multiplier, and a condition cannot supply one.
+    "rule that neither writes nor fixes its multiplier": lambda s: _without_multiplier(
+        s, "ten", condition="multiplier == 1"
+    ),
+    # Present exactly when the remainder is nonzero, and says nothing about
+    # it, so no nonzero remainder can be rendered.
+    "segment that never renders the remainder": lambda s: _with_rule(
+        s, "ten", output="{scales[10].standalone}[ leh]"
     ),
     # A free-standing word literal, which is the #53 clock case: the rule
-    # renders "dar pathum" and then cannot parse it back, because the arity
-    # check sees two tokens against one placeholder.
+    # renders "dar pathum" and then cannot parse it back, because "dar" is a
+    # token no placeholder matches.
     "template literal that is a free word": lambda s: _with_rule(
-        s, "units", output="dar {units[ones_digit].standalone}"
+        s, "units", output="dar {units[multiplier].standalone}"
     ),
     # Two placeholders with nothing between them: the concatenation shape
-    # from #48. Renders as one token, so the arity check can never match it.
+    # from #48. Here the second is {remainder}, and they only meet when the
+    # segment is present -- which is why the check reads every way a
+    # template can render (engine._linearisations) rather than the text.
     "placeholders written adjacent": lambda s: _with_rule(
-        s, "teens", output="{scales[10].standalone}{units[ones_digit].standalone}"
+        s, "ten", output="{scales[10].standalone}[{remainder}]"
     ),
     # Being a connector is not enough on its own -- it also has to separate.
-    # This renders "sawmlehpakhat" as a single token.
+    # This renders "sâwmlehpakhat" as a single token.
     "placeholders joined by a connector with no separator": lambda s: _with_rule(
-        s, "teens", output="{scales[10].standalone}leh{units[ones_digit].standalone}"
+        s, "ten", output="{scales[10].standalone}[leh{remainder}]"
     ),
     # The four below are the boundary cases, and they are the reason the check
     # asks each side separately instead of asking whether the literal contains
@@ -442,25 +528,19 @@ LOAD_REJECTS = {
     # "between two placeholders" test never looks at. The second two sit
     # squarely between two placeholders and still satisfy a `re.search`, on
     # the strength of the separator at the end that is not the boundary in
-    # question. All four render a token that the arity check cannot match, so
-    # the rule fails to parse its own output -- the #53 symptom exactly.
+    # question. All four render a token that nothing can match, so the rule
+    # fails to parse its own output -- the #53 symptom exactly.
     "connector before the first placeholder, unseparated": lambda s: _with_rule(
-        s, "units", output="leh{units[ones_digit].standalone}"
+        s, "units", output="leh{units[multiplier].standalone}"
     ),
     "connector after the last placeholder, unseparated": lambda s: _with_rule(
-        s, "units", output="{units[ones_digit].standalone}leh"
+        s, "units", output="{units[multiplier].standalone}leh"
     ),
     "joining connector separated on its left only": lambda s: _with_rule(
-        s, "teens", output="{scales[10].standalone} leh{units[ones_digit].standalone}"
+        s, "ten", output="{scales[10].standalone}[ leh{remainder}]"
     ),
     "joining connector separated on its right only": lambda s: _with_rule(
-        s, "teens", output="{scales[10].standalone}leh {units[ones_digit].standalone}"
-    ),
-    # The schema can require two integers, not that the first is the smaller.
-    # _find_rule tests low <= n <= high, so this rule can never fire, and the
-    # symptom is an error naming the number rather than the rule.
-    "range that is inverted, so the rule can never match": lambda s: _with_rule(
-        s, "exact_tens", range=[99, 20]
+        s, "ten", output="{scales[10].standalone}[leh {remainder}]"
     ),
 }
 
@@ -489,21 +569,24 @@ def test_a_separated_edge_connector_is_still_accepted(mizo_data):
     # forbidden". A trailing connector that IS separated from the placeholder
     # renders as two tokens, the connector is one _tokenize removes, and the
     # rule parses its own output. Rejecting this would be over-tightening.
-    ok = _with_rule(mizo_data, "units", output="{units[ones_digit].standalone} leh")
+    ok = _with_rule(mizo_data, "units", output="{units[multiplier].standalone} leh")
     spec = Spec(ok)
     assert spec.number_to_text(3) == "pathum leh"
     assert spec.text_to_number("pathum leh") == 3
 
 
 # _validate_spec walks the rules in three separate loops, and each one has to
-# default the name the same way. One case per loop, because a rule that is
-# broken in two ways only ever reaches the first loop that rejects it -- which
-# is how the placeholder loop's default came to be uncovered while a test
-# named "an unnamed rule gets a verdict" was passing.
+# default the name the same way. One case per check, because a rule that is
+# broken in two ways only ever reaches the first check that rejects it --
+# which is how the placeholder check's default came to be uncovered while a
+# test named "an unnamed rule gets a verdict" was passing. The template loop
+# runs three checks in turn, so it gets three cases.
 UNNAMED_RULE_BREAKAGE = {
-    "condition loop": {"condition": "ones_digitz == 0"},
-    "placeholder loop": {"output": "{unitz[ones_digit].standalone}"},
-    "literal loop": {"output": "dar {units[ones_digit].standalone}"},
+    "type-check loop": {"scope": "whole"},
+    "condition loop": {"condition": "multiplierz > 1"},
+    "template parse": {"output": "{units[ones_digit].standalone}"},
+    "placeholder check": {"output": "{unitz[multiplier].standalone}"},
+    "literal check": {"output": "dar {units[multiplier].standalone}"},
 }
 
 
@@ -513,10 +596,9 @@ def test_an_unnamed_rule_gets_a_verdict_not_a_key_error(loop, mizo_data):
     # "validate" has to survive one long enough to say so: reporting
     # KeyError('name') from inside the check reads as a crash, and the
     # docstring promises a verdict rather than a TypeError from three calls
-    # down. The type-check loop already defaulted the name; these are the two
-    # that indexed it.
+    # down.
     broken = copy.deepcopy(mizo_data)
-    rule = _rule(broken, "exact_tens" if loop == "condition loop" else "units")
+    rule = _rule(broken, "tens" if loop in ("condition loop", "type-check loop") else "units")
     del rule["name"]
     rule.update(UNNAMED_RULE_BREAKAGE[loop])
     with pytest.raises(ValueError, match="unnamed rule"):
@@ -525,12 +607,12 @@ def test_an_unnamed_rule_gets_a_verdict_not_a_key_error(loop, mizo_data):
 
 def test_a_condition_is_rejected_before_any_number_is_converted(mizo_data):
     # The shape of #37, stated directly. The old engine checked nodes as it
-    # reached them, so this spec was accepted for numbers whose ones digit was
-    # 0 -- the short-circuit meant the offending subtree was never visited --
-    # and rejected for the rest. Validity depended on the input, which is not
+    # reached them, so this spec was accepted for numbers that made the left
+    # side of the `or` true -- the short-circuit meant the offending subtree
+    # was never visited -- and rejected for the rest. Validity depended on the input, which is not
     # a property a spec is allowed to have.
-    broken = _with_rule(mizo_data, "exact_tens", condition=_UNSUPPORTED_NODE_BEHIND_OR)
-    with pytest.raises(ValueError, match="exact_tens"):
+    broken = _with_rule(mizo_data, "tens", condition=_UNSUPPORTED_NODE_BEHIND_OR)
+    with pytest.raises(ValueError, match="tens"):
         Spec(broken)
 
 
@@ -567,10 +649,7 @@ TYPE_MISMATCHES = {
             ]
         },
     },
-    "condition is not a string": lambda s: _with_rule(s, "exact_tens", condition=True),
-    "a parse_aliases entry is not a string": lambda s: _with_rule(
-        s, "compound_tens", parse_aliases=[5]
-    ),
+    "condition is not a string": lambda s: _with_rule(s, "tens", condition=True),
 }
 
 
@@ -581,21 +660,20 @@ def test_a_wrong_typed_rule_field_is_named_not_crashed(description, mizo_data):
         Spec(broken)
 
 
-def test_connector_precedes_without_connectors_is_rejected():
+def test_a_connector_that_parsing_does_not_drop_is_rejected():
     # Built on English rather than Mizo, and that is the whole point of the
-    # test. Stripping `connectors` from mizo.yaml also strips the meaning of
-    # the "leh" literal in the hundreds templates, so the literal check fires
-    # first and the case passes without the connectors-required check existing
-    # at all -- found by mutating that check away and watching nothing fail.
-    #
-    # English has connectors but no rule in 0-99 emits one, so removing them
-    # leaves every template still valid and isolates the case.
+    # test. Mizo already declares a connector, so the negative case in
+    # LOAD_REJECTS covers a *misspelt* one; this covers the other way to get
+    # there, a language that emits a connector and never lists it for
+    # parsing. English drops "and" on input but writes it nowhere below 100,
+    # so declaring it adds a connector without changing any rendering in
+    # range, and removing it from parse.connectors isolates the check.
     data = _spec_data(REPO_ROOT / "languages" / "en.yaml")
-    data["parse"]["connector_precedes"] = {"units": ["word"]}
-    Spec(data)  # with connectors present, this is a fine spec
+    data["grammar"]["connector"] = {"word": "and", "placement": "final_addend", "min": 100}
+    Spec(data)  # with "and" in parse.connectors, this is a fine spec
 
     data["parse"]["connectors"] = []
-    with pytest.raises(ValueError, match="without any connectors"):
+    with pytest.raises(ValueError, match="parse.connectors"):
         Spec(data)
 
 
@@ -631,7 +709,10 @@ def _first_round_trip_failure(spec):
     whole supported range.
     """
     for n in range(spec.supports["min"], spec.supports["max"] + 1):
-        rendered = spec.number_to_text(n)
+        try:
+            rendered = spec.number_to_text(n)
+        except ValueError as exc:
+            return n, None, f"does not render: {exc}"
         try:
             parsed = spec.text_to_number(rendered)
         except ValueError as exc:
@@ -649,34 +730,46 @@ def test_every_rule_parses_its_own_output(path):
         f"{path.name}: {failure[0]} renders {failure[1]!r}, which {failure[2]}"
     )
     # Named rules, not just numbers: the property is about rules, and a rule
-    # no number reaches is one this test silently says nothing about.
+    # no number reaches is one this test silently says nothing about. An
+    # `emit: never` rule is never reached by rendering by design; the test
+    # after this one is its property.
     exercised = {
-        _find_rule(spec.rules, n, _positional_variables(n))["name"]
+        spec._find_rule(n)["name"]
         for n in range(spec.supports["min"], spec.supports["max"] + 1)
     }
-    unreachable = {rule["name"] for rule in spec.rules} - exercised
+    emitted = {rule["name"] for rule in spec.rules if rule.get("emit") != "never"}
+    unreachable = emitted - exercised
     assert not unreachable, f"{path.name}: no number reaches {sorted(unreachable)}"
 
 
-def _first_alias_failure(spec):
-    """The first declared alias spelling that does not parse to its own number.
+def _first_unemitted_failure(spec):
+    """The first `emit: never` spelling that does not parse to its own number.
 
-    The alias counterpart to _first_round_trip_failure, and a deliberately
-    different property. `number_to_text` never emits an alias, so breaking one
-    cannot break the canonical round trip -- which is why the alias case is
-    excluded from TEMPLATE_REJECTS. What it can break is the property CLAUDE.md
-    names alongside it, `text -> number -> text` being stable: a spelling a
-    rule declares as acceptable has to parse to the number whose rule declares
-    it.
+    The counterpart to _first_round_trip_failure, and a deliberately different
+    property. number_to_text never uses an `emit: never` rule, so breaking one
+    cannot break the canonical round trip -- which is why that case is
+    excluded from TEMPLATE_REJECTS. What it can break is the property
+    CLAUDE.md names alongside it, `text -> number -> text` being stable: a
+    spelling a rule declares as acceptable has to parse to the number it
+    describes.
 
-    Returns (n, spelling, reason), or None if every declared alias holds across
+    Which numbers a rule describes is asked the way the vector generator asks
+    it: at the scale the canonical rule renders n at, where the rule's
+    multiplier and condition hold.
+
+    Returns (n, spelling, reason), or None if every such spelling holds across
     the whole supported range.
     """
     for n in range(spec.supports["min"], spec.supports["max"] + 1):
-        variables = _positional_variables(n)
-        rule = _find_rule(spec.rules, n, variables)
-        for template in rule.get("parse_aliases", []):
-            spelling = _render(template, spec.lexicon, variables)
+        rule = spec._find_rule(n)
+        multiplier, remainder = divmod(n, rule["scale"])
+        for other in spec.rules:
+            if other.get("emit") != "never" or other["scale"] != rule["scale"]:
+                continue
+            if not spec._rule_applies(other, multiplier, remainder):
+                continue
+            text, boundaries = spec._render_rule(other, n)
+            spelling = spec._with_connector(n, text, boundaries)
             try:
                 parsed = spec.text_to_number(spelling)
             except ValueError as exc:
@@ -687,39 +780,40 @@ def _first_alias_failure(spec):
 
 
 @pytest.mark.parametrize("path", ALL_SPEC_PATHS, ids=lambda p: p.name)
-def test_every_declared_alias_parses_to_its_own_number(path):
-    # This is the vacuity guard on _first_alias_failure as much as it is a
-    # property test. The negative test below asserts that the helper *finds* a
-    # failure for the rejected alias; a helper broken so that it always
-    # reported one would make that pass for exactly the wrong reason. Running
-    # it over the real specs and requiring None is what rules that out.
+def test_every_unemitted_spelling_parses_to_its_own_number(path):
+    # This is the vacuity guard on _first_unemitted_failure as much as it is
+    # a property test. The negative test below asserts that the helper
+    # *finds* a failure for the rejected rule; a helper broken so that it
+    # always reported one would make that pass for exactly the wrong reason.
+    # Running it over the real specs and requiring None is what rules that
+    # out.
     #
     # As coverage on its own it is close to redundant, and narrower than the
     # name suggests. The property is self-referential -- the spelling is
     # rendered from the very template it is then parsed back through -- so it
     # can only catch a template that breaks the matcher, never one that is
-    # merely wrong. Mutating mizo's alias to take the standalone tens form,
-    # which renders "pahnih thum" for 23, passes here; four tests in
-    # test_engine.py catch that instead. It is redundant in a second way too:
-    # generate_vectors.py emits alias spellings into accepted_inputs, so
+    # merely wrong. Mutating mizo's shorthand to take the standalone tens
+    # form, which renders "pahnih thum" for 23, passes here; test_engine.py
+    # catches that instead. It is redundant in a second way too:
+    # generate_vectors.py emits these spellings into accepted_inputs, so
     # test_vectors_parse_back already exercises them. Stating the property
     # directly still beats relying on the generator having happened to emit it.
     #
-    # Inert on en.yaml, which declares no parse_aliases at all -- today only
-    # compound_tens in mizo.yaml has one. Said here rather than left for a
+    # Inert on en.yaml, which has no `emit: never` rule -- today only
+    # tens_shorthand in mizo.yaml is one. Said here rather than left for a
     # reader to discover.
     spec = Spec(_spec_data(path))
-    failure = _first_alias_failure(spec)
+    failure = _first_unemitted_failure(spec)
     assert failure is None, (
-        f"{path.name}: {failure[0]} declares the alias spelling {failure[1]!r}, "
+        f"{path.name}: {failure[0]} is described by the spelling {failure[1]!r}, "
         f"which {failure[2]}"
     )
 
 
-# Every template case in LOAD_REJECTS, except the parse_aliases one: an alias
-# is an extra spelling to accept, so breaking it cannot break the round trip
-# of the canonical output. It is demonstrated against its own property
-# instead -- see ALIAS_REJECTS below.
+# Every template case in LOAD_REJECTS, except the `emit: never` one: that
+# rule is an extra spelling to accept, so breaking it cannot break the round
+# trip of the canonical output. It is demonstrated against its own property
+# instead -- see UNEMITTED_REJECTS below.
 TEMPLATE_REJECTS = (
     "template literal that is a bound morpheme",
     "template literal that is a free word",
@@ -732,7 +826,16 @@ TEMPLATE_REJECTS = (
 )
 
 
-@pytest.mark.parametrize("description", TEMPLATE_REJECTS)
+# Two structural cases (engine._validate_readable), demonstrated the same way.
+# They are not the literal check's, so they stay out of TEMPLATE_REJECTS,
+# which the ownership test below reads.
+STRUCTURE_REJECTS = (
+    "rule that neither writes nor fixes its multiplier",
+    "segment that never renders the remainder",
+)
+
+
+@pytest.mark.parametrize("description", TEMPLATE_REJECTS + STRUCTURE_REJECTS)
 def test_each_rejected_template_really_does_break_the_round_trip(
     description, mizo_data, monkeypatch
 ):
@@ -749,42 +852,35 @@ def test_each_rejected_template_really_does_break_the_round_trip(
     )
 
 
-# The alias case from LOAD_REJECTS, kept in its own list because the property
-# it violates is a different one -- not because it is a weaker case.
+# The `emit: never` case from LOAD_REJECTS, kept in its own list because the
+# property it violates is a different one -- not because it is a weaker case.
 #
-# One entry, and one is the right number. _validate_literals runs over `output`
-# and over `parse_aliases` through the same loop with the same arguments (see
-# "for template in [rule['output'], *rule.get('parse_aliases', [])]" in
-# engine.py), so every boundary shape enumerated in TEMPLATE_REJECTS is already
-# the same code on both slots. Duplicating those eight here would add rows that
-# cannot fail independently of the ones above -- the inert-invariant trap. The
-# dimension this list covers is the *slot*: that the loop visits parse_aliases
-# at all.
-#
-# The entry is load-bearing, and measurably so: deleting the parse_aliases
-# half of that loop stops this case being rejected at load. What catches
-# that is test_load_rejects_what_the_schema_cannot_express, not the
-# ownership test below -- a case is "owned" when it *loads* with the check
-# disabled, which the mutation does not change. So the slot was already
-# covered before #55; what was missing was the demonstration.
-ALIAS_REJECTS = ("parse_alias literal that is a bound morpheme",)
+# One entry, and one is the right number. _validate_literals runs over every
+# rule's template through the same loop with the same arguments, emitted or
+# not, so every boundary shape enumerated in TEMPLATE_REJECTS is already the
+# same code for an `emit: never` rule. Duplicating those eight here would add
+# rows that cannot fail independently of the ones above -- the
+# inert-invariant trap. Before #65 the parse-only spellings were a separate
+# `parse_aliases` slot with its own half of the loop, and this entry was what
+# proved the loop visited it. The slot is gone; what remains is the property.
+UNEMITTED_REJECTS = ("emit: never literal that is a bound morpheme",)
 
 
-@pytest.mark.parametrize("description", ALIAS_REJECTS)
-def test_each_rejected_alias_really_does_break_the_alias_property(
+@pytest.mark.parametrize("description", UNEMITTED_REJECTS)
+def test_each_rejected_unemitted_rule_really_does_break_its_property(
     description, mizo_data, monkeypatch
 ):
-    # The same bargain as the template test above, made against the property an
-    # alias actually has. With validation switched off, a rejected alias
-    # template has to fail to accept the spelling it itself describes --
+    # The same bargain as the template test above, made against the property
+    # an `emit: never` rule actually has. With validation switched off, a
+    # rejected rule has to fail to accept the spelling it itself describes --
     # otherwise the loader is rejecting a spec for a reason that is not true,
     # and the check should be narrowed rather than defended.
     monkeypatch.setattr(engine, "_validate_spec", lambda data: None)
     spec = Spec(LOAD_REJECTS[description](mizo_data))
-    assert _first_alias_failure(spec) is not None, (
-        f"{description!r} is rejected at load, but every declared alias still "
-        f"parses to its own number, so the check is stricter than the property "
-        f"it cites"
+    assert _first_unemitted_failure(spec) is not None, (
+        f"{description!r} is rejected at load, but every unemitted spelling "
+        f"still parses to its own number, so the check is stricter than the "
+        f"property it cites"
     )
 
 
@@ -797,10 +893,10 @@ def test_every_case_the_literal_check_owns_is_justified_by_the_property(
     # of a description, so a renamed case cannot drift out of scope.
     #
     # Adding a case to LOAD_REJECTS without adding it to TEMPLATE_REJECTS or
-    # ALIAS_REJECTS fails here, which is the point: a check is entitled to
+    # UNEMITTED_REJECTS fails here, which is the point: a check is entitled to
     # reject a spec only for a reason something demonstrates. Until #55 the
-    # alias case was named here as a literal string instead -- an exception
-    # in the one test whose job is that there are none.
+    # parse-only case was named here as a literal string instead -- an
+    # exception in the one test whose job is that there are none.
     owned = set()
     for description, mutate in LOAD_REJECTS.items():
         with monkeypatch.context() as without_the_check:
@@ -812,14 +908,14 @@ def test_every_case_the_literal_check_owns_is_justified_by_the_property(
             except ValueError:
                 continue  # some other check rejects it; not this one's case
         owned.add(description)
-    assert owned == set(TEMPLATE_REJECTS) | set(ALIAS_REJECTS)
+    assert owned == set(TEMPLATE_REJECTS) | set(UNEMITTED_REJECTS)
 
 
 # --- Note on languages/en.yaml --------------------------------------------
 #
 # en.yaml was ported to the current format in #29; before that it was written
 # in the older illustrative `form:` mini-syntax and did not load in engine.py
-# at all. It is capped at 0-99 rather than the 0-999 it used to claim, because
-# English above 99 needs recursion ("three hundred and five" = {units} hundred
-# and {0-99}) and the format has no recursive placeholder. That gap is tracked
-# on #27, and the hundreds return with it.
+# at all. It is capped at 0-99 rather than the 0-999 it once claimed, because
+# English above 99 needed recursion ("three hundred and five" = {units}
+# hundred and {0-99}) that the format did not have. #65 added it
+# (`{remainder}`); bringing the hundreds back is a change of its own.

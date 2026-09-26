@@ -42,10 +42,10 @@ vectors as they stood at that release. It exports `number_to_text`,
 `text_to_number` and `NumberWordsError`, and handles Mizo 0–199 in both
 directions. The npm target is still a name reservation.
 
-Next is the range: Mizo's scale ladder runs to 10⁹, and reaching it needs the
-spec format to grow a recursive placeholder and to stop hardcoding two
-positional variables. The design and the remaining milestones live in
-[`docs/architecture.md`](docs/architecture.md).
+Next is the range: Mizo's scale ladder runs to 10⁹. The spec format can now
+express it — rules are keyed by scale and recurse through `{remainder}` (#65)
+— and extending the lexicon up the ladder is the next step. The design and the
+remaining milestones live in [`docs/architecture.md`](docs/architecture.md).
 
 ## For contributors
 
