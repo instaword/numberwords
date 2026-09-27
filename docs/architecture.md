@@ -264,7 +264,9 @@ This is a well-trodden problem. Study these before inventing a format:
   are *per-language implementations*, which is the drift problem we're avoiding.
 
 A senior-engineer instinct: **do not reinvent RBNF by accident.** Either build on
-its ideas explicitly, or write down why we need something different.
+its ideas explicitly, or write down why we need something different. The spec
+format does both — it adopts RBNF's model and not its syntax, and says why, in
+[`spec-format.md`](spec-format.md#relationship-to-cldr-rbnf) (#65).
 
 ## Correctness model: round-trip properties
 

@@ -7,13 +7,16 @@ tooling; it is not shipped.
 """
 
 import ast
+import importlib
 import importlib.util
+import itertools
 import re
+import sys
 
 import pytest
 
 import compile_spec
-from engine import _eval_condition, _positional_variables, load
+from engine import _eval_condition, load
 
 
 @pytest.fixture(scope="module")
@@ -75,7 +78,8 @@ def test_compiled_conditions_match_the_engine(spec, artifact):
     """The compiled lambda and engine._eval_condition are two
     implementations of the same condition, which is the risk that made
     ast.unparse the right way to emit them. This checks they agree at every
-    input in the supported range.
+    (multiplier, remainder) pair a supported number gives the rule's scale
+    -- which is every input the renderer can hand a condition.
     """
     low, high = artifact.SUPPORTS
     # zip() stops at the shorter sequence, so without this the test would
@@ -90,11 +94,12 @@ def test_compiled_conditions_match_the_engine(spec, artifact):
         if condition is None:
             assert compiled_rule["condition"] is None
             continue
-        for n in range(low, high + 1):
-            variables = _positional_variables(n)
+        pairs = {divmod(n, yaml_rule["scale"]) for n in range(low, high + 1)}
+        for multiplier, remainder in sorted(pairs):
+            variables = {"multiplier": multiplier, "remainder": remainder}
             assert bool(compiled_rule["condition"](variables)) == bool(
                 _eval_condition(condition, variables)
-            ), f"rule {yaml_rule['name']} disagrees at n={n}"
+            ), f"rule {yaml_rule['name']} disagrees at {variables}"
 
 
 def test_chained_comparison_keeps_python_semantics():
@@ -104,9 +109,9 @@ def test_chained_comparison_keeps_python_semantics():
     d = 0. No rule in mizo.yaml uses one today, so this guards the
     mechanism rather than the current data.
     """
-    condition = eval(compile_spec._compile_condition("0 < ones_digit < 5"))
+    condition = eval(compile_spec._compile_condition("0 < multiplier < 5"))
     results = [
-        condition({"ones_digit": n, "tens_digit": 0}) for n in (0, 1, 4, 5)
+        condition({"multiplier": n, "remainder": 0}) for n in (0, 1, 4, 5)
     ]
     assert results == [False, True, True, False]
 
@@ -114,11 +119,11 @@ def test_chained_comparison_keeps_python_semantics():
 @pytest.mark.parametrize(
     "expression",
     [
-        "ones_digit + 1 == 2",     # arithmetic
-        "len(ones_digit) == 1",    # a call
-        "ones_digit.real == 1",    # attribute access
-        "not_a_variable == 1",     # a name the spec never defines
-        "ones_digit == 'zero'",    # a constant that is not an integer
+        "multiplier + 1 == 2",     # arithmetic
+        "len(multiplier) == 1",    # a call
+        "multiplier.real == 1",    # attribute access
+        "ones_digit == 1",         # a name the format no longer defines
+        "multiplier == 'zero'",    # a constant that is not an integer
     ],
 )
 def test_validator_rejects_unsupported_conditions(expression):
@@ -133,10 +138,10 @@ def test_validator_rejects_unsupported_conditions(expression):
 @pytest.mark.parametrize(
     "expression",
     [
-        "ones_digit == 0",
-        "ones_digit > 0",
-        "ones_digit == 0 and tens_digit > 1",
-        "ones_digit == 0 or ones_digit == 5",
+        "multiplier == 1",
+        "multiplier > 1",
+        "multiplier > 1 and remainder > 0",
+        "remainder == 0 or remainder == 5",
     ],
 )
 def test_validator_accepts_the_shapes_the_engine_supports(expression):
@@ -151,13 +156,25 @@ def test_validator_accepts_the_shapes_the_engine_supports(expression):
 
 
 def test_compiled_rules_match_the_spec(spec, artifact):
-    """Rule count, names and ranges. Rule selection depends on the range
-    as much as on the condition, and nothing else checks it.
+    """Rule count, names, and everything rule selection reads besides the
+    condition: the scale, the fixed multiplier, and whether the rule is
+    emitted or whole-input-only. Nothing else checks those field by field.
     """
     assert len(artifact.RULES) == len(spec.rules)
     for yaml_rule, compiled_rule in zip(spec.rules, artifact.RULES):
         assert compiled_rule["name"] == yaml_rule["name"]
-        assert compiled_rule["range"] == tuple(yaml_rule["range"])
+        assert compiled_rule["scale"] == yaml_rule["scale"]
+        assert compiled_rule["multiplier"] == yaml_rule.get("multiplier")
+        assert compiled_rule["emit"] == (yaml_rule.get("emit") != "never")
+        assert compiled_rule["whole_only"] == (yaml_rule.get("scope") == "whole")
+
+
+def test_compiled_connector_matches_the_spec(spec, artifact):
+    """grammar.connector decides where "leh" goes in every number from 100
+    up, and the renderer reads it from nowhere else."""
+    declared = spec.connector
+    assert declared is not None
+    assert artifact.CONNECTOR == {"word": declared["word"], "min": declared["min"]}
 
 
 def test_compiled_lexicon_matches_the_spec(spec, artifact):
@@ -182,32 +199,59 @@ def test_compiled_provenance_matches_the_spec(spec, artifact):
 
 def _render_from_artifact(artifact, n):
     """Renders `n` using only the compiled artifact, mirroring
-    engine._find_rule and engine._render.
+    Spec._find_rule, Spec._render_rule and Spec._with_connector.
 
     This is deliberately the smallest thing that can read the artifact,
-    not a draft of _render.py. Its job is to prove the compiled data
-    still means what the spec meant; the real renderer lands with the
-    public API and brings the parse side with it.
+    not a copy of _render.py. Its job is to prove the compiled data still
+    means what the spec meant, independently of the package's renderer --
+    if both read the artifact the same wrong way, the package's own
+    conformance tests would not notice, and this would.
     """
-    variables = _positional_variables(n)
-    for rule in artifact.RULES:
-        low, high = rule["range"]
-        if not (low <= n <= high):
-            continue
-        condition = rule["condition"]
-        if condition is not None and not condition(variables):
-            continue
-        rendered = []
-        for part in rule["output"]:
-            if isinstance(part, str):
-                rendered.append(part)
+    def find(n):
+        scales = sorted({r["scale"] for r in artifact.RULES if r["emit"]}, reverse=True)
+        scale = next(s for s in scales if s <= max(n, 1))
+        multiplier, remainder = divmod(n, scale)
+        for rule in artifact.RULES:
+            if rule["scale"] != scale or not rule["emit"]:
                 continue
-            table, key, field = part
-            if isinstance(key, str):
-                key = variables[key]
-            rendered.append(artifact.LEXICON[table][key][field])
-        return "".join(rendered)
-    raise AssertionError(f"no compiled rule matches n={n}")
+            if rule["multiplier"] not in (None, multiplier):
+                continue
+            condition = rule["condition"]
+            if condition is None or condition(
+                {"multiplier": multiplier, "remainder": remainder}
+            ):
+                return rule
+        raise AssertionError(f"no compiled rule matches n={n}")
+
+    def render(rule, n):
+        multiplier, remainder = divmod(n, rule["scale"])
+        values = {"multiplier": multiplier, "remainder": remainder}
+        out, starts = [], []
+
+        def walk(items):
+            for item in items:
+                if isinstance(item, str):
+                    out.append(item)
+                elif item[0] == "lex":
+                    _, table, key, field = item
+                    out.append(artifact.LEXICON[table][values.get(key, key)][field])
+                elif item[0] == "remainder":
+                    start = len("".join(out))
+                    text, inner = render(find(remainder), remainder)
+                    starts.append(start)
+                    starts.extend(start + i for i in inner)
+                    out.append(text)
+                elif remainder:
+                    walk(item[1])
+
+        walk(rule["output"])
+        return "".join(out), starts
+
+    text, starts = render(find(n), n)
+    connector = artifact.CONNECTOR
+    if connector and n >= connector["min"] and starts:
+        text = text[:starts[-1]] + connector["word"] + " " + text[starts[-1]:]
+    return text
 
 
 def test_compiled_output_matches_the_engine(spec, artifact):
@@ -216,7 +260,8 @@ def test_compiled_output_matches_the_engine(spec, artifact):
 
     This is the one that would catch a compiler bug the piecewise tests
     miss, because it exercises rule selection, placeholder keys, field
-    names and literal text together, against the oracle.
+    names, literal text, segments and the connector together, against the
+    oracle.
     """
     low, high = artifact.SUPPORTS
     for n in range(low, high + 1):
@@ -225,36 +270,33 @@ def test_compiled_output_matches_the_engine(spec, artifact):
         )
 
 
-def _unparse_template(parts):
-    """Rebuilds a template string from the parts _parse_template produced."""
+def _unparse_template(items):
+    """Rebuilds a template string from the items _parse_template produced."""
     pieces = []
-    for part in parts:
-        if isinstance(part, str):
-            pieces.append(part)
-        else:
-            table, key, field = part
+    for item in items:
+        if isinstance(item, str):
+            pieces.append(item)
+        elif item[0] == "lex":
+            _, table, key, field = item
             pieces.append(f"{{{table}[{key}].{field}}}")
+        elif item[0] == "remainder":
+            pieces.append("{remainder}")
+        else:
+            pieces.append(f"[{_unparse_template(item[1])}]")
     return "".join(pieces)
 
 
 def test_compiled_templates_round_trip_to_the_spec_text(spec, artifact):
     """Every compiled template rebuilds into the template the spec wrote.
 
-    _parse_template splits a template into literal text and placeholders,
-    and a split that dropped or reordered a piece would still look like a
-    plausible template. Rebuilding is the cheap way to prove nothing was
-    lost. This is the only check that covers parse_aliases at all -- they
-    are used for text -> number, which needs the parse side of the
-    renderer, so nothing else here can reach them yet.
+    _parse_template splits a template into literal text, placeholders and
+    segments, and a split that dropped or reordered a piece would still look
+    like a plausible template. Rebuilding is the cheap way to prove nothing
+    was lost -- including in an `emit: never` rule, which the output check
+    above never renders.
     """
     for yaml_rule, compiled_rule in zip(spec.rules, artifact.RULES):
         assert _unparse_template(compiled_rule["output"]) == yaml_rule["output"]
-        aliases = yaml_rule.get("parse_aliases", [])
-        assert len(compiled_rule["parse_aliases"]) == len(aliases)
-        for compiled_alias, yaml_alias in zip(
-            compiled_rule["parse_aliases"], aliases
-        ):
-            assert _unparse_template(compiled_alias) == yaml_alias
 
 
 def test_compiled_parse_config_matches_the_spec(spec, artifact):
@@ -390,3 +432,54 @@ def test_the_ignorable_table_is_identical_in_both_implementations():
     )
     assert reference_table == package_table
     assert len(set(reference_table)) == 6
+
+
+@pytest.fixture(scope="module")
+def package():
+    """The package's own public API, imported from its source tree.
+
+    Everything else in this file reads the artifact or the package source as
+    data. This one needs the package's parser running, and the package is
+    importable from its src/ directory with no install step -- it depends on
+    nothing, which is the point of compiling the spec (#20).
+    """
+    source = str(compile_spec.REPO_ROOT / "packages" / "python" / "src")
+    sys.path.insert(0, source)
+    try:
+        yield importlib.import_module("numberwords")
+    finally:
+        sys.path.remove(source)
+
+
+def test_the_package_parser_agrees_with_the_engine_on_every_short_phrase(spec, package):
+    """Since #65 the package carries a real parser, and it is a second copy
+    of the engine's -- deliberately, since the package never imports the
+    oracle. The vectors hold the two together on 5,950 spellings that must
+    be accepted, and on nothing that must be rejected. This holds them
+    together on everything up to three words the lexicon can spell,
+    connector included: same number, or both refuse.
+
+    It is the check that made the prototype for #65 trustworthy -- run then
+    over every phrase of up to four words, 245,410 of them, with no
+    disagreement -- kept at three so it costs seconds.
+    """
+    vocabulary = sorted(
+        {spec._normalize_word(w) for table in spec.lexicon.values()
+         for entry in table.values() for w in entry.values()}
+        | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
+    )
+    disagreements = []
+    for length in (1, 2, 3):
+        for words in itertools.product(vocabulary, repeat=length):
+            text = " ".join(words)
+            try:
+                expected = spec.text_to_number(text)
+            except ValueError:
+                expected = None
+            try:
+                got = package.text_to_number(text)
+            except package.NumberWordsError:
+                got = None
+            if got != expected:
+                disagreements.append((text, expected, got))
+    assert not disagreements, disagreements[:10]

@@ -11,8 +11,9 @@ matters: irregular teens that can't be composed, a hyphen inside the
 canonical form ("forty-two") that is also a word separator when parsing, and
 lexicon entries with one form each rather than two.
 
-Scope is 0-99. English above 99 needs recursion the format doesn't have yet
-(#27); a valid 0-99 spec proves more than an invalid 0-999 one.
+Scope is 0-99. English above 99 needed recursion the format did not have;
+since #65 it has it (`{remainder}`), and extending en.yaml is a change of
+its own rather than part of that one.
 """
 
 import copy
@@ -74,11 +75,12 @@ def test_number_to_text(en, n, expected):
     assert en.number_to_text(n) == expected
 
 
-def test_teens_are_keyed_by_ones_digit_not_by_value(en):
+def test_teens_are_keyed_by_the_remainder_not_by_value(en):
     # en.yaml keys its teens table 0-9 rather than 10-19, because the format's
-    # lookup keys are positional variables or literal integers -- there is no
-    # whole-number key. This asserts the modelling actually holds rather than
-    # happening to work for the values in examples:.
+    # lookup keys are multiplier, remainder or a literal integer -- there is
+    # no whole-number key. `teens` is a scale-10 rule with multiplier 1, so
+    # its remainder is the ones digit. This asserts the modelling actually
+    # holds rather than happening to work for the values in examples:.
     for ones, word in enumerate(
         ["ten", "eleven", "twelve", "thirteen", "fourteen",
          "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"]
@@ -169,3 +171,17 @@ def test_single_digits_parse_without_mizo_form_names(en):
     assert "accepted_forms" not in en.parse_config
     for n in range(0, 10):
         assert en.text_to_number(en.number_to_text(n)) == n
+
+
+def test_no_connector_position_is_certified(en):
+    # en.yaml drops "and" on input but declares no grammar.connector, and the
+    # generator certifies connector positions only for a language that does
+    # (#65). Before that, the same gating came from en.yaml declaring no
+    # parse.connector_precedes. Either way "forty and two" is tolerated by
+    # the engine and blessed by nothing.
+    assert en.connector is None
+    assert en.text_to_number("forty and two") == 42
+    assert not any(
+        "and" in candidate
+        for candidate in generate_vectors.accepted_inputs(en, 42)
+    )

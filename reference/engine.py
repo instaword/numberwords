@@ -1,52 +1,48 @@
 """Reference engine: interprets a language spec (languages/<lang>.yaml) to
-convert numbers to text. This is the "oracle" described in
+convert numbers to text and back. This is the "oracle" described in
 docs/architecture.md -- the definition of correctness that target packages
-(Python, npm, ...) are eventually checked against, instead of each
-reimplementing a language's rules by hand.
+(Python, npm, ...) are checked against, instead of each reimplementing a
+language's rules by hand.
 
-Scope: specs shaped like the current languages/mizo.yaml (positional
-variables ones_digit/tens_digit/hundreds_digit). That covers 0-999 as of #27
-step 2b -- a rule matches on its `range` as well as its condition, so 118 and
-18 select different rules despite identical positional variables. (The order
-of the two checks is not what does this; a rule is selected only when both
-pass.) A fourth variable becomes necessary at 1000, where the thousands
-digit multiplies; that scale word also behaves differently -- #27 rule 1
-makes x1 obligatory from 10^3 up ("sang khat", never bare "sang") and rule 2
-keeps its circumflex under multiplication, neither of which any rule here
-has to express yet. Larger ranges are follow-up work.
+The format it reads is the scale-keyed one from #65. Every rule is keyed by
+the power of ten it consumes (`scale`), and sees two values derived from the
+number and that scale:
 
-text -> number first normalises both the input *and* the lexicon words
-using the spec's `parse` section (see Spec._normalize_word). It then
-searches the supported range for the number whose grammar rule matches
-the input token by token -- see Spec.text_to_number().
-Matching is placeholder-aware rather than a plain string comparison against
-number_to_text()'s output: a freestanding single-digit phrase (one token,
-one placeholder) accepts either bound or standalone form per
-parse.accepted_forms (e.g. "khat" as well as "pakhat" for 1), while
-multi-word rules (teens, exact_tens, compound_tens, ...) match each field
-exactly as the canonical template names it, to avoid cross-rule ambiguity
-(see _rule_matches). A rule may also declare `parse_aliases`: a list of
-extra templates (same placeholder syntax as `output`) accepted when parsing
-but never produced by number_to_text() -- e.g. compound_tens' shorthand that
-drops the scale word. These are matched with the same field-exactness as
-the canonical output; only a single freestanding placeholder gets bound/
-standalone leniency. number_to_text() stays the single source of truth for
-the canonical form. Every parse brute-forces the supported range and
-match-tests each candidate: 1,000 candidates per parse at 0-999, against 200
-before. When #27 step 2b raised the ceiling the reference suite went from
-about 20 s to 16-20 minutes -- six runs on one machine spanned 15:32 to
-19:30, so treat it as a band rather than a figure; it is sensitive to what
-else the machine is doing. That is a factor somewhere between 35 and 60, and
-it is not range^2 alone: it is the range (5x more candidates per parse),
-times 3.5x more tests because the parametrised ones cover the range, times a
-per-candidate rise from the rule table growing 11 to 17 (measured separately
-at 33us -> 90us, since _find_rule scans rules in order and AST-walks their
-conditions).
+    multiplier = n // scale
+    remainder  = n %  scale
 
-That is tolerable here and is not a strategy -- at 10^5 it is arithmetically
-impossible, and the Mizo ladder runs to 10^9 (#27 rule 4, with rule 5
-allowing multi-digit multipliers above it). This has to become a real parser
-before the range grows again; see #27 and docs/spec-format.md.
+A rule's template names lexicon words through those two values
+(`{units[multiplier].bound}`), and may hold `{remainder}`: the remainder,
+rendered by the same rules. That one recursive placeholder is what the old
+positional variables (ones_digit, tens_digit, hundreds_digit) could not
+express, and it is why Mizo 0-999 needs 5 rules here where it needed 17.
+A `[...]` segment is dropped when the remainder is zero -- CLDR RBNF's own
+notation for the same thing (docs/spec-format.md, "Relationship to CLDR
+RBNF").
+
+number -> text: take the largest scale any emitting rule is keyed by that is
+not above n, then the first rule at that scale whose fixed `multiplier` and
+`condition` both hold (see Spec._find_rule). A connector declared under
+`grammar.connector` is written before the final addend of the whole number,
+which is the innermost {remainder} expansion (see Spec._render_rule).
+
+text -> number: normalise the text using the spec's `parse` section (see
+Spec._normalize_word), then parse it by recursive descent over the same
+rules, collecting every value some derivation gives rather than stopping at
+the first (see Spec._parse_values). A freestanding single-word phrase
+accepts either form parse.accepted_forms lists ("khat" as well as "pakhat"
+for 1); inside a longer phrase every field must match exactly as the
+template names it. A rule marked `emit: never` is accepted on input and
+never produced, and `scope: whole` keeps it from being used as anybody's
+remainder -- Mizo's `hnih thum` (23) is a whole phrase, not a way of writing
+the last two words of `za hnih thum`.
+
+Cost. The parser's loops are over the tokens of the input and the entries
+of the lexicon, never over supports.max. Parsing used to brute-force the
+supported range and template-match every candidate, which put the reference
+suite at 16-20 minutes at 0-999 and was arithmetically impossible at 10^5
+(#27, #65 requirement 2). Growing the range no longer changes what a parse
+costs.
 """
 
 import ast
@@ -74,7 +70,7 @@ _PLACEHOLDER_RE = re.compile(r"\{(\w+)\[(\w+)\]\.(\w+)\}")
 
 
 def _eval_condition(expr: str, variables: dict) -> bool:
-    """Evaluate a `condition` string like "ones_digit == 0 and tens_digit > 1"
+    """Evaluate a `condition` string like "multiplier > 1 and remainder > 0"
     against `variables`. Deliberately not eval()/exec(): `condition` is data
     loaded from a YAML spec file, not code we wrote, so only a small allowed
     set of nodes (comparisons, and/or, names, int constants) is permitted --
@@ -253,41 +249,137 @@ def _normalize(word: str, parse_config: dict) -> str:
         word = _strip_diacritics(word)
     return word
 
+# The variables a condition or a placeholder key may name. Two, and they are
+# the same two at every scale: that is what lets one rule describe every
+# multiple of its scale instead of one rule per digit position (#65).
+_VARIABLE_NAMES = frozenset({"multiplier", "remainder"})
 
-def _positional_variables(n: int) -> dict:
-    # Kept in step with the same function in the Python target's _render.py.
-    # There are deliberately two copies -- the target does not import the
-    # oracle -- so a name added here without adding it there makes every
-    # rule that reads it raise KeyError in the package while the reference
-    # suite stays green. compile_spec.py imports _VARIABLE_NAMES from here,
-    # so the compiler needs no third edit.
-    return {
-        "ones_digit": n % 10,
-        "tens_digit": (n // 10) % 10,
-        "hundreds_digit": (n // 100) % 10,
-    }
+# The one placeholder that is not a lexicon lookup: the remainder, rendered
+# by the same rules. Only legal inside a [...] segment -- see _parse_template.
+_REMAINDER = "remainder"
 
 
-def _resolve_key(raw_key: str, variables: dict):
-    """A placeholder's bracket key is either a positional variable name
-    (e.g. "tens_digit") or a literal integer (e.g. scales[10])."""
-    if raw_key in variables:
-        return variables[raw_key]
-    return int(raw_key)
+def _parse_template(template: str) -> tuple:
+    """Split a template into items, the one representation the engine, the
+    compiler and the package all read.
+
+        "text"                          literal text, kept verbatim
+        ("lex", table, key, field)      a lexicon word; key is "multiplier",
+                                        "remainder" or an int
+        ("remainder",)                  the remainder, rendered by the rules
+        ("optional", items)             present exactly when remainder > 0
+
+    A bracket opens an optional segment only outside a placeholder. Inside
+    one it is the lexicon index: `{units[multiplier].bound}` holds a bracket
+    that must not be read as `[...]`. The prototype for #65 got that wrong
+    and rendered `{units.bound}`, so the scan below handles a whole
+    placeholder at a time rather than looking at brackets character by
+    character.
+
+    Raises ValueError for anything malformed: an unbalanced bracket, a
+    nested segment, a placeholder that is neither `{remainder}` nor
+    `{table[key].field}`, or `{remainder}` outside a segment. The last one
+    matters for output rather than syntax. Outside a segment, a remainder of
+    zero would render the rules' word for zero ("bial") in the middle of a
+    number.
+    """
+    stack = [[]]
+    literal = []
+
+    def flush():
+        if literal:
+            stack[-1].append("".join(literal))
+            literal.clear()
+
+    position = 0
+    while position < len(template):
+        ch = template[position]
+        if ch == "{":
+            end = template.find("}", position)
+            if end < 0:
+                raise ValueError(f"unclosed placeholder in {template!r}")
+            body = template[position:end + 1]
+            flush()
+            if body == "{%s}" % _REMAINDER:
+                if len(stack) == 1:
+                    raise ValueError(
+                        f"{{remainder}} outside a [...] segment in {template!r}: "
+                        f"a zero remainder would render as a word"
+                    )
+                stack[-1].append((_REMAINDER,))
+            else:
+                match = _PLACEHOLDER_RE.fullmatch(body)
+                if match is None:
+                    raise ValueError(f"malformed placeholder {body!r} in {template!r}")
+                table, raw_key, field = match.groups()
+                if raw_key in _VARIABLE_NAMES:
+                    key = raw_key
+                else:
+                    try:
+                        key = int(raw_key)
+                    except ValueError:
+                        raise ValueError(
+                            f"placeholder key {raw_key!r} is neither a variable "
+                            f"({', '.join(sorted(_VARIABLE_NAMES))}) nor an integer"
+                        ) from None
+                stack[-1].append(("lex", table, key, field))
+            position = end + 1
+            continue
+        if ch == "}":
+            raise ValueError(f"stray '}}' in {template!r}")
+        if ch == "[":
+            if len(stack) > 1:
+                raise ValueError(f"nested [...] segment in {template!r}")
+            flush()
+            stack.append([])
+        elif ch == "]":
+            if len(stack) == 1:
+                raise ValueError(f"unbalanced ']' in {template!r}")
+            flush()
+            inner = stack.pop()
+            stack[-1].append(("optional", tuple(inner)))
+        else:
+            literal.append(ch)
+        position += 1
+    if len(stack) > 1:
+        raise ValueError(f"unclosed '[' in {template!r}")
+    flush()
+    return tuple(stack[0])
 
 
-def _render(output: str, lexicon: dict, variables: dict) -> str:
-    def substitute(match: "re.Match") -> str:
-        table_name, raw_key, field = match.groups()
-        key = _resolve_key(raw_key, variables)
-        return lexicon[table_name][key][field]
+def _linearisations(items: tuple) -> list:
+    """The template as it renders with its segment absent, then present.
 
-    return _PLACEHOLDER_RE.sub(substitute, output)
+    A template with no segment renders one way. Used by the literal check,
+    which has to see every sequence of words a template can actually emit --
+    a separator that exists only when the segment is present still has to
+    separate what it sits between.
+    """
+    absent, present = [], []
+    has_segment = False
+    for item in items:
+        if isinstance(item, tuple) and item[0] == "optional":
+            has_segment = True
+            present.extend(item[1])
+        else:
+            absent.append(item)
+            present.append(item)
+    return [absent, present] if has_segment else [absent]
 
 
-# The positional variable names a condition or a placeholder key may use.
-# Derived from the function that defines them so the two cannot disagree.
-_VARIABLE_NAMES = frozenset(_positional_variables(0))
+def _refers_to_remainder(items: tuple) -> bool:
+    """Whether items say anything about the remainder: `{remainder}` itself,
+    a word keyed by it (English's teens), or a segment that does."""
+    for item in items:
+        if isinstance(item, str):
+            continue
+        if item[0] == _REMAINDER:
+            return True
+        if item[0] == "lex" and item[2] == _REMAINDER:
+            return True
+        if item[0] == "optional" and _refers_to_remainder(item[1]):
+            return True
+    return False
 
 
 def _validate_condition_node(node):
@@ -351,7 +443,7 @@ def _validate_spec(data: dict) -> None:
     Schema structurally cannot express: it can say `accepted_forms` maps
     names to lists of names, not that those names exist in *this file's*
     lexicon. Each of these used to fail silently -- leniency quietly
-    stopping, a connector quietly never certified, a literal quietly
+    stopping, a connector quietly never stripped, a literal quietly
     dropping out of matching -- and the hand-written cross-reference checks
     lived in test_spec_schema.py, which only sees the specs in languages/.
     A spec loaded from anywhere else got no warning at all.
@@ -361,17 +453,17 @@ def _validate_spec(data: dict) -> None:
     spec the engine accepts but the compiler refuses inverts that.
 
     Where the line sits. Structural validity -- that `rules` is a list, that
-    a rule has a name and a two-integer range -- is spec.schema.json's job,
-    and re-implementing it here would be the duplication this issue exists
-    to remove. What this function adds is the part a schema cannot state:
-    whether a name resolves, what is inside a condition, whether a literal
-    can be matched, whether a range can ever fire. The few type checks below
-    are not an exception to that: they guard only the fields this function
-    itself parses or regexes, so that it returns a verdict rather than a
-    TypeError from three calls down. A structurally malformed dict handed
-    straight to Spec() can still surface as KeyError -- the schema is the
-    gate for that, and every spec that reaches the engine by any supported
-    route has been through it.
+    a rule has a name and an integer scale -- is spec.schema.json's job, and
+    re-implementing it here would be the duplication this issue exists to
+    remove. What this function adds is the part a schema cannot state:
+    whether a name resolves, what is inside a condition or a template,
+    whether a literal can be matched. The few type checks below are not an
+    exception to that: they guard only the fields this function itself
+    parses or regexes, so that it returns a verdict rather than a TypeError
+    from three calls down. A structurally malformed dict handed straight to
+    Spec() can still surface as KeyError -- the schema is the gate for that,
+    and every spec that reaches the engine by any supported route has been
+    through it.
     """
     # Named rather than left to KeyError. The schema catches a missing section
     # in a checked-in spec, but a function called "validate" reporting
@@ -387,13 +479,13 @@ def _validate_spec(data: dict) -> None:
     rules = data["grammar"]["rules"]
     parse = data.get("parse", {})
 
-    # Schema-valid data never trips this -- output and condition are both
-    # `type: string` there, and output is required. It exists for the same
+    # Schema-valid data never trips these -- output and condition are both
+    # `type: string` there, and output is required. They exist for the same
     # reason the section check above does: Spec() can be built from a raw
-    # dict with no schema in the loop, and without this a missing or
+    # dict with no schema in the loop, and without them a missing or
     # wrong-typed field reaches a KeyError from indexing or a TypeError three
-    # calls down inside ast.parse or a regex, either of which this function
-    # promises not to do. Found auditing #37 rather than filed against it.
+    # calls down inside ast.parse, either of which this function promises
+    # not to do.
     for rule in rules:
         name = _rule_name(rule)
         output = rule.get("output")
@@ -408,26 +500,16 @@ def _validate_spec(data: dict) -> None:
                 f"rule {name!r}: 'condition' must be a string, got "
                 f"{type(condition).__name__}"
             )
-        for alias in rule.get("parse_aliases", []):
-            if not isinstance(alias, str):
-                raise ValueError(
-                    f"rule {name!r}: each parse_aliases entry must be a "
-                    f"string, got {type(alias).__name__}"
-                )
-        # An inverted range is the one thing about `range` the schema cannot
-        # say: it can require two integers, not that the first is not larger
-        # than the second. _find_rule tests `low <= n <= high`, so such a rule
-        # never fires, and the only symptom is "No grammar rule matches n=..."
-        # for whatever the rule was supposed to cover -- an error naming the
-        # number rather than the rule that should have handled it.
-        rule_range = rule.get("range")
-        if isinstance(rule_range, list) and len(rule_range) == 2:
-            low, high = rule_range
-            if isinstance(low, int) and isinstance(high, int) and low > high:
-                raise ValueError(
-                    f"rule {name!r}: range is [{low}, {high}], which is empty, "
-                    f"so the rule can never match"
-                )
+        # `scope: whole` exists to keep a parse-only form from being read as
+        # somebody's remainder. On a rule number_to_text() also uses, it
+        # would let the renderer emit a remainder the parser then refuses to
+        # read back -- a spec that fails its own round trip.
+        if rule.get("scope") == "whole" and rule.get("emit") != "never":
+            raise ValueError(
+                f"rule {name!r}: 'scope: whole' is only meaningful on an "
+                f"'emit: never' rule; on an emitted rule it would break the "
+                f"round trip"
+            )
 
     separator_pattern = _separator_pattern(parse)
     connectors = {_normalize(c, parse) for c in parse.get("connectors", [])}
@@ -441,54 +523,98 @@ def _validate_spec(data: dict) -> None:
         except (ValueError, SyntaxError) as exc:
             raise ValueError(f"rule {_rule_name(rule)!r}: {exc}") from None
 
-    # accepted_forms (#31) and connector_precedes (#19) have the same shape:
-    # a lexicon table mapped to a list of its fields.
-    for key in ("accepted_forms", "connector_precedes"):
-        for table, fields in parse.get(key, {}).items():
-            if table not in lexicon:
-                raise ValueError(f"parse.{key}: unknown lexicon table {table!r}")
-            for field in fields:
-                if not _field_exists(lexicon, table, field):
-                    raise ValueError(
-                        f"parse.{key}: no {table} entry has a {field!r} field"
-                    )
-    # Declaring where a connector may stand, in a language with no connector,
-    # is a mechanism nothing can exercise (#36, #38).
-    if parse.get("connector_precedes") and not parse.get("connectors"):
-        raise ValueError("parse.connector_precedes declared without any connectors")
+    for table, fields in parse.get("accepted_forms", {}).items():
+        if table not in lexicon:
+            raise ValueError(f"parse.accepted_forms: unknown lexicon table {table!r}")
+        for field in fields:
+            if not _field_exists(lexicon, table, field):
+                raise ValueError(
+                    f"parse.accepted_forms: no {table} entry has a {field!r} field"
+                )
+
+    # The connector number_to_text() writes has to be one text_to_number()
+    # drops, or the canonical spelling of every number from `min` up fails
+    # to parse back. Two declarations because they are two facts: English
+    # drops "and" on input but emits it nowhere below 100.
+    connector = data["grammar"].get("connector")
+    if connector is not None:
+        if _normalize(connector.get("word", ""), parse) not in connectors:
+            raise ValueError(
+                f"grammar.connector: {connector.get('word')!r} is not one of "
+                f"parse.connectors, so the canonical spelling would not parse back"
+            )
 
     for rule in rules:
         name = _rule_name(rule)
-        for template in [rule["output"], *rule.get("parse_aliases", [])]:
-            _validate_placeholders(name, template, lexicon)
-            _validate_literals(
-                name, template, separator_pattern, connectors, parse
-            )
+        try:
+            items = _parse_template(rule["output"])
+        except ValueError as exc:
+            raise ValueError(f"rule {name!r}: {exc}") from None
+        _validate_readable(name, rule, items)
+        _validate_placeholders(name, items, lexicon)
+        for sequence in _linearisations(items):
+            _validate_literals(name, sequence, separator_pattern, connectors, parse)
 
 
-def _validate_placeholders(rule_name: str, template: str, lexicon: dict) -> None:
-    """Every placeholder addresses something that is actually in the lexicon.
+def _validate_readable(rule_name: str, rule: dict, items: tuple) -> None:
+    """Two ways a template can render and still not be readable back.
 
-    Not in #37 as filed. Same shape as the cross-references above, reached by
-    the same traversal, and the failure without it is a KeyError out of
-    _render at conversion time rather than a message naming the rule.
+    A rule has to write its multiplier down or fix it. A parser learns the
+    multiplier from the word it reads, and a rule that writes none -- Mizo's
+    bare "sâwm" -- gives it nothing, while a condition such as
+    "multiplier == 1" can only check a value it has already been given. The
+    rules first proposed for #65 did exactly that for `ten` and `hundred`,
+    and 190 of the 1,000 shipped spellings rendered correctly and then parsed
+    to nothing. Only a word outside a [...] segment counts, since a segment
+    is absent whenever the remainder is zero.
+
+    And a [...] segment has to render the remainder, through `{remainder}` or
+    a remainder-keyed word. It is present exactly when the remainder is
+    nonzero, so one that says nothing about the remainder -- `[ leh]` --
+    has nowhere to put it. Spec._render_rule refuses such a number rather
+    than drop the remainder and name a smaller one, but only when one is
+    converted; this says so at load, for all of them.
     """
-    for table, raw_key, field in _PLACEHOLDER_RE.findall(template):
+    writes_multiplier = any(
+        not isinstance(item, str) and item[0] == "lex" and item[2] == "multiplier"
+        for item in items
+    )
+    if not writes_multiplier and "multiplier" not in rule:
+        raise ValueError(
+            f"rule {rule_name!r} never writes its multiplier and does not fix "
+            f"one, so text_to_number could never read it: give it "
+            f"`multiplier: <n>`, not a condition (#65)"
+        )
+    for item in items:
+        if isinstance(item, tuple) and item[0] == "optional":
+            if not _refers_to_remainder(item[1]):
+                raise ValueError(
+                    f"rule {rule_name!r}: a [...] segment never renders the "
+                    f"remainder, so a nonzero remainder would be dropped from "
+                    f"the output"
+                )
+
+
+def _validate_placeholders(rule_name: str, items: tuple, lexicon: dict) -> None:
+    """Every lexicon placeholder addresses something that is actually in the
+    lexicon. The failure without it is a KeyError out of rendering at
+    conversion time rather than a message naming the rule.
+    """
+    for item in items:
+        if isinstance(item, str) or item[0] == _REMAINDER:
+            continue
+        if item[0] == "optional":
+            _validate_placeholders(rule_name, item[1], lexicon)
+            continue
+        _, table, key, field = item
         if table not in lexicon:
             raise ValueError(f"rule {rule_name!r}: unknown lexicon table {table!r}")
-        if raw_key in _VARIABLE_NAMES:
+        if key in _VARIABLE_NAMES:
             if not _field_exists(lexicon, table, field):
                 raise ValueError(
                     f"rule {rule_name!r}: no {table} entry has a {field!r} field"
                 )
             continue
-        try:
-            key = int(raw_key)
-        except ValueError:
-            raise ValueError(
-                f"rule {rule_name!r}: placeholder key {raw_key!r} is neither a "
-                f"positional variable nor an integer"
-            ) from None
         if key not in lexicon[table]:
             raise ValueError(f"rule {rule_name!r}: {table}[{key}] is not in the lexicon")
         if field not in lexicon[table][key]:
@@ -498,45 +624,46 @@ def _validate_placeholders(rule_name: str, template: str, lexicon: dict) -> None
 
 
 def _validate_literals(
-    rule_name: str, template: str, separator_pattern: str, connectors: set,
+    rule_name: str, sequence: list, separator_pattern: str, connectors: set,
     parse_config: dict,
 ) -> None:
     """Every template literal is a separator or connector, and separates.
 
-    Two clauses, and the second is the one with teeth. _rule_matches
-    compares placeholders and ignores literals, so a literal has to be
-    something _tokenize also removes. A literal that is neither is emitted
-    on output and matched on neither side, and the rule then rejects its own
-    canonical output -- reproduced on #53, where a `"dâr {units[...]}"` rule
-    renders 3 as `dâr pathum` and then fails to parse it, while bare `pathum`
-    still parses. That breaks the round-trip property docs/architecture.md
-    treats as non-negotiable.
+    Checked over each way the template can render (see _linearisations),
+    with `{remainder}` counting as a placeholder: it renders to words too.
+
+    Two clauses, and the second is the one with teeth. The parser matches
+    placeholders and skips literals, so a literal has to be something
+    _tokenize also removes. A literal that is neither is emitted on output
+    and matched on neither side, and the rule then rejects its own canonical
+    output -- reproduced on #53, where a `"dâr {units[...]}"` rule renders 3
+    as `dâr pathum` and then fails to parse it, while bare `pathum` still
+    parses. That breaks the round-trip property docs/architecture.md treats
+    as non-negotiable.
 
     Being removable is necessary and not sufficient. A literal must also put
     a separator at every boundary where a placeholder abuts it, or the two
-    render as one token and the arity check can never match. `leh` is a
-    declared connector and every one of `"leh{a}"`, `"{a}leh"`, `"{a} leh{b}"`
-    and `"{a}leh {b}"` satisfies the first clause while failing to parse its
-    own output.
-
-    The first clause is not a new restriction: it is the rule
-    packages/python/tests/test_render_internals.py already asserts over the
-    compiled Mizo rules, moved to load so it covers any spec rather than the
-    checked-in ones. The second is new, and that test is deliberately left
-    alone -- it reads the compiled Mizo rules, which cannot exhibit any of
-    the four shapes above, so strengthening it there would assert something
-    no input can violate. The boundary rule belongs where a spec arrives.
+    render as one token and can never be matched. `leh` is a declared
+    connector and every one of `"leh{a}"`, `"{a}leh"`, `"{a} leh{b}"` and
+    `"{a}leh {b}"` satisfies the first clause while failing to parse its own
+    output.
 
     It is also a rule with a known expiry: #48 and #53 both need literals
     that carry meaning, and the engine change they share is exactly
-    "require literals to be present, and segment bound ones". When
-    the matcher learns that, this check narrows rather than disappears --
-    and until it does, failing loudly here beats a spec that silently does
-    not round-trip.
+    "require literals to be present, and segment bound ones". When the
+    matcher learns that, this check narrows rather than disappears -- and
+    until it does, failing loudly here beats a spec that silently does not
+    round-trip.
     """
-    # _PLACEHOLDER_RE has three groups, so split() interleaves each literal
-    # with its three captures: literal, table, key, field, literal, ...
-    literals = _PLACEHOLDER_RE.split(template)[::4]
+    # Adjacent literals cannot arise from _parse_template, but a segment
+    # boundary can put a literal from outside next to one from inside ("x[ y"
+    # renders "x y"); merge them so each boundary is judged as rendered.
+    literals = [""]
+    for item in sequence:
+        if isinstance(item, str):
+            literals[-1] += item
+        else:
+            literals.append("")
     placeholder_count = len(literals) - 1
 
     for position, literal in enumerate(literals):
@@ -586,20 +713,8 @@ def _validate_literals(
             )
 
 
-def _find_rule(rules: list, n: int, variables: dict) -> dict:
-    for rule in rules:
-        low, high = rule["range"]
-        if not (low <= n <= high):
-            continue
-        condition = rule.get("condition")
-        if condition is not None and not _eval_condition(condition, variables):
-            continue
-        return rule
-    raise ValueError(f"No grammar rule matches n={n}")
-
-
 class Spec:
-    """A loaded language spec, exposing number_to_text()."""
+    """A loaded language spec, exposing number_to_text() and text_to_number()."""
 
     def __init__(self, data: dict):
         # Validate here rather than in load(), so a Spec built straight from a
@@ -609,8 +724,139 @@ class Spec:
         self._data = data
         self.lexicon = data["lexicon"]
         self.rules = data["grammar"]["rules"]
+        self.connector = data["grammar"].get("connector")
         self.supports = data["meta"]["supports"]
         self.parse_config = data.get("parse", {})
+        # Parsed once here rather than on every conversion. Keyed by identity
+        # because two rules may be equal as dicts and still be two rules.
+        self._items = {id(rule): _parse_template(rule["output"]) for rule in self.rules}
+        # Conditions are parsed once, for the same reason: ast.parse on every
+        # evaluation cost more than the whole rest of a parse in the #65
+        # prototype, and nearly hid how cheap the algorithm is.
+        self._conditions = {
+            id(rule): ast.parse(rule["condition"], mode="eval").body
+            for rule in self.rules
+            if rule.get("condition") is not None
+        }
+        # The scales number_to_text() chooses between, largest first.
+        self._emitting_scales = sorted(
+            {rule["scale"] for rule in self.rules if rule.get("emit") != "never"},
+            reverse=True,
+        )
+
+    # --- number -> text --------------------------------------------------
+
+    def _rule_applies(self, rule: dict, multiplier: int, remainder: int) -> bool:
+        """A rule's fixed `multiplier`, if it declares one, and its condition.
+
+        A fixed multiplier is a value, not a test. That is the difference that
+        matters for parsing: `condition: "multiplier == 1"` can check a
+        multiplier the parser already has, but cannot give it one, and a rule
+        like Mizo's `ten` never writes its multiplier down -- `sâwm` is 10
+        with no digit in sight. Under the rules as first proposed for #65, 190
+        of the 1,000 shipped spellings parsed to nothing for exactly this
+        reason.
+        """
+        if "multiplier" in rule and rule["multiplier"] != multiplier:
+            return False
+        tree = self._conditions.get(id(rule))
+        if tree is None:
+            return True
+        return _eval_node(tree, {"multiplier": multiplier, "remainder": remainder})
+
+    def _find_rule(self, n: int) -> dict:
+        """The rule number_to_text() renders n with.
+
+        The largest emitting scale that is not above n -- 0 falls to the
+        smallest, since there is no scale below it -- then the first rule at
+        that scale, in spec order, that applies. Spec order only breaks ties
+        between rules of the same scale, which is where a language's ×1
+        behaviour lives: Mizo's `ten` (bare `sâwm`) and `tens` (`sawm hnih`)
+        are both scale 10.
+        """
+        scale = next(
+            (s for s in self._emitting_scales if s <= max(n, 1)),
+            self._emitting_scales[-1] if self._emitting_scales else None,
+        )
+        if scale is not None:
+            multiplier, remainder = divmod(n, scale)
+            for rule in self.rules:
+                if rule["scale"] != scale or rule.get("emit") == "never":
+                    continue
+                if self._rule_applies(rule, multiplier, remainder):
+                    return rule
+        raise ValueError(f"No grammar rule matches n={n}")
+
+    def _render_rule(self, rule: dict, n: int) -> tuple:
+        """Render n with `rule`, before any connector goes in.
+
+        Returns (text, boundaries), where boundaries are the offsets at which
+        each {remainder} expansion starts, outermost first. They are where the
+        number's addends begin: 128 is `zâ` + `sawm hnih` + `pariat`, and the
+        last boundary is the final addend, which is where a connector goes.
+        The vector generator reads the others, since they are the gaps a
+        speaker may also put `leh` in.
+        """
+        multiplier, remainder = divmod(n, rule["scale"])
+        if remainder and not _refers_to_remainder(self._items[id(rule)]):
+            # A rule that cannot say anything about a nonzero remainder would
+            # drop it silently, and the output would name a smaller number.
+            raise ValueError(
+                f"rule {rule['name']!r} has no way to render a remainder, "
+                f"but n={n} leaves {remainder}"
+            )
+        parts = []
+        boundaries = []
+
+        def walk(items):
+            for item in items:
+                if isinstance(item, str):
+                    parts.append(item)
+                elif item[0] == "lex":
+                    _, table, key, field = item
+                    value = {"multiplier": multiplier, "remainder": remainder}.get(key, key)
+                    if value not in self.lexicon[table]:
+                        # The likeliest way here is supports.max raised past
+                        # the rules: 1,000 with nothing above scale 100 asks
+                        # for the hundreds digit 10. Name the rule and the
+                        # word rather than surface KeyError: 10.
+                        raise ValueError(
+                            f"rule {rule['name']!r} needs {table}[{value}] to "
+                            f"render n={n}, and the lexicon has no such entry"
+                        )
+                    parts.append(self.lexicon[table][value][field])
+                elif item[0] == _REMAINDER:
+                    start = sum(len(p) for p in parts)
+                    sub_text, sub_boundaries = self._render_rule(
+                        self._find_rule(remainder), remainder
+                    )
+                    boundaries.append(start)
+                    boundaries.extend(start + b for b in sub_boundaries)
+                    parts.append(sub_text)
+                elif remainder:                     # ("optional", items)
+                    walk(item[1])
+
+        walk(self._items[id(rule)])
+        return "".join(parts), boundaries
+
+    def _with_connector(self, n: int, text: str, boundaries: list) -> str:
+        """Write grammar.connector before the final addend, when n needs one.
+
+        Decision (#27 Q-M): Mizo writes `leh` before the final addend of every
+        number from 100 up, and nowhere else. That is a property of the whole
+        number rather than of a rule, which is why it is declared once instead
+        of written into ten of the old seventeen templates. The final addend
+        is the innermost {remainder}: 130 is `zâ leh sawm thum`, 128 is `zâ
+        sawm hnih leh pariat`.
+
+        The connector is followed by a space, the first joinable separator
+        (_joinable_separators); the boundary it goes in front of already
+        follows one, since a literal before `{remainder}` has to separate.
+        """
+        if self.connector is None or n < self.connector["min"] or not boundaries:
+            return text
+        at = boundaries[-1]
+        return text[:at] + self.connector["word"] + " " + text[at:]
 
     def number_to_text(self, n: int) -> str:
         if not (self.supports["min"] <= n <= self.supports["max"]):
@@ -618,64 +864,140 @@ class Spec:
                 f"{n} is outside the supported range "
                 f"[{self.supports['min']}, {self.supports['max']}]"
             )
-        variables = _positional_variables(n)
-        rule = _find_rule(self.rules, n, variables)
-        return _render(rule["output"], self.lexicon, variables)
+        text, boundaries = self._render_rule(self._find_rule(n), n)
+        return self._with_connector(n, text, boundaries)
+
+    # --- text -> number --------------------------------------------------
 
     def text_to_number(self, text: str) -> int:
-        # Collect every matching n rather than returning on the first hit.
+        # Collect every value rather than returning on the first derivation.
         # This engine is the oracle -- the definition of correctness -- so an
         # ambiguous spelling (two numbers both accepting the same text) must
-        # be a loud error, not a silent "whichever came first in the range."
-        # There's no ambiguity today (verified across the full supported
-        # range), but a future grammar change could introduce one, and this
-        # is what would catch it.
-        tokens = self._tokenize(text)
-        matches = []
-        for n in range(self.supports["min"], self.supports["max"] + 1):
-            variables = _positional_variables(n)
-            rule = _find_rule(self.rules, n, variables)
-            templates = [rule["output"], *rule.get("parse_aliases", [])]
-            if any(self._rule_matches(t, tokens, variables) for t in templates):
-                matches.append(n)
+        # be a loud error, not a silent "whichever the parser found first".
+        # There is no ambiguity in the checked-in specs (the vector generator
+        # parses every certified spelling back, and the suite sweeps every
+        # short phrase), but a grammar change could introduce one, and this is
+        # what would catch it.
+        matches = sorted(self._parse_values(text))
         if not matches:
             raise ValueError(f"{text!r} does not match any number in the supported range")
         if len(matches) > 1:
             raise ValueError(f"{text!r} is ambiguous: matches {matches}")
         return matches[0]
 
-    def _rule_matches(self, output: str, tokens: list, variables: dict) -> bool:
-        placeholders = _PLACEHOLDER_RE.findall(output)
-        if len(placeholders) != len(tokens):
-            return False
-        # Leniency (accepting either bound or standalone form) only applies
-        # to a phrase that's a single freestanding digit -- e.g. "khat" as
-        # well as "pakhat" for 1. A multi-word template (teens, exact_tens,
-        # compound_tens, ...) must match each field exactly as named:
-        # relaxing e.g. the tens-digit slot would let "sawm hnih" (20) also
-        # match teens' ones-digit slot for 12, which is a real ambiguity,
-        # not an accepted alternate spelling.
-        lenient = len(placeholders) == 1
-        return all(
-            self._token_matches_entry(table, raw_key, field, variables, token, lenient)
-            for (table, raw_key, field), token in zip(placeholders, tokens)
-        )
+    def _parse_values(self, text: str) -> set:
+        """Every number in range some derivation of `text` gives.
 
-    def _token_matches_entry(
-        self, table: str, raw_key: str, field: str, variables: dict, token: str,
-        lenient: bool,
-    ) -> bool:
-        """A token matches a placeholder if it equals the lexicon entry's
-        value in the field the template names -- or, when `lenient`, any
-        field accepted for that table (parse.accepted_forms).
+        Recursive descent over the rules, memoised on (start, end, whole,
+        below): `whole` is whether the span is the entire input, which is
+        what `scope: whole` asks, and `below` skips rules too large to render
+        a remainder of the rule being matched. That one is pruning, not
+        correctness: a remainder must also come out smaller than the scale
+        (`0 < value < rule["scale"]` below), which alone rejects a derivation
+        through a larger rule -- removing `below` changes no result, only how
+        many rules the parser tries.
+
+        Literals in a template are skipped, because every one is a separator
+        or a connector (_validate_literals), and _tokenize has already
+        removed both.
         """
-        key = _resolve_key(raw_key, variables)
-        entry = self.lexicon[table][key]
-        for candidate_field in self._acceptable_fields(table, field, lenient):
-            value = entry.get(candidate_field)
-            if value is not None and self._normalize_word(value) == token:
-                return True
-        return False
+        tokens = self._tokenize(text)
+        if not tokens:
+            return set()
+        # Leniency (accepting either form parse.accepted_forms lists) applies
+        # only to a phrase that is a single freestanding word -- "khat" as
+        # well as "pakhat" for 1. Relaxing a slot inside a longer phrase would
+        # let "sawm hnih" (20) also read as 10 + 2 through the bound form of
+        # 2, which is real ambiguity rather than an alternate spelling.
+        lenient = len(tokens) == 1
+        cache = {}
+
+        def span(start, end, whole, below):
+            key = (start, end, whole, below)
+            if key not in cache:
+                values = set()
+                for rule in self.rules:
+                    if below is not None and rule["scale"] >= below:
+                        continue
+                    if rule.get("scope") == "whole" and not whole:
+                        continue
+                    initial = {}
+                    if "multiplier" in rule:
+                        initial["multiplier"] = rule["multiplier"]
+                    for bound in match(self._items[id(rule)], start, end, initial, rule, whole):
+                        if "multiplier" not in bound:
+                            continue
+                        multiplier = bound["multiplier"]
+                        remainder = bound.get("remainder", 0)
+                        if self._rule_applies(rule, multiplier, remainder):
+                            values.add(multiplier * rule["scale"] + remainder)
+                cache[key] = values
+            return cache[key]
+
+        def bind(bound, name, value):
+            if bound.get(name, value) != value:
+                return None
+            return {**bound, name: value}
+
+        def match(items, position, end, bound, rule, whole):
+            """Yield every binding under which `items` consume exactly
+            tokens[position:end]."""
+            if not items:
+                if position == end:
+                    yield bound
+                return
+            item, rest = items[0], items[1:]
+            if isinstance(item, str):
+                yield from match(rest, position, end, bound, rule, whole)
+            elif item[0] == "lex":
+                if position >= end:
+                    return
+                _, table, key, field = item
+                token = tokens[position]
+                if isinstance(key, int):
+                    if self._normalize_word(self.lexicon[table][key][field]) == token:
+                        yield from match(rest, position + 1, end, bound, rule, whole)
+                    return
+                # Two gates, each a backstop for the other: `lenient` (the
+                # input is one word) and `whole` (this span is the input). On
+                # today's data either alone is enough -- a one-word input has
+                # no room for a remainder, and the only rule that can match a
+                # whole input through a lenient table is the one-word units
+                # rule -- so removing one is caught by no test. Removing both
+                # is caught at once: "sawm hnih" then reads as 12 (sâwm + a
+                # lenient "hnih") as well as 20, and the vectors stop generating.
+                fields = self._acceptable_fields(table, field, lenient and whole)
+                for entry_key, entry in self.lexicon[table].items():
+                    if any(
+                        f in entry and self._normalize_word(entry[f]) == token
+                        for f in fields
+                    ):
+                        rebound = bind(bound, key, entry_key)
+                        if rebound is not None:
+                            yield from match(rest, position + 1, end, rebound, rule, whole)
+            elif item[0] == _REMAINDER:
+                for stop in range(position + 1, end + 1):
+                    for value in span(position, stop, False, rule["scale"]):
+                        if 0 < value < rule["scale"]:
+                            rebound = bind(bound, "remainder", value)
+                            if rebound is not None:
+                                yield from match(rest, stop, end, rebound, rule, whole)
+            elif item[0] == "optional":
+                # Absent: the remainder is zero.
+                rebound = bind(bound, "remainder", 0)
+                if rebound is not None:
+                    yield from match(rest, position, end, rebound, rule, whole)
+                # Present: the remainder is not.
+                yield from match(
+                    item[1] + (("end_optional",),) + rest,
+                    position, end, bound, rule, whole,
+                )
+            elif item[0] == "end_optional":
+                if bound.get("remainder", 0) > 0:
+                    yield from match(rest, position, end, bound, rule, whole)
+
+        low, high = self.supports["min"], self.supports["max"]
+        return {v for v in span(0, len(tokens), True, None) if low <= v <= high}
 
     def _acceptable_fields(self, table: str, default_field: str, lenient: bool) -> list:
         """Which lexicon fields a token may match for this placeholder.
