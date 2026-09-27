@@ -25,17 +25,19 @@ also test the canonical form. See below for how the list is chosen.
 
 Why `number` is a string (#12)
 ------------------------------
-Every number in this file today is between 0 and 100, so JSON's number type
-would do. It is written as a string anyway, because the format outlives the
-range. #27 sets Mizo's eventual ceiling at 10^18 - 1, which is 111x larger
-than JavaScript's Number.MAX_SAFE_INTEGER: a standard JSON.parse reads
-999999999999999999 back as 1000000000000000000. A JS target would then load
-the vectors, compare its output against a silently wrong expected value, and
-pass -- a conformance suite that certifies a broken implementation is worse
-than no suite at all. Python's arbitrary-precision ints hide this, so it
-would go unnoticed until the npm target exists, by which point the format is
-fixed and every vectors file needs regenerating. Deciding it now costs one
-str() here and an int() in the tests.
+Every number in this file today is between 0 and 999, and Mizo's ceiling is
+10^10 - 1 (#27, revised 2026-09-25), which JavaScript's
+Number.MAX_SAFE_INTEGER holds exactly -- so JSON's number type would do. It
+is written as a string anyway, because the format outlives the ceiling. The
+decision was taken when the ceiling was 10^18 - 1, 111x past
+MAX_SAFE_INTEGER, where a standard JSON.parse reads 999999999999999999 back
+as 1000000000000000000. A JS target would then load the vectors, compare its
+output against a silently wrong expected value, and pass -- a conformance
+suite that certifies a broken implementation is worse than no suite at all.
+#27 records that this comes back the moment the ceiling is raised past
+2^53 - 1, and Python's arbitrary-precision ints would hide it until the npm
+target exists. Keeping the string costs one str() here and an int() in the
+tests; dropping it would mean regenerating every vectors file then.
 """
 
 import itertools
