@@ -47,6 +47,10 @@ meta:
                                    # multiplier (10^12 = "tlûklehdingâwn
                                    # sâng khat"), so the eventual ceiling is a
                                    # project decision, not a linguistic one.
+                                   # Decision (#27, 2026-09-25): 10^10 - 1.
+                                   # Above it greedy binding reads a trailing
+                                   # addend into the 10^9 multiplier, and no
+                                   # spelling round-trips.
   orthography: missionary   # The writing system used by this spec. The
                             # diacritics depend on it, so a different writing
                             # system would change them throughout the lexicon.

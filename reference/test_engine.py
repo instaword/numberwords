@@ -79,11 +79,11 @@ def test_vectors_match_number_to_text(spec, vectors):
 
 def test_vector_numbers_are_strings(vectors):
     # #12: `number` is deliberately a string, so that a JS target reading
-    # this file cannot silently lose precision above 2^53 - 1 once the range
-    # grows (#27 rule 4 puts the top of the Mizo ladder at 10^9, and rule 5
-    # allows multipliers above it). Nothing in the current 0-999 range needs
-    # it; the format does. Asserted so that a future regenerate cannot
-    # quietly drop back to a JSON number.
+    # this file cannot silently lose precision above 2^53 - 1. Neither the
+    # current 0-999 range nor the 10^10 - 1 ceiling (#27) needs it; a ceiling
+    # raised past 2^53 - 1 would (#27 rule 5 lets the 10^9 multiplier grow).
+    # The format outlives the range. Asserted so that a future regenerate
+    # cannot quietly drop back to a JSON number.
     for vector in vectors:
         assert isinstance(vector["number"], str), vector
 
@@ -111,8 +111,8 @@ def test_vectors_parse_back(spec, vectors):
 def test_every_accepted_input_parses(spec, vectors):
     # The contract the accepted_inputs field exists to state: a target that
     # passes the vectors accepts every one of these spellings, not just the
-    # canonical one. Without it a package could score 101/101 with a parser
-    # that handles nothing a Mizo speaker would actually type.
+    # canonical one. Without it a package could pass every vector with a
+    # parser that handles nothing a Mizo speaker would actually type.
     for vector in vectors:
         n = int(vector["number"])
         for candidate in vector["accepted_inputs"]:

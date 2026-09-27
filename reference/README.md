@@ -111,16 +111,19 @@ exists. Each entry looks like:
 `text` is what `number_to_text()` must produce. `accepted_inputs` is what
 `text_to_number()` must accept, and it includes `text` itself so a target can
 iterate one field. Both directions need stating: a package that matched only
-canonical spellings could score 101/101 and still reject everything a Mizo
-speaker actually types.
+canonical spellings could pass every entry and still reject everything a
+Mizo speaker actually types.
 
 `number` is a **string**, and deliberately so even though every value here
-fits comfortably in a JSON number. #27 puts Mizo's eventual ceiling at
-10<sup>18</sup> − 1, which is 111× past JavaScript's `MAX_SAFE_INTEGER` — a
-standard `JSON.parse` would read it back as a different number, and a JS
-target would compare against a silently wrong expected value and *pass*.
-Deciding the encoding now costs one line; changing it later means
-regenerating every vectors file and updating every target that reads them.
+fits comfortably in a JSON number — as does Mizo's ceiling of
+10<sup>10</sup> − 1 (#27, revised 2026-09-25). The encoding was decided when
+that ceiling was 10<sup>18</sup> − 1, which is 111× past JavaScript's
+`MAX_SAFE_INTEGER`: a standard `JSON.parse` would read it back as a different
+number, and a JS target would compare against a silently wrong expected value
+and *pass*. #27 records that this returns if the ceiling is ever raised past
+2<sup>53</sup> − 1. Keeping the string costs one line; changing the encoding
+later means regenerating every vectors file and updating every target that
+reads them.
 
 ### Which spellings get listed
 
