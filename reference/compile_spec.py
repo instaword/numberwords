@@ -59,12 +59,11 @@ reference/ and commit the result.
 
 # Compiling conditions means there are two places that define how a
 # condition works: engine._eval_node and the compiled lambda below.
-# What keeps them in sync today is vectors/mizo.json. It covers every
-# number from 0 to 999, and so every (multiplier, remainder) pair a
-# condition is evaluated at while rendering one. test_compile_spec.py also
-# evaluates both over a grid of pairs directly. Once the vectors stop being
-# exhaustive -- #12 puts that at roughly 1,000 entries, which 0-999 sits
-# exactly on -- that grid is what carries the guarantee.
+# What keeps them in sync is vectors/mizo.json. It covers every number
+# from 0 to 999, and so every (multiplier, remainder) pair a condition is
+# evaluated at while rendering one; above 999 it keeps every multiplier at
+# every scale (generate_vectors.numbers_to_cover). test_compile_spec.py
+# also evaluates both directly at every pair those numbers give each rule.
 
 
 # The allowlist moved into engine.py in #37, where it now also runs over the

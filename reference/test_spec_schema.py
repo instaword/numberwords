@@ -47,6 +47,7 @@ import yaml
 # checks live in the loader (#37), so the tests exercise it instead of
 # reimplementing what it does.
 import engine
+import generate_vectors
 from engine import Spec, _parse_template
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -702,13 +703,25 @@ def test_the_checked_in_spec_survives_the_loader_mutations(mizo_data):
 # which is the whole point of moving those checks out of this file in #37.
 
 
-def _first_round_trip_failure(spec):
+def _first_round_trip_failure(
+    spec, exhaustive_below=generate_vectors.EXHAUSTIVE_BELOW
+):
     """The first n whose canonical output does not parse back to n.
 
-    Returns (n, rendered, reason), or None if the property holds across the
-    whole supported range.
+    Returns (n, rendered, reason), or None if the property holds at every
+    covered number -- the whole range below `exhaustive_below`, and one
+    number of each shape above it (generate_vectors.numbers_to_cover).
+
+    Finding one number of each shape renders them, so a spec that cannot
+    render fails while the sample is being chosen, before any round trip
+    runs. That is the same failure as "does not render" below, and is
+    reported as one, with n unknown, rather than raised.
     """
-    for n in range(spec.supports["min"], spec.supports["max"] + 1):
+    try:
+        numbers = generate_vectors.numbers_to_cover(spec, exhaustive_below)
+    except ValueError as exc:
+        return None, None, f"does not render: {exc}"
+    for n in numbers:
         try:
             rendered = spec.number_to_text(n)
         except ValueError as exc:
@@ -735,7 +748,7 @@ def test_every_rule_parses_its_own_output(path):
     # after this one is its property.
     exercised = {
         spec._find_rule(n)["name"]
-        for n in range(spec.supports["min"], spec.supports["max"] + 1)
+        for n in generate_vectors.numbers_to_cover(spec)
     }
     emitted = {rule["name"] for rule in spec.rules if rule.get("emit") != "never"}
     unreachable = emitted - exercised
@@ -757,10 +770,10 @@ def _first_unemitted_failure(spec):
     it: at the scale the canonical rule renders n at, where the rule's
     multiplier and condition hold.
 
-    Returns (n, spelling, reason), or None if every such spelling holds across
-    the whole supported range.
+    Returns (n, spelling, reason), or None if every such spelling holds at
+    every covered number (generate_vectors.numbers_to_cover).
     """
-    for n in range(spec.supports["min"], spec.supports["max"] + 1):
+    for n in generate_vectors.numbers_to_cover(spec):
         rule = spec._find_rule(n)
         multiplier, remainder = divmod(n, rule["scale"])
         for other in spec.rules:
@@ -850,6 +863,20 @@ def test_each_rejected_template_really_does_break_the_round_trip(
         f"{description!r} is rejected at load but round-trips fine, so the "
         f"check is stricter than the property it cites"
     )
+
+
+def test_a_spec_that_cannot_render_is_reported_when_sampled(mizo_data, monkeypatch):
+    # Above EXHAUSTIVE_BELOW the round trip visits a sample, and choosing it
+    # renders one number of every shape -- so a spec that cannot render
+    # breaks there, inside numbers_to_cover, before the round trip starts.
+    # At today's 0-999 nothing is sampled and that path is never taken;
+    # lowering the threshold to 100 takes it now. Found by running the
+    # demonstrations above against the sample: without the helper's guard
+    # this one raised instead of reporting.
+    monkeypatch.setattr(engine, "_validate_spec", lambda data: None)
+    spec = Spec(LOAD_REJECTS["segment that never renders the remainder"](mizo_data))
+    failure = _first_round_trip_failure(spec, exhaustive_below=100)
+    assert failure is not None and "does not render" in failure[2], failure
 
 
 # The `emit: never` case from LOAD_REJECTS, kept in its own list because the
