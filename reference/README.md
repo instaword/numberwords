@@ -185,8 +185,9 @@ That distinction is free today and load-bearing later: above
 10<sup>5</sup> Mizo scale words multiply each other productively (`nuai za
 hnih`), and any scale may take any scale-multiplied expression as its
 multiplier, so the accepted spellings of a single number stop being a list and
-become a grammar. Whoever extends the range past there will need generation
-from parse features to become generation from a grammar — see #27.
+become a grammar. The range passes 10<sup>5</sup> already, but stacking is not
+accepted yet; whoever adds it will need generation from parse features to
+become generation from a grammar — see #27.
 
 **The assumption this rests on:** that parse features compose, so covering
 each separately covers them together. The engine's parse side is a pipeline

@@ -207,9 +207,10 @@ Two consequences worth stating, because they're easy to get wrong:
 
 The compiler emits each rule's `condition` as an executable expression rather
 than as data. That is genuinely codegen, and it's recorded here as an exception
-rather than glossed over. It is acceptable because it is small (two expressions
-in `mizo.yaml` today), and guarded: the compiler validates every condition
-against the same restricted allowlist the engine uses, and only then emits.
+rather than glossed over. It is acceptable because it is small (ten one-line
+comparisons in `mizo.yaml` today), and guarded: the compiler validates every
+condition against the same restricted allowlist the engine uses, and only then
+emits.
 Never emit an unvalidated string.
 
 If that exception ever grows beyond simple predicates, revisit this decision

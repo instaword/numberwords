@@ -6,13 +6,20 @@ reference/ and commit the result.
 
 LANGUAGE = 'Mizo'
 CODE = 'lus'
-SPEC_VERSION = '0.6.0'
-SUPPORTS = (0, 999)
+SPEC_VERSION = '0.7.0'
+SUPPORTS = (0, 9999999999)
 
 LEXICON = {
     'scales': {
         10: {'multiplied': 'sawm', 'standalone': 'sâwm'},
         100: {'multiplied': 'za', 'standalone': 'zâ'},
+        1000: {'multiplied': 'sâng', 'standalone': 'sâng'},
+        10000: {'multiplied': 'sîng', 'standalone': 'sîng'},
+        100000: {'multiplied': 'nuai', 'standalone': 'nuai'},
+        1000000: {'multiplied': 'maktaduai', 'standalone': 'maktaduai'},
+        10000000: {'multiplied': 'vaibêlchhe', 'standalone': 'vaibêlchhe'},
+        100000000: {'multiplied': 'vaibêlchhetak', 'standalone': 'vaibêlchhetak'},
+        1000000000: {'multiplied': 'tlûklehdingâwn', 'standalone': 'tlûklehdingâwn'},
     },
     'units': {
         0: {'bound': 'bial', 'standalone': 'bial'},
@@ -71,6 +78,69 @@ RULES = (
         'multiplier': None,
         'condition': lambda variables: variables['multiplier'] > 1,
         'output': (('lex', 'scales', 100, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+    },
+    {
+        'name': 'thousands',
+        'scale': 1000,
+        'multiplier': None,
+        'condition': lambda variables: variables['multiplier'] > 0,
+        'output': (('lex', 'scales', 1000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+    },
+    {
+        'name': 'ten_thousands',
+        'scale': 10000,
+        'multiplier': None,
+        'condition': lambda variables: variables['multiplier'] > 0,
+        'output': (('lex', 'scales', 10000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+    },
+    {
+        'name': 'hundred_thousands',
+        'scale': 100000,
+        'multiplier': None,
+        'condition': lambda variables: variables['multiplier'] > 0,
+        'output': (('lex', 'scales', 100000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+    },
+    {
+        'name': 'millions',
+        'scale': 1000000,
+        'multiplier': None,
+        'condition': lambda variables: variables['multiplier'] > 0,
+        'output': (('lex', 'scales', 1000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+    },
+    {
+        'name': 'ten_millions',
+        'scale': 10000000,
+        'multiplier': None,
+        'condition': lambda variables: variables['multiplier'] > 0,
+        'output': (('lex', 'scales', 10000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+    },
+    {
+        'name': 'hundred_millions',
+        'scale': 100000000,
+        'multiplier': None,
+        'condition': lambda variables: variables['multiplier'] > 0,
+        'output': (('lex', 'scales', 100000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+    },
+    {
+        'name': 'billions',
+        'scale': 1000000000,
+        'multiplier': None,
+        'condition': lambda variables: variables['multiplier'] > 0,
+        'output': (('lex', 'scales', 1000000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
     },

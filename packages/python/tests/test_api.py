@@ -11,7 +11,7 @@ import pytest
 # compiled artifact: these tests are an independent claim about what the
 # package must accept, so a spec edit that narrowed the range should fail
 # them rather than shrink them. Widen with the spec (#19).
-SUPPORTED_MAX = 999
+SUPPORTED_MAX = 9_999_999_999
 
 
 def test_public_names_are_exactly_the_three_agreed():
@@ -40,7 +40,7 @@ def test_it_converts_both_ways():
     assert numberwords.text_to_number("sawm nga pariat") == 58
 
 
-@pytest.mark.parametrize("n", [-1, SUPPORTED_MAX + 1, 1000])
+@pytest.mark.parametrize("n", [-1, SUPPORTED_MAX + 1, 10**12])
 def test_out_of_range_raises(n):
     with pytest.raises(numberwords.NumberWordsError):
         numberwords.number_to_text(n)

@@ -55,6 +55,13 @@ def test_every_literal_in_a_template_is_a_separator_or_a_connector():
         (20, "tens"), (99, "tens"),
         (100, "hundred"), (199, "hundred"),
         (200, "hundreds"), (999, "hundreds"),
+        (1000, "thousands"), (9_999, "thousands"),
+        (10_000, "ten_thousands"), (99_999, "ten_thousands"),
+        (100_000, "hundred_thousands"), (999_999, "hundred_thousands"),
+        (1_000_000, "millions"), (9_999_999, "millions"),
+        (10_000_000, "ten_millions"), (99_999_999, "ten_millions"),
+        (100_000_000, "hundred_millions"), (999_999_999, "hundred_millions"),
+        (1_000_000_000, "billions"), (9_999_999_999, "billions"),
     ],
 )
 def test_rule_selection_follows_the_scale(n, expected):

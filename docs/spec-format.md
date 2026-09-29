@@ -68,7 +68,8 @@ that file would have to notice. Bump it when:
 - **`meta.supports` changes.** The range is the one thing a consumer cannot
   discover without loading the spec and probing it, so widening it is a visible
   change even though no structure moved. Raising Mizo to 199 is part of the
-  same 0.3.0 (#19), and raising it to 999 is 0.5.0 on its own (#27 step 2b) --
+  same 0.3.0 (#19), raising it to 999 is 0.5.0 on its own (#27 step 2b), and
+  raising it to 10^10 - 1 with the scale words that reach it is 0.7.0 (#27) --
   a range change alone is enough.
 
 Do **not** bump it for numeral data that leaves both the shape and the range
@@ -334,7 +335,8 @@ Not speculative — each has been hit by a real language.
 - **Canonical vs. accepted forms aren't fully expressible.** Above 10⁵ Mizo
   accepts productive scale-stacking (`nuai za hnih`) that no rule generates.
   It is accepted from a head scale of 10⁵ up, measured against the scale word
-  heading the stacked form (#65), and arrives with the ladder. #27, #12.
+  heading the stacked form (#65), and arrives with #27's input forms, after
+  the ladder's output side. #27, #12.
 
 Still genuinely open, no data yet:
 
