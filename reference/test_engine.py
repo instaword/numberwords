@@ -51,6 +51,12 @@ VECTORS_PATH = Path(__file__).resolve().parent.parent / "vectors" / "mizo.json"
 # them. Widen it in the same PR that widens the spec (#19).
 SUPPORTED_MAX = 999
 
+# The numbers the per-number tests below visit, where they used to walk the
+# whole supported range: every number below EXHAUSTIVE_BELOW, and one of
+# each shape above it (#12, #65). Today that is still all of 0-999. It is
+# the same list the vectors are generated from.
+COVERED = generate_vectors.numbers_to_cover(load(MIZO_SPEC_PATH))
+
 
 @pytest.fixture(scope="module")
 def spec():
@@ -88,11 +94,11 @@ def test_vector_numbers_are_strings(vectors):
         assert isinstance(vector["number"], str), vector
 
 
-@pytest.mark.parametrize("n", range(0, SUPPORTED_MAX + 1))
-def test_every_number_in_range_has_a_matching_rule(spec, n):
-    # Every number in the supported range must match some grammar rule --
-    # this catches gaps/overlaps in rule ranges even for numbers we don't
-    # have a hand-written example for.
+@pytest.mark.parametrize("n", COVERED)
+def test_every_covered_number_has_a_matching_rule(spec, n):
+    # Every covered number must match some grammar rule -- this catches a
+    # gap in the rules even for numbers we don't have a hand-written example
+    # for.
     spec.number_to_text(n)
 
 
@@ -312,7 +318,7 @@ def test_the_two_connector_spelling_is_certified(spec, vectors):
     assert "zâ leh sâwm leh pariat" in vector["accepted_inputs"]
 
 
-@pytest.mark.parametrize("n", range(0, SUPPORTED_MAX + 1))
+@pytest.mark.parametrize("n", COVERED)
 def test_canonical_emits_the_connector_exactly_once_above_the_first_scale(spec, n):
     # The output convention (#19): "leh" is emitted once and only once,
     # immediately before the final addend -- the last unit, or the smallest
@@ -475,9 +481,10 @@ def test_every_dimension_of_variation_parses(spec):
     # Over one number per shape rather than every number, for the same
     # reason placement is three points rather than every subset: two numbers
     # of the same shape generate the same variant structure with different
-    # words in it, and each costs a full range scan to say so. Per-number
-    # correctness is not this test's job and is not weakened -- the
-    # round-trip tests and the vector-driven ones still visit every number.
+    # words in it, and each costs every variant it parses to say so.
+    # Per-number correctness is not this test's job and is not weakened --
+    # the round-trip tests and the vector-driven ones still visit every
+    # number numbers_to_cover lists.
     # See numbers_to_sweep for the dimensions it enumerates.
     swept = generate_vectors.numbers_to_sweep(spec)
     for n in swept:
@@ -500,13 +507,78 @@ def test_every_dimension_of_variation_parses(spec):
     assert not missing, f"no number in the sweep reaches {sorted(missing)}"
 
 
-@pytest.mark.parametrize("n", range(0, SUPPORTED_MAX + 1))
+# --- #65: what the suite visits once the range is too big to walk ---------
+
+
+@pytest.mark.parametrize("exhaustive_below", [10, 100])
+def test_the_sample_loses_no_shape(spec, exhaustive_below):
+    # Above EXHAUSTIVE_BELOW, numbers_to_cover keeps one number of each
+    # shape, and finds them without walking the range: a number's shape is
+    # taken to follow from its rule, its multiplier and its remainder's
+    # shape (_shape_representatives). The only way to check that is to walk
+    # every number and compare, which needs a range small enough to walk.
+    # So sample one that is: lower the exhaustive part to 0-9 or 0-99, and
+    # every shape the walk finds must be in the sample. From 0-9, everything
+    # above 9 comes out of the recursion; from 0-99, the hundreds do.
+    #
+    # Capped at 9,999 so it stays cheap once the range grows. The recursion
+    # does the same thing at every scale, so the first few are where it can
+    # be caught doing it wrong.
+    walked = range(spec.supports["min"], min(spec.supports["max"], 9_999) + 1)
+    sampled = generate_vectors.numbers_to_cover(spec, exhaustive_below)
+    first_of_shape = {}
+    for n in walked:
+        first_of_shape.setdefault(generate_vectors._shape(spec, n), n)
+    found = {generate_vectors._shape(spec, n) for n in sampled if n in walked}
+    missing = sorted(n for shape, n in first_of_shape.items() if shape not in found)
+    assert not missing, f"the sample has no number shaped like {missing[:10]}"
+    # A sample that quietly became the walk would pass the line above.
+    assert len(sampled) < len(walked) // 5
+
+
+def test_the_sample_keeps_the_structural_cases(spec):
+    # #27's list of what a sampled table must still show, checked by value
+    # at the one scale today's range has above 10: from 100 up, 100 and its
+    # neighbours, every multiplier, one digit below 100 with zeros around it
+    # (101, 110), and every place filled but one (109, 190 -- 190 is 1990's
+    # shape one scale down).
+    #
+    # Asked of _structural_cases itself, not only of the sample. Most of
+    # these are also shapes the sample finds, so a family the function
+    # stopped producing could hide behind them: dropping "100 and its
+    # neighbours" passed when this only checked the sample.
+    cases = generate_vectors._structural_cases(spec, 100)
+    expected = {99, 100, 101, 109, 110, 190} | {m * 100 for m in range(1, 10)}
+    assert expected <= cases, sorted(expected - cases)
+    sampled = set(generate_vectors.numbers_to_cover(spec, 100))
+    assert cases | {0, SUPPORTED_MAX} <= sampled, sorted(cases - sampled)
+
+
+def test_everything_below_the_threshold_is_covered():
+    # #12's threshold, applied as a value: all of 0-999 stays in the table
+    # however far the range grows (see EXHAUSTIVE_BELOW for why).
+    top = min(SUPPORTED_MAX, generate_vectors.EXHAUSTIVE_BELOW - 1)
+    assert set(range(0, top + 1)) <= set(COVERED)
+
+
+def test_the_covered_numbers_stay_a_sample():
+    # Every per-number test pays for each number in COVERED, and the vectors
+    # hold an entry for each. It is all of 0-999 plus a few hundred numbers
+    # above: a throwaway spec with the ladder to 10^10 - 1, built while
+    # writing this, gave 1,234. A sampler that stopped deduplicating shapes
+    # would grow with the range instead, and this names that rather than
+    # leaving a suite that never finishes. It cannot fail until
+    # supports.max passes 999, because below that nothing is sampled.
+    assert len(COVERED) <= 5_000
+
+
+@pytest.mark.parametrize("n", COVERED)
 def test_round_trip_number_text_number(spec, n):
     # number -> text -> number must return the original value.
     assert spec.text_to_number(spec.number_to_text(n)) == n
 
 
-@pytest.mark.parametrize("n", range(0, SUPPORTED_MAX + 1))
+@pytest.mark.parametrize("n", COVERED)
 def test_round_trip_text_number_text(spec, n):
     # text -> number -> text must be stable for canonical text.
     text = spec.number_to_text(n)

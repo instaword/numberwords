@@ -65,30 +65,141 @@ SPEC_PATH = REPO_ROOT / "languages" / "mizo.yaml"
 VECTORS_PATH = REPO_ROOT / "vectors" / "mizo.json"
 
 
-def numbers_to_cover(spec) -> list:
-    """Which numbers get an entry in the vectors file.
+# #12's threshold, applied as a value: every number below it gets an entry,
+# whatever the range. #12 put it at "roughly 1,000 entries", which 0-999 is.
+# Keeping all of 0-999 once the range grows past it is deliberate. The
+# irregular Mizo lives there -- bare sâwm and zâ, the "hnih thum" shorthand,
+# where "leh" goes -- and those 1,000 entries are the table step 4 of #27
+# reproduced byte-identically: "the rules are scaffolding but the vectors are
+# not -- they are facts about Mizo" (zoramt on #27, 2026-09-03).
+EXHAUSTIVE_BELOW = 1000
 
-    Today: every number in the supported range, which is 0-999 since #27
-    step 2b, and it stays exhaustive. Note that 1,000 entries sits exactly on
-    the #12 threshold below -- the next extension is the one that has to
-    choose, not this one. The policy agreed in #12 for when it stops
-    being exhaustive:
 
-    - Enumerate every number while the range is under roughly 1,000 entries.
-      The threshold is arbitrary -- writing it down is the point, so that
-      growing past it is a decision rather than a surprise.
-    - Above that, sample one entry per structural case rather than one per
-      number, using the list in #27: each scale boundary and the numbers
-      either side of it, the x1 cases, the 10^2/10^3 behavioural split,
-      numbers with zero digits in the middle, and supports.max itself.
+def numbers_to_cover(spec, exhaustive_below: int = EXHAUSTIVE_BELOW) -> list:
+    """Which numbers get an entry in the vectors file -- and which numbers
+    every test that used to walk the whole supported range visits instead.
 
-    This exists as a named function so #19 and whatever follows it edit one
-    function instead of restructuring the generator. Which numbers get an
-    entry and which spellings each entry accepts are independent decisions:
-    sampling picks the rows, accepted_inputs() fills them in, and the rule
-    it uses is per-entry so it already works at any range.
+    The policy agreed in #12, decided with #65:
+
+    - Every number below `exhaustive_below` (EXHAUSTIVE_BELOW, 1,000).
+    - Above it, one number of each shape the grammar can render (see
+      _shape_representatives), which is what the composition sweep and the
+      round trips need, plus #27's structural cases (see _structural_cases),
+      which are what a person reading the table looks for.
+    - supports.min and supports.max, always.
+
+    Below the threshold this is the whole range, so for a range that ends
+    there -- Mizo's 0-999 today -- it is exactly what it used to be. Nothing
+    is random: the same spec always gives the same list, which is what lets
+    CI check that the vectors regenerate identically.
+
+    `exhaustive_below` is a parameter so that the tests can sample a range
+    that is still small enough to walk, and compare. That is the only
+    evidence a sample is representative (see
+    test_the_sample_loses_no_shape).
+
+    Which numbers get an entry and which spellings each entry accepts are
+    independent decisions: this picks the rows, accepted_inputs() fills them
+    in, and its rule is per-entry so it works at any range.
     """
-    return list(range(spec.supports["min"], spec.supports["max"] + 1))
+    low, high = spec.supports["min"], spec.supports["max"]
+    numbers = set(range(low, min(high, exhaustive_below - 1) + 1))
+    if high >= exhaustive_below:
+        numbers |= set(_shape_representatives(spec, exhaustive_below).values())
+        numbers |= _structural_cases(spec, exhaustive_below)
+        numbers |= {low, high}
+    return sorted(numbers)
+
+
+def _shape(spec, n: int) -> tuple:
+    """The shape of n's rendering, as numbers_to_sweep defines it: the rule
+    that renders n; per template, its word count and whether any word
+    carries a diacritic; and how many of the templates render to distinct
+    strings. numbers_to_sweep's docstring says why each term is there."""
+    separators = _joinable_separators(spec.parse_config)
+    pattern = _separator_pattern(spec.parse_config)
+    renderings = _all_renderings(spec, n, pattern, separators)
+    per_template = tuple(
+        (len(words), any(w != _strip_diacritics(w) for w in words))
+        for words, _joiner in renderings
+    )
+    distinct = len({joiner.join(words) for words, joiner in renderings})
+    return spec._find_rule(n)["name"], per_template, distinct
+
+
+def _shape_representatives(spec, exhaustive_below: int) -> dict:
+    """One number of each shape in the supported range, keyed by shape --
+    found without walking the range.
+
+    Rules recurse through {remainder}, so a number is its own rule's words
+    followed by its remainder's rendering, and its shape is fixed by its
+    rule, its multiplier and the *shape* of its remainder, not by which
+    number the remainder is. Every shape at a scale is therefore some
+    multiplier times the scale plus a representative of a shape below it.
+    The exhaustive part seeds the table, and each scale above it adds
+    multiplier x scale + r for every multiplier and every representative r
+    found so far, keeping the first number of each new shape.
+
+    That is an assumption about the grammar, not a fact about it -- a
+    condition that tested a remainder's value rather than whether it is
+    zero could break it -- so it is checked, not trusted:
+    test_the_sample_loses_no_shape compares this against a walk of every
+    number, over the part of the range that can still be walked.
+    """
+    low, high = spec.supports["min"], spec.supports["max"]
+    representatives = {}
+    for n in range(low, min(high, exhaustive_below - 1) + 1):
+        representatives.setdefault(_shape(spec, n), n)
+    scales = sorted(spec._emitting_scales)
+    for i, scale in enumerate(scales):
+        if scale > high:
+            break
+        above = scales[i + 1] if i + 1 < len(scales) else None
+        if above is not None and above <= exhaustive_below:
+            continue    # every number this scale renders is exhaustive
+        # The multipliers this scale renders: up to the next scale, or for
+        # the largest one, up to supports.max.
+        top = (high // scale) if above is None else (above // scale - 1)
+        remainders = sorted({0} | {r for r in representatives.values() if r < scale})
+        for multiplier in range(1, top + 1):
+            for remainder in remainders:
+                n = multiplier * scale + remainder
+                if low <= n <= high:
+                    representatives.setdefault(_shape(spec, n), n)
+    return representatives
+
+
+def _structural_cases(spec, exhaustive_below: int) -> set:
+    """#27's list of the cases a sampled table must still show, at each
+    scale from `exhaustive_below` up:
+
+    - the scale itself -- its x1 case -- and the numbers either side of it,
+      which is also where the behaviour changes from one scale to the next;
+    - every multiplier the scale takes, so every digit's form appears
+      next to every scale word;
+    - one digit below the scale with zeros around it (1001, 1010, 1100);
+    - every place below the scale filled but one (1099, 1909, 1990) --
+      #27's own hard case for where the connector goes.
+
+    Mostly these are shapes _shape_representatives has already found. They
+    are listed anyway because they are what a reader of the table looks for,
+    and a sample chosen by shape alone could pick any number of a shape.
+    """
+    low, high = spec.supports["min"], spec.supports["max"]
+    scales = sorted(spec._emitting_scales)
+    cases = set()
+    for i, scale in enumerate(scales):
+        if scale < exhaustive_below:
+            continue
+        above = scales[i + 1] if i + 1 < len(scales) else high + 1
+        cases |= {scale - 1, scale, scale + 1}
+        cases |= {m * scale for m in range(1, above // scale)}
+        full = scale - 1    # every place below the scale filled
+        for j, place in enumerate(scales[:i]):
+            digit = full % scales[j + 1] // place
+            cases.add(scale + place)
+            cases.add(scale + full - digit * place)
+    return {n for n in cases if low <= n <= high}
 
 
 def numbers_to_sweep(spec) -> list:
@@ -99,8 +210,8 @@ def numbers_to_sweep(spec) -> list:
     carries a diacritic, how many distinct spellings the rule's templates
     produce -- and not about which lexemes fill it. Two numbers of the same
     shape generate the same set of variant forms with different words in
-    them, so the second re-runs the first one's check and pays a whole
-    range scan to do it.
+    them, so the second re-runs the first one's check at the cost of every
+    variant it parses.
 
     Two dimensions, enumerated rather than sampled:
 
@@ -117,31 +228,24 @@ def numbers_to_sweep(spec) -> list:
       until this was added.
     - **Position in the range**, which is why supports.min and supports.max
       are always included even when their shape is already covered. They are
-      the boundaries of the scan in text_to_number, where an off-by-one
+      the bounds text_to_number checks a value against, where an off-by-one
       lives; that is a different failure from anything shape covers.
 
-    What this does *not* weaken is per-number correctness. Every number in
-    range is still round-tripped and still has its certified spellings
-    parsed, by test_round_trip_number_text_number and the vector-driven
-    tests. Those carry the lexical guarantee; this carries the structural
-    one, and only the structural one needs every shape rather than every
-    number.
+    What this does *not* weaken is per-number correctness. Every number
+    numbers_to_cover lists -- all of 0-999, and one of each shape above --
+    is still round-tripped and still has its certified spellings parsed, by
+    test_round_trip_number_text_number and the vector-driven tests. Those
+    carry the lexical guarantee; this carries the structural one, and only
+    the structural one needs every shape rather than every number.
 
     It is computed rather than listed, so a spec growing new rules or new
-    collapsed-form cases grows new representatives on its own.
+    collapsed-form cases grows new representatives on its own. It picks
+    from numbers_to_cover, which already holds one number of every shape
+    (_shape_representatives), so nothing here walks the range.
     """
-    separators = _joinable_separators(spec.parse_config)
-    pattern = _separator_pattern(spec.parse_config)
     representatives = {}
     for n in numbers_to_cover(spec):
-        rule = spec._find_rule(n)
-        renderings = _all_renderings(spec, n, pattern, separators)
-        shape = tuple(
-            (len(words), any(w != _strip_diacritics(w) for w in words))
-            for words, _joiner in renderings
-        )
-        distinct = len({joiner.join(words) for words, joiner in renderings})
-        representatives.setdefault((rule["name"], shape, distinct), n)
+        representatives.setdefault(_shape(spec, n), n)
     bounds = {spec.supports["min"], spec.supports["max"]}
     return sorted(set(representatives.values()) | bounds)
 

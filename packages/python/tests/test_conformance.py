@@ -12,8 +12,6 @@ Both directions are checked, and the parse direction iterates
 spelling the engine tolerates would go unchecked in the target.
 """
 
-import pytest
-
 import numberwords
 
 # The generated table for Mizo 0-999. Asserted rather than assumed: an
@@ -66,9 +64,14 @@ def test_text_to_number_accepts_every_accepted_input(vectors):
     assert checked == EXPECTED_ACCEPTED_INPUTS
 
 
-@pytest.mark.parametrize("n", range(0, 101))
-def test_round_trip_number_text_number(n):
-    assert numberwords.text_to_number(numberwords.number_to_text(n)) == n
+def test_round_trip_number_text_number(vectors):
+    # Every number in the table, which is every number the package is
+    # certified for. This used to walk range(0, 101) and was never widened
+    # when the range reached 199 and then 999; reading the table is what
+    # keeps it from going stale again.
+    for vector in vectors:
+        n = int(vector["number"])
+        assert numberwords.text_to_number(numberwords.number_to_text(n)) == n, n
 
 
 def test_round_trip_text_number_text(vectors):

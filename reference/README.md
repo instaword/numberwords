@@ -204,19 +204,32 @@ can run neither, because `reference/` isn't shipped.
 
 ### Which numbers get an entry
 
-Every number in the supported range, and that stays true through #19
-(100–199). The policy agreed in #12 for when exhaustive enumeration stops
-being practical: enumerate while the range is under roughly 1,000 entries, and
-above that sample one entry per structural case rather than one per number,
-using the list in #27 — scale boundaries and their neighbours, the ×1 cases,
-the 10²/10³ behavioural split, numbers with interior zero digits, and
-`supports.max` itself. The threshold is arbitrary; writing it down is the
-point, so that growing past it is a decision rather than a surprise.
+The policy agreed in #12 and settled with #65, in `numbers_to_cover()`:
+
+- **Every number from 0 to 999**, whatever the range. #12 put the threshold at
+  roughly 1,000 entries; it is applied as a value, so 0–999 stays whole when
+  the range grows past it. That is where the irregular Mizo is — bare `sâwm`
+  and `zâ`, the `hnih thum` shorthand, where `leh` goes — and it is the table
+  #27's step 4 had to reproduce byte-identically.
+- **Above 999, one number of each shape** the grammar renders: which rule, how
+  many words, whether any carries a diacritic. They are found without walking
+  the range — a number's shape follows from its rule, its multiplier and its
+  remainder's shape, since rules recurse through `{remainder}` — and
+  `test_the_sample_loses_no_shape` checks that against a walk of every number
+  wherever a walk is still possible.
+- **#27's structural cases** at each scale above 999: the scale and the
+  numbers either side of it, every multiplier, one digit with zeros around it
+  (1001), and one zero among full places (1990). Mostly these are shapes
+  already found; they are listed because they are what a reader looks for.
+- **`supports.min` and `supports.max`.**
+
+Nothing is random, so the file regenerates identically. The same list is what
+every per-number test visits in place of the whole range — the round trips,
+the rule and connector checks, the compiled-artifact checks — so a range too
+large to walk still gets a suite that finishes.
 
 The two rules are independent and compose: sampling picks the rows, the
-per-feature rule fills each one in. Row selection lives in
-`numbers_to_cover()` so that extending the range edits one function instead of
-restructuring the generator.
+per-feature rule fills each one in.
 
 ### Regenerating
 

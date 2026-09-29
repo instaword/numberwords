@@ -16,6 +16,7 @@ import sys
 import pytest
 
 import compile_spec
+import generate_vectors
 from engine import _eval_condition, load
 
 
@@ -78,23 +79,27 @@ def test_compiled_conditions_match_the_engine(spec, artifact):
     """The compiled lambda and engine._eval_condition are two
     implementations of the same condition, which is the risk that made
     ast.unparse the right way to emit them. This checks they agree at every
-    (multiplier, remainder) pair a supported number gives the rule's scale
-    -- which is every input the renderer can hand a condition.
+    (multiplier, remainder) pair a covered number gives the rule's scale.
+    Up to 999 that is every input the renderer can hand a condition; above
+    it, every multiplier, with the remainders the sampled numbers leave.
     """
-    low, high = artifact.SUPPORTS
     # zip() stops at the shorter sequence, so without this the test would
     # quietly check fewer rules if the compiler ever dropped one. The name
     # assert below catches a rule dropped from the middle, because
     # everything after it shifts -- but a dropped last rule would just
     # disappear from the comparison and the suite would still pass.
     assert len(spec.rules) == len(artifact.RULES)
+    # The numbers whose (multiplier, remainder) pairs are checked: every
+    # covered number, which is every number up to 999 and, above it, every
+    # multiplier at every scale plus the remainders the sample leaves.
+    covered = generate_vectors.numbers_to_cover(spec)
     for yaml_rule, compiled_rule in zip(spec.rules, artifact.RULES):
         assert yaml_rule["name"] == compiled_rule["name"]
         condition = yaml_rule.get("condition")
         if condition is None:
             assert compiled_rule["condition"] is None
             continue
-        pairs = {divmod(n, yaml_rule["scale"]) for n in range(low, high + 1)}
+        pairs = {divmod(n, yaml_rule["scale"]) for n in covered}
         for multiplier, remainder in sorted(pairs):
             variables = {"multiplier": multiplier, "remainder": remainder}
             assert bool(compiled_rule["condition"](variables)) == bool(
@@ -256,15 +261,15 @@ def _render_from_artifact(artifact, n):
 
 def test_compiled_output_matches_the_engine(spec, artifact):
     """The end-to-end check: rendering from the artifact agrees with the
-    engine at every supported number.
+    engine at every covered number -- all of 0-999, and one of each shape
+    above it (generate_vectors.numbers_to_cover).
 
     This is the one that would catch a compiler bug the piecewise tests
     miss, because it exercises rule selection, placeholder keys, field
     names, literal text, segments and the connector together, against the
     oracle.
     """
-    low, high = artifact.SUPPORTS
-    for n in range(low, high + 1):
+    for n in generate_vectors.numbers_to_cover(spec):
         assert _render_from_artifact(artifact, n) == spec.number_to_text(n), (
             f"compiled output disagrees with the engine at n={n}"
         )
@@ -483,3 +488,53 @@ def test_the_package_parser_agrees_with_the_engine_on_every_short_phrase(spec, p
             if got != expected:
                 disagreements.append((text, expected, got))
     assert not disagreements, disagreements[:10]
+
+
+def _near_misses(text):
+    """Every spelling one slip away from `text`: one word deleted, one word
+    doubled, or two neighbouring words swapped."""
+    words = text.split()
+    slips = set()
+    for i in range(len(words)):
+        slips.add(" ".join(words[:i] + words[i + 1:]))
+        slips.add(" ".join(words[:i + 1] + words[i:]))
+        if i + 1 < len(words):
+            slips.add(" ".join(words[:i] + [words[i + 1], words[i]] + words[i + 2:]))
+    slips.discard("")
+    return slips
+
+
+def test_the_package_parser_agrees_with_the_engine_one_slip_from_the_vectors(spec, package):
+    """The short-phrase check above stops at three words, and the vectors
+    only hold spellings that must be accepted. This covers the gap between:
+    longer phrases that are *nearly* right, which is where a second copy of
+    a parser is most likely to accept what the first one refuses.
+
+    Every certified spelling of one number per shape (numbers_to_sweep),
+    with one word deleted, doubled or swapped with its neighbour: same
+    number, or both refuse. One number per shape, so it grows with the
+    grammar rather than the range.
+    """
+    phrases = set()
+    for n in generate_vectors.numbers_to_sweep(spec):
+        for text in generate_vectors.accepted_inputs(spec, n):
+            phrases |= _near_misses(text)
+    disagreements = []
+    accepted = 0
+    for text in sorted(phrases):
+        try:
+            expected = spec.text_to_number(text)
+            accepted += 1
+        except ValueError:
+            expected = None
+        try:
+            got = package.text_to_number(text)
+        except package.NumberWordsError:
+            got = None
+        if got != expected:
+            disagreements.append((text, expected, got))
+    assert not disagreements, disagreements[:10]
+    # Both halves have to be exercised, or "they agree" means little: some
+    # slips still spell a number ("sâwm pakhat" with a word dropped is
+    # "sâwm"), and most do not.
+    assert 0 < accepted < len(phrases), (accepted, len(phrases))
