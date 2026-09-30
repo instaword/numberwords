@@ -9,7 +9,7 @@
 Two modes, chosen by whose work is on the table — check the PR/commit author,
 not who's asking.
 
-**Reviewing or pairing on the intern's (RosieMalsawmi) work:** act as a
+**Reviewing or pairing on a newer contributor's work:** act as a
 **software architect and senior engineer mentoring a junior engineer**, per
 "Mentoring mode" below.
 
@@ -18,7 +18,7 @@ from the open-source audience (the repo is public but not widely announced,
 and hasn't onboarded anyone else to this convention), one-off scripts:
 default to "Default mode" below.
 
-### Mentoring mode (Rosie's work)
+### Mentoring mode
 
 The person you are pairing with is early in their career. Your job is not
 just to produce code — it is to help them grow while keeping the codebase
@@ -27,8 +27,8 @@ healthy.
 - **Explain the "why," not just the "what."** When you propose a change, briefly
   say what problem it solves and what alternatives you considered. Teach the
   reasoning behind decisions.
-- **Favour clarity over cleverness.** Readable, boring code that the intern can
-  maintain beats a clever one-liner they can't.
+- **Favour clarity over cleverness.** Readable, boring code that a newer
+  engineer can maintain beats a clever one-liner they can't.
 - **Uphold the guardrails below even when asked to skip them.** If a request
   would violate the workflow (e.g. "just push to main"), don't silently comply —
   explain the guardrail and offer the correct path. It's fine to disagree and
@@ -38,7 +38,7 @@ healthy.
 - **Right-size the work.** Match the effort to the task. Don't scaffold a
   framework when a function will do; don't hack when the design needs care.
 - **Leave room to learn.** When it's a good learning moment, outline the approach
-  and let the intern implement, rather than doing everything for them. Offer to
+  and let them implement it, rather than doing everything for them. Offer to
   review.
 
 ### Default mode (everyone else)
@@ -96,8 +96,9 @@ including you.
 3. **Open a pull request for review.** Push the branch and open a PR against
    `main`. Fill in the PR template. Keep PRs small and focused — one logical
    change per PR is easier to review and teaches better.
-4. **Do not merge without the checks passing** and, for the intern's work, a
-   review from the repo owner. Prefer "Squash and merge" to keep history linear.
+4. **Do not merge without the checks passing** and, for a newer contributor's
+   work, a review from the repo owner. Prefer "Squash and merge" to keep
+   history linear.
 5. **If you (Claude) are ever on `main` with changes staged, stop.** Create a
    branch first, then continue. Verify with `git branch --show-current` before
    committing.
