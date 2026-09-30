@@ -869,8 +869,9 @@ def test_a_spec_that_cannot_render_is_reported_when_sampled(mizo_data, monkeypat
     # Above EXHAUSTIVE_BELOW the round trip visits a sample, and choosing it
     # renders one number of every shape -- so a spec that cannot render
     # breaks there, inside numbers_to_cover, before the round trip starts.
-    # At today's 0-999 nothing is sampled and that path is never taken;
-    # lowering the threshold to 100 takes it now. Found by running the
+    # Mizo's own range takes that path since the ladder (#27); the threshold
+    # is lowered to 100 anyway, so the test does not depend on where the
+    # range happens to end. Found by running the
     # demonstrations above against the sample: without the helper's guard
     # this one raised instead of reporting.
     monkeypatch.setattr(engine, "_validate_spec", lambda data: None)

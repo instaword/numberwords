@@ -25,15 +25,15 @@ also test the canonical form. See below for how the list is chosen.
 
 Why `number` is a string (#12)
 ------------------------------
-Every number in this file today is between 0 and 999, and Mizo's ceiling is
-10^10 - 1 (#27, revised 2026-09-25), which JavaScript's
-Number.MAX_SAFE_INTEGER holds exactly -- so JSON's number type would do. It
-is written as a string anyway, because the format outlives the ceiling. The
-decision was taken when the ceiling was 10^18 - 1, 111x past
-MAX_SAFE_INTEGER, where a standard JSON.parse reads 999999999999999999 back
-as 1000000000000000000. A JS target would then load the vectors, compare its
-output against a silently wrong expected value, and pass -- a conformance
-suite that certifies a broken implementation is worse than no suite at all.
+Every number in this file is at most Mizo's ceiling, 10^10 - 1 (#27, revised
+2026-09-25), which JavaScript's Number.MAX_SAFE_INTEGER holds exactly -- so
+JSON's number type would do. It is written as a string anyway, because the
+format outlives the ceiling. The decision was taken when the ceiling was
+10^18 - 1, 111x past MAX_SAFE_INTEGER, where a standard JSON.parse reads
+999999999999999999 back as 1000000000000000000. A JS target would then load
+the vectors, compare its output against a silently wrong expected value, and
+pass -- a conformance suite that certifies a broken implementation is worse
+than no suite at all.
 #27 records that this comes back the moment the ceiling is raised past
 2^53 - 1, and Python's arbitrary-precision ints would hide it until the npm
 target exists. Keeping the string costs one str() here and an int() in the
@@ -89,7 +89,8 @@ def numbers_to_cover(spec, exhaustive_below: int = EXHAUSTIVE_BELOW) -> list:
     - supports.min and supports.max, always.
 
     Below the threshold this is the whole range, so for a range that ends
-    there -- Mizo's 0-999 today -- it is exactly what it used to be. Nothing
+    there -- Mizo's 0-999 until #27's ladder -- it is exactly what it used
+    to be. Nothing
     is random: the same spec always gives the same list, which is what lets
     CI check that the vectors regenerate identically.
 
@@ -317,13 +318,14 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
 
     Second, that an entry's accepted spellings can be enumerated at all.
     That is true of every parse feature in the spec today, and it stops being
-    true above 10^5: Mizo scale words multiply each other productively there
-    (nuai za hnih for 10^5 x 200), and any scale may take any
-    scale-multiplied expression as its multiplier, so the accepted spellings
-    of one number stop being a list and become a grammar. Nothing to do about
-    it at 0-999, but whoever extends the range past that boundary will need
-    generation from parse features to become generation from a grammar. See
-    #27 for the data and #12 for the discussion.
+    true when the spec accepts what Mizo says above 10^5: scale words
+    multiply each other productively there (nuai za hnih for 10^5 x 200),
+    and any scale may take any scale-multiplied expression as its
+    multiplier, so the accepted spellings of one number stop being a list
+    and become a grammar. The range passes 10^5 already, but stacking is not
+    accepted yet; whoever adds it will need generation from parse features
+    to become generation from a grammar. See #27 for the data and #12 for
+    the discussion.
     """
     separators = _joinable_separators(spec.parse_config)
     separator_pattern = _separator_pattern(spec.parse_config)

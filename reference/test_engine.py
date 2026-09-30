@@ -49,12 +49,12 @@ VECTORS_PATH = Path(__file__).resolve().parent.parent / "vectors" / "mizo.json"
 # these tests are meant to be an independent claim about what must work, so
 # a spec edit that narrowed the range should fail them rather than shrink
 # them. Widen it in the same PR that widens the spec (#19).
-SUPPORTED_MAX = 999
+SUPPORTED_MAX = 9_999_999_999
 
 # The numbers the per-number tests below visit, where they used to walk the
 # whole supported range: every number below EXHAUSTIVE_BELOW, and one of
-# each shape above it (#12, #65). Today that is still all of 0-999. It is
-# the same list the vectors are generated from.
+# each shape above it (#12, #65) -- all of 0-999 and 234 numbers above. It
+# is the same list the vectors are generated from.
 COVERED = generate_vectors.numbers_to_cover(load(MIZO_SPEC_PATH))
 
 
@@ -85,9 +85,9 @@ def test_vectors_match_number_to_text(spec, vectors):
 
 def test_vector_numbers_are_strings(vectors):
     # #12: `number` is deliberately a string, so that a JS target reading
-    # this file cannot silently lose precision above 2^53 - 1. Neither the
-    # current 0-999 range nor the 10^10 - 1 ceiling (#27) needs it; a ceiling
-    # raised past 2^53 - 1 would (#27 rule 5 lets the 10^9 multiplier grow).
+    # this file cannot silently lose precision above 2^53 - 1. The current
+    # 10^10 - 1 ceiling (#27) does not need it; a ceiling raised past
+    # 2^53 - 1 would (#27 rule 5 lets the 10^9 multiplier grow).
     # The format outlives the range. Asserted so that a future regenerate
     # cannot quietly drop back to a JSON number.
     for vector in vectors:
@@ -380,12 +380,12 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
     # only, so "za sawm hnih" is 120 and not also 10^2 x 20 = 2,000.
     #
     # This cannot currently fail for that reason, and saying so is the point.
-    # The spec has no stacking rule yet -- it lands with the ladder, where
-    # stacking is attested (#27 rule 6, #65) -- and 2,000 is outside
-    # supports.max besides, so no derivation could produce the rival reading.
-    # What the assertions actually pin is narrower: that no *other* number in
-    # 0-999 accepts "za sawm hnih", and that 120's canonical spelling is what
-    # it should be.
+    # 2,000 has been inside supports.max since the ladder (#27), so range is
+    # no longer what keeps the rival reading out: the spec has no stacking
+    # rule yet. That lands with #27's input forms, where stacking is attested
+    # (rule 6, #65). What the assertions actually pin is narrower: that no
+    # *other* number accepts "za sawm hnih", and that 120's canonical
+    # spelling is what it should be.
     #
     # Kept rather than deleted, on the #36 precedent -- an invariant can be
     # correct and inert, and the honest move is to document the limit instead
@@ -394,6 +394,46 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
     # so "za sawm hnih" must still read as 120 only.
     assert spec.text_to_number("za sawm hnih") == 120
     assert spec.number_to_text(120) == "zâ leh sawm hnih"
+
+
+# Where a scale word multiplied by zero ("sâng bial") can stand, one row
+# each, since each reaches the rule's condition by a different path through
+# the parser: alone, the whole phrase would be 0; followed by an addend, only
+# the addend; and inside a larger number, as its {remainder}, the larger
+# number with that place skipped.
+_ZERO_MULTIPLIER_POSITIONS = {
+    "alone": "{word} bial",
+    "followed by an addend": "{word} bial pakhat",
+    "inside a larger number": "{above} {word} bial pakhat",
+}
+
+
+@pytest.mark.parametrize("position", sorted(_ZERO_MULTIPLIER_POSITIONS))
+def test_no_scale_word_is_multiplied_by_zero(spec, position):
+    # Rule 3 on #27: a zero digit is omitted, never said -- 1,990 is "sâng
+    # khat za kua leh sawm kua", with nothing for the ones. So "sâng bial"
+    # is not a way of writing anything. Output never produces it, since a
+    # rule is only reached with a multiplier of at least 1; what keeps it out
+    # of input is each rule's condition -- "multiplier > 1" for sawm and za,
+    # "multiplier > 0" from sâng up -- and nothing else. Without this test,
+    # dropping that condition from any of the seven ladder rules passed both
+    # suites, since it changes no rendering and so no vector.
+    #
+    # Every scale word, in both forms, because the guard is per rule.
+    scales = sorted(spec.lexicon["scales"])
+    template = _ZERO_MULTIPLIER_POSITIONS[position]
+    accepted = []
+    for i, scale in enumerate(scales):
+        if "{above}" in template and i + 1 == len(scales):
+            continue                # nothing larger to sit inside
+        above = spec.number_to_text(scales[i + 1]) if i + 1 < len(scales) else ""
+        for word in sorted(set(spec.lexicon["scales"][scale].values())):
+            text = template.format(word=word, above=above)
+            try:
+                accepted.append((text, spec.text_to_number(text)))
+            except ValueError:
+                pass
+    assert not accepted, accepted
 
 
 def test_connector_placement_does_not_survive_tokenisation(spec):
@@ -537,11 +577,11 @@ def test_the_sample_loses_no_shape(spec, exhaustive_below):
 
 
 def test_the_sample_keeps_the_structural_cases(spec):
-    # #27's list of what a sampled table must still show, checked by value
-    # at the one scale today's range has above 10: from 100 up, 100 and its
-    # neighbours, every multiplier, one digit below 100 with zeros around it
-    # (101, 110), and every place filled but one (109, 190 -- 190 is 1990's
-    # shape one scale down).
+    # #27's list of what a sampled table must still show, checked by value.
+    # From 100 up, with the threshold lowered: 100 and its neighbours, every
+    # multiplier, one digit below 100 with zeros around it (101, 110), and
+    # every place filled but one (109, 190 -- 190 is 1990's shape one scale
+    # down).
     #
     # Asked of _structural_cases itself, not only of the sample. Most of
     # these are also shapes the sample finds, so a family the function
@@ -552,6 +592,20 @@ def test_the_sample_keeps_the_structural_cases(spec):
     assert expected <= cases, sorted(expected - cases)
     sampled = set(generate_vectors.numbers_to_cover(spec, 100))
     assert cases | {0, SUPPORTED_MAX} <= sampled, sorted(cases - sampled)
+
+    # And at the real threshold, where the vectors come from: the first
+    # scale above it, which holds 1990 itself (#27's hard case for "leh"),
+    # and the top of the ladder, whose multiplier runs to 9 rather than to
+    # the next scale word.
+    cases = generate_vectors._structural_cases(spec, generate_vectors.EXHAUSTIVE_BELOW)
+    expected = (
+        {999, 1000, 1001, 1010, 1100, 1099, 1909, 1990}
+        | {m * 1000 for m in range(1, 10)}
+        | {10**9 - 1, 10**9, 10**9 + 1}
+        | {m * 10**9 for m in range(1, 10)}
+    )
+    assert expected <= cases, sorted(expected - cases)
+    assert cases <= set(COVERED), sorted(cases - set(COVERED))
 
 
 def test_everything_below_the_threshold_is_covered():
@@ -564,11 +618,9 @@ def test_everything_below_the_threshold_is_covered():
 def test_the_covered_numbers_stay_a_sample():
     # Every per-number test pays for each number in COVERED, and the vectors
     # hold an entry for each. It is all of 0-999 plus a few hundred numbers
-    # above: a throwaway spec with the ladder to 10^10 - 1, built while
-    # writing this, gave 1,234. A sampler that stopped deduplicating shapes
-    # would grow with the range instead, and this names that rather than
-    # leaving a suite that never finishes. It cannot fail until
-    # supports.max passes 999, because below that nothing is sampled.
+    # above: 1,234 with the ladder to 10^10 - 1 (#27). A sampler that stopped
+    # deduplicating shapes would grow with the range instead, and this names
+    # that rather than leaving a suite that never finishes.
     assert len(COVERED) <= 5_000
 
 
@@ -801,10 +853,11 @@ def test_aliases_resolve_to_canonical_word_before_matching():
     # parse.aliases lets an alternate spelling resolve to the canonical
     # lexicon word before rule matching. Same mechanism as parse.connectors,
     # just substituting instead of dropping. mizo.yaml's alias list is empty
-    # and settled -- a native speaker confirmed Mizo 0-199 has no
-    # non-diacritic spelling variants, and 200-999 introduced no new scale
-    # words, so the finding carries (#27 puts the first real aliases at 10^5,
-    # nuai/nuaih) -- so this uses synthetic placeholder words rather than
+    # for now -- a native speaker confirmed Mizo 0-199 has no non-diacritic
+    # spelling variants, and 200-999 introduced no new scale words, so the
+    # finding carries that far. #27 puts the first real aliases at 10^5
+    # (nuai/nuaih, Q-O); the range reaches them now, and they arrive with
+    # #27's input forms. So this uses synthetic placeholder words rather than
     # asserting real Mizo spellings.
     data = {
         "meta": {"supports": {"min": 5, "max": 5}},
@@ -916,22 +969,23 @@ def test_a_rule_that_cannot_render_its_remainder_raises():
 
 def test_a_range_beyond_the_rules_is_named_not_crashed(spec):
     # supports.max raised past what the rules cover is the likeliest mistake
-    # when the ladder lands: at 1,000 with nothing above scale 100, the
-    # hundreds rule asks for the digit 10. The engine names the rule and the
+    # the next time the ceiling moves: at 10^10 there is no scale word above
+    # tlûklehdingâwn (#27 rule 4), and its rule, written for a one-digit
+    # multiplier, asks for the digit 10. The engine names the rule and the
     # missing word rather than surfacing KeyError: 10.
     data = copy.deepcopy(spec._data)
-    data["meta"]["supports"]["max"] = 1000
+    data["meta"]["supports"]["max"] = SUPPORTED_MAX + 1
     widened = Spec(data)
-    assert widened.number_to_text(999) == spec.number_to_text(999)
-    with pytest.raises(ValueError, match=r"'hundreds' needs units\[10\]"):
-        widened.number_to_text(1000)
+    assert widened.number_to_text(SUPPORTED_MAX) == spec.number_to_text(SUPPORTED_MAX)
+    with pytest.raises(ValueError, match=r"'billions' needs units\[10\]"):
+        widened.number_to_text(SUPPORTED_MAX + 1)
 
 
 def test_no_short_phrase_is_ambiguous(spec):
     # The oracle raises on ambiguity rather than guessing, which only helps
     # if something feeds it the ambiguous strings. The certified inputs
     # cannot: every one is a correct positive. So feed it every phrase of up
-    # to three words the lexicon can spell, connector included -- 11,154
+    # to three words the lexicon can spell, connector included -- 25,259
     # strings -- and require that none denotes two numbers. Cheap now that a
     # parse no longer scans the range; under the brute-force parser the same
     # sweep was a separate twenty-minute job, run once while prototyping #65.
@@ -940,7 +994,7 @@ def test_no_short_phrase_is_ambiguous(spec):
          for entry in table.values() for w in entry.values()}
         | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
     )
-    assert len(vocabulary) == 22, vocabulary
+    assert len(vocabulary) == 29, vocabulary
     ambiguous = []
     for length in (1, 2, 3):
         for words in itertools.product(vocabulary, repeat=length):

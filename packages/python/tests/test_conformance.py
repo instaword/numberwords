@@ -14,15 +14,16 @@ spelling the engine tolerates would go unchecked in the target.
 
 import numberwords
 
-# The generated table for Mizo 0-999. Asserted rather than assumed: an
-# empty or truncated vectors file would otherwise make every parametrised
-# test below pass by having nothing to run.
+# The generated table for Mizo 0-9,999,999,999: all of 0-999, and above
+# it one number of each shape plus #27's structural cases (#12, #65).
+# Asserted rather than assumed: an empty or truncated vectors file would
+# otherwise make every parametrised test below pass by having nothing to run.
 #
 # Both move with supports.max, and both are range knobs a range PR has to
 # bump by hand -- that is the point of stating them rather than deriving
 # them from the file being checked.
-EXPECTED_VECTORS = 1000
-EXPECTED_ACCEPTED_INPUTS = 5950
+EXPECTED_VECTORS = 1234
+EXPECTED_ACCEPTED_INPUTS = 7387
 
 
 def test_the_vector_table_is_the_size_it_should_be(vectors):

@@ -490,6 +490,11 @@ def test_the_package_parser_agrees_with_the_engine_on_every_short_phrase(spec, p
     assert not disagreements, disagreements[:10]
 
 
+# The longest slip, in words, that the one-slip test below checks. See its
+# docstring for why eight.
+SLIP_PHRASE_MAX_WORDS = 8
+
+
 def _near_misses(text):
     """Every spelling one slip away from `text`: one word deleted, one word
     doubled, or two neighbouring words swapped."""
@@ -514,11 +519,24 @@ def test_the_package_parser_agrees_with_the_engine_one_slip_from_the_vectors(spe
     with one word deleted, doubled or swapped with its neighbour: same
     number, or both refuse. One number per shape, so it grows with the
     grammar rather than the range.
+
+    Capped at SLIP_PHRASE_MAX_WORDS, because a parse costs more the longer
+    the phrase: with the ladder to 10^10 - 1 (#27) the slips run to 29
+    words, 12,525 phrases, about 70 s here. At 0-999 the longest slip was
+    eight words (a seven-word spelling with one word doubled), so the cap
+    would have dropped nothing there. And the length of a phrase is not
+    where the two parsers can differ: a longer one is the same rules reached
+    through one more {remainder}. What has to survive the cap is every rule,
+    which the last assertion checks.
     """
+    sweep = generate_vectors.numbers_to_sweep(spec)
     phrases = set()
-    for n in generate_vectors.numbers_to_sweep(spec):
+    for n in sweep:
         for text in generate_vectors.accepted_inputs(spec, n):
-            phrases |= _near_misses(text)
+            phrases |= {
+                slip for slip in _near_misses(text)
+                if len(slip.split()) <= SLIP_PHRASE_MAX_WORDS
+            }
     disagreements = []
     accepted = 0
     for text in sorted(phrases):
@@ -538,3 +556,12 @@ def test_the_package_parser_agrees_with_the_engine_one_slip_from_the_vectors(spe
     # slips still spell a number ("sâwm pakhat" with a word dropped is
     # "sâwm"), and most do not.
     assert 0 < accepted < len(phrases), (accepted, len(phrases))
+    # The cap must not cost a rule: every emitting rule heads some number
+    # whose canonical spelling, doubled in one word, still fits under it.
+    # At 10^10 - 1 each one already does at six words.
+    headed = {
+        spec._find_rule(n)["name"] for n in sweep
+        if len(spec.number_to_text(n).split()) < SLIP_PHRASE_MAX_WORDS
+    }
+    emitting = {r["name"] for r in spec.rules if r.get("emit") != "never"}
+    assert emitting <= headed, sorted(emitting - headed)
