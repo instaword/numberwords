@@ -29,7 +29,10 @@
 meta:
   language: Mizo
   code: lus           # ISO 639-3 for Lushai/Mizo.
-  version: 0.7.0      # 0.7.0: supports.max raised to 10^10 - 1, with the
+  version: 0.8.0      # 0.8.0: grammar.stacking -- a multiplier may be a
+                      # whole numeral on input, from 10^5 up, binding
+                      # greedily (#27 rule 6).
+                      # 0.7.0: supports.max raised to 10^10 - 1, with the
                       # seven scale words 10^3-10^9 and one rule each (#27).
                       # 0.6.0: rules keyed by scale, with {remainder} and
                       # [...] segments; grammar.connector replaces the
@@ -77,6 +80,14 @@ meta:
        #27: the ladder and rules 1-4 (2026-08-08), invariance when multiplied
        for 10^7-10^9 (Q-C, 2026-08-16), where 'leh' goes (Q-D, Q-M), and the
        worked examples below."
+    - "The optional trailing -h on nuai and maktaduai (nuaih, maktaduaih),
+       accepted on input and never emitted, is the repo owner's, on #27
+       (Q-O, 2026-09-03)."
+    - "Stacking is the repo owner's, on #27: the attested forms (rule 6,
+       2026-08-08), the 10^5 floor (Q-K, 2026-08-16), where a stacked
+       addend attaches (Q-E, 2026-08-16), greedy binding (2026-08-30,
+       confirmed 2026-09-03), and the head-scale reading of the floor
+       (#65, 2026-09-24)."
 
 lexicon:
   units:               # 0–9. standalone = used alone; bound = used after a scale word (e.g. "sawm").
@@ -147,6 +158,25 @@ grammar:
   # vector generator reads it from there rather than from a separate
   # declaration.
   connector: { word: "leh", placement: final_addend, min: 100 }
+
+  # Stacking (#27 rule 6): on input, a scale word may take a whole numeral as
+  # its multiplier, the way government and finance registers say large
+  # numbers -- "nuai za hnih" is 10^5 x 200 = 20,000,000, "maktaduai za thum"
+  # is 10^6 x 300. number_to_text never writes it: "vaibêlchhe hnih" is the
+  # canonical 20,000,000 (#27, Decision 2 of 2026-08-30).
+  #
+  # From 10^5 up only, measured against the scale word heading the form, not
+  # the value it stands for (Q-K, reversed 2026-08-16; head scale settled on
+  # #65 2026-09-24): "sâng za" and "sîng za" stand for 10^5 and 10^6 and are
+  # still not said. Below the floor it would collide -- 120's "zâ leh sawm
+  # hnih" reaches the parser as "za sawm hnih", which stacked is 2,000.
+  #
+  # The multiplier binds greedily: it takes in as much as it can (#27,
+  # Decision 1 of 2026-08-30). "nuai za hnih leh sawm nga" is 250 x 10^5 --
+  # "leh" strips, greed absorbs (2026-09-03) -- and "nuai za pahnih" is
+  # 10^5 x 102 (Q-E). The value greed displaces is said through the next
+  # scale up: 20,000,050 is "vaibêlchhe hnih leh sawm nga".
+  stacking: { accepted_from: 100000, emit: never }
 
   rules:
     - name: units                    # bial, pakhat, … pakua
@@ -274,22 +304,22 @@ parse:
   # Where "leh" idiomatically stands is stated by the grammar, not here: see
   # grammar.connector. The parser drops connectors wherever they fall and
   # stays deliberately more tolerant than the certified set (#12, #34).
-  aliases: {}   # Decision (#15): no non-diacritic spelling variants among the
-                # numerals 0-999. Confirmed by a native speaker for 0-199
-                # (#15); it carries to 999 because 200-999 introduces no new
-                # lexemes -- the same units and the same two scale words,
-                # recombined (#27 Q-N). Diacritics are handled by
-                # strip_diacritics above, and that covers every scale word
-                # from 10^3 up except two.
-                #
-                # Those two are why this is NOT true of Mizo generally: the
-                # 10^5 and 10^6 scale words take an optional trailing -h
-                # (nuai/nuaih, maktaduai/maktaduaih) that strip_diacritics
-                # cannot collapse. Accepted on input in any position, never
-                # emitted (#27 Q-O, 2026-09-03). They are not here yet
-                # because this range extension is the output side only; they
-                # land with the rest of #27's input forms, and number_to_text()
-                # must still emit the h-less form.
+  # Decision (#15): no non-diacritic spelling variants among the numerals
+  # 0-999. Confirmed by a native speaker for 0-199 (#15); it carries to 999
+  # because 200-999 introduces no new lexemes -- the same units and the same
+  # two scale words, recombined (#27 Q-N). Diacritics are handled by
+  # strip_diacritics above, and that covers every scale word from 10^3 up
+  # except two.
+  #
+  # Those two are the entries below. The 10^5 and 10^6 scale words take an
+  # optional trailing -h that strip_diacritics cannot collapse: accepted on
+  # input in any position, including multiplied ("nuaih khat"), and never
+  # emitted -- number_to_text() writes the h-less form (#27 Q-O, 2026-09-03).
+  # An alias rather than a parse flag, because it is two words and not a
+  # rule: stripping a trailing h everywhere would turn "hnih" into "hni".
+  aliases:
+    nuaih: nuai
+    maktaduaih: maktaduai
 
 
 examples:

@@ -323,6 +323,23 @@ MUTATIONS = {
     "accepted_forms holding a bare string": lambda s: _mutate(
         s, ["parse"], {**s["parse"], "accepted_forms": {"units": "standalone"}}
     ),
+    # grammar.stacking (#27 rule 6): a positive integer floor, and input only.
+    "stacking floor written as a string": lambda s: _mutate(
+        s, ["grammar", "stacking"], {"accepted_from": "100000", "emit": "never"}
+    ),
+    "stacking floor of zero": lambda s: _mutate(
+        s, ["grammar", "stacking"], {"accepted_from": 0, "emit": "never"}
+    ),
+    "stacking declared as emitted": lambda s: _mutate(
+        s, ["grammar", "stacking"], {"accepted_from": 100000, "emit": "always"}
+    ),
+    "stacking without its emit": lambda s: _mutate(
+        s, ["grammar", "stacking"], {"accepted_from": 100000}
+    ),
+    "stacking with a key the format does not have": lambda s: _mutate(
+        s, ["grammar", "stacking"],
+        {"accepted_from": 100000, "emit": "never", "accepted_to": 10**9},
+    ),
 }
 
 
@@ -658,6 +675,26 @@ TYPE_MISMATCHES = {
 def test_a_wrong_typed_rule_field_is_named_not_crashed(description, mizo_data):
     broken = TYPE_MISMATCHES[description](mizo_data)
     with pytest.raises(ValueError, match="must be a string"):
+        Spec(broken)
+
+
+@pytest.mark.parametrize(
+    "stacking, named",
+    [
+        ({"accepted_from": "100000", "emit": "never"}, "accepted_from"),
+        ({"accepted_from": True, "emit": "never"}, "accepted_from"),
+        ({"emit": "never"}, "accepted_from"),
+        ({"accepted_from": 100000, "emit": "always"}, "emit must be 'never'"),
+        ({"accepted_from": 100000}, "emit must be 'never'"),
+    ],
+)
+def test_a_malformed_stacking_declaration_is_named_not_crashed(mizo_data, stacking, named):
+    # Spec.__init__ reads grammar.stacking, so a dict that never met the
+    # schema gets a verdict naming the field, not a KeyError or a TypeError
+    # from comparing a scale with a string. True is refused with the rest:
+    # bool is an int to isinstance, and a floor of 1 is not what it means.
+    broken = _mutate(mizo_data, ["grammar", "stacking"], stacking)
+    with pytest.raises(ValueError, match=named):
         Spec(broken)
 
 

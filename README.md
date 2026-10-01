@@ -42,11 +42,11 @@ vectors as they stood at that release. It exports `number_to_text`,
 `text_to_number` and `NumberWordsError`, and handles Mizo 0–199 in both
 directions. The npm target is still a name reservation.
 
-Next is the range. The spec now reaches 10¹⁰ − 1 on the output side — Mizo's
-scale ladder runs to 10⁹, and rules keyed by scale recurse through
-`{remainder}` (#65) — and the input forms #27 records, such as `nuai za hnih`,
-come next, then a release. The design and the remaining milestones live in
-[`docs/architecture.md`](docs/architecture.md).
+Next is a release. The spec now reaches 10¹⁰ − 1 in both directions — Mizo's
+scale ladder runs to 10⁹, rules keyed by scale recurse through `{remainder}`
+(#65), and input accepts the forms #27 records, such as `nuai za hnih` for
+20,000,000 — but PyPI still ships 0.2.0. The design and the remaining
+milestones live in [`docs/architecture.md`](docs/architecture.md).
 
 ## For contributors
 

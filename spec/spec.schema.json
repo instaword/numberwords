@@ -112,6 +112,26 @@
             }
           }
         },
+        "stacking": {
+          "type": "object",
+          "description": "Optional, input only. A rule keyed by a scale at or above `accepted_from`, whose template writes its multiplier as a word, also accepts a whole numeral in that slot, read by the same rules from scales below its own -- Mizo's `nuai za hnih` is 10^5 x 200 (#27 rule 6). The multiplier binds greedily: of the readings stacking allows, the one whose outermost stacked multiplier takes in the most words wins, and a tie is still an error. number_to_text never writes a stacked form.",
+          "required": [
+            "accepted_from",
+            "emit"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "accepted_from": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The smallest scale whose word may head a stacked form. Compared with the rule's scale, not with the value the form stands for (#65)."
+            },
+            "emit": {
+              "const": "never",
+              "description": "Stacked forms are accepted and never written. Required so the declaration says so itself."
+            }
+          }
+        },
         "rules": {
           "type": "array",
           "minItems": 1,

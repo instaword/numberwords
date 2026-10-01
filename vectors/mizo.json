@@ -12483,9 +12483,10 @@
     "text": "nuai khat",
     "accepted_inputs": [
       "NUAI KHAT",
-      "NUAI-KHAT",
+      "NUAIH-KHAT",
       "nuai khat",
-      "nuai-khat"
+      "nuai-khat",
+      "nuaih khat"
     ]
   },
   {
@@ -12493,10 +12494,11 @@
     "text": "nuai khat leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT LEH PAKHAT",
-      "NUAI-KHAT-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-PAKHAT",
       "nuai khat leh pakhat",
       "nuai khat pakhat",
-      "nuai-khat-leh-pakhat"
+      "nuai-khat-leh-pakhat",
+      "nuaih khat leh pakhat"
     ]
   },
   {
@@ -12504,11 +12506,12 @@
     "text": "nuai khat leh sâwm",
     "accepted_inputs": [
       "NUAI KHAT LEH SÂWM",
-      "NUAI-KHAT-LEH-SAWM",
+      "NUAIH-KHAT-LEH-SAWM",
       "nuai khat leh sawm",
       "nuai khat leh sâwm",
       "nuai khat sâwm",
-      "nuai-khat-leh-sâwm"
+      "nuai-khat-leh-sâwm",
+      "nuaih khat leh sâwm"
     ]
   },
   {
@@ -12516,12 +12519,13 @@
     "text": "nuai khat sâwm leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT SÂWM LEH PAKHAT",
-      "NUAI-KHAT-LEH-SAWM-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-SAWM-LEH-PAKHAT",
       "nuai khat leh sâwm leh pakhat",
       "nuai khat sawm leh pakhat",
       "nuai khat sâwm leh pakhat",
       "nuai khat sâwm pakhat",
-      "nuai-khat-sâwm-leh-pakhat"
+      "nuai-khat-sâwm-leh-pakhat",
+      "nuaih khat sâwm leh pakhat"
     ]
   },
   {
@@ -12529,10 +12533,11 @@
     "text": "nuai khat leh sawm hnih",
     "accepted_inputs": [
       "NUAI KHAT LEH SAWM HNIH",
-      "NUAI-KHAT-LEH-SAWM-HNIH",
+      "NUAIH-KHAT-LEH-SAWM-HNIH",
       "nuai khat leh sawm hnih",
       "nuai khat sawm hnih",
-      "nuai-khat-leh-sawm-hnih"
+      "nuai-khat-leh-sawm-hnih",
+      "nuaih khat leh sawm hnih"
     ]
   },
   {
@@ -12540,11 +12545,12 @@
     "text": "nuai khat sawm hnih leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT SAWM HNIH LEH PAKHAT",
-      "NUAI-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
       "nuai khat leh sawm hnih leh pakhat",
       "nuai khat sawm hnih leh pakhat",
       "nuai khat sawm hnih pakhat",
-      "nuai-khat-sawm-hnih-leh-pakhat"
+      "nuai-khat-sawm-hnih-leh-pakhat",
+      "nuaih khat sawm hnih leh pakhat"
     ]
   },
   {
@@ -12552,11 +12558,12 @@
     "text": "nuai khat leh zâ",
     "accepted_inputs": [
       "NUAI KHAT LEH ZÂ",
-      "NUAI-KHAT-LEH-ZA",
+      "NUAIH-KHAT-LEH-ZA",
       "nuai khat leh za",
       "nuai khat leh zâ",
       "nuai khat zâ",
-      "nuai-khat-leh-zâ"
+      "nuai-khat-leh-zâ",
+      "nuaih khat leh zâ"
     ]
   },
   {
@@ -12564,12 +12571,13 @@
     "text": "nuai khat zâ sâwm leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT ZÂ SÂWM LEH PAKHAT",
-      "NUAI-KHAT-LEH-ZA-LEH-SAWM-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-ZA-LEH-SAWM-LEH-PAKHAT",
       "nuai khat leh zâ leh sâwm leh pakhat",
       "nuai khat za sawm leh pakhat",
       "nuai khat zâ sâwm leh pakhat",
       "nuai khat zâ sâwm pakhat",
-      "nuai-khat-zâ-sâwm-leh-pakhat"
+      "nuai-khat-zâ-sâwm-leh-pakhat",
+      "nuaih khat zâ sâwm leh pakhat"
     ]
   },
   {
@@ -12577,12 +12585,13 @@
     "text": "nuai khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT ZÂ SAWM HNIH LEH PAKHAT",
-      "NUAI-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "nuai khat leh zâ leh sawm hnih leh pakhat",
       "nuai khat za sawm hnih leh pakhat",
       "nuai khat zâ sawm hnih leh pakhat",
       "nuai khat zâ sawm hnih pakhat",
-      "nuai-khat-zâ-sawm-hnih-leh-pakhat"
+      "nuai-khat-zâ-sawm-hnih-leh-pakhat",
+      "nuaih khat zâ sawm hnih leh pakhat"
     ]
   },
   {
@@ -12590,11 +12599,12 @@
     "text": "nuai khat za hnih leh sawm hnih",
     "accepted_inputs": [
       "NUAI KHAT ZA HNIH LEH SAWM HNIH",
-      "NUAI-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
       "nuai khat leh za hnih leh sawm hnih",
       "nuai khat za hnih leh sawm hnih",
       "nuai khat za hnih sawm hnih",
-      "nuai-khat-za-hnih-leh-sawm-hnih"
+      "nuai-khat-za-hnih-leh-sawm-hnih",
+      "nuaih khat za hnih leh sawm hnih"
     ]
   },
   {
@@ -12602,11 +12612,12 @@
     "text": "nuai khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
-      "NUAI-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "nuai khat leh za hnih leh sawm hnih leh pakhat",
       "nuai khat za hnih sawm hnih leh pakhat",
       "nuai khat za hnih sawm hnih pakhat",
-      "nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+      "nuai-khat-za-hnih-sawm-hnih-leh-pakhat",
+      "nuaih khat za hnih sawm hnih leh pakhat"
     ]
   },
   {
@@ -12614,11 +12625,12 @@
     "text": "nuai khat leh sâng khat",
     "accepted_inputs": [
       "NUAI KHAT LEH SÂNG KHAT",
-      "NUAI-KHAT-LEH-SANG-KHAT",
+      "NUAIH-KHAT-LEH-SANG-KHAT",
       "nuai khat leh sang khat",
       "nuai khat leh sâng khat",
       "nuai khat sâng khat",
-      "nuai-khat-leh-sâng-khat"
+      "nuai-khat-leh-sâng-khat",
+      "nuaih khat leh sâng khat"
     ]
   },
   {
@@ -12626,12 +12638,13 @@
     "text": "nuai khat sâng khat sawm hnih leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT SÂNG KHAT SAWM HNIH LEH PAKHAT",
-      "NUAI-KHAT-LEH-SANG-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-SANG-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
       "nuai khat leh sâng khat leh sawm hnih leh pakhat",
       "nuai khat sang khat sawm hnih leh pakhat",
       "nuai khat sâng khat sawm hnih leh pakhat",
       "nuai khat sâng khat sawm hnih pakhat",
-      "nuai-khat-sâng-khat-sawm-hnih-leh-pakhat"
+      "nuai-khat-sâng-khat-sawm-hnih-leh-pakhat",
+      "nuaih khat sâng khat sawm hnih leh pakhat"
     ]
   },
   {
@@ -12639,12 +12652,13 @@
     "text": "nuai khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
-      "NUAI-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "nuai khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "nuai khat sang khat za sawm hnih leh pakhat",
       "nuai khat sâng khat zâ sawm hnih leh pakhat",
       "nuai khat sâng khat zâ sawm hnih pakhat",
-      "nuai-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+      "nuai-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat",
+      "nuaih khat sâng khat zâ sawm hnih leh pakhat"
     ]
   },
   {
@@ -12652,12 +12666,13 @@
     "text": "nuai khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
-      "NUAI-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "nuai khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "nuai khat sang khat za hnih sawm hnih leh pakhat",
       "nuai khat sâng khat za hnih sawm hnih leh pakhat",
       "nuai khat sâng khat za hnih sawm hnih pakhat",
-      "nuai-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+      "nuai-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat",
+      "nuaih khat sâng khat za hnih sawm hnih leh pakhat"
     ]
   },
   {
@@ -12665,12 +12680,13 @@
     "text": "nuai khat sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
       "NUAI KHAT SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
-      "NUAI-KHAT-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "NUAIH-KHAT-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "nuai khat leh sâng kua leh za kua leh sawm kua leh pakua",
       "nuai khat sang kua za kua sawm kua leh pakua",
       "nuai khat sâng kua za kua sawm kua leh pakua",
       "nuai khat sâng kua za kua sawm kua pakua",
-      "nuai-khat-sâng-kua-za-kua-sawm-kua-leh-pakua"
+      "nuai-khat-sâng-kua-za-kua-sawm-kua-leh-pakua",
+      "nuaih khat sâng kua za kua sawm kua leh pakua"
     ]
   },
   {
@@ -12678,11 +12694,12 @@
     "text": "nuai khat leh sîng khat",
     "accepted_inputs": [
       "NUAI KHAT LEH SÎNG KHAT",
-      "NUAI-KHAT-LEH-SING-KHAT",
+      "NUAIH-KHAT-LEH-SING-KHAT",
       "nuai khat leh sing khat",
       "nuai khat leh sîng khat",
       "nuai khat sîng khat",
-      "nuai-khat-leh-sîng-khat"
+      "nuai-khat-leh-sîng-khat",
+      "nuaih khat leh sîng khat"
     ]
   },
   {
@@ -12690,12 +12707,13 @@
     "text": "nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
-      "NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
-      "nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+      "nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat",
+      "nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat"
     ]
   },
   {
@@ -12703,12 +12721,13 @@
     "text": "nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
       "NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
-      "NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
-      "nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+      "nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat",
+      "nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat"
     ]
   },
   {
@@ -12716,12 +12735,13 @@
     "text": "nuai khat sîng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
       "NUAI KHAT SÎNG KUA ZA KUA SAWM KUA LEH PAKUA",
-      "NUAI-KHAT-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "NUAIH-KHAT-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "nuai khat leh sîng kua leh za kua leh sawm kua leh pakua",
       "nuai khat sing kua za kua sawm kua leh pakua",
       "nuai khat sîng kua za kua sawm kua leh pakua",
       "nuai khat sîng kua za kua sawm kua pakua",
-      "nuai-khat-sîng-kua-za-kua-sawm-kua-leh-pakua"
+      "nuai-khat-sîng-kua-za-kua-sawm-kua-leh-pakua",
+      "nuaih khat sîng kua za kua sawm kua leh pakua"
     ]
   },
   {
@@ -12729,12 +12749,13 @@
     "text": "nuai khat sîng kua sâng kua sawm kua leh pakua",
     "accepted_inputs": [
       "NUAI KHAT SÎNG KUA SÂNG KUA SAWM KUA LEH PAKUA",
-      "NUAI-KHAT-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "NUAIH-KHAT-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "nuai khat leh sîng kua leh sâng kua leh sawm kua leh pakua",
       "nuai khat sing kua sang kua sawm kua leh pakua",
       "nuai khat sîng kua sâng kua sawm kua leh pakua",
       "nuai khat sîng kua sâng kua sawm kua pakua",
-      "nuai-khat-sîng-kua-sâng-kua-sawm-kua-leh-pakua"
+      "nuai-khat-sîng-kua-sâng-kua-sawm-kua-leh-pakua",
+      "nuaih khat sîng kua sâng kua sawm kua leh pakua"
     ]
   },
   {
@@ -12742,12 +12763,13 @@
     "text": "nuai khat sîng kua sâng kua za kua leh pakua",
     "accepted_inputs": [
       "NUAI KHAT SÎNG KUA SÂNG KUA ZA KUA LEH PAKUA",
-      "NUAI-KHAT-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
+      "NUAIH-KHAT-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
       "nuai khat leh sîng kua leh sâng kua leh za kua leh pakua",
       "nuai khat sing kua sang kua za kua leh pakua",
       "nuai khat sîng kua sâng kua za kua leh pakua",
       "nuai khat sîng kua sâng kua za kua pakua",
-      "nuai-khat-sîng-kua-sâng-kua-za-kua-leh-pakua"
+      "nuai-khat-sîng-kua-sâng-kua-za-kua-leh-pakua",
+      "nuaih khat sîng kua sâng kua za kua leh pakua"
     ]
   },
   {
@@ -12755,12 +12777,13 @@
     "text": "nuai khat sîng kua sâng kua za kua leh sawm kua",
     "accepted_inputs": [
       "NUAI KHAT SÎNG KUA SÂNG KUA ZA KUA LEH SAWM KUA",
-      "NUAI-KHAT-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
+      "NUAIH-KHAT-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
       "nuai khat leh sîng kua leh sâng kua leh za kua leh sawm kua",
       "nuai khat sing kua sang kua za kua leh sawm kua",
       "nuai khat sîng kua sâng kua za kua leh sawm kua",
       "nuai khat sîng kua sâng kua za kua sawm kua",
-      "nuai-khat-sîng-kua-sâng-kua-za-kua-leh-sawm-kua"
+      "nuai-khat-sîng-kua-sâng-kua-za-kua-leh-sawm-kua",
+      "nuaih khat sîng kua sâng kua za kua leh sawm kua"
     ]
   },
   {
@@ -12768,9 +12791,10 @@
     "text": "nuai hnih",
     "accepted_inputs": [
       "NUAI HNIH",
-      "NUAI-HNIH",
+      "NUAIH-HNIH",
       "nuai hnih",
-      "nuai-hnih"
+      "nuai-hnih",
+      "nuaih hnih"
     ]
   },
   {
@@ -12778,9 +12802,10 @@
     "text": "nuai thum",
     "accepted_inputs": [
       "NUAI THUM",
-      "NUAI-THUM",
+      "NUAIH-THUM",
       "nuai thum",
-      "nuai-thum"
+      "nuai-thum",
+      "nuaih thum"
     ]
   },
   {
@@ -12788,9 +12813,10 @@
     "text": "nuai li",
     "accepted_inputs": [
       "NUAI LI",
-      "NUAI-LI",
+      "NUAIH-LI",
       "nuai li",
-      "nuai-li"
+      "nuai-li",
+      "nuaih li"
     ]
   },
   {
@@ -12798,9 +12824,10 @@
     "text": "nuai nga",
     "accepted_inputs": [
       "NUAI NGA",
-      "NUAI-NGA",
+      "NUAIH-NGA",
       "nuai nga",
-      "nuai-nga"
+      "nuai-nga",
+      "nuaih nga"
     ]
   },
   {
@@ -12808,9 +12835,10 @@
     "text": "nuai ruk",
     "accepted_inputs": [
       "NUAI RUK",
-      "NUAI-RUK",
+      "NUAIH-RUK",
       "nuai ruk",
-      "nuai-ruk"
+      "nuai-ruk",
+      "nuaih ruk"
     ]
   },
   {
@@ -12818,9 +12846,10 @@
     "text": "nuai sarih",
     "accepted_inputs": [
       "NUAI SARIH",
-      "NUAI-SARIH",
+      "NUAIH-SARIH",
       "nuai sarih",
-      "nuai-sarih"
+      "nuai-sarih",
+      "nuaih sarih"
     ]
   },
   {
@@ -12828,9 +12857,10 @@
     "text": "nuai riat",
     "accepted_inputs": [
       "NUAI RIAT",
-      "NUAI-RIAT",
+      "NUAIH-RIAT",
       "nuai riat",
-      "nuai-riat"
+      "nuai-riat",
+      "nuaih riat"
     ]
   },
   {
@@ -12838,9 +12868,10 @@
     "text": "nuai kua",
     "accepted_inputs": [
       "NUAI KUA",
-      "NUAI-KUA",
+      "NUAIH-KUA",
       "nuai kua",
-      "nuai-kua"
+      "nuai-kua",
+      "nuaih kua"
     ]
   },
   {
@@ -12848,12 +12879,13 @@
     "text": "nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
       "NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
-      "NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "nuai kua sîng kua sâng kua za kua sawm kua pakua",
-      "nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+      "nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua",
+      "nuaih kua sîng kua sâng kua za kua sawm kua leh pakua"
     ]
   },
   {
@@ -12861,9 +12893,11 @@
     "text": "maktaduai khat",
     "accepted_inputs": [
       "MAKTADUAI KHAT",
-      "MAKTADUAI-KHAT",
+      "MAKTADUAIH-KHAT",
       "maktaduai khat",
-      "maktaduai-khat"
+      "maktaduai-khat",
+      "maktaduaih khat",
+      "nuai sâwm"
     ]
   },
   {
@@ -12871,10 +12905,11 @@
     "text": "maktaduai khat leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-PAKHAT",
       "maktaduai khat leh pakhat",
       "maktaduai khat pakhat",
-      "maktaduai-khat-leh-pakhat"
+      "maktaduai-khat-leh-pakhat",
+      "maktaduaih khat leh pakhat"
     ]
   },
   {
@@ -12882,11 +12917,13 @@
     "text": "maktaduai khat leh sâwm",
     "accepted_inputs": [
       "MAKTADUAI KHAT LEH SÂWM",
-      "MAKTADUAI-KHAT-LEH-SAWM",
+      "MAKTADUAIH-KHAT-LEH-SAWM",
       "maktaduai khat leh sawm",
       "maktaduai khat leh sâwm",
       "maktaduai khat sâwm",
-      "maktaduai-khat-leh-sâwm"
+      "maktaduai-khat-leh-sâwm",
+      "maktaduaih khat leh sâwm",
+      "nuai sâwm sâwm"
     ]
   },
   {
@@ -12894,12 +12931,14 @@
     "text": "maktaduai khat sâwm leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT SÂWM LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-SAWM-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-SAWM-LEH-PAKHAT",
       "maktaduai khat leh sâwm leh pakhat",
       "maktaduai khat sawm leh pakhat",
       "maktaduai khat sâwm leh pakhat",
       "maktaduai khat sâwm pakhat",
-      "maktaduai-khat-sâwm-leh-pakhat"
+      "maktaduai-khat-sâwm-leh-pakhat",
+      "maktaduaih khat sâwm leh pakhat",
+      "nuai sâwm sâwm pakhat"
     ]
   },
   {
@@ -12907,10 +12946,12 @@
     "text": "maktaduai khat leh sawm hnih",
     "accepted_inputs": [
       "MAKTADUAI KHAT LEH SAWM HNIH",
-      "MAKTADUAI-KHAT-LEH-SAWM-HNIH",
+      "MAKTADUAIH-KHAT-LEH-SAWM-HNIH",
       "maktaduai khat leh sawm hnih",
       "maktaduai khat sawm hnih",
-      "maktaduai-khat-leh-sawm-hnih"
+      "maktaduai-khat-leh-sawm-hnih",
+      "maktaduaih khat leh sawm hnih",
+      "nuai sâwm sawm hnih"
     ]
   },
   {
@@ -12918,11 +12959,13 @@
     "text": "maktaduai khat sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh sawm hnih leh pakhat",
       "maktaduai khat sawm hnih leh pakhat",
       "maktaduai khat sawm hnih pakhat",
-      "maktaduai-khat-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-sawm-hnih-leh-pakhat",
+      "maktaduaih khat sawm hnih leh pakhat",
+      "nuai sâwm sawm hnih pakhat"
     ]
   },
   {
@@ -12930,11 +12973,13 @@
     "text": "maktaduai khat leh zâ",
     "accepted_inputs": [
       "MAKTADUAI KHAT LEH ZÂ",
-      "MAKTADUAI-KHAT-LEH-ZA",
+      "MAKTADUAIH-KHAT-LEH-ZA",
       "maktaduai khat leh za",
       "maktaduai khat leh zâ",
       "maktaduai khat zâ",
-      "maktaduai-khat-leh-zâ"
+      "maktaduai-khat-leh-zâ",
+      "maktaduaih khat leh zâ",
+      "nuai sâwm zâ"
     ]
   },
   {
@@ -12942,12 +12987,14 @@
     "text": "maktaduai khat zâ sâwm leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT ZÂ SÂWM LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-ZA-LEH-SAWM-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-ZA-LEH-SAWM-LEH-PAKHAT",
       "maktaduai khat leh zâ leh sâwm leh pakhat",
       "maktaduai khat za sawm leh pakhat",
       "maktaduai khat zâ sâwm leh pakhat",
       "maktaduai khat zâ sâwm pakhat",
-      "maktaduai-khat-zâ-sâwm-leh-pakhat"
+      "maktaduai-khat-zâ-sâwm-leh-pakhat",
+      "maktaduaih khat zâ sâwm leh pakhat",
+      "nuai sâwm zâ sâwm pakhat"
     ]
   },
   {
@@ -12955,12 +13002,14 @@
     "text": "maktaduai khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT ZÂ SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh zâ leh sawm hnih leh pakhat",
       "maktaduai khat za sawm hnih leh pakhat",
       "maktaduai khat zâ sawm hnih leh pakhat",
       "maktaduai khat zâ sawm hnih pakhat",
-      "maktaduai-khat-zâ-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-zâ-sawm-hnih-leh-pakhat",
+      "maktaduaih khat zâ sawm hnih leh pakhat",
+      "nuai sâwm zâ sawm hnih pakhat"
     ]
   },
   {
@@ -12968,11 +13017,13 @@
     "text": "maktaduai khat za hnih leh sawm hnih",
     "accepted_inputs": [
       "MAKTADUAI KHAT ZA HNIH LEH SAWM HNIH",
-      "MAKTADUAI-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "MAKTADUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
       "maktaduai khat leh za hnih leh sawm hnih",
       "maktaduai khat za hnih leh sawm hnih",
       "maktaduai khat za hnih sawm hnih",
-      "maktaduai-khat-za-hnih-leh-sawm-hnih"
+      "maktaduai-khat-za-hnih-leh-sawm-hnih",
+      "maktaduaih khat za hnih leh sawm hnih",
+      "nuai sâwm za hnih sawm hnih"
     ]
   },
   {
@@ -12980,11 +13031,13 @@
     "text": "maktaduai khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh za hnih leh sawm hnih leh pakhat",
       "maktaduai khat za hnih sawm hnih leh pakhat",
       "maktaduai khat za hnih sawm hnih pakhat",
-      "maktaduai-khat-za-hnih-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-za-hnih-sawm-hnih-leh-pakhat",
+      "maktaduaih khat za hnih sawm hnih leh pakhat",
+      "nuai sâwm za hnih sawm hnih pakhat"
     ]
   },
   {
@@ -12992,11 +13045,13 @@
     "text": "maktaduai khat leh sâng khat",
     "accepted_inputs": [
       "MAKTADUAI KHAT LEH SÂNG KHAT",
-      "MAKTADUAI-KHAT-LEH-SANG-KHAT",
+      "MAKTADUAIH-KHAT-LEH-SANG-KHAT",
       "maktaduai khat leh sang khat",
       "maktaduai khat leh sâng khat",
       "maktaduai khat sâng khat",
-      "maktaduai-khat-leh-sâng-khat"
+      "maktaduai-khat-leh-sâng-khat",
+      "maktaduaih khat leh sâng khat",
+      "nuai sâwm sâng khat"
     ]
   },
   {
@@ -13004,12 +13059,14 @@
     "text": "maktaduai khat sâng khat sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT SÂNG KHAT SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-SANG-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-SANG-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh sâng khat leh sawm hnih leh pakhat",
       "maktaduai khat sang khat sawm hnih leh pakhat",
       "maktaduai khat sâng khat sawm hnih leh pakhat",
       "maktaduai khat sâng khat sawm hnih pakhat",
-      "maktaduai-khat-sâng-khat-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-sâng-khat-sawm-hnih-leh-pakhat",
+      "maktaduaih khat sâng khat sawm hnih leh pakhat",
+      "nuai sâwm sâng khat sawm hnih pakhat"
     ]
   },
   {
@@ -13017,12 +13074,14 @@
     "text": "maktaduai khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "maktaduai khat sang khat za sawm hnih leh pakhat",
       "maktaduai khat sâng khat zâ sawm hnih leh pakhat",
       "maktaduai khat sâng khat zâ sawm hnih pakhat",
-      "maktaduai-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat",
+      "maktaduaih khat sâng khat zâ sawm hnih leh pakhat",
+      "nuai sâwm sâng khat zâ sawm hnih pakhat"
     ]
   },
   {
@@ -13030,12 +13089,14 @@
     "text": "maktaduai khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "maktaduai khat sang khat za hnih sawm hnih leh pakhat",
       "maktaduai khat sâng khat za hnih sawm hnih leh pakhat",
       "maktaduai khat sâng khat za hnih sawm hnih pakhat",
-      "maktaduai-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat",
+      "maktaduaih khat sâng khat za hnih sawm hnih leh pakhat",
+      "nuai sâwm sâng khat za hnih sawm hnih pakhat"
     ]
   },
   {
@@ -13043,11 +13104,13 @@
     "text": "maktaduai khat leh sîng khat",
     "accepted_inputs": [
       "MAKTADUAI KHAT LEH SÎNG KHAT",
-      "MAKTADUAI-KHAT-LEH-SING-KHAT",
+      "MAKTADUAIH-KHAT-LEH-SING-KHAT",
       "maktaduai khat leh sing khat",
       "maktaduai khat leh sîng khat",
       "maktaduai khat sîng khat",
-      "maktaduai-khat-leh-sîng-khat"
+      "maktaduai-khat-leh-sîng-khat",
+      "maktaduaih khat leh sîng khat",
+      "nuai sâwm sîng khat"
     ]
   },
   {
@@ -13055,12 +13118,14 @@
     "text": "maktaduai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "maktaduai khat sing khat sang khat za sawm hnih leh pakhat",
       "maktaduai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "maktaduai khat sîng khat sâng khat zâ sawm hnih pakhat",
-      "maktaduai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat",
+      "maktaduaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "nuai sâwm sîng khat sâng khat zâ sawm hnih pakhat"
     ]
   },
   {
@@ -13068,12 +13133,14 @@
     "text": "maktaduai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "maktaduai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "maktaduai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "maktaduai khat sîng khat sâng khat za hnih sawm hnih pakhat",
-      "maktaduai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat",
+      "maktaduaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "nuai sâwm sîng khat sâng khat za hnih sawm hnih pakhat"
     ]
   },
   {
@@ -13081,12 +13148,14 @@
     "text": "maktaduai khat sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
       "MAKTADUAI KHAT SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
-      "MAKTADUAI-KHAT-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "MAKTADUAIH-KHAT-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "maktaduai khat leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "maktaduai khat sing kua sang kua za kua sawm kua leh pakua",
       "maktaduai khat sîng kua sâng kua za kua sawm kua leh pakua",
       "maktaduai khat sîng kua sâng kua za kua sawm kua pakua",
-      "maktaduai-khat-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+      "maktaduai-khat-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua",
+      "maktaduaih khat sîng kua sâng kua za kua sawm kua leh pakua",
+      "nuai sâwm sîng kua sâng kua za kua sawm kua pakua"
     ]
   },
   {
@@ -13094,10 +13163,12 @@
     "text": "maktaduai khat leh nuai khat",
     "accepted_inputs": [
       "MAKTADUAI KHAT LEH NUAI KHAT",
-      "MAKTADUAI-KHAT-LEH-NUAI-KHAT",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KHAT",
       "maktaduai khat leh nuai khat",
       "maktaduai khat nuai khat",
-      "maktaduai-khat-leh-nuai-khat"
+      "maktaduai-khat-leh-nuai-khat",
+      "maktaduaih khat leh nuaih khat",
+      "nuai sâwm pakhat"
     ]
   },
   {
@@ -13105,11 +13176,13 @@
     "text": "maktaduai khat nuai khat za hnih leh sawm hnih",
     "accepted_inputs": [
       "MAKTADUAI KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
-      "MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
       "maktaduai khat leh nuai khat leh za hnih leh sawm hnih",
       "maktaduai khat nuai khat za hnih leh sawm hnih",
       "maktaduai khat nuai khat za hnih sawm hnih",
-      "maktaduai-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+      "maktaduai-khat-nuai-khat-za-hnih-leh-sawm-hnih",
+      "maktaduaih khat nuaih khat za hnih leh sawm hnih",
+      "nuai sâwm pakhat za hnih sawm hnih"
     ]
   },
   {
@@ -13117,11 +13190,13 @@
     "text": "maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
       "maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
       "maktaduai khat nuai khat za hnih sawm hnih pakhat",
-      "maktaduai-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat",
+      "maktaduaih khat nuaih khat za hnih sawm hnih leh pakhat",
+      "nuai sâwm pakhat za hnih sawm hnih pakhat"
     ]
   },
   {
@@ -13129,12 +13204,14 @@
     "text": "maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
-      "maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat",
+      "maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "nuai sâwm pakhat sîng khat sâng khat zâ sawm hnih pakhat"
     ]
   },
   {
@@ -13142,12 +13219,14 @@
     "text": "maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
       "MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
-      "MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
-      "maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+      "maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat",
+      "maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "nuai sâwm pakhat sîng khat sâng khat za hnih sawm hnih pakhat"
     ]
   },
   {
@@ -13155,12 +13234,14 @@
     "text": "maktaduai khat nuai kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
       "MAKTADUAI KHAT NUAI KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
-      "MAKTADUAI-KHAT-LEH-NUAI-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "maktaduai khat leh nuai kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "maktaduai khat nuai kua sang kua za kua sawm kua leh pakua",
       "maktaduai khat nuai kua sâng kua za kua sawm kua leh pakua",
       "maktaduai khat nuai kua sâng kua za kua sawm kua pakua",
-      "maktaduai-khat-nuai-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+      "maktaduai-khat-nuai-kua-sâng-kua-za-kua-sawm-kua-leh-pakua",
+      "maktaduaih khat nuaih kua sâng kua za kua sawm kua leh pakua",
+      "nuai sâwm pakua sâng kua za kua sawm kua pakua"
     ]
   },
   {
@@ -13168,12 +13249,14 @@
     "text": "maktaduai khat nuai kua sîng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
       "MAKTADUAI KHAT NUAI KUA SÎNG KUA ZA KUA SAWM KUA LEH PAKUA",
-      "MAKTADUAI-KHAT-LEH-NUAI-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "maktaduai khat leh nuai kua leh sîng kua leh za kua leh sawm kua leh pakua",
       "maktaduai khat nuai kua sing kua za kua sawm kua leh pakua",
       "maktaduai khat nuai kua sîng kua za kua sawm kua leh pakua",
       "maktaduai khat nuai kua sîng kua za kua sawm kua pakua",
-      "maktaduai-khat-nuai-kua-sîng-kua-za-kua-sawm-kua-leh-pakua"
+      "maktaduai-khat-nuai-kua-sîng-kua-za-kua-sawm-kua-leh-pakua",
+      "maktaduaih khat nuaih kua sîng kua za kua sawm kua leh pakua",
+      "nuai sâwm pakua sîng kua za kua sawm kua pakua"
     ]
   },
   {
@@ -13181,12 +13264,14 @@
     "text": "maktaduai khat nuai kua sîng kua sâng kua sawm kua leh pakua",
     "accepted_inputs": [
       "MAKTADUAI KHAT NUAI KUA SÎNG KUA SÂNG KUA SAWM KUA LEH PAKUA",
-      "MAKTADUAI-KHAT-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "maktaduai khat leh nuai kua leh sîng kua leh sâng kua leh sawm kua leh pakua",
       "maktaduai khat nuai kua sing kua sang kua sawm kua leh pakua",
       "maktaduai khat nuai kua sîng kua sâng kua sawm kua leh pakua",
       "maktaduai khat nuai kua sîng kua sâng kua sawm kua pakua",
-      "maktaduai-khat-nuai-kua-sîng-kua-sâng-kua-sawm-kua-leh-pakua"
+      "maktaduai-khat-nuai-kua-sîng-kua-sâng-kua-sawm-kua-leh-pakua",
+      "maktaduaih khat nuaih kua sîng kua sâng kua sawm kua leh pakua",
+      "nuai sâwm pakua sîng kua sâng kua sawm kua pakua"
     ]
   },
   {
@@ -13194,12 +13279,14 @@
     "text": "maktaduai khat nuai kua sîng kua sâng kua za kua leh pakua",
     "accepted_inputs": [
       "MAKTADUAI KHAT NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH PAKUA",
-      "MAKTADUAI-KHAT-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
       "maktaduai khat leh nuai kua leh sîng kua leh sâng kua leh za kua leh pakua",
       "maktaduai khat nuai kua sing kua sang kua za kua leh pakua",
       "maktaduai khat nuai kua sîng kua sâng kua za kua leh pakua",
       "maktaduai khat nuai kua sîng kua sâng kua za kua pakua",
-      "maktaduai-khat-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-pakua"
+      "maktaduai-khat-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-pakua",
+      "maktaduaih khat nuaih kua sîng kua sâng kua za kua leh pakua",
+      "nuai sâwm pakua sîng kua sâng kua za kua pakua"
     ]
   },
   {
@@ -13207,12 +13294,14 @@
     "text": "maktaduai khat nuai kua sîng kua sâng kua za kua leh sawm kua",
     "accepted_inputs": [
       "MAKTADUAI KHAT NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH SAWM KUA",
-      "MAKTADUAI-KHAT-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
+      "MAKTADUAIH-KHAT-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
       "maktaduai khat leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua",
       "maktaduai khat nuai kua sing kua sang kua za kua leh sawm kua",
       "maktaduai khat nuai kua sîng kua sâng kua za kua leh sawm kua",
       "maktaduai khat nuai kua sîng kua sâng kua za kua sawm kua",
-      "maktaduai-khat-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-sawm-kua"
+      "maktaduai-khat-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-sawm-kua",
+      "maktaduaih khat nuaih kua sîng kua sâng kua za kua leh sawm kua",
+      "nuai sâwm pakua sîng kua sâng kua za kua sawm kua"
     ]
   },
   {
@@ -13220,9 +13309,11 @@
     "text": "maktaduai hnih",
     "accepted_inputs": [
       "MAKTADUAI HNIH",
-      "MAKTADUAI-HNIH",
+      "MAKTADUAIH-HNIH",
       "maktaduai hnih",
-      "maktaduai-hnih"
+      "maktaduai-hnih",
+      "maktaduaih hnih",
+      "nuai sawm hnih"
     ]
   },
   {
@@ -13230,9 +13321,11 @@
     "text": "maktaduai thum",
     "accepted_inputs": [
       "MAKTADUAI THUM",
-      "MAKTADUAI-THUM",
+      "MAKTADUAIH-THUM",
       "maktaduai thum",
-      "maktaduai-thum"
+      "maktaduai-thum",
+      "maktaduaih thum",
+      "nuai sawm thum"
     ]
   },
   {
@@ -13240,9 +13333,11 @@
     "text": "maktaduai li",
     "accepted_inputs": [
       "MAKTADUAI LI",
-      "MAKTADUAI-LI",
+      "MAKTADUAIH-LI",
       "maktaduai li",
-      "maktaduai-li"
+      "maktaduai-li",
+      "maktaduaih li",
+      "nuai sawm li"
     ]
   },
   {
@@ -13250,9 +13345,11 @@
     "text": "maktaduai nga",
     "accepted_inputs": [
       "MAKTADUAI NGA",
-      "MAKTADUAI-NGA",
+      "MAKTADUAIH-NGA",
       "maktaduai nga",
-      "maktaduai-nga"
+      "maktaduai-nga",
+      "maktaduaih nga",
+      "nuai sawm nga"
     ]
   },
   {
@@ -13260,9 +13357,11 @@
     "text": "maktaduai ruk",
     "accepted_inputs": [
       "MAKTADUAI RUK",
-      "MAKTADUAI-RUK",
+      "MAKTADUAIH-RUK",
       "maktaduai ruk",
-      "maktaduai-ruk"
+      "maktaduai-ruk",
+      "maktaduaih ruk",
+      "nuai sawm ruk"
     ]
   },
   {
@@ -13270,9 +13369,11 @@
     "text": "maktaduai sarih",
     "accepted_inputs": [
       "MAKTADUAI SARIH",
-      "MAKTADUAI-SARIH",
+      "MAKTADUAIH-SARIH",
       "maktaduai sarih",
-      "maktaduai-sarih"
+      "maktaduai-sarih",
+      "maktaduaih sarih",
+      "nuai sawm sarih"
     ]
   },
   {
@@ -13280,9 +13381,11 @@
     "text": "maktaduai riat",
     "accepted_inputs": [
       "MAKTADUAI RIAT",
-      "MAKTADUAI-RIAT",
+      "MAKTADUAIH-RIAT",
       "maktaduai riat",
-      "maktaduai-riat"
+      "maktaduai-riat",
+      "maktaduaih riat",
+      "nuai sawm riat"
     ]
   },
   {
@@ -13290,9 +13393,11 @@
     "text": "maktaduai kua",
     "accepted_inputs": [
       "MAKTADUAI KUA",
-      "MAKTADUAI-KUA",
+      "MAKTADUAIH-KUA",
       "maktaduai kua",
-      "maktaduai-kua"
+      "maktaduai-kua",
+      "maktaduaih kua",
+      "nuai sawm kua"
     ]
   },
   {
@@ -13300,12 +13405,14 @@
     "text": "maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
       "MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
-      "MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
-      "maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+      "maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua",
+      "maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "nuai sawm kua pakua sîng kua sâng kua za kua sawm kua pakua"
     ]
   },
   {
@@ -13314,6 +13421,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT",
       "VAIBÊLCHHE KHAT",
+      "nuai zâ",
       "vaibelchhe khat",
       "vaibêlchhe khat",
       "vaibêlchhe-khat"
@@ -13375,6 +13483,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT-LEH-ZA",
       "VAIBÊLCHHE KHAT LEH ZÂ",
+      "nuai zâ zâ",
       "vaibelchhe khat leh za",
       "vaibêlchhe khat leh zâ",
       "vaibêlchhe khat zâ",
@@ -13387,6 +13496,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai zâ zâ sawm hnih pakhat",
       "vaibelchhe khat za sawm hnih leh pakhat",
       "vaibêlchhe khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhe khat zâ sawm hnih leh pakhat",
@@ -13400,6 +13510,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai zâ za hnih sawm hnih pakhat",
       "vaibelchhe khat za hnih sawm hnih leh pakhat",
       "vaibêlchhe khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhe khat za hnih sawm hnih leh pakhat",
@@ -13413,6 +13524,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT-LEH-SANG-KHAT",
       "VAIBÊLCHHE KHAT LEH SÂNG KHAT",
+      "nuai zâ sâng khat",
       "vaibelchhe khat leh sang khat",
       "vaibêlchhe khat leh sâng khat",
       "vaibêlchhe khat sâng khat",
@@ -13425,6 +13537,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai zâ sâng khat zâ sawm hnih pakhat",
       "vaibelchhe khat sang khat za sawm hnih leh pakhat",
       "vaibêlchhe khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhe khat sâng khat zâ sawm hnih leh pakhat",
@@ -13438,6 +13551,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai zâ sâng khat za hnih sawm hnih pakhat",
       "vaibelchhe khat sang khat za hnih sawm hnih leh pakhat",
       "vaibêlchhe khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhe khat sâng khat za hnih sawm hnih leh pakhat",
@@ -13451,6 +13565,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT-LEH-SING-KHAT",
       "VAIBÊLCHHE KHAT LEH SÎNG KHAT",
+      "nuai zâ sîng khat",
       "vaibelchhe khat leh sing khat",
       "vaibêlchhe khat leh sîng khat",
       "vaibêlchhe khat sîng khat",
@@ -13463,6 +13578,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai zâ sîng khat sâng khat zâ sawm hnih pakhat",
       "vaibelchhe khat sing khat sang khat za sawm hnih leh pakhat",
       "vaibêlchhe khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhe khat sîng khat sâng khat zâ sawm hnih leh pakhat",
@@ -13476,6 +13592,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai zâ sîng khat sâng khat za hnih sawm hnih pakhat",
       "vaibelchhe khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "vaibêlchhe khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhe khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
@@ -13487,10 +13604,12 @@
     "number": "10100000",
     "text": "vaibêlchhe khat leh nuai khat",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-NUAI-KHAT",
+      "VAIBELCHHE-KHAT-LEH-NUAIH-KHAT",
       "VAIBÊLCHHE KHAT LEH NUAI KHAT",
+      "nuai zâ pakhat",
       "vaibelchhe khat leh nuai khat",
       "vaibêlchhe khat leh nuai khat",
+      "vaibêlchhe khat leh nuaih khat",
       "vaibêlchhe khat nuai khat",
       "vaibêlchhe-khat-leh-nuai-khat"
     ]
@@ -13499,12 +13618,14 @@
     "number": "10111121",
     "text": "vaibêlchhe khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHE-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai zâ pakhat sîng khat sâng khat zâ sawm hnih pakhat",
       "vaibelchhe khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "vaibêlchhe khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhe khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhe khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vaibêlchhe khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhe-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
     ]
   },
@@ -13512,12 +13633,14 @@
     "number": "10111221",
     "text": "vaibêlchhe khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHE-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai zâ pakhat sîng khat sâng khat za hnih sawm hnih pakhat",
       "vaibelchhe khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "vaibêlchhe khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhe khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhe khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vaibêlchhe khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhe-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
     ]
   },
@@ -13525,12 +13648,14 @@
     "number": "10999999",
     "text": "vaibêlchhe khat nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHE-KHAT-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHE KHAT NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai zâ pakua sîng kua sâng kua za kua sawm kua pakua",
       "vaibelchhe khat nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "vaibêlchhe khat leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhe khat nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhe khat nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vaibêlchhe khat nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhe-khat-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -13538,10 +13663,12 @@
     "number": "11000000",
     "text": "vaibêlchhe khat leh maktaduai khat",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-MAKTADUAI-KHAT",
+      "VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT",
       "VAIBÊLCHHE KHAT LEH MAKTADUAI KHAT",
+      "nuai zâ sâwm",
       "vaibelchhe khat leh maktaduai khat",
       "vaibêlchhe khat leh maktaduai khat",
+      "vaibêlchhe khat leh maktaduaih khat",
       "vaibêlchhe khat maktaduai khat",
       "vaibêlchhe-khat-leh-maktaduai-khat"
     ]
@@ -13550,12 +13677,14 @@
     "number": "11111121",
     "text": "vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai zâ sâwm pakhat sîng khat sâng khat zâ sawm hnih pakhat",
       "vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
     ]
   },
@@ -13563,12 +13692,14 @@
     "number": "11111221",
     "text": "vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai zâ sâwm pakhat sîng khat sâng khat za hnih sawm hnih pakhat",
       "vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
     ]
   },
@@ -13576,12 +13707,14 @@
     "number": "19099999",
     "text": "vaibêlchhe khat maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-MAKTADUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHE KHAT MAKTADUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai zâ sawm kua sîng kua sâng kua za kua sawm kua pakua",
       "vaibelchhe khat maktaduai kua sing kua sang kua za kua sawm kua leh pakua",
       "vaibêlchhe khat leh maktaduai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhe khat maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhe khat maktaduai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vaibêlchhe khat maktaduaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhe-khat-maktaduai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -13589,12 +13722,14 @@
     "number": "19909999",
     "text": "vaibêlchhe khat maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHE KHAT MAKTADUAI KUA NUAI KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai zâ sawm kua pakua sâng kua za kua sawm kua pakua",
       "vaibelchhe khat maktaduai kua nuai kua sang kua za kua sawm kua leh pakua",
       "vaibêlchhe khat leh maktaduai kua leh nuai kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhe khat maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhe khat maktaduai kua nuai kua sâng kua za kua sawm kua pakua",
+      "vaibêlchhe khat maktaduaih kua nuaih kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhe-khat-maktaduai-kua-nuai-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -13602,12 +13737,14 @@
     "number": "19990999",
     "text": "vaibêlchhe khat maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHE KHAT MAKTADUAI KUA NUAI KUA SÎNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai zâ sawm kua pakua sîng kua za kua sawm kua pakua",
       "vaibelchhe khat maktaduai kua nuai kua sing kua za kua sawm kua leh pakua",
       "vaibêlchhe khat leh maktaduai kua leh nuai kua leh sîng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhe khat maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
       "vaibêlchhe khat maktaduai kua nuai kua sîng kua za kua sawm kua pakua",
+      "vaibêlchhe khat maktaduaih kua nuaih kua sîng kua za kua sawm kua leh pakua",
       "vaibêlchhe-khat-maktaduai-kua-nuai-kua-sîng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -13615,12 +13752,14 @@
     "number": "19999099",
     "text": "vaibêlchhe khat maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHE KHAT MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA SAWM KUA LEH PAKUA",
+      "nuai zâ sawm kua pakua sîng kua sâng kua sawm kua pakua",
       "vaibelchhe khat maktaduai kua nuai kua sing kua sang kua sawm kua leh pakua",
       "vaibêlchhe khat leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh sawm kua leh pakua",
       "vaibêlchhe khat maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
       "vaibêlchhe khat maktaduai kua nuai kua sîng kua sâng kua sawm kua pakua",
+      "vaibêlchhe khat maktaduaih kua nuaih kua sîng kua sâng kua sawm kua leh pakua",
       "vaibêlchhe-khat-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -13628,12 +13767,14 @@
     "number": "19999909",
     "text": "vaibêlchhe khat maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
+      "VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
       "VAIBÊLCHHE KHAT MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH PAKUA",
+      "nuai zâ sawm kua pakua sîng kua sâng kua za kua pakua",
       "vaibelchhe khat maktaduai kua nuai kua sing kua sang kua za kua leh pakua",
       "vaibêlchhe khat leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh pakua",
       "vaibêlchhe khat maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
       "vaibêlchhe khat maktaduai kua nuai kua sîng kua sâng kua za kua pakua",
+      "vaibêlchhe khat maktaduaih kua nuaih kua sîng kua sâng kua za kua leh pakua",
       "vaibêlchhe-khat-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-pakua"
     ]
   },
@@ -13641,12 +13782,14 @@
     "number": "19999990",
     "text": "vaibêlchhe khat maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
     "accepted_inputs": [
-      "VAIBELCHHE-KHAT-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
+      "VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
       "VAIBÊLCHHE KHAT MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH SAWM KUA",
+      "nuai zâ sawm kua pakua sîng kua sâng kua za kua sawm kua",
       "vaibelchhe khat maktaduai kua nuai kua sing kua sang kua za kua leh sawm kua",
       "vaibêlchhe khat leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua",
       "vaibêlchhe khat maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
       "vaibêlchhe khat maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua",
+      "vaibêlchhe khat maktaduaih kua nuaih kua sîng kua sâng kua za kua leh sawm kua",
       "vaibêlchhe-khat-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-sawm-kua"
     ]
   },
@@ -13656,6 +13799,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-HNIH",
       "VAIBÊLCHHE HNIH",
+      "nuai za hnih",
       "vaibelchhe hnih",
       "vaibêlchhe hnih",
       "vaibêlchhe-hnih"
@@ -13667,6 +13811,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-THUM",
       "VAIBÊLCHHE THUM",
+      "nuai za thum",
       "vaibelchhe thum",
       "vaibêlchhe thum",
       "vaibêlchhe-thum"
@@ -13678,6 +13823,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-LI",
       "VAIBÊLCHHE LI",
+      "nuai za li",
       "vaibelchhe li",
       "vaibêlchhe li",
       "vaibêlchhe-li"
@@ -13689,6 +13835,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-NGA",
       "VAIBÊLCHHE NGA",
+      "nuai za nga",
       "vaibelchhe nga",
       "vaibêlchhe nga",
       "vaibêlchhe-nga"
@@ -13700,6 +13847,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-RUK",
       "VAIBÊLCHHE RUK",
+      "nuai za ruk",
       "vaibelchhe ruk",
       "vaibêlchhe ruk",
       "vaibêlchhe-ruk"
@@ -13711,6 +13859,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-SARIH",
       "VAIBÊLCHHE SARIH",
+      "nuai za sarih",
       "vaibelchhe sarih",
       "vaibêlchhe sarih",
       "vaibêlchhe-sarih"
@@ -13722,6 +13871,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-RIAT",
       "VAIBÊLCHHE RIAT",
+      "nuai za riat",
       "vaibelchhe riat",
       "vaibêlchhe riat",
       "vaibêlchhe-riat"
@@ -13733,6 +13883,7 @@
     "accepted_inputs": [
       "VAIBELCHHE-KUA",
       "VAIBÊLCHHE KUA",
+      "nuai za kua",
       "vaibelchhe kua",
       "vaibêlchhe kua",
       "vaibêlchhe-kua"
@@ -13742,12 +13893,14 @@
     "number": "99999999",
     "text": "vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai za kua sawm kua pakua sîng kua sâng kua za kua sawm kua pakua",
       "vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -13757,6 +13910,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-KHAT",
       "VAIBÊLCHHETAK KHAT",
+      "nuai sâng khat",
       "vaibelchhetak khat",
       "vaibêlchhetak khat",
       "vaibêlchhetak-khat"
@@ -13856,6 +14010,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-KHAT-LEH-SANG-KHAT",
       "VAIBÊLCHHETAK KHAT LEH SÂNG KHAT",
+      "nuai sâng khat sâng khat",
       "vaibelchhetak khat leh sang khat",
       "vaibêlchhetak khat leh sâng khat",
       "vaibêlchhetak khat sâng khat",
@@ -13868,6 +14023,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat sâng khat zâ sawm hnih pakhat",
       "vaibelchhetak khat sang khat za sawm hnih leh pakhat",
       "vaibêlchhetak khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhetak khat sâng khat zâ sawm hnih leh pakhat",
@@ -13881,6 +14037,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat sâng khat za hnih sawm hnih pakhat",
       "vaibelchhetak khat sang khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhetak khat sâng khat za hnih sawm hnih leh pakhat",
@@ -13894,6 +14051,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-KHAT-LEH-SING-KHAT",
       "VAIBÊLCHHETAK KHAT LEH SÎNG KHAT",
+      "nuai sâng khat sîng khat",
       "vaibelchhetak khat leh sing khat",
       "vaibêlchhetak khat leh sîng khat",
       "vaibêlchhetak khat sîng khat",
@@ -13906,6 +14064,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat sîng khat sâng khat zâ sawm hnih pakhat",
       "vaibelchhetak khat sing khat sang khat za sawm hnih leh pakhat",
       "vaibêlchhetak khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhetak khat sîng khat sâng khat zâ sawm hnih leh pakhat",
@@ -13919,6 +14078,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat sîng khat sâng khat za hnih sawm hnih pakhat",
       "vaibelchhetak khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhetak khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
@@ -13930,10 +14090,12 @@
     "number": "100100000",
     "text": "vaibêlchhetak khat leh nuai khat",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-NUAI-KHAT",
+      "VAIBELCHHETAK-KHAT-LEH-NUAIH-KHAT",
       "VAIBÊLCHHETAK KHAT LEH NUAI KHAT",
+      "nuai sâng khat pakhat",
       "vaibelchhetak khat leh nuai khat",
       "vaibêlchhetak khat leh nuai khat",
+      "vaibêlchhetak khat leh nuaih khat",
       "vaibêlchhetak khat nuai khat",
       "vaibêlchhetak-khat-leh-nuai-khat"
     ]
@@ -13942,12 +14104,14 @@
     "number": "100111121",
     "text": "vaibêlchhetak khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHETAK-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat pakhat sîng khat sâng khat zâ sawm hnih pakhat",
       "vaibelchhetak khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "vaibêlchhetak khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhetak khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhetak khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vaibêlchhetak khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhetak-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
     ]
   },
@@ -13955,12 +14119,14 @@
     "number": "100111221",
     "text": "vaibêlchhetak khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHETAK-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat pakhat sîng khat sâng khat za hnih sawm hnih pakhat",
       "vaibelchhetak khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhetak khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vaibêlchhetak khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
     ]
   },
@@ -13968,10 +14134,12 @@
     "number": "101000000",
     "text": "vaibêlchhetak khat leh maktaduai khat",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-MAKTADUAI-KHAT",
+      "VAIBELCHHETAK-KHAT-LEH-MAKTADUAIH-KHAT",
       "VAIBÊLCHHETAK KHAT LEH MAKTADUAI KHAT",
+      "nuai sâng khat sâwm",
       "vaibelchhetak khat leh maktaduai khat",
       "vaibêlchhetak khat leh maktaduai khat",
+      "vaibêlchhetak khat leh maktaduaih khat",
       "vaibêlchhetak khat maktaduai khat",
       "vaibêlchhetak-khat-leh-maktaduai-khat"
     ]
@@ -13980,12 +14148,14 @@
     "number": "101111121",
     "text": "vaibêlchhetak khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHETAK-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat sâwm pakhat sîng khat sâng khat zâ sawm hnih pakhat",
       "vaibelchhetak khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "vaibêlchhetak khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhetak khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhetak khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vaibêlchhetak khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhetak-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
     ]
   },
@@ -13993,12 +14163,14 @@
     "number": "101111221",
     "text": "vaibêlchhetak khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHETAK-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat sâwm pakhat sîng khat sâng khat za hnih sawm hnih pakhat",
       "vaibelchhetak khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhetak khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vaibêlchhetak khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14006,12 +14178,14 @@
     "number": "109999999",
     "text": "vaibêlchhetak khat maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHETAK-KHAT-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHETAK KHAT MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sâng khat sawm kua pakua sîng kua sâng kua za kua sawm kua pakua",
       "vaibelchhetak khat maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhetak khat maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vaibêlchhetak khat maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak-khat-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14021,6 +14195,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT",
       "VAIBÊLCHHETAK KHAT LEH VAIBÊLCHHE KHAT",
+      "nuai sâng khat zâ",
       "vaibelchhetak khat leh vaibelchhe khat",
       "vaibêlchhetak khat leh vaibêlchhe khat",
       "vaibêlchhetak khat vaibêlchhe khat",
@@ -14031,12 +14206,14 @@
     "number": "111111121",
     "text": "vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat zâ sâwm pakhat sîng khat sâng khat zâ sawm hnih pakhat",
       "vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14044,12 +14221,14 @@
     "number": "111111221",
     "text": "vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sâng khat zâ sâwm pakhat sîng khat sâng khat za hnih sawm hnih pakhat",
       "vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14057,12 +14236,14 @@
     "number": "190999999",
     "text": "vaibêlchhetak khat vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHETAK KHAT VAIBÊLCHHE KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sâng khat za kua pakua sîng kua sâng kua za kua sawm kua pakua",
       "vaibelchhetak khat vaibelchhe kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat leh vaibêlchhe kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vaibêlchhetak khat vaibêlchhe kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak-khat-vaibêlchhe-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14070,12 +14251,14 @@
     "number": "199099999",
     "text": "vaibêlchhetak khat vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHETAK KHAT VAIBÊLCHHE KUA MAKTADUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sâng khat za kua sawm kua sîng kua sâng kua za kua sawm kua pakua",
       "vaibelchhetak khat vaibelchhe kua maktaduai kua sing kua sang kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat leh vaibêlchhe kua leh maktaduai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vaibêlchhetak khat vaibêlchhe kua maktaduaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak-khat-vaibêlchhe-kua-maktaduai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14083,12 +14266,14 @@
     "number": "199909999",
     "text": "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHETAK KHAT VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sâng khat za kua sawm kua pakua sâng kua za kua sawm kua pakua",
       "vaibelchhetak khat vaibelchhe kua maktaduai kua nuai kua sang kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua pakua",
+      "vaibêlchhetak khat vaibêlchhe kua maktaduaih kua nuaih kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak-khat-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14096,12 +14281,14 @@
     "number": "199990999",
     "text": "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHETAK KHAT VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sâng khat za kua sawm kua pakua sîng kua za kua sawm kua pakua",
       "vaibelchhetak khat vaibelchhe kua maktaduai kua nuai kua sing kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua pakua",
+      "vaibêlchhetak khat vaibêlchhe kua maktaduaih kua nuaih kua sîng kua za kua sawm kua leh pakua",
       "vaibêlchhetak-khat-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14109,12 +14296,14 @@
     "number": "199999099",
     "text": "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHETAK KHAT VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA SAWM KUA LEH PAKUA",
+      "nuai sâng khat za kua sawm kua pakua sîng kua sâng kua sawm kua pakua",
       "vaibelchhetak khat vaibelchhe kua maktaduai kua nuai kua sing kua sang kua sawm kua leh pakua",
       "vaibêlchhetak khat leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua pakua",
+      "vaibêlchhetak khat vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua sawm kua leh pakua",
       "vaibêlchhetak-khat-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14122,12 +14311,14 @@
     "number": "199999909",
     "text": "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
+      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
       "VAIBÊLCHHETAK KHAT VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH PAKUA",
+      "nuai sâng khat za kua sawm kua pakua sîng kua sâng kua za kua pakua",
       "vaibelchhetak khat vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh pakua",
       "vaibêlchhetak khat leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua pakua",
+      "vaibêlchhetak khat vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh pakua",
       "vaibêlchhetak-khat-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-pakua"
     ]
   },
@@ -14135,12 +14326,14 @@
     "number": "199999990",
     "text": "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
+      "VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
       "VAIBÊLCHHETAK KHAT VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH SAWM KUA",
+      "nuai sâng khat za kua sawm kua pakua sîng kua sâng kua za kua sawm kua",
       "vaibelchhetak khat vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh sawm kua",
       "vaibêlchhetak khat leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
       "vaibêlchhetak khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua",
+      "vaibêlchhetak khat vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh sawm kua",
       "vaibêlchhetak-khat-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-sawm-kua"
     ]
   },
@@ -14150,6 +14343,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-HNIH",
       "VAIBÊLCHHETAK HNIH",
+      "nuai sâng hnih",
       "vaibelchhetak hnih",
       "vaibêlchhetak hnih",
       "vaibêlchhetak-hnih"
@@ -14161,6 +14355,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-THUM",
       "VAIBÊLCHHETAK THUM",
+      "nuai sâng thum",
       "vaibelchhetak thum",
       "vaibêlchhetak thum",
       "vaibêlchhetak-thum"
@@ -14172,6 +14367,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-LI",
       "VAIBÊLCHHETAK LI",
+      "nuai sâng li",
       "vaibelchhetak li",
       "vaibêlchhetak li",
       "vaibêlchhetak-li"
@@ -14183,6 +14379,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-NGA",
       "VAIBÊLCHHETAK NGA",
+      "nuai sâng nga",
       "vaibelchhetak nga",
       "vaibêlchhetak nga",
       "vaibêlchhetak-nga"
@@ -14194,6 +14391,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-RUK",
       "VAIBÊLCHHETAK RUK",
+      "nuai sâng ruk",
       "vaibelchhetak ruk",
       "vaibêlchhetak ruk",
       "vaibêlchhetak-ruk"
@@ -14205,6 +14403,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-SARIH",
       "VAIBÊLCHHETAK SARIH",
+      "nuai sâng sarih",
       "vaibelchhetak sarih",
       "vaibêlchhetak sarih",
       "vaibêlchhetak-sarih"
@@ -14216,6 +14415,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-RIAT",
       "VAIBÊLCHHETAK RIAT",
+      "nuai sâng riat",
       "vaibelchhetak riat",
       "vaibêlchhetak riat",
       "vaibêlchhetak-riat"
@@ -14227,6 +14427,7 @@
     "accepted_inputs": [
       "VAIBELCHHETAK-KUA",
       "VAIBÊLCHHETAK KUA",
+      "nuai sâng kua",
       "vaibelchhetak kua",
       "vaibêlchhetak kua",
       "vaibêlchhetak-kua"
@@ -14236,12 +14437,14 @@
     "number": "999999999",
     "text": "vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sâng kua za kua sawm kua pakua sîng kua sâng kua za kua sawm kua pakua",
       "vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14251,6 +14454,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-KHAT",
       "TLÛKLEHDINGÂWN KHAT",
+      "nuai sîng khat",
       "tluklehdingawn khat",
       "tlûklehdingâwn khat",
       "tlûklehdingâwn-khat"
@@ -14388,6 +14592,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-KHAT-LEH-SING-KHAT",
       "TLÛKLEHDINGÂWN KHAT LEH SÎNG KHAT",
+      "nuai sîng khat sîng khat",
       "tluklehdingawn khat leh sing khat",
       "tlûklehdingâwn khat leh sîng khat",
       "tlûklehdingâwn khat sîng khat",
@@ -14400,6 +14605,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat sîng khat sâng khat zâ sawm hnih pakhat",
       "tluklehdingawn khat sing khat sang khat za sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat sîng khat sâng khat zâ sawm hnih leh pakhat",
@@ -14413,6 +14619,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat sîng khat sâng khat za hnih sawm hnih pakhat",
       "tluklehdingawn khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
@@ -14424,10 +14631,12 @@
     "number": "1000100000",
     "text": "tlûklehdingâwn khat leh nuai khat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-NUAI-KHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-NUAIH-KHAT",
       "TLÛKLEHDINGÂWN KHAT LEH NUAI KHAT",
+      "nuai sîng khat pakhat",
       "tluklehdingawn khat leh nuai khat",
       "tlûklehdingâwn khat leh nuai khat",
+      "tlûklehdingâwn khat leh nuaih khat",
       "tlûklehdingâwn khat nuai khat",
       "tlûklehdingâwn-khat-leh-nuai-khat"
     ]
@@ -14436,12 +14645,14 @@
     "number": "1000111121",
     "text": "tlûklehdingâwn khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat pakhat sîng khat sâng khat zâ sawm hnih pakhat",
       "tluklehdingawn khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "tlûklehdingâwn khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "tlûklehdingâwn khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "tlûklehdingâwn-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14449,12 +14660,14 @@
     "number": "1000111221",
     "text": "tlûklehdingâwn khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat pakhat sîng khat sâng khat za hnih sawm hnih pakhat",
       "tluklehdingawn khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "tlûklehdingâwn khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14462,10 +14675,12 @@
     "number": "1001000000",
     "text": "tlûklehdingâwn khat leh maktaduai khat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-MAKTADUAI-KHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-MAKTADUAIH-KHAT",
       "TLÛKLEHDINGÂWN KHAT LEH MAKTADUAI KHAT",
+      "nuai sîng khat sâwm",
       "tluklehdingawn khat leh maktaduai khat",
       "tlûklehdingâwn khat leh maktaduai khat",
+      "tlûklehdingâwn khat leh maktaduaih khat",
       "tlûklehdingâwn khat maktaduai khat",
       "tlûklehdingâwn-khat-leh-maktaduai-khat"
     ]
@@ -14474,12 +14689,14 @@
     "number": "1001111121",
     "text": "tlûklehdingâwn khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat sâwm pakhat sîng khat sâng khat zâ sawm hnih pakhat",
       "tluklehdingawn khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "tlûklehdingâwn khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "tlûklehdingâwn khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "tlûklehdingâwn-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14487,12 +14704,14 @@
     "number": "1001111221",
     "text": "tlûklehdingâwn khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat sâwm pakhat sîng khat sâng khat za hnih sawm hnih pakhat",
       "tluklehdingawn khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "tlûklehdingâwn khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14502,6 +14721,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHE-KHAT",
       "TLÛKLEHDINGÂWN KHAT LEH VAIBÊLCHHE KHAT",
+      "nuai sîng khat zâ",
       "tluklehdingawn khat leh vaibelchhe khat",
       "tlûklehdingâwn khat leh vaibêlchhe khat",
       "tlûklehdingâwn khat vaibêlchhe khat",
@@ -14512,12 +14732,14 @@
     "number": "1011111121",
     "text": "tlûklehdingâwn khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat zâ sâwm pakhat sîng khat sâng khat zâ sawm hnih pakhat",
       "tluklehdingawn khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "tlûklehdingâwn khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "tlûklehdingâwn khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "tlûklehdingâwn-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14525,12 +14747,14 @@
     "number": "1011111221",
     "text": "tlûklehdingâwn khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat zâ sâwm pakhat sîng khat sâng khat za hnih sawm hnih pakhat",
       "tluklehdingawn khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "tlûklehdingâwn khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14538,12 +14762,14 @@
     "number": "1099999999",
     "text": "tlûklehdingâwn khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sîng khat za kua sawm kua pakua sîng kua sâng kua za kua sawm kua pakua",
       "tluklehdingawn khat vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "tlûklehdingâwn khat vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn-khat-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14553,6 +14779,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT",
       "TLÛKLEHDINGÂWN KHAT LEH VAIBÊLCHHETAK KHAT",
+      "nuai sîng khat sâng khat",
       "tluklehdingawn khat leh vaibelchhetak khat",
       "tlûklehdingâwn khat leh vaibêlchhetak khat",
       "tlûklehdingâwn khat vaibêlchhetak khat",
@@ -14563,12 +14790,14 @@
     "number": "1111111121",
     "text": "tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat sâng khat zâ sâwm pakhat sîng khat sâng khat zâ sawm hnih pakhat",
       "tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
       "tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14576,12 +14805,14 @@
     "number": "1111111221",
     "text": "tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAI-KHAT-LEH-NUAI-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "nuai sîng khat sâng khat zâ sâwm pakhat sîng khat sâng khat za hnih sawm hnih pakhat",
       "tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
       "tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
       "tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
     ]
   },
@@ -14589,12 +14820,14 @@
     "number": "1909999999",
     "text": "tlûklehdingâwn khat vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sîng khat sâng kua sawm kua pakua sîng kua sâng kua za kua sawm kua pakua",
       "tluklehdingawn khat vaibelchhetak kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat leh vaibêlchhetak kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "tlûklehdingâwn khat vaibêlchhetak kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn-khat-vaibêlchhetak-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14602,12 +14835,14 @@
     "number": "1990999999",
     "text": "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sîng khat sâng kua za kua pakua sîng kua sâng kua za kua sawm kua pakua",
       "tluklehdingawn khat vaibelchhetak kua vaibelchhe kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat leh vaibêlchhetak kua leh vaibêlchhe kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn-khat-vaibêlchhetak-kua-vaibêlchhe-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14615,12 +14850,14 @@
     "number": "1999099999",
     "text": "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sîng khat sâng kua za kua sawm kua sîng kua sâng kua za kua sawm kua pakua",
       "tluklehdingawn khat vaibelchhetak kua vaibelchhe kua maktaduai kua sing kua sang kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua pakua",
+      "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn-khat-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14628,12 +14865,14 @@
     "number": "1999909999",
     "text": "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sîng khat sâng kua za kua sawm kua pakua sâng kua za kua sawm kua pakua",
       "tluklehdingawn khat vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sang kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua pakua",
+      "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn-khat-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14641,12 +14880,14 @@
     "number": "1999990999",
     "text": "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sîng khat sâng kua za kua sawm kua pakua sîng kua za kua sawm kua pakua",
       "tluklehdingawn khat vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh za kua leh sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua pakua",
+      "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn-khat-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14654,12 +14895,14 @@
     "number": "1999999099",
     "text": "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA SAWM KUA LEH PAKUA",
+      "nuai sîng khat sâng kua za kua sawm kua pakua sîng kua sâng kua sawm kua pakua",
       "tluklehdingawn khat vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua sawm kua leh pakua",
       "tlûklehdingâwn khat leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua pakua",
+      "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua sawm kua leh pakua",
       "tlûklehdingâwn-khat-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-sawm-kua-leh-pakua"
     ]
   },
@@ -14667,12 +14910,14 @@
     "number": "1999999909",
     "text": "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH PAKUA",
+      "nuai sîng khat sâng kua za kua sawm kua pakua sîng kua sâng kua za kua pakua",
       "tluklehdingawn khat vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh pakua",
       "tlûklehdingâwn khat leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua pakua",
+      "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh pakua",
       "tlûklehdingâwn-khat-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-pakua"
     ]
   },
@@ -14680,12 +14925,14 @@
     "number": "1999999990",
     "text": "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
+      "TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
       "TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH SAWM KUA",
+      "nuai sîng khat sâng kua za kua sawm kua pakua sîng kua sâng kua za kua sawm kua",
       "tluklehdingawn khat vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh sawm kua",
       "tlûklehdingâwn khat leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
       "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua",
+      "tlûklehdingâwn khat vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh sawm kua",
       "tlûklehdingâwn-khat-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-sawm-kua"
     ]
   },
@@ -14695,6 +14942,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-HNIH",
       "TLÛKLEHDINGÂWN HNIH",
+      "nuai sîng hnih",
       "tluklehdingawn hnih",
       "tlûklehdingâwn hnih",
       "tlûklehdingâwn-hnih"
@@ -14706,6 +14954,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-THUM",
       "TLÛKLEHDINGÂWN THUM",
+      "nuai sîng thum",
       "tluklehdingawn thum",
       "tlûklehdingâwn thum",
       "tlûklehdingâwn-thum"
@@ -14717,6 +14966,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-LI",
       "TLÛKLEHDINGÂWN LI",
+      "nuai sîng li",
       "tluklehdingawn li",
       "tlûklehdingâwn li",
       "tlûklehdingâwn-li"
@@ -14728,6 +14978,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-NGA",
       "TLÛKLEHDINGÂWN NGA",
+      "nuai sîng nga",
       "tluklehdingawn nga",
       "tlûklehdingâwn nga",
       "tlûklehdingâwn-nga"
@@ -14739,6 +14990,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-RUK",
       "TLÛKLEHDINGÂWN RUK",
+      "nuai sîng ruk",
       "tluklehdingawn ruk",
       "tlûklehdingâwn ruk",
       "tlûklehdingâwn-ruk"
@@ -14750,6 +15002,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-SARIH",
       "TLÛKLEHDINGÂWN SARIH",
+      "nuai sîng sarih",
       "tluklehdingawn sarih",
       "tlûklehdingâwn sarih",
       "tlûklehdingâwn-sarih"
@@ -14761,6 +15014,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-RIAT",
       "TLÛKLEHDINGÂWN RIAT",
+      "nuai sîng riat",
       "tluklehdingawn riat",
       "tlûklehdingâwn riat",
       "tlûklehdingâwn-riat"
@@ -14772,6 +15026,7 @@
     "accepted_inputs": [
       "TLUKLEHDINGAWN-KUA",
       "TLÛKLEHDINGÂWN KUA",
+      "nuai sîng kua",
       "tluklehdingawn kua",
       "tlûklehdingâwn kua",
       "tlûklehdingâwn-kua"
@@ -14781,12 +15036,14 @@
     "number": "9999999999",
     "text": "tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
     "accepted_inputs": [
-      "TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAI-KUA-LEH-NUAI-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
       "TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "nuai sîng kua sâng kua za kua sawm kua pakua sîng kua sâng kua za kua sawm kua pakua",
       "tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
       "tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
       "tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
   }

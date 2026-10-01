@@ -48,7 +48,7 @@ to convert numbers ↔ text, and nothing runtime-specific.
 |-------------|---------------------------------------------------------------|
 | `meta`      | language name/code, version, supported range, orthography, sources. |
 | `lexicon`   | the atomic words: digits, teens, tens, scale words, etc.      |
-| `grammar`   | how atoms combine (grouping, connectors, ordering).           |
+| `grammar`   | how atoms combine (rules, the connector, input-only stacking). |
 | `parse`     | hints for the reverse direction (separators, casing, diacritics, aliases). |
 | `examples`  | a few `{ number, text }` pairs — sanity checks + docs.        |
 
@@ -63,8 +63,9 @@ that file would have to notice. Bump it when:
 - **the file's shape changes** — a section added or renamed, a new field, or a
   different structure for an existing one. `accepted_forms` becoming
   `{ table: [fields] }` took Mizo to 0.2.0 (#31), `connector_precedes`
-  arriving took it to 0.3.0 (#19), and rules becoming scale-keyed took Mizo to
-  0.6.0 and English to 0.5.0 (#65).
+  arriving took it to 0.3.0 (#19), rules becoming scale-keyed took Mizo to
+  0.6.0 and English to 0.5.0 (#65), and `grammar.stacking` took Mizo to 0.8.0
+  (#27).
 - **`meta.supports` changes.** The range is the one thing a consumer cannot
   discover without loading the spec and probing it, so widening it is a visible
   change even though no structure moved. Raising Mizo to 199 is part of the
@@ -162,9 +163,10 @@ say that; bringing the hundreds back is a change of its own.
   `word_separators` declares — drop `connectors`, resolve `aliases`), then
   parse it by recursive descent over the same rules, collecting every value
   some derivation gives. More than one is an ambiguity in the spec and raises;
-  it is never resolved by picking one. The normalising flags apply to the
-  lexicon word too, so only the comparison is loosened — `number → text` still
-  emits the canonical spelling, diacritics and all.
+  it is never resolved by picking one — except where `grammar.stacking` lets a
+  multiplier be a whole numeral, which binds greedily (below). The normalising
+  flags apply to the lexicon word too, so only the comparison is loosened —
+  `number → text` still emits the canonical spelling, diacritics and all.
 
 A rule may be marked `emit: never`: accepted when parsing but never produced.
 Mizo's `tens_shorthand` is one — `hnih thum` for 23. `number_to_text` stays the
@@ -221,6 +223,31 @@ The engine stays deliberately more tolerant than the certified set — it drops
 connectors from any gap, so it parses strings the vectors never bless. That
 asymmetry is intended (#12, #34): the vectors are a floor every target must
 reach, not a ceiling.
+
+`grammar.stacking` widens what is accepted a third way, for a pattern no rule
+can list because it is productive: on input, a scale word may take a whole
+numeral as its multiplier. Mizo's `nuai za hnih` is 10⁵ × 200 = 20,000,000,
+said where the canonical spelling is `vaibêlchhe hnih` (#27 rule 6).
+`{ accepted_from: 100000, emit: never }` means a rule keyed by a scale of 10⁵
+or more, whose template writes its multiplier as a word, also accepts in that
+slot a numeral the word could not hold, read by the same rules from the
+scales below its own. `accepted_from` is compared with the scale word heading
+the form, not the value it stands for: Mizo's `sîng za` stands for 10⁶ and is
+still refused, because `sîng` is 10⁴ (#65). `emit` has one value and is
+required so the declaration says it is input-only.
+
+A stacked multiplier **binds greedily**: it takes in as much as it can, so
+`nuai za hnih sawm nga` is 250 × 10⁵, not 200 × 10⁵ + 50 (#27, Decision 1 of
+2026-08-30). That is the one ambiguity the engine resolves rather than raises
+on. Each reading is ranked by how many words its outermost stacked multiplier
+took; only on a tie are the stacked multipliers nested inside it compared,
+outermost first. The top rank wins, and only rules that stack add to a rank,
+so any other ambiguity still ties and still raises. The range is checked on
+the winner, not used to choose one, so a reading above `supports.max` is
+refused rather than swapped for a shorter one that fits.
+Canonical output never needs greed — every canonical multiplier is a single
+bound word, which cannot take in what follows — and the reference suite checks
+that at every covered number against the readings before greed, as #65 asked.
 
 **What a parse costs.** Until #65 `text → number` brute-forced the supported
 range and template-matched every candidate, so its cost grew with the range on
@@ -324,19 +351,15 @@ as a magic number.
 
 Not speculative — each has been hit by a real language.
 
-- **No recursive multiplier.** `{remainder}` recurses; the multiplier is a
-  lexicon key, so it is always a single word. Mizo's ladder would need more
-  only at 10⁹, where the multiplier can itself be a numeral (#27 rule 5:
-  `tlûklehdingâwn sawm hnih`). Mizo's ceiling is 10¹⁰ − 1 (#27, revised
-  2026-09-25), where every 10⁹ multiplier is a single digit, so it is not
-  needed; above it, greedy binding reabsorbs a trailing addend into the
-  multiplier and no spelling round-trips. Reopening that needs a Mizo answer,
-  not a format change.
-- **Canonical vs. accepted forms aren't fully expressible.** Above 10⁵ Mizo
-  accepts productive scale-stacking (`nuai za hnih`) that no rule generates.
-  It is accepted from a head scale of 10⁵ up, measured against the scale word
-  heading the stacked form (#65), and arrives with #27's input forms, after
-  the ladder's output side. #27, #12.
+- **No recursive multiplier on output.** `{remainder}` recurses; in a
+  template the multiplier is a lexicon key, so `number_to_text` always writes
+  it as a single word. (`grammar.stacking` makes the slot recursive on input
+  only.) Mizo's ladder would need more only at 10⁹, where the multiplier can
+  itself be a numeral (#27 rule 5: `tlûklehdingâwn sawm hnih`). Mizo's ceiling
+  is 10¹⁰ − 1 (#27, revised 2026-09-25), where every 10⁹ multiplier is a single
+  digit, so it is not needed; above it, greedy binding reabsorbs a trailing
+  addend into the multiplier and no spelling round-trips. Reopening that needs
+  a Mizo answer, not a format change.
 
 Still genuinely open, no data yet:
 

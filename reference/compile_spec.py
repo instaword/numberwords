@@ -131,15 +131,20 @@ def _format_lexicon(lexicon):
     return "\n".join(lines)
 
 
-def _format_rules(rules):
+def _format_rules(spec):
     """Each rule as a dict of plain literals.
 
     `emit` and `whole_only` are booleans rather than the spec's strings
     ("never", "whole"): the renderer asks yes-or-no questions of them, and a
     bool cannot be misspelt in a comparison the way a string can.
+
+    `stacks` is grammar.stacking resolved per rule, by the engine: whether
+    this rule's multiplier slot also takes a whole numeral on input. Shipped
+    as the answer rather than as `accepted_from` plus the test for a
+    multiplier word, so the package holds no second copy of that test.
     """
     lines = ["RULES = ("]
-    for rule in rules:
+    for rule in spec.rules:
         lines.append("    {")
         lines.append(f"        'name': {rule['name']!r},")
         lines.append(f"        'scale': {rule['scale']!r},")
@@ -151,6 +156,7 @@ def _format_rules(rules):
         lines.append(f"        'output': {_parse_template(rule['output'])!r},")
         lines.append(f"        'emit': {rule.get('emit') != 'never'!r},")
         lines.append(f"        'whole_only': {rule.get('scope') == 'whole'!r},")
+        lines.append(f"        'stacks': {id(rule) in spec._stacking_rules!r},")
         lines.append("    },")
     lines.append(")")
     return "\n".join(lines)
@@ -221,7 +227,7 @@ def render_module(spec):
         _HEADER,
         provenance,
         _format_lexicon(spec.lexicon),
-        _format_rules(spec.rules),
+        _format_rules(spec),
         _format_connector(spec),
         _format_parse(spec),
     ]
