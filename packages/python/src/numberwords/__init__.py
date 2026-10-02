@@ -34,7 +34,7 @@ NumberWordsError.__module__ = "numberwords"
 
 __all__ = ["number_to_text", "text_to_number", "NumberWordsError"]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 
 def number_to_text(n: int) -> str:

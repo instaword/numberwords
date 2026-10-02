@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "numberwords"
-version = "0.2.0"
+version = "0.3.0"
 description = "Bidirectional text-number conversion driven by a single language-agnostic rule spec. Supports Mizo (Lushai) 0-9,999,999,999."
 readme = "README.md"
 requires-python = ">=3.9"
