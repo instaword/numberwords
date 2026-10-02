@@ -32,7 +32,7 @@ def test_nothing_else_leaks_into_the_package_namespace():
 
 
 def test_version_is_declared():
-    assert numberwords.__version__ == "0.2.0"
+    assert numberwords.__version__ == "0.3.0"
 
 
 def test_it_converts_both_ways():

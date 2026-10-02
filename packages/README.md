@@ -10,7 +10,7 @@ The published target packages — the libraries a consumer actually installs.
 ## What's here right now
 
 `python/` is the first real target package (#20). It has the `src/` layout,
-version `0.2.0`, `_mizo.py` — a module compiled from `languages/mizo.yaml` by
+version `0.3.0`, `_mizo.py` — a module compiled from `languages/mizo.yaml` by
 `reference/compile_spec.py` — and `_render.py`, which interprets it. It
 exports `number_to_text`, `text_to_number` and `NumberWordsError`, and it
 passes `vectors/mizo.json` in both directions.
@@ -81,6 +81,6 @@ two should share a version line once the npm target becomes real is a question
 for #23, not something to fix by bumping npm now.
 
 The **descriptions** now diverge for the same reason. `python/` describes what
-it ships — Mizo 0–199 — while `npm/` keeps the placeholder wording, because
-that is still what it is. Keep the *shared* fields (keywords, repo URL) in step;
-let the fields that describe the contents follow the contents.
+it ships — Mizo 0–9,999,999,999 — while `npm/` keeps the placeholder wording,
+because that is still what it is. Keep the *shared* fields (keywords, repo
+URL) in step; let the fields that describe the contents follow the contents.
