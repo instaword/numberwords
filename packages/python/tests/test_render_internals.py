@@ -139,9 +139,9 @@ def test_spelling_aliases_resolve_to_the_canonical_word(monkeypatch):
     # parse.aliases (spec-wide spelling variants), not an `emit: never`
     # rule (an alternate template) tested above -- until #65 the second was
     # called parse_aliases, which is why these two tests used to need this
-    # note more than they do now. mizo.yaml declares `aliases: {}` (#15), so no
-    # vector reaches this path and the suite passes with the lookup deleted
-    # from _tokenize. #27 populates it later; the code ships before that.
+    # note more than they do now. The vectors reach this path too, through
+    # Mizo's nuaih/maktaduaih (#27 Q-O); this pins the mechanism apart from
+    # that data, including normalisation of the input before the lookup.
     #
     # The alias is a placeholder, not Mizo, and the circumflex sits on the
     # invented part so nothing here reads as a claim about spelling.
@@ -186,12 +186,37 @@ def test_text_that_is_only_separators_raises(text):
         numberwords.text_to_number(text)
 
 
+def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking(monkeypatch):
+    # The package's half of the engine test of the same name. Greed decides
+    # only between stacked readings (#27); "one ten" is 10 by `tens` and 100
+    # by `hundred`, neither of which stacks, so the two must tie and raise.
+    # Ranking every rule by its multiplier's width would answer 10 instead.
+    # Placeholder words, not Mizo: Mizo has no such ambiguity to test with.
+    lexicon = {"units": {1: {"word": "one"}}, "scales": {10: {"word": "ten"}}}
+    word = ("lex", "units", "multiplier", "word")
+    ten = ("lex", "scales", 10, "word")
+    rule = {"condition": None, "emit": True, "whole_only": False, "stacks": False}
+    rules = (
+        {**rule, "name": "units", "scale": 1, "multiplier": None, "output": (word,)},
+        {**rule, "name": "tens", "scale": 10, "multiplier": None, "output": (word, " ", ten)},
+        {**rule, "name": "hundred", "scale": 100, "multiplier": 1,
+         "output": (("lex", "units", 1, "word"), " ", ten)},
+    )
+    monkeypatch.setattr(_render, "LEXICON", lexicon)
+    monkeypatch.setattr(_render, "RULES", rules)
+
+    assert set(_render._parse_readings(["one", "ten"])) == {10, 100}
+    with pytest.raises(numberwords.NumberWordsError, match=r"ambiguous"):
+        numberwords.text_to_number("one ten")
+
+
 def test_ambiguity_raises_instead_of_returning_the_first_match(monkeypatch):
     # parse_text collects every derivation's number and only then decides.
     # The tempting version returns on the first hit, which is indistinguishable
-    # on the real spec -- nothing there is ambiguous -- and hides a genuine
-    # spec fault behind a plausible answer. Force an ambiguity to prove the
-    # collect-all behaviour is really there.
+    # on the real spec -- nothing there is ambiguous except stacking, which
+    # greed decides (#27) -- and hides a genuine spec fault behind a plausible
+    # answer. Force an ambiguity outside stacking, which greed must not settle,
+    # to prove the collect-all behaviour is really there.
     lexicon = copy.deepcopy(_render.LEXICON)
     lexicon["units"][2]["standalone"] = lexicon["units"][1]["standalone"]
     monkeypatch.setattr(_render, "LEXICON", lexicon)

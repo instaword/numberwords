@@ -119,7 +119,13 @@ def _shape(spec, n: int) -> tuple:
     strings. numbers_to_sweep's docstring says why each term is there."""
     separators = _joinable_separators(spec.parse_config)
     pattern = _separator_pattern(spec.parse_config)
-    renderings = _all_renderings(spec, n, pattern, separators)
+    # Not the stacked spelling. Its length follows n // the stacking scale,
+    # which _shape_representatives never composes -- it builds a shape from
+    # a rule, a one-digit multiplier and a smaller representative -- so
+    # counting it would make shapes the recursion cannot find, and
+    # test_the_sample_loses_no_shape could not see that: it walks only to
+    # 9,999, below any stacked form.
+    renderings = _all_renderings(spec, n, pattern, separators, stacked=False)
     per_template = tuple(
         (len(words), any(w != _strip_diacritics(w) for w in words))
         for words, _joiner in renderings
@@ -265,16 +271,18 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
     - the canonical output, verbatim -- the string number_to_text() returns,
       never a rebuild of it (see _joiners);
     - one variant per applicable respelling feature, applied to the
-      canonical output: case, diacritics, alternate word separator, and the
-      connector in each gap that is somewhere the connector can go and does
-      not already hold one (see _connector_slots);
+      canonical output: case, diacritics, an alias spelling (parse.aliases),
+      alternate word separator, and the connector in each gap that is
+      somewhere the connector can go and does not already hold one (see
+      _connector_slots);
     - one combined variant with every applicable respelling applied at once,
       when more than one applies;
     - where the canonical output itself contains a connector, the spelling
       with it dropped (see _without_connectors);
     - one plain variant per alternate rendering: each `emit: never` rule
-      that also describes n, and, for a freestanding single word, the other
-      forms parse.accepted_forms allows.
+      that also describes n; for a freestanding single word, the other
+      forms parse.accepted_forms allows; and n stacked, where greed reads
+      it back as n (_stacked_rendering).
 
     Not the cross product. One representative per feature is what makes a
     failure diagnostic: when a target fails an entry, the variant that failed
@@ -322,10 +330,11 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
     multiply each other productively there (nuai za hnih for 10^5 x 200),
     and any scale may take any scale-multiplied expression as its
     multiplier, so the accepted spellings of one number stop being a list
-    and become a grammar. The range passes 10^5 already, but stacking is not
-    accepted yet; whoever adds it will need generation from parse features
-    to become generation from a grammar. See #27 for the data and #12 for
-    the discussion.
+    and become a grammar. That is Mizo since #27's input side, so the list
+    now samples a grammar rather than enumerating one: a stacked spelling is
+    one alternate rendering per number (_stacked_rendering), not every
+    decomposition the grammar accepts. See #27 for the data and #12 for the
+    discussion.
     """
     separators = _joinable_separators(spec.parse_config)
     separator_pattern = _separator_pattern(spec.parse_config)
@@ -355,10 +364,10 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
         # directly instead, which is what this split rests on (#27).
         #
         # "One dimension at a time" is exact *between* dimensions and loose
-        # within two of them: _subsets(respellings) still crosses case with
-        # diacritics, and _placements is three points rather than every
-        # value. Both are bounded and neither is a product of the others,
-        # which is the property that matters here.
+        # within two of them: _subsets(respellings) still crosses case,
+        # diacritics and aliases, and _placements is three points rather
+        # than every value. Both are bounded and neither is a product of the
+        # others, which is the property that matters here.
         #
         # The one crossed row is the thing a pure per-dimension split would
         # lose: a target that handles each dimension alone but not in
@@ -411,15 +420,15 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
     return sorted(variants)
 
 
-def _alternate_renderings(spec, n: int) -> list:
+def _alternate_renderings(spec, n: int, stacked: bool = True) -> list:
     """Spellings of `n` other than its canonical output.
 
-    Two sources. An `emit: never` rule at the scale n is rendered at, whose
+    Three sources. An `emit: never` rule at the scale n is rendered at, whose
     multiplier and condition hold for n, is accepted when parsing and never
-    produced -- Mizo's shorthand "hnih thum" for 23. The other is the
-    engine's leniency for a phrase that is a single freestanding word, which
-    accepts any form parse.accepted_forms allows ("khat" as well as "pakhat"
-    for 1).
+    produced -- Mizo's shorthand "hnih thum" for 23. The engine's leniency
+    for a phrase that is a single freestanding word, which accepts any form
+    parse.accepted_forms allows ("khat" as well as "pakhat" for 1). And,
+    unless `stacked` is false, grammar.stacking (see _stacked_rendering).
 
     Which fields leniency allows comes from the engine rather than from a
     "standalone"/"bound" list written out here. That is why this kept
@@ -449,7 +458,70 @@ def _alternate_renderings(spec, n: int) -> list:
         for other in spec._acceptable_fields(table, field, lenient=True):
             if other != field and other in entry:
                 renderings.append(entry[other])
+
+    if stacked:
+        rendering = _stacked_rendering(spec, n)
+        if rendering is not None:
+            renderings.append(rendering)
     return renderings
+
+
+def _stacked_rendering(spec, n: int):
+    """n said with a whole numeral as the multiplier of the lowest scale that
+    stacks, or None where that spelling does not denote n.
+
+    Mizo's is lakh-style: 20,146,713 is "nuai za hnih pakhat sîng li sâng ruk
+    za sarih sâwm pathum" -- 201 x 10^5, then 146,713 -- the form the repo
+    owner gave on #27 (2026-08-30), here without "leh", which is optional
+    everywhere (Q-L). One representative per number, like every other
+    feature here, not every scale it could be stacked on.
+
+    Certified only when greedy binding reads it back as n. Where it does
+    not, it is another number's spelling: 20,000,050 stacked is "nuai za
+    hnih sawm nga", which greed reads as 25,000,000 (#27, 2026-09-03), and
+    20,000,050 is said "vaibêlchhe hnih leh sawm nga" instead. Where it does,
+    a stacked spelling with a second reading is exactly what pins greed for
+    a target: 25,000,000's is that same string.
+    """
+    stacking_rules = [rule for rule in spec.rules if id(rule) in spec._stacking_rules]
+    if not stacking_rules:
+        return None
+    rule = min(stacking_rules, key=lambda r: r["scale"])
+    multiplier, remainder = divmod(n, rule["scale"])
+    items = spec._items[id(rule)]
+    slot = next(item for item in items if not isinstance(item, str) and item[0] == "lex"
+                and item[2] == "multiplier")
+    if multiplier in spec.lexicon[slot[1]] or not spec._rule_applies(rule, multiplier, remainder):
+        return None                 # the slot holds it: that is the canonical rule
+
+    pattern = _separator_pattern(spec.parse_config)
+
+    def numeral(value):
+        return " ".join(_without_connectors(spec, _split_words(spec.number_to_text(value), pattern)))
+
+    parts = []
+
+    def walk(items):
+        for item in items:
+            if isinstance(item, str):
+                parts.append(item)
+            elif item[0] == "lex" and item[2] == "multiplier":
+                parts.append(numeral(multiplier))
+            elif item[0] == "lex":
+                _, table, key, field = item
+                value = {"remainder": remainder}.get(key, key)
+                parts.append(spec.lexicon[table][value][field])
+            elif item[0] == "remainder":
+                parts.append(numeral(remainder))
+            elif remainder:                 # ("optional", items)
+                walk(item[1])
+
+    walk(items)
+    text = "".join(parts)
+    try:
+        return text if spec.text_to_number(text) == n else None
+    except ValueError:
+        return None
 
 
 def _single_lexicon_word(spec, rule, remainder: int):
@@ -498,11 +570,29 @@ def _applicable_respellings(
         features.append("case")
     if parse.get("strip_diacritics", False) and any(w != _strip_diacritics(w) for w in words):
         features.append("diacritics")
+    aliases = _alias_spellings(spec)
+    if any(spec._normalize_word(w) in aliases for w in words):
+        features.append("alias")
     if alternate_separators and len(words) > 1:
         features.append("separator")
     if parse.get("connectors") and len(words) > 1 and connector_allowed:
         features.append("connector")
     return tuple(features)
+
+
+def _alias_spellings(spec) -> dict:
+    """The alias spelling to certify for each word that has one, keyed by
+    the word normalised: {"nuai": "nuaih"} for Mizo (#27 Q-O).
+
+    parse.aliases maps variant -> canonical, the direction the parser needs;
+    the generator needs the reverse. Where several variants share a
+    canonical word, the first in sorted order stands for all of them -- one
+    representative per feature, as for everything else here.
+    """
+    reverse = {}
+    for variant, canonical in sorted(spec.parse_config.get("aliases", {}).items()):
+        reverse.setdefault(spec._normalize_word(canonical), variant)
+    return reverse
 
 
 def _joiners(canonical: str, words, separators) -> tuple:
@@ -598,9 +688,9 @@ def _connector_slots(spec, n: int, words) -> tuple:
 def _respell(words, spec, features, connector_gaps, joiner) -> str:
     """Write one phrase a different way, without changing which number it is.
 
-    Order matters: the connector goes in before normalisation, so that it
-    gets the same casing as the rest of the phrase rather than staying
-    lowercase in an otherwise uppercase string.
+    Order matters: the connector and any alias spelling go in before
+    normalisation, so that they get the same casing as the rest of the
+    phrase rather than staying lowercase in an otherwise uppercase string.
 
     The joiner is chosen by the caller rather than derived from `features`,
     because which separator counts as "the alternate one" depends on which
@@ -613,6 +703,11 @@ def _respell(words, spec, features, connector_gaps, joiner) -> str:
         out.append(word)
         if i in connector_gaps:
             out.append(parse["connectors"][0])
+    if "alias" in features:
+        # Before case and diacritics, for the same reason as the connector:
+        # the substituted word should be spelled like the rest of the phrase.
+        aliases = _alias_spellings(spec)
+        out = [aliases.get(spec._normalize_word(w), w) for w in out]
     if "diacritics" in features:
         out = [_strip_diacritics(w) for w in out]
     if "case" in features:
@@ -647,7 +742,7 @@ def _connector_gaps(spec, words, features, slots, every_gap: bool = False) -> tu
     return tuple(slots)
 
 
-def _all_renderings(spec, n: int, separator_pattern, separators) -> list:
+def _all_renderings(spec, n: int, separator_pattern, separators, stacked: bool = True) -> list:
     """Each spelling of n the rules produce -- canonical first, then the
     alternates -- as (words, the joiner that rendering used).
 
@@ -657,7 +752,7 @@ def _all_renderings(spec, n: int, separator_pattern, separators) -> list:
     string the template never emits.
     """
     renderings = []
-    for rendered in [spec.number_to_text(n), *_alternate_renderings(spec, n)]:
+    for rendered in [spec.number_to_text(n), *_alternate_renderings(spec, n, stacked)]:
         words = _split_words(rendered, separator_pattern)
         used, _ = _joiners(rendered, words, separators)
         renderings.append((words, used))

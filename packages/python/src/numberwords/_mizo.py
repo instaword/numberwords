@@ -6,7 +6,7 @@ reference/ and commit the result.
 
 LANGUAGE = 'Mizo'
 CODE = 'lus'
-SPEC_VERSION = '0.7.0'
+SPEC_VERSION = '0.8.0'
 SUPPORTS = (0, 9999999999)
 
 LEXICON = {
@@ -44,6 +44,7 @@ RULES = (
         'output': (('lex', 'units', 'multiplier', 'standalone'),),
         'emit': True,
         'whole_only': False,
+        'stacks': False,
     },
     {
         'name': 'ten',
@@ -53,6 +54,7 @@ RULES = (
         'output': (('lex', 'scales', 10, 'standalone'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': False,
     },
     {
         'name': 'tens',
@@ -62,6 +64,7 @@ RULES = (
         'output': (('lex', 'scales', 10, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': False,
     },
     {
         'name': 'hundred',
@@ -71,6 +74,7 @@ RULES = (
         'output': (('lex', 'scales', 100, 'standalone'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': False,
     },
     {
         'name': 'hundreds',
@@ -80,6 +84,7 @@ RULES = (
         'output': (('lex', 'scales', 100, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': False,
     },
     {
         'name': 'thousands',
@@ -89,6 +94,7 @@ RULES = (
         'output': (('lex', 'scales', 1000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': False,
     },
     {
         'name': 'ten_thousands',
@@ -98,6 +104,7 @@ RULES = (
         'output': (('lex', 'scales', 10000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': False,
     },
     {
         'name': 'hundred_thousands',
@@ -107,6 +114,7 @@ RULES = (
         'output': (('lex', 'scales', 100000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': True,
     },
     {
         'name': 'millions',
@@ -116,6 +124,7 @@ RULES = (
         'output': (('lex', 'scales', 1000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': True,
     },
     {
         'name': 'ten_millions',
@@ -125,6 +134,7 @@ RULES = (
         'output': (('lex', 'scales', 10000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': True,
     },
     {
         'name': 'hundred_millions',
@@ -134,6 +144,7 @@ RULES = (
         'output': (('lex', 'scales', 100000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': True,
     },
     {
         'name': 'billions',
@@ -143,6 +154,7 @@ RULES = (
         'output': (('lex', 'scales', 1000000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
+        'stacks': True,
     },
     {
         'name': 'tens_shorthand',
@@ -152,6 +164,7 @@ RULES = (
         'output': (('lex', 'units', 'multiplier', 'bound'), ' ', ('lex', 'units', 'remainder', 'bound')),
         'emit': False,
         'whole_only': True,
+        'stacks': False,
     },
 )
 
@@ -163,5 +176,5 @@ PARSE = {
     'word_separators': ('-',),
     'accepted_forms': {'units': ('bound',)},
     'connectors': ('leh',),
-    'aliases': {},
+    'aliases': {'maktaduaih': 'maktaduai', 'nuaih': 'nuai'},
 }

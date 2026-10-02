@@ -29,7 +29,10 @@ which is the innermost {remainder} expansion (see Spec._render_rule).
 text -> number: normalise the text using the spec's `parse` section (see
 Spec._normalize_word), then parse it by recursive descent over the same
 rules, collecting every value some derivation gives rather than stopping at
-the first (see Spec._parse_values). A freestanding single-word phrase
+the first (see Spec._parse_readings). More than one is an error, except
+where grammar.stacking lets a multiplier be a whole numeral: there the
+multiplier binds greedily, and the reading whose stacked multiplier takes
+in the most words wins (#27 rule 6). A freestanding single-word phrase
 accepts either form parse.accepted_forms lists ("khat" as well as "pakhat"
 for 1); inside a longer phrase every field must match exactly as the
 template names it. A rule marked `emit: never` is accepted on input and
@@ -544,6 +547,24 @@ def _validate_spec(data: dict) -> None:
                 f"parse.connectors, so the canonical spelling would not parse back"
             )
 
+    # Read by Spec.__init__, so guarded here for the same reason as `output`
+    # above: a raw dict should get a verdict, not a KeyError. `emit: never`
+    # is the only value -- stacked forms are input-only (#27 rule 6) -- and
+    # is required so a reader sees that at the declaration.
+    stacking = data["grammar"].get("stacking")
+    if stacking is not None:
+        floor = stacking.get("accepted_from")
+        if not isinstance(floor, int) or isinstance(floor, bool) or floor < 1:
+            raise ValueError(
+                f"grammar.stacking.accepted_from must be a positive integer, "
+                f"got {floor!r}"
+            )
+        if stacking.get("emit") != "never":
+            raise ValueError(
+                "grammar.stacking.emit must be 'never': stacked forms are "
+                "accepted on input and never written"
+            )
+
     for rule in rules:
         name = _rule_name(rule)
         try:
@@ -554,6 +575,16 @@ def _validate_spec(data: dict) -> None:
         _validate_placeholders(name, items, lexicon)
         for sequence in _linearisations(items):
             _validate_literals(name, sequence, separator_pattern, connectors, parse)
+
+
+def _writes_multiplier(items: tuple) -> bool:
+    """Whether a template writes its multiplier as a word outside any [...]
+    segment -- the slot a parser reads the multiplier from, and the one
+    grammar.stacking widens."""
+    return any(
+        not isinstance(item, str) and item[0] == "lex" and item[2] == "multiplier"
+        for item in items
+    )
 
 
 def _validate_readable(rule_name: str, rule: dict, items: tuple) -> None:
@@ -575,11 +606,7 @@ def _validate_readable(rule_name: str, rule: dict, items: tuple) -> None:
     than drop the remainder and name a smaller one, but only when one is
     converted; this says so at load, for all of them.
     """
-    writes_multiplier = any(
-        not isinstance(item, str) and item[0] == "lex" and item[2] == "multiplier"
-        for item in items
-    )
-    if not writes_multiplier and "multiplier" not in rule:
+    if not _writes_multiplier(items) and "multiplier" not in rule:
         raise ValueError(
             f"rule {rule_name!r} never writes its multiplier and does not fix "
             f"one, so text_to_number could never read it: give it "
@@ -743,6 +770,15 @@ class Spec:
             {rule["scale"] for rule in self.rules if rule.get("emit") != "never"},
             reverse=True,
         )
+        # The rules whose multiplier slot also takes a whole numeral on input
+        # (grammar.stacking, #27 rule 6). See _parse_readings.
+        stacking = data["grammar"].get("stacking")
+        self._stacking_rules = {
+            id(rule) for rule in self.rules
+            if stacking is not None
+            and rule["scale"] >= stacking["accepted_from"]
+            and _writes_multiplier(self._items[id(rule)])
+        }
 
     # --- number -> text --------------------------------------------------
 
@@ -870,32 +906,69 @@ class Spec:
     # --- text -> number --------------------------------------------------
 
     def text_to_number(self, text: str) -> int:
-        # Collect every value rather than returning on the first derivation.
+        # Collect every reading rather than returning on the first derivation.
         # This engine is the oracle -- the definition of correctness -- so an
         # ambiguous spelling (two numbers both accepting the same text) must
         # be a loud error, not a silent "whichever the parser found first".
-        # There is no ambiguity in the checked-in specs (the vector generator
-        # parses every certified spelling back, and the suite sweeps every
-        # short phrase), but a grammar change could introduce one, and this is
-        # what would catch it.
-        matches = sorted(self._parse_values(text))
-        if not matches:
+        #
+        # The one ambiguity the grammar resolves is stacking's, by greedy
+        # binding (#27, Decision 1 of 2026-08-30): `nuai za hnih sawm nga` is
+        # 250 x 10^5, not 200 x 10^5 + 50, because a scale word's multiplier
+        # takes in as much as it can. _parse_readings ranks each reading by
+        # that, and the top rank wins. Two readings tied at the top is still
+        # an error, and so is every ambiguity that does not involve stacking,
+        # since only stacking rules contribute to a rank.
+        #
+        # The range is applied to the winner, not before choosing one. A
+        # greedy reading above supports.max is refused rather than replaced by
+        # a shorter reading that fits: that would answer with a number the
+        # speaker did not say. At 10^10 - 1 the case cannot arise -- every
+        # shorter multiplier starts with the same scale word and is as far out
+        # of range -- and test_engine pins that rather than trusting it.
+        readings = self._parse_readings(text)
+        if not readings:
             raise ValueError(f"{text!r} does not match any number in the supported range")
-        if len(matches) > 1:
-            raise ValueError(f"{text!r} is ambiguous: matches {matches}")
-        return matches[0]
+        top = max(readings.values())
+        winners = sorted(n for n, rank in readings.items() if rank == top)
+        if len(winners) > 1:
+            raise ValueError(f"{text!r} is ambiguous: matches {winners}")
+        n = winners[0]
+        if not (self.supports["min"] <= n <= self.supports["max"]):
+            raise ValueError(
+                f"{text!r} reads as {n}, outside the supported range "
+                f"[{self.supports['min']}, {self.supports['max']}]"
+            )
+        return n
 
     def _parse_values(self, text: str) -> set:
-        """Every number in range some derivation of `text` gives.
+        """Every number in range that some reading of `text` gives, before
+        greedy binding chooses between them: the ungreedy enumeration #65
+        asks the ambiguity tests to run against. text_to_number never uses
+        it -- greed would make it 1 by construction.
+        """
+        low, high = self.supports["min"], self.supports["max"]
+        return {n for n in self._parse_readings(text) if low <= n <= high}
+
+    def _parse_readings(self, text: str) -> dict:
+        """Every number some derivation of `text` gives, mapped to the rank
+        greedy binding gives its best derivation. The range is not applied.
 
         Recursive descent over the rules, memoised on (start, end, whole,
         below): `whole` is whether the span is the entire input, which is
-        what `scope: whole` asks, and `below` skips rules too large to render
-        a remainder of the rule being matched. That one is pruning, not
-        correctness: a remainder must also come out smaller than the scale
-        (`0 < value < rule["scale"]` below), which alone rejects a derivation
-        through a larger rule -- removing `below` changes no result, only how
-        many rules the parser tries.
+        what `scope: whole` asks, and `below` skips rules at or above a
+        scale. For a remainder that is pruning: it must also come out
+        smaller than the scale (`0 < value < rule["scale"]` below), which
+        alone rejects a derivation through a larger rule. For a stacked
+        multiplier it is the descending order #27 requires -- `nuai za hnih`,
+        never `nuai maktaduai khat` -- though at 10^10 - 1 any ascending
+        reading is out of range anyway.
+
+        A rank is a tuple, compared like a word in a dictionary. A stacking
+        rule contributes how many words its multiplier took, then its
+        multiplier's rank, then its remainder's: the outermost multiplier
+        that reaches further wins, and only a tie there looks inside. Any
+        other rule contributes its remainder's rank only, so a reading never
+        outranks another for a reason that has nothing to do with stacking.
 
         Literals in a template are skipped, because every one is a separator
         or a connector (_validate_literals), and _tokenize has already
@@ -903,7 +976,7 @@ class Spec:
         """
         tokens = self._tokenize(text)
         if not tokens:
-            return set()
+            return {}
         # Leniency (accepting either form parse.accepted_forms lists) applies
         # only to a phrase that is a single freestanding word -- "khat" as
         # well as "pakhat" for 1. Relaxing a slot inside a longer phrase would
@@ -915,7 +988,7 @@ class Spec:
         def span(start, end, whole, below):
             key = (start, end, whole, below)
             if key not in cache:
-                values = set()
+                readings = {}
                 for rule in self.rules:
                     if below is not None and rule["scale"] >= below:
                         continue
@@ -929,9 +1002,19 @@ class Spec:
                             continue
                         multiplier = bound["multiplier"]
                         remainder = bound.get("remainder", 0)
-                        if self._rule_applies(rule, multiplier, remainder):
-                            values.add(multiplier * rule["scale"] + remainder)
-                cache[key] = values
+                        if not self._rule_applies(rule, multiplier, remainder):
+                            continue
+                        rank = bound.get("_remainder_rank", ())
+                        if id(rule) in self._stacking_rules:
+                            rank = (
+                                (bound.get("_multiplier_words", 0),)
+                                + bound.get("_multiplier_rank", ())
+                                + rank
+                            )
+                        value = multiplier * rule["scale"] + remainder
+                        if value not in readings or rank > readings[value]:
+                            readings[value] = rank
+                cache[key] = readings
             return cache[key]
 
         def bind(bound, name, value):
@@ -966,6 +1049,7 @@ class Spec:
                 # rule -- so removing one is caught by no test. Removing both
                 # is caught at once: "sawm hnih" then reads as 12 (sâwm + a
                 # lenient "hnih") as well as 20, and the vectors stop generating.
+                stacks = key == "multiplier" and id(rule) in self._stacking_rules
                 fields = self._acceptable_fields(table, field, lenient and whole)
                 for entry_key, entry in self.lexicon[table].items():
                     if any(
@@ -974,13 +1058,31 @@ class Spec:
                     ):
                         rebound = bind(bound, key, entry_key)
                         if rebound is not None:
+                            if key == "multiplier":
+                                rebound["_multiplier_words"] = 1
                             yield from match(rest, position + 1, end, rebound, rule, whole)
+                if stacks:
+                    # Stacking (#27 rule 6): the multiplier may instead be a
+                    # whole numeral read by these same rules -- "nuai za hnih"
+                    # is 10^5 x 200. Only a numeral the word slot cannot hold:
+                    # a single digit is the ordinary multiplier and takes the
+                    # bound form, so "vaibêlchhe pahnih" is not 2 x 10^7 (Q-L).
+                    for stop in range(position + 1, end + 1):
+                        for value, rank in span(position, stop, False, rule["scale"]).items():
+                            if value in self.lexicon[table]:
+                                continue
+                            rebound = bind(bound, "multiplier", value)
+                            if rebound is not None:
+                                rebound["_multiplier_words"] = stop - position
+                                rebound["_multiplier_rank"] = rank
+                                yield from match(rest, stop, end, rebound, rule, whole)
             elif item[0] == _REMAINDER:
                 for stop in range(position + 1, end + 1):
-                    for value in span(position, stop, False, rule["scale"]):
+                    for value, rank in span(position, stop, False, rule["scale"]).items():
                         if 0 < value < rule["scale"]:
                             rebound = bind(bound, "remainder", value)
                             if rebound is not None:
+                                rebound["_remainder_rank"] = rank
                                 yield from match(rest, stop, end, rebound, rule, whole)
             elif item[0] == "optional":
                 # Absent: the remainder is zero.
@@ -996,8 +1098,7 @@ class Spec:
                 if bound.get("remainder", 0) > 0:
                     yield from match(rest, position, end, bound, rule, whole)
 
-        low, high = self.supports["min"], self.supports["max"]
-        return {v for v in span(0, len(tokens), True, None) if low <= v <= high}
+        return dict(span(0, len(tokens), True, None))
 
     def _acceptable_fields(self, table: str, default_field: str, lenient: bool) -> list:
         """Which lexicon fields a token may match for this placeholder.

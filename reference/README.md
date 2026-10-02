@@ -128,11 +128,12 @@ reads them.
 ### Which spellings get listed
 
 **One representative per applicable parse feature, per entry** — the
-canonical output, one variant for each of case, diacritics, alternate word
-separator and the connector, one combined variant with all of them applied at
-once, and one per alternate rendering (each `emit: never` rule that describes
-the number, and the other unit forms `parse.accepted_forms` allows for a
-freestanding digit). Not the cross product, which is 18× the bytes and reports
+canonical output, one variant for each of case, diacritics, an alias spelling,
+alternate word separator and the connector, one combined variant with all of
+them applied at once, and one per alternate rendering (each `emit: never`
+rule that describes the number, the other unit forms `parse.accepted_forms`
+allows for a freestanding digit, and the number said lakh-style through
+`grammar.stacking`). Not the cross product, which is 18× the bytes and reports
 the same bug several dozen times over. One representative per feature means a failure names its own
 cause.
 
@@ -185,9 +186,9 @@ That distinction is free today and load-bearing later: above
 10<sup>5</sup> Mizo scale words multiply each other productively (`nuai za
 hnih`), and any scale may take any scale-multiplied expression as its
 multiplier, so the accepted spellings of a single number stop being a list and
-become a grammar. The range passes 10<sup>5</sup> already, but stacking is not
-accepted yet; whoever adds it will need generation from parse features to
-become generation from a grammar — see #27.
+become a grammar. That is Mizo since #27's input side, and the file certifies
+one stacked spelling per number rather than every decomposition — a sample of
+the grammar, like everything else here. See #27.
 
 **The assumption this rests on:** that parse features compose, so covering
 each separately covers them together. The engine's parse side is a pipeline

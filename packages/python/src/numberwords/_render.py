@@ -285,20 +285,26 @@ def _acceptable_fields(table: str, named_field: str, lenient: bool) -> list:
     return [named_field] + [f for f in extras if f != named_field]
 
 
-def _parse_values(tokens: list) -> set:
-    """Every number in the supported range some derivation of `tokens` gives.
+def _parse_readings(tokens: list) -> dict:
+    """Every number some derivation of `tokens` gives, mapped to the rank
+    greedy binding gives its best derivation. The range is not applied.
 
     Recursive descent over the rules, the same algorithm as the engine's
-    Spec._parse_values and deliberately a separate copy of it: this module
+    Spec._parse_readings and deliberately a separate copy of it: this module
     never imports the oracle. The two are held together by vectors/mizo.json,
     and by reference/test_compile_spec.py, which feeds both every phrase of
     up to three words and requires the same answer.
 
     Memoised on (start, end, whole, below). `whole` is whether the span is
     the entire input -- a `scope: whole` rule is only ever the whole phrase,
-    never somebody's remainder -- and `below` skips rules too large to render
-    a remainder. That is pruning, not correctness: the remainder also has to
-    come out smaller than the scale, which alone rejects the rest.
+    never somebody's remainder -- and `below` skips rules at or above a
+    scale: pruning for a remainder, which must also come out smaller than
+    the scale, and the descending order a stacked multiplier needs.
+
+    A rank is a tuple compared like a word in a dictionary. A rule that
+    stacks contributes how many words its multiplier took, then its
+    multiplier's rank, then its remainder's; any other rule only its
+    remainder's, so greed decides only between stacked readings (#27).
     """
     # Leniency applies only to a phrase that is a single freestanding word --
     # "khat" as well as "pakhat" for 1. Relaxing a slot inside a longer phrase
@@ -310,7 +316,7 @@ def _parse_values(tokens: list) -> set:
     def span(start, end, whole, below):
         key = (start, end, whole, below)
         if key not in cache:
-            values = set()
+            readings = {}
             for rule in RULES:
                 if below is not None and rule["scale"] >= below:
                     continue
@@ -324,9 +330,19 @@ def _parse_values(tokens: list) -> set:
                         continue
                     multiplier = bound["multiplier"]
                     remainder = bound.get("remainder", 0)
-                    if _rule_applies(rule, multiplier, remainder):
-                        values.add(multiplier * rule["scale"] + remainder)
-            cache[key] = values
+                    if not _rule_applies(rule, multiplier, remainder):
+                        continue
+                    rank = bound.get("_remainder_rank", ())
+                    if rule["stacks"]:
+                        rank = (
+                            (bound.get("_multiplier_words", 0),)
+                            + bound.get("_multiplier_rank", ())
+                            + rank
+                        )
+                    value = multiplier * rule["scale"] + remainder
+                    if value not in readings or rank > readings[value]:
+                        readings[value] = rank
+            cache[key] = readings
         return cache[key]
 
     def bind(bound, name, value):
@@ -359,6 +375,7 @@ def _parse_values(tokens: list) -> set:
             # removing one is caught by no test on today's data; removing
             # both makes "sawm hnih" read as 12 as well as 20, which the
             # vectors catch at once.
+            stacks = key == "multiplier" and rule["stacks"]
             fields = _acceptable_fields(table, field, lenient and whole)
             for entry_key, entry in LEXICON[table].items():
                 if any(
@@ -367,13 +384,29 @@ def _parse_values(tokens: list) -> set:
                 ):
                     rebound = bind(bound, key, entry_key)
                     if rebound is not None:
+                        if key == "multiplier":
+                            rebound["_multiplier_words"] = 1
                         yield from match(rest, position + 1, end, rebound, rule, whole)
+            if stacks:
+                # Stacking: the multiplier may instead be a whole numeral
+                # read by these same rules, but only one the word slot cannot
+                # hold -- a single digit takes the bound form (#27 Q-L).
+                for stop in range(position + 1, end + 1):
+                    for value, rank in span(position, stop, False, rule["scale"]).items():
+                        if value in LEXICON[table]:
+                            continue
+                        rebound = bind(bound, "multiplier", value)
+                        if rebound is not None:
+                            rebound["_multiplier_words"] = stop - position
+                            rebound["_multiplier_rank"] = rank
+                            yield from match(rest, stop, end, rebound, rule, whole)
         elif item[0] == "remainder":
             for stop in range(position + 1, end + 1):
-                for value in span(position, stop, False, rule["scale"]):
+                for value, rank in span(position, stop, False, rule["scale"]).items():
                     if 0 < value < rule["scale"]:
                         rebound = bind(bound, "remainder", value)
                         if rebound is not None:
+                            rebound["_remainder_rank"] = rank
                             yield from match(rest, stop, end, rebound, rule, whole)
         elif item[0] == "optional":
             # Absent: the remainder is zero.
@@ -390,9 +423,8 @@ def _parse_values(tokens: list) -> set:
                 yield from match(rest, position, end, bound, rule, whole)
 
     if not tokens:
-        return set()
-    low, high = SUPPORTS
-    return {v for v in span(0, len(tokens), True, None) if low <= v <= high}
+        return {}
+    return dict(span(0, len(tokens), True, None))
 
 
 # --- Public behaviour -------------------------------------------------------
@@ -428,9 +460,10 @@ def parse_text(text: str) -> int:
     Collecting all of them rather than returning the first is the point.
     Two numbers accepting the same spelling is a fault in the spec, and it
     has to be loud: returning whichever the parser happened to find first
-    would hide it behind an answer that looks right. There is no ambiguity
-    in the current spec, so this is here for the grammar change that
-    introduces one.
+    would hide it behind an answer that looks right. The one exception is
+    stacking, which greedy binding decides (#27): the top-ranked reading
+    wins, a tie at the top is still an error, and the range is checked on
+    the winner rather than used to pick one.
     """
     # Same reason as render_number: without this, a non-string reaches the
     # separator regex and surfaces as TypeError from inside re.
@@ -438,13 +471,21 @@ def parse_text(text: str) -> int:
         raise NumberWordsError(
             f"expected a str, got {type(text).__name__}"
         )
-    matches = sorted(_parse_values(_tokenize(text)))
-    if not matches:
+    readings = _parse_readings(_tokenize(text))
+    if not readings:
         raise NumberWordsError(
             f"{text!r} does not match any number in the supported range"
         )
-    if len(matches) > 1:
+    top = max(readings.values())
+    winners = sorted(n for n, rank in readings.items() if rank == top)
+    if len(winners) > 1:
         raise NumberWordsError(
-            f"{text!r} is ambiguous: matches {matches}"
+            f"{text!r} is ambiguous: matches {winners}"
         )
-    return matches[0]
+    n = winners[0]
+    low, high = SUPPORTS
+    if not (low <= n <= high):
+        raise NumberWordsError(
+            f"{text!r} reads as {n}, outside the supported range [{low}, {high}]"
+        )
+    return n

@@ -162,8 +162,9 @@ def test_validator_accepts_the_shapes_the_engine_supports(expression):
 
 def test_compiled_rules_match_the_spec(spec, artifact):
     """Rule count, names, and everything rule selection reads besides the
-    condition: the scale, the fixed multiplier, and whether the rule is
-    emitted or whole-input-only. Nothing else checks those field by field.
+    condition: the scale, the fixed multiplier, whether the rule is emitted
+    or whole-input-only, and whether it stacks. Nothing else checks those
+    field by field.
     """
     assert len(artifact.RULES) == len(spec.rules)
     for yaml_rule, compiled_rule in zip(spec.rules, artifact.RULES):
@@ -172,6 +173,13 @@ def test_compiled_rules_match_the_spec(spec, artifact):
         assert compiled_rule["multiplier"] == yaml_rule.get("multiplier")
         assert compiled_rule["emit"] == (yaml_rule.get("emit") != "never")
         assert compiled_rule["whole_only"] == (yaml_rule.get("scope") == "whole")
+        assert compiled_rule["stacks"] == (id(yaml_rule) in spec._stacking_rules)
+    # And which rules those are, written out rather than asked of the engine
+    # the compiler reads it from: every rule from 10^5 up (#27 rule 6, the
+    # floor from Q-K), and none below it.
+    assert {r["name"] for r in artifact.RULES if r["stacks"]} == {
+        "hundred_thousands", "millions", "ten_millions", "hundred_millions", "billions",
+    }
 
 
 def test_compiled_connector_matches_the_spec(spec, artifact):
@@ -336,13 +344,12 @@ def test_compiled_parse_config_matches_the_spec(spec, artifact):
     # the renderer would silently fail to match that word.
     #
     # This cannot fail on today's data. Mizo's only connector is "leh",
-    # which is already lowercase and diacritic-free, so normalising it
-    # changes nothing -- removing the compiler's normalisation step still
-    # produces a byte-identical artifact and this still passes. The
-    # aliases table is empty, so that loop does not run at all. The
-    # assert holds the invariant for the first value that is not already
-    # normalised, the way en.yaml holds the engine's rules for a spec
-    # that is not Mizo.
+    # and its aliases (nuaih -> nuai, maktaduaih -> maktaduai) are all
+    # already lowercase and diacritic-free, so normalising them changes
+    # nothing -- removing the compiler's normalisation step still produces a
+    # byte-identical artifact and this still passes. The assert holds the
+    # invariant for the first value that is not already normalised, the way
+    # en.yaml holds the engine's rules for a spec that is not Mizo.
     for connector in parse["connectors"]:
         assert spec._normalize_word(connector) == connector
     for variant, canonical in parse["aliases"].items():
@@ -459,10 +466,11 @@ def package():
 def test_the_package_parser_agrees_with_the_engine_on_every_short_phrase(spec, package):
     """Since #65 the package carries a real parser, and it is a second copy
     of the engine's -- deliberately, since the package never imports the
-    oracle. The vectors hold the two together on 5,950 spellings that must
-    be accepted, and on nothing that must be rejected. This holds them
-    together on everything up to three words the lexicon can spell,
-    connector included: same number, or both refuse.
+    oracle. The vectors hold the two together on every spelling they
+    certify, all of which must be accepted, and on nothing that must be
+    rejected. This holds them together on everything up to three words the
+    lexicon can spell, connectors and alias spellings included: same
+    number, or both refuse.
 
     It is the check that made the prototype for #65 trustworthy -- run then
     over every phrase of up to four words, 245,410 of them, with no
@@ -472,6 +480,7 @@ def test_the_package_parser_agrees_with_the_engine_on_every_short_phrase(spec, p
         {spec._normalize_word(w) for table in spec.lexicon.values()
          for entry in table.values() for w in entry.values()}
         | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
+        | {spec._normalize_word(a) for a in spec.parse_config["aliases"]}
     )
     disagreements = []
     for length in (1, 2, 3):
@@ -565,3 +574,36 @@ def test_the_package_parser_agrees_with_the_engine_one_slip_from_the_vectors(spe
     }
     emitting = {r["name"] for r in spec.rules if r.get("emit") != "never"}
     assert emitting <= headed, sorted(emitting - headed)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # Longer than the sweeps above reach, and each one a place where the
+        # package's copy of greedy binding has to choose as the engine does
+        # (#27 rule 6, Q-E, and the 2026-08-30 / 2026-09-03 decisions).
+        "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum",
+        "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga",
+        "nuai za hnih leh sawm nga",
+        "nuai za hnih leh pathum",
+        "nuai za pahnih",
+        "maktaduai sawm pakhat",
+        "vaibêlchhetak khat nuai sawm pakhat",
+        "NUAIH-ZA-HNIH",
+        # Refused by both, each for its own reason: above the range, below
+        # the floor, and a single digit offered as a stacked multiplier.
+        "tlûklehdingâwn sawm hnih",
+        "sîng za",
+        "vaibêlchhe pahnih",
+    ],
+)
+def test_the_package_stacks_and_binds_greedily_as_the_engine_does(spec, package, text):
+    try:
+        expected = spec.text_to_number(text)
+    except ValueError:
+        expected = None
+    try:
+        got = package.text_to_number(text)
+    except package.NumberWordsError:
+        got = None
+    assert got == expected

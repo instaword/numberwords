@@ -23,7 +23,7 @@ import numberwords
 # bump by hand -- that is the point of stating them rather than deriving
 # them from the file being checked.
 EXPECTED_VECTORS = 1234
-EXPECTED_ACCEPTED_INPUTS = 7387
+EXPECTED_ACCEPTED_INPUTS = 7644
 
 
 def test_the_vector_table_is_the_size_it_should_be(vectors):

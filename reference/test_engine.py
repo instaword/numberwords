@@ -152,6 +152,17 @@ def test_accepted_inputs_are_sorted_and_unique(vectors):
         (11, "combined", "SAWM-LEH-PAKHAT"),
         (1, "unit form", "khat"),
         (23, "parse alias", "hnih thum"),
+        # parse.aliases, #27 Q-O -- a spelling alias, not an alternate
+        # rendering like the row above. Each word that has one, not only the
+        # first, and the alias spelled like the rest of a combined variant.
+        (100_000, "spelling alias", "nuaih khat"),
+        (1_000_000, "spelling alias", "maktaduaih khat"),
+        (1_100_000, "spelling alias, every word", "maktaduaih khat leh nuaih khat"),
+        (100_000, "combined, with the alias", "NUAIH-KHAT"),
+        # grammar.stacking, #27 rule 6 -- the attested form itself, and one
+        # whose second reading makes the vector pin greed (see below).
+        (20_000_000, "stacking", "nuai za hnih"),
+        (1_100_000, "stacking, greed decides", "nuai sâwm pakhat"),
     ],
 )
 def test_each_parse_feature_is_represented(vectors, n, feature, expected):
@@ -163,6 +174,32 @@ def test_each_parse_feature_is_represented(vectors, n, feature, expected):
     # own new output.
     vector = next(v for v in vectors if v["number"] == str(n))
     assert expected in vector["accepted_inputs"], feature
+
+
+def test_the_vectors_pin_greedy_binding(spec, vectors):
+    # A target that resolved stacking the other way -- or raised on it --
+    # passes every certified spelling unless some spelling has a second
+    # reading. "nuai sâwm pakhat" is 11 x 10^5 to greed and 10 x 10^5 + 1
+    # without it; certified under 1,100,000, it fails such a target. Asked of
+    # the file, so a generator that stopped producing these fails here. Only
+    # spellings with a word that can head a stacked form can have a second
+    # reading (test_greed_decides_only_where_a_word_stacks), so only those
+    # are parsed. The file holds exactly ten today: the bound is tight on
+    # purpose, so a generator change that loses one gets looked at.
+    floor = spec._data["grammar"]["stacking"]["accepted_from"]
+    heads = {
+        spec._normalize_word(word)
+        for scale, entry in spec.lexicon["scales"].items() if scale >= floor
+        for word in entry.values()
+    }
+    pinning = []
+    for vector in vectors:
+        for text in vector["accepted_inputs"]:
+            if heads & set(spec._tokenize(text)) and len(spec._parse_values(text)) > 1:
+                pinning.append(text)
+        if len(pinning) >= 10:
+            break
+    assert len(pinning) >= 10, pinning
 
 
 def test_accepted_inputs_do_not_bless_every_connector_gap(vectors):
@@ -220,6 +257,13 @@ def test_certified_connectors_are_followed_by_a_top_level_addend(spec, vectors):
     }
     for entry in spec.lexicon["scales"].values():
         addends.update(spec._normalize_word(form) for form in entry.values())
+    # And another spelling of one, which is still one: "maktaduaih khat leh
+    # nuaih khat" (1,100,000) is certified since #27 Q-O.
+    addends.update(
+        spec._normalize_word(variant)
+        for variant, canonical in spec.parse_config["aliases"].items()
+        if spec._normalize_word(canonical) in addends
+    )
     # The effective separators, not parse.word_separators: since #46 that
     # declares only the non-whitespace ones, and splitting on it alone
     # would silently stop examining every space-joined candidate -- which
@@ -377,23 +421,180 @@ def test_a_bound_form_is_rejected_as_the_final_addend(spec):
 
 def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
     # Q-K on #27, as revised: scale words multiply each other from 10^5 up
-    # only, so "za sawm hnih" is 120 and not also 10^2 x 20 = 2,000.
+    # only, so "za sawm hnih" is 120 and not also 10^2 x 20 = 2,000. It
+    # reaches the parser that way from 120's canonical "zâ leh sawm hnih".
     #
-    # This cannot currently fail for that reason, and saying so is the point.
-    # 2,000 has been inside supports.max since the ladder (#27), so range is
-    # no longer what keeps the rival reading out: the spec has no stacking
-    # rule yet. That lands with #27's input forms, where stacking is attested
-    # (rule 6, #65). What the assertions actually pin is narrower: that no
-    # *other* number accepts "za sawm hnih", and that 120's canonical
-    # spelling is what it should be.
-    #
-    # Kept rather than deleted, on the #36 precedent -- an invariant can be
-    # correct and inert, and the honest move is to document the limit instead
-    # of implying coverage. It becomes load-bearing when stacking arrives:
-    # measured against the head scale, `za` (10^2) is below the 10^5 floor,
-    # so "za sawm hnih" must still read as 120 only.
-    assert spec.text_to_number("za sawm hnih") == 120
+    # Inert until #27's input side, since nothing stacked; live now. Asked
+    # of every reading rather than of text_to_number, because greed would
+    # pick one if there were two and hide that the floor had failed.
+    assert spec._parse_values("za sawm hnih") == {120}
     assert spec.number_to_text(120) == "zâ leh sawm hnih"
+    # Measured against the head scale, not the value stood for (#65,
+    # 2026-09-24): "sâng za" and "sîng za" stand for 10^5 and 10^6 and are
+    # still refused, because sâng and sîng sit below the floor.
+    for text in ("sâng za", "sîng za"):
+        assert spec._parse_values(text) == set(), text
+
+    # And the floor is what does it: lowered to za's scale, the rival reading
+    # Q-K was reversed to prevent comes straight back.
+    data = copy.deepcopy(spec._data)
+    data["grammar"]["stacking"]["accepted_from"] = 100
+    assert Spec(data)._parse_values("za sawm hnih") == {120, 2000}
+
+
+# Stacked spellings and what they are, as written on #27 and #65 rather than
+# derived from the rules, so a wrong rule fails here instead of agreeing
+# with itself. Each is accepted on input and never emitted.
+_STACKED_FORMS = {
+    "nuai za hnih": 20_000_000,                      # #27 rule 6
+    "maktaduai za thum": 300_000_000,                # #27 rule 6
+    "nuai za pahnih": 10_200_000,                    # #27 Q-E: 10^5 x (100 + 2)
+    "nuaih za hnih": 20_000_000,                     # #27 Q-O, multiplied position
+    "nuai sawm hnih": 2_000_000,                     # a native speaker, #65, 2026-09-24
+    # 2026-08-30, the repo owner's ordinary way to say it: 201 x 10^5, then
+    # the rest, with "leh" only before the final addend.
+    "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum": 20_146_713,
+    # Mizo Ṭawng Ziah Dân Dik, ch. 4, via #27 (2026-09-03): "leh" in every
+    # gap, and "sâwm" keeping its circumflex as nuai's multiplier.
+    "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga":
+        1_098_765,
+}
+
+
+@pytest.mark.parametrize("text", sorted(_STACKED_FORMS))
+def test_stacked_spellings_are_accepted(spec, text):
+    assert spec.text_to_number(text) == _STACKED_FORMS[text]
+
+
+@pytest.mark.parametrize("n", sorted(set(_STACKED_FORMS.values())))
+def test_stacked_spellings_are_never_emitted(spec, n):
+    # Rule 6: number_to_text takes the largest scale that fits (Decision 2
+    # of 2026-08-30), so 20,000,000 is "vaibêlchhe hnih", never "nuai za hnih".
+    assert spec.number_to_text(n) not in _STACKED_FORMS
+
+
+# Where a stacked spelling has more than one reading and greed decides, with
+# every reading listed, so the test shows the choice and not only its result.
+_GREEDY_CHOICES = {
+    # #27, Decision 1 of 2026-08-30: 250 x 10^5, not 200 x 10^5 + 50.
+    "nuai za hnih sawm nga": (25_000_000, {25_000_000, 20_000_050}),
+    # 2026-09-03: "leh strips, greed absorbs".
+    "nuai za hnih leh sawm nga": (25_000_000, {25_000_000, 20_000_050}),
+    # #65, 2026-09-25: 203 x 10^5, not 200 x 10^5 + 3.
+    "nuai za hnih leh pathum": (20_300_000, {20_300_000, 20_000_003}),
+    # Q-E: the addend binds into the multiplier.
+    "nuai za pahnih": (10_200_000, {10_200_000, 10_000_002}),
+    # #65, 2026-09-25, on the prototype: 11 x 10^6, not 10 x 10^6 + 1.
+    "maktaduai sawm pakhat": (11_000_000, {11_000_000, 10_000_001}),
+}
+
+
+@pytest.mark.parametrize("text", sorted(_GREEDY_CHOICES))
+def test_a_stacked_multiplier_binds_greedily(spec, text):
+    chosen, readings = _GREEDY_CHOICES[text]
+    assert spec._parse_values(text) == readings
+    assert spec.text_to_number(text) == chosen
+
+
+def test_greed_applies_at_every_stacked_multiplier_not_only_the_first(spec):
+    # A stacking rule reached as a remainder binds greedily too: the inner
+    # "nuai sawm pakhat" is 11 x 10^5 here, as it is standing alone. Without
+    # the remainder's rank the two readings below tie and the phrase raises.
+    #
+    # The grammar mechanism, not a linguistic claim: stacking inside a
+    # remainder follows from the rules recursing, and #27 attests stacking
+    # only at the head of a number. The PR that added it asks whether it
+    # should stay accepted.
+    text = "vaibêlchhetak khat nuai sawm pakhat"
+    assert spec._parse_values(text) == {101_100_000, 101_000_001}
+    assert spec.text_to_number(text) == 101_100_000
+
+
+def test_the_value_greed_displaces_is_said_through_the_next_scale(spec):
+    # 2026-09-03 on #27: 20,000,050 cannot be said lakh-style, since greed
+    # reads "nuai za hnih (leh) sawm nga" as 25,000,000 -- and its canonical
+    # spelling, one bound digit on vaibêlchhe, has nothing for greed to take.
+    assert spec.number_to_text(20_000_050) == "vaibêlchhe hnih leh sawm nga"
+    assert spec._parse_values("vaibêlchhe hnih leh sawm nga") == {20_000_050}
+
+
+def test_greed_never_decides_a_canonical_spelling(spec):
+    # Decision 2 on #27 argues that canonical output is unambiguous by
+    # construction -- every multiplier is one bound digit, which cannot take
+    # in what follows -- so greed only ever settles an input-only spelling.
+    # #65 asked for that to be tested rather than trusted, against every
+    # reading rather than greed's choice: exactly one, at every covered
+    # number, out of range included.
+    ambiguous = []
+    for n in COVERED:
+        readings = spec._parse_readings(spec.number_to_text(n))
+        if len(readings) != 1:
+            ambiguous.append((n, sorted(readings)))
+    assert not ambiguous, ambiguous[:5]
+
+
+@pytest.mark.parametrize(
+    "text, why",
+    [
+        # Q-L: a multiplier is always the bound form; one the word slot holds
+        # is that slot's, and a stacked one must be a numeral it cannot hold.
+        ("vaibêlchhe pahnih", "a single digit is not stacked"),
+        ("nuai pakhat", "a single digit is not stacked"),
+        # What follows a stacked multiplier is a remainder, below the head.
+        ("nuai za hnih leh nuai khat", "an addend as large as the head scale"),
+    ],
+)
+def test_what_stacking_still_refuses(spec, text, why):
+    with pytest.raises(ValueError):
+        spec.text_to_number(text)
+
+
+@pytest.mark.parametrize("text", ["nuai maktaduai khat", "nuai nuai khat"])
+def test_a_stacked_multiplier_descends(spec, text):
+    # A multiplier's scale words sit below the word it multiplies: "nuai za
+    # hnih", never "nuai maktaduai khat". At 10^10 - 1 the order cannot
+    # change an answer -- an ascending reading is at least 10^11 -- so it is
+    # asked of every reading, out of range included: there must be none,
+    # not one that the range then throws away.
+    assert spec._parse_readings(text) == {}
+
+
+def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking():
+    # Synthetic, because Mizo has no such ambiguity -- which is exactly why
+    # nothing else would notice greed starting to settle one. "one ten" is
+    # 10 by `tens` (multiplier one, a word) and 100 by `hundred` (a fixed
+    # multiplier, no word). Neither rule stacks, so neither reading outranks
+    # the other and the oracle raises, as it always has; ranking every rule
+    # by how many words its multiplier took would quietly answer 10.
+    spec = Spec({
+        "meta": {"supports": {"min": 0, "max": 1000}},
+        "lexicon": {
+            "units": {1: {"word": "one"}},
+            "scales": {10: {"word": "ten"}},
+        },
+        "grammar": {
+            "stacking": {"accepted_from": 1000, "emit": "never"},
+            "rules": [
+                {"name": "units", "scale": 1, "output": "{units[multiplier].word}"},
+                {"name": "tens", "scale": 10,
+                 "output": "{units[multiplier].word} {scales[10].word}"},
+                {"name": "hundred", "scale": 100, "multiplier": 1,
+                 "output": "{units[1].word} {scales[10].word}"},
+            ],
+        },
+        "parse": {},
+    })
+    assert spec._parse_values("one ten") == {10, 100}
+    with pytest.raises(ValueError, match="ambiguous"):
+        spec.text_to_number("one ten")
+
+
+def test_a_stacked_reading_above_the_range_is_refused_not_shortened(spec):
+    # Greedy first, then the range. "tlûklehdingâwn sawm hnih" is 20 x 10^9
+    # (#27 rule 5) -- sayable, above the 10^10 - 1 ceiling -- and is refused
+    # with the number it reads as rather than as "no match".
+    with pytest.raises(ValueError, match=r"reads as 20000000000, outside"):
+        spec.text_to_number("tlûklehdingâwn sawm hnih")
 
 
 # Where a scale word multiplied by zero ("sâng bial") can stand, one row
@@ -852,13 +1053,9 @@ def test_the_field_a_template_names_always_matches(spec):
 def test_aliases_resolve_to_canonical_word_before_matching():
     # parse.aliases lets an alternate spelling resolve to the canonical
     # lexicon word before rule matching. Same mechanism as parse.connectors,
-    # just substituting instead of dropping. mizo.yaml's alias list is empty
-    # for now -- a native speaker confirmed Mizo 0-199 has no non-diacritic
-    # spelling variants, and 200-999 introduced no new scale words, so the
-    # finding carries that far. #27 puts the first real aliases at 10^5
-    # (nuai/nuaih, Q-O); the range reaches them now, and they arrive with
-    # #27's input forms. So this uses synthetic placeholder words rather than
-    # asserting real Mizo spellings.
+    # just substituting instead of dropping. The mechanism, with synthetic
+    # words so it holds whatever mizo.yaml lists; Mizo's own two aliases are
+    # tested below.
     data = {
         "meta": {"supports": {"min": 5, "max": 5}},
         "lexicon": {"units": {5: {"standalone": "canonical_five", "bound": "canonical_five"}}},
@@ -870,6 +1067,50 @@ def test_aliases_resolve_to_canonical_word_before_matching():
     spec = Spec(data)
     assert spec.text_to_number("alt_five") == 5
     assert spec.text_to_number("canonical_five") == 5
+
+
+# Where an h-spelling can stand in a phrase, one row per position, since an
+# alias is resolved word by word and a target that resolved it only at the
+# start of a phrase, or only once per phrase, would fail a different row
+# (#27 Q-O: "accepted on input, including in multiplied position").
+_H_SPELLINGS = {
+    "the whole phrase": ("nuaih khat", 100_000),
+    "heading a number with an addend": ("nuaih khat leh pakhat", 100_001),
+    "inside a larger number": ("maktaduai khat nuaih hnih", 1_200_000),
+    "twice in one phrase": ("maktaduaih khat nuaih hnih", 1_200_000),
+    "with the other parse features": ("MAKTADUAIH-KHAT", 1_000_000),
+}
+
+
+@pytest.mark.parametrize("position", sorted(_H_SPELLINGS))
+def test_the_h_spellings_of_nuai_and_maktaduai_are_accepted(spec, position):
+    text, expected = _H_SPELLINGS[position]
+    assert spec.text_to_number(text) == expected
+
+
+def test_the_h_spellings_are_never_emitted(spec):
+    # Q-O: number_to_text writes the h-less form. Asked of every alias the
+    # spec declares rather than of the two words, so a third one added later
+    # is held to the same rule.
+    aliases = {spec._normalize_word(v) for v in spec.parse_config["aliases"]}
+    assert aliases, "mizo.yaml declares no aliases"
+    emitted = []
+    for n in COVERED:
+        text = spec.number_to_text(n)
+        words = {spec._normalize_word(w) for w in text.split()}
+        if words & aliases:
+            emitted.append((n, text))
+    assert not emitted, emitted[:5]
+
+
+@pytest.mark.parametrize("word", ["nuai", "nuaih", "maktaduai", "maktaduaih"])
+def test_an_h_spelling_is_still_a_scale_word(spec, word):
+    # The alias makes "nuaih" another way of writing "nuai", nothing more:
+    # alone, both are a scale word missing its x1 (#27 rule 1), and both
+    # are refused. The h-less forms are listed too, so the comparison is
+    # checked rather than assumed.
+    with pytest.raises(ValueError):
+        spec.text_to_number(word)
 
 
 @pytest.mark.parametrize(
@@ -981,26 +1222,85 @@ def test_a_range_beyond_the_rules_is_named_not_crashed(spec):
         widened.number_to_text(SUPPORTED_MAX + 1)
 
 
-def test_no_short_phrase_is_ambiguous(spec):
-    # The oracle raises on ambiguity rather than guessing, which only helps
-    # if something feeds it the ambiguous strings. The certified inputs
-    # cannot: every one is a correct positive. So feed it every phrase of up
-    # to three words the lexicon can spell, connector included -- 25,259
-    # strings -- and require that none denotes two numbers. Cheap now that a
-    # parse no longer scans the range; under the brute-force parser the same
-    # sweep was a separate twenty-minute job, run once while prototyping #65.
+@pytest.fixture(scope="module")
+def short_phrase_readings(spec):
+    """Every reading of every phrase of up to three words the lexicon can
+    spell, connectors and alias spellings included -- 30,783 phrases --
+    before greed chooses. Computed once for the tests below.
+
+    The oracle raises on ambiguity rather than guessing, which only helps if
+    something feeds it the ambiguous strings, and the certified inputs
+    cannot: every one is a correct positive. Cheap now that a parse no
+    longer scans the range; under the brute-force parser the same sweep was
+    a separate twenty-minute job, run once while prototyping #65.
+    """
     vocabulary = sorted(
         {spec._normalize_word(w) for table in spec.lexicon.values()
          for entry in table.values() for w in entry.values()}
         | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
+        | {spec._normalize_word(a) for a in spec.parse_config["aliases"]}
     )
-    assert len(vocabulary) == 29, vocabulary
-    ambiguous = []
+    assert len(vocabulary) == 31, vocabulary
+    readings = {}
     for length in (1, 2, 3):
         for words in itertools.product(vocabulary, repeat=length):
-            if len(spec._parse_values(" ".join(words))) > 1:
-                ambiguous.append(" ".join(words))
-    assert not ambiguous, ambiguous[:10]
+            text = " ".join(words)
+            readings[text] = spec._parse_readings(text)
+    return readings
+
+
+def test_greed_leaves_no_short_phrase_ambiguous(short_phrase_readings):
+    # Two readings tied at the top rank is an ambiguity greed does not
+    # settle, and text_to_number raises on it. None may exist.
+    tied = []
+    for text, readings in short_phrase_readings.items():
+        if readings:
+            top = max(readings.values())
+            if sum(1 for rank in readings.values() if rank == top) > 1:
+                tied.append((text, sorted(readings)))
+    assert not tied, tied[:10]
+
+
+def test_greed_decides_only_where_a_word_stacks(spec, short_phrase_readings):
+    # Every phrase with two readings in range must hold a scale word from
+    # 10^5 up -- greed exists for stacking, and anywhere else a second
+    # reading is a fault in the spec that should raise, not be chosen
+    # between. And greed has to be doing something, or the check is empty:
+    # "maktaduai sawm pakhat" alone gives it work.
+    floor = spec._data["grammar"]["stacking"]["accepted_from"]
+    heads = {
+        spec._normalize_word(word)
+        for scale, entry in spec.lexicon["scales"].items() if scale >= floor
+        for word in entry.values()
+    }
+    decided, unexplained = 0, []
+    for text, readings in short_phrase_readings.items():
+        in_range = [n for n in readings if 0 <= n <= SUPPORTED_MAX]
+        if len(in_range) > 1:
+            decided += 1
+            if not heads & set(spec._tokenize(text)):
+                unexplained.append((text, sorted(in_range)))
+    assert not unexplained, unexplained[:10]
+    assert decided > 0
+
+
+def test_a_greedy_reading_out_of_range_has_nothing_in_range_to_fall_back_to(
+    short_phrase_readings,
+):
+    # text_to_number applies the range to greed's choice rather than using
+    # it to choose. At 10^10 - 1 that cannot change an answer: a stacked
+    # multiplier and every shorter one start with the same scale word, so
+    # when the longest is out of range, so is every reading. Measured here
+    # rather than trusted, so that a higher ceiling or a new rule that makes
+    # the order matter fails a test instead of silently changing answers.
+    fallback = []
+    for text, readings in short_phrase_readings.items():
+        if not readings:
+            continue
+        winner = max(readings, key=lambda n: readings[n])
+        if winner > SUPPORTED_MAX and any(n <= SUPPORTED_MAX for n in readings):
+            fallback.append((text, sorted(readings)))
+    assert not fallback, fallback[:10]
 
 
 def test_an_emit_never_rule_is_accepted_alongside_canonical_output():
