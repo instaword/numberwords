@@ -1,52 +1,57 @@
 # numberwords
 
-Bidirectional **text ↔ number** conversion, starting with **Mizo** and designed
-to add more languages over time.
+Convert numbers to words and words back to numbers, starting with **Mizo**
+(Lushai). Every whole number from 0 to 9,999,999,999 works in both directions.
 
-```
-number → text :  2026  →  (the Mizo words for 2026)
-text → number :  (the Mizo words)  →  2026
+```python
+>>> import numberwords
+>>> numberwords.number_to_text(2026)
+'sâng hnih sawm hnih leh paruk'
+>>> numberwords.text_to_number("sâng hnih sawm hnih leh paruk")
+2026
 ```
 
-The goal is a **single, language-agnostic rule specification** that can be
-authored once per language and "compiled" into idiomatic packages for multiple
-runtimes — a Python package, an npm package for JS/TS, and more later. One
-source of truth; many published targets.
+It is for software that writes or reads Mizo numbers: spelling out an amount,
+or turning a number someone typed in words back into digits.
+
+- **Writing** gives one correct spelling, from numeral data checked by native
+  speakers and cited in [`languages/mizo.yaml`](languages/mizo.yaml).
+- **Reading** accepts what people actually write: any case, missing
+  diacritics, the connector `leh` left out, and forms it never writes itself,
+  such as `nuai za hnih` (200 × 100,000) for 20,000,000.
+- **Text it cannot read, or a number out of range,** raises
+  `NumberWordsError`, a `ValueError`, rather than returning a wrong answer.
 
 ## Install
 
 ```bash
-pip install numberwords              # Python -- Mizo 0-199
+pip install numberwords              # Python -- Mizo 0-9,999,999,999
 npm install @instaword/numberwords   # JS/TS -- placeholder release, exports nothing
 ```
 
-```python
->>> import numberwords
->>> numberwords.number_to_text(58)
-'sawm nga pariat'
->>> numberwords.text_to_number("sawm nga pariat")
-58
->>> numberwords.number_to_text(128)
-'zâ sawm hnih leh pariat'
-```
+The Python package exports `number_to_text`, `text_to_number` and
+`NumberWordsError`. The range stops at 10¹⁰ − 1 because above it some numbers
+would not read back as themselves, starting with 10,000,000,001
+([#27](https://github.com/instaword/numberwords/issues/27)).
 
-**The Python package handles Mizo 0–199 and nothing above it** — `200` raises
-`NumberWordsError`. That covers everyday counting, but not years, prices or
-measurements; the range is being extended (see below). The npm package is
-still a name reservation that exports nothing.
+## How it works
+
+Each language is described once, as data: a rule specification in
+[`languages/`](languages). A reference engine interprets that specification
+directly and generates a table of conformance vectors: numbers, the spelling
+written for each, and the spellings accepted for it. The Python package is
+compiled from the same specification and must pass that table before it can be
+released. One source of truth; many published targets — Python today, an npm
+package for JS/TS later. The design is in
+[`docs/architecture.md`](docs/architecture.md).
 
 ## Status
 
-`numberwords` 0.2.0 is on PyPI, released from CI against the conformance
-vectors as they stood at that release. It exports `number_to_text`,
-`text_to_number` and `NumberWordsError`, and handles Mizo 0–199 in both
-directions. The npm target is still a name reservation.
-
-Next is a release. The spec now reaches 10¹⁰ − 1 in both directions — Mizo's
-scale ladder runs to 10⁹, rules keyed by scale recurse through `{remainder}`
-(#65), and input accepts the forms #27 records, such as `nuai za hnih` for
-20,000,000 — but PyPI still ships 0.2.0. The design and the remaining
-milestones live in [`docs/architecture.md`](docs/architecture.md).
+`numberwords` 0.3.0 is on PyPI, released from CI against the conformance
+vectors. It handles Mizo 0–9,999,999,999 in both directions. The npm package
+is still a name reservation. Open work, including a second language
+([#48](https://github.com/instaword/numberwords/issues/48)), is tracked in the
+[issues](https://github.com/instaword/numberwords/issues).
 
 ## For contributors
 
