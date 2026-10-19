@@ -13,6 +13,10 @@ checked against, on purpose, because they prove different things:
   is the half of the contract `text` alone can't state -- a target package
   can match every canonical string and still reject everything a Mizo
   speaker types. See generate_vectors.accepted_inputs() for the rule.
+- vectors/mizo.phrases.json -- generated the same way, and the half the
+  vectors cannot state: which short phrases must be rejected, namely every
+  one it does not list (generate_vectors.build_phrases). Catches drift the
+  same way.
 
 mizo.yaml's core numeral data has been verified by a native Mizo speaker
 (see meta.sources). The "leh" connector (parse.connectors) is a separate,
@@ -44,6 +48,7 @@ from engine import (
 
 MIZO_SPEC_PATH = Path(__file__).resolve().parent.parent / "languages" / "mizo.yaml"
 VECTORS_PATH = Path(__file__).resolve().parent.parent / "vectors" / "mizo.json"
+PHRASES_PATH = Path(__file__).resolve().parent.parent / "vectors" / "mizo.phrases.json"
 
 # mizo.yaml's meta.supports.max, stated here rather than read from the spec:
 # these tests are meant to be an independent claim about what must work, so
@@ -66,6 +71,12 @@ def spec():
 @pytest.fixture(scope="module")
 def vectors():
     with open(VECTORS_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+@pytest.fixture(scope="module")
+def phrases():
+    with open(PHRASES_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -140,6 +151,22 @@ def test_accepted_inputs_are_sorted_and_unique(vectors):
     for vector in vectors:
         inputs = vector["accepted_inputs"]
         assert inputs == sorted(set(inputs)), vector["number"]
+
+
+def test_the_phrase_file_is_up_to_date(spec, phrases):
+    # Regenerated whole and compared, not checked phrase by phrase. The
+    # file's rejections are the phrases it leaves out, so a listed phrase
+    # can be parsed back on its own but a missing one cannot -- this is the
+    # only test that sees a phrase the engine now accepts and the file
+    # still rejects.
+    assert generate_vectors.build_phrases(spec) == phrases
+
+
+def test_phrase_numbers_are_strings(phrases):
+    # The same encoding as the vectors' `number`, for the same reason (#12):
+    # a target reads both files with the same JSON parser.
+    for text, number in phrases["accepted"].items():
+        assert isinstance(number, str), text
 
 
 @pytest.mark.parametrize(
@@ -1234,15 +1261,10 @@ def short_phrase_readings(spec):
     longer scans the range; under the brute-force parser the same sweep was
     a separate twenty-minute job, run once while prototyping #65.
     """
-    vocabulary = sorted(
-        {spec._normalize_word(w) for table in spec.lexicon.values()
-         for entry in table.values() for w in entry.values()}
-        | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
-        | {spec._normalize_word(a) for a in spec.parse_config["aliases"]}
-    )
+    vocabulary = generate_vectors.phrase_vocabulary(spec)
     assert len(vocabulary) == 31, vocabulary
     readings = {}
-    for length in (1, 2, 3):
+    for length in range(1, generate_vectors.PHRASE_MAX_WORDS + 1):
         for words in itertools.product(vocabulary, repeat=length):
             text = " ".join(words)
             readings[text] = spec._parse_readings(text)

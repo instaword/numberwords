@@ -130,6 +130,12 @@ Five pieces:
    (#12). **Every published target package must pass every vector.** This is
    what keeps Python and npm in agreement.
 
+   The vectors only say what must be accepted, so a target that accepts too
+   much passes them. **The phrase file** beside them
+   (`vectors/<lang>.phrases.json`, #75) states the other half: every phrase
+   of up to three words its vocabulary can spell either names the number it
+   lists or must be rejected. Every target must pass both.
+
    What they govern is **conversion**: which text a number produces, and
    which text parses back to it. Every vector names a whole number in the
    supported range, and the engine is never handed a caller's arguments, so

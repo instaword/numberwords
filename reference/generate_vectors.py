@@ -1,14 +1,15 @@
 """Generates vectors/mizo.json -- the conformance vectors described in
 docs/architecture.md: a checked-in table for the full supported range,
 generated from the reference engine (the oracle), that every target package
-will eventually be tested against.
+will eventually be tested against -- and vectors/mizo.phrases.json, the
+phrase file beside it (see build_phrases).
 
 Run from inside reference/ (same convention as pytest, see README.md):
 
     python generate_vectors.py
 
-Regenerate and commit vectors/mizo.json whenever languages/mizo.yaml's
-lexicon or grammar changes -- it's a snapshot, not computed at test time, so
+Regenerate and commit both files whenever languages/mizo.yaml's lexicon or
+grammar changes -- they're snapshots, not computed at test time, so
 test_engine.py can catch a spec edit that silently changed output and wasn't
 followed by a regenerate.
 
@@ -63,6 +64,7 @@ from engine import (
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SPEC_PATH = REPO_ROOT / "languages" / "mizo.yaml"
 VECTORS_PATH = REPO_ROOT / "vectors" / "mizo.json"
+PHRASES_PATH = REPO_ROOT / "vectors" / "mizo.phrases.json"
 
 
 # #12's threshold, applied as a value: every number below it gets an entry,
@@ -840,17 +842,86 @@ def build_vectors(spec) -> list:
     return vectors
 
 
+# The longest phrase the phrase file covers, in words. Every phrase up to
+# three words is 30,783 phrases, about ten seconds to check in either suite;
+# four would be 954,304, minutes in each. Three is also the length the
+# short-phrase checks in test_engine.py and test_compile_spec.py already
+# settled on.
+PHRASE_MAX_WORDS = 3
+
+
+def phrase_vocabulary(spec) -> list:
+    """The words the phrase file builds its phrases from: every form in the
+    lexicon, every connector and every alias spelling, normalised the way
+    the parser compares them, once each, sorted.
+
+    Shared with the short-phrase checks in test_engine.py and
+    test_compile_spec.py, so that the file and those checks cannot come to
+    disagree about which words count.
+    """
+    return sorted(
+        {spec._normalize_word(w) for table in spec.lexicon.values()
+         for entry in table.values() for w in entry.values()}
+        | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
+        | {spec._normalize_word(a) for a in spec.parse_config["aliases"]}
+    )
+
+
+def build_phrases(spec) -> dict:
+    """Build the phrase file: the vocabulary, the longest phrase, and every
+    phrase of 1 to PHRASE_MAX_WORDS words from the vocabulary that
+    text_to_number() accepts, with the number it names (#75).
+
+    The vectors only say what must be accepted, so a target that accepts
+    too much passes all of them. This file says what must be rejected as
+    well, without listing it: it is closed-world. A target builds every
+    phrase from `vocabulary` itself, words joined by one space; one listed
+    in `accepted` must give that number, and every other one must be
+    rejected. Of the bugs planted in a JS port on #75, it caught both that
+    changed an answer; the vectors caught neither.
+
+    Numbers are strings, for the reason the vectors' are (see the top of
+    this module). `accepted` is sorted, so the file is byte-stable for the
+    CI drift check.
+    """
+    vocabulary = phrase_vocabulary(spec)
+    accepted = {}
+    for length in range(1, PHRASE_MAX_WORDS + 1):
+        for words in itertools.product(vocabulary, repeat=length):
+            text = " ".join(words)
+            try:
+                accepted[text] = str(spec.text_to_number(text))
+            except ValueError:
+                pass
+    return {
+        "vocabulary": vocabulary,
+        "max_words": PHRASE_MAX_WORDS,
+        "accepted": dict(sorted(accepted.items())),
+    }
+
+
+def _write_json(path, data) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+
 def main() -> None:
     spec = load(SPEC_PATH)
     vectors = build_vectors(spec)
-    VECTORS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(VECTORS_PATH, "w", encoding="utf-8") as f:
-        json.dump(vectors, f, ensure_ascii=False, indent=2)
-        f.write("\n")
+    _write_json(VECTORS_PATH, vectors)
     total = sum(len(v["accepted_inputs"]) for v in vectors)
     print(
         f"Wrote {len(vectors)} vectors ({total} accepted inputs) to "
         f"{VECTORS_PATH.relative_to(REPO_ROOT)}"
+    )
+    phrases = build_phrases(spec)
+    _write_json(PHRASES_PATH, phrases)
+    print(
+        f"Wrote {len(phrases['accepted'])} accepted phrases of up to "
+        f"{phrases['max_words']} words, from a vocabulary of "
+        f"{len(phrases['vocabulary'])}, to {PHRASES_PATH.relative_to(REPO_ROOT)}"
     )
 
 

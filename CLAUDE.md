@@ -159,10 +159,11 @@ spec/
                        Authoritative where it and spec-format.md disagree.
 reference/
   engine.py            The oracle — interprets a spec directly.
-  generate_vectors.py  Regenerates vectors/mizo.json. Run after spec edits.
+  generate_vectors.py  Regenerates vectors/. Run after spec edits.
   test_*.py            Engine, English control, and schema validation.
 vectors/
   mizo.json            Checked-in conformance vectors. Generated, not edited.
+  mizo.phrases.json    Which short phrases are accepted; all others are rejected.
 packages/
   python/              The first real target package: _mizo.py (compiled spec),
                        _render.py (thin interpreter), and its own test suite.

@@ -476,14 +476,9 @@ def test_the_package_parser_agrees_with_the_engine_on_every_short_phrase(spec, p
     over every phrase of up to four words, 245,410 of them, with no
     disagreement -- kept at three so it costs seconds.
     """
-    vocabulary = sorted(
-        {spec._normalize_word(w) for table in spec.lexicon.values()
-         for entry in table.values() for w in entry.values()}
-        | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
-        | {spec._normalize_word(a) for a in spec.parse_config["aliases"]}
-    )
+    vocabulary = generate_vectors.phrase_vocabulary(spec)
     disagreements = []
-    for length in (1, 2, 3):
+    for length in range(1, generate_vectors.PHRASE_MAX_WORDS + 1):
         for words in itertools.product(vocabulary, repeat=length):
             text = " ".join(words)
             try:
