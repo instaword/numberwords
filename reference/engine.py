@@ -740,6 +740,20 @@ def _validate_literals(
             )
 
 
+class NoNumberError(ValueError):
+    """text_to_number()'s refusal when the text names no number in the
+    supported range: nothing reads it, or the reading greed chooses is out
+    of range.
+
+    A ValueError like every other refusal, so a caller catching ValueError
+    sees no difference. It exists for the caller that has to tell refusals
+    apart. generate_vectors.build_phrases writes this one down as "must be
+    rejected", and lets anything else -- an ambiguous phrase, a fault in the
+    spec -- stop it instead, because a generator that writes the answers
+    turns a swallowed error into a wrong answer for every target (#77).
+    """
+
+
 class Spec:
     """A loaded language spec, exposing number_to_text() and text_to_number()."""
 
@@ -927,14 +941,14 @@ class Spec:
         # of range -- and test_engine pins that rather than trusting it.
         readings = self._parse_readings(text)
         if not readings:
-            raise ValueError(f"{text!r} does not match any number in the supported range")
+            raise NoNumberError(f"{text!r} does not match any number in the supported range")
         top = max(readings.values())
         winners = sorted(n for n, rank in readings.items() if rank == top)
         if len(winners) > 1:
             raise ValueError(f"{text!r} is ambiguous: matches {winners}")
         n = winners[0]
         if not (self.supports["min"] <= n <= self.supports["max"]):
-            raise ValueError(
+            raise NoNumberError(
                 f"{text!r} reads as {n}, outside the supported range "
                 f"[{self.supports['min']}, {self.supports['max']}]"
             )

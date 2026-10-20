@@ -54,7 +54,10 @@ from pathlib import Path
 # (Spec._find_rule, Spec._render_rule, Spec._with_connector), so the import
 # shrank to the text helpers; the methods are private for the same reason
 # these are, and the same rule applies if the surface grows further.
+# NoNumberError is not an internal: it is the refusal build_phrases is
+# allowed to record (#77).
 from engine import (
+    NoNumberError,
     _joinable_separators,
     _separator_pattern,
     _strip_diacritics,
@@ -857,11 +860,13 @@ def phrase_vocabulary(spec) -> list:
     Shared with the short-phrase checks in test_engine.py, so that the file
     and those checks cannot come to disagree about which words count.
     """
+    # .get(): a spec may declare no aliases at all, and the engine treats a
+    # missing table as an empty one. _connectors() does the same.
     return sorted(
         {spec._normalize_word(w) for table in spec.lexicon.values()
          for entry in table.values() for w in entry.values()}
-        | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
-        | {spec._normalize_word(a) for a in spec.parse_config["aliases"]}
+        | _connectors(spec)
+        | {spec._normalize_word(a) for a in spec.parse_config.get("aliases", {})}
     )
 
 
@@ -878,6 +883,11 @@ def build_phrases(spec) -> dict:
     rejected. Of the bugs planted in a JS port on #75, it caught both that
     changed an answer; the vectors caught neither.
 
+    Only engine.NoNumberError is written down as a rejection. Anything else
+    the engine raises -- an ambiguous phrase, a fault in the spec -- stops
+    the build instead, because leaving the phrase out would certify "must
+    be rejected" as the answer every target is tested against (#77).
+
     Numbers are strings, for the reason the vectors' are (see the top of
     this module). `accepted` is sorted, so the file is byte-stable for the
     CI drift check.
@@ -889,7 +899,7 @@ def build_phrases(spec) -> dict:
             text = " ".join(words)
             try:
                 accepted[text] = str(spec.text_to_number(text))
-            except ValueError:
+            except NoNumberError:
                 pass
     return {
         "vocabulary": vocabulary,
