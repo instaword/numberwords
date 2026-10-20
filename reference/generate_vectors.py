@@ -845,8 +845,7 @@ def build_vectors(spec) -> list:
 # The longest phrase the phrase file covers, in words. Every phrase up to
 # three words is 30,783 phrases, about ten seconds to check in either suite;
 # four would be 954,304, minutes in each. Three is also the length the
-# short-phrase checks in test_engine.py and test_compile_spec.py already
-# settled on.
+# short-phrase checks in test_engine.py had already settled on.
 PHRASE_MAX_WORDS = 3
 
 
@@ -855,9 +854,8 @@ def phrase_vocabulary(spec) -> list:
     lexicon, every connector and every alias spelling, normalised the way
     the parser compares them, once each, sorted.
 
-    Shared with the short-phrase checks in test_engine.py and
-    test_compile_spec.py, so that the file and those checks cannot come to
-    disagree about which words count.
+    Shared with the short-phrase checks in test_engine.py, so that the file
+    and those checks cannot come to disagree about which words count.
     """
     return sorted(
         {spec._normalize_word(w) for table in spec.lexicon.values()

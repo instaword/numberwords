@@ -258,8 +258,8 @@ it is why the rejections cannot be checked one at a time:
 
 The vocabulary is every lexicon form, connector and alias spelling,
 normalised (`phrase_vocabulary()`), and it is the same one the short-phrase
-checks in `test_engine.py` and `test_compile_spec.py` use. Numbers are strings
-here too, for the reason above.
+checks in `test_engine.py` use. Numbers are strings here too, for the reason
+above.
 
 ### Regenerating
 
