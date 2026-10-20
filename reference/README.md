@@ -261,6 +261,11 @@ normalised (`phrase_vocabulary()`), and it is the same one the short-phrase
 checks in `test_engine.py` use. Numbers are strings here too, for the reason
 above.
 
+Because the vocabulary is normalised — lowercase, diacritics stripped — the
+file never tests case or diacritic handling; the vectors' `accepted_inputs`
+cover those. A target that folds case or strips diacritics wrongly can still
+pass this file.
+
 ### Regenerating
 
 Both files are generated from `languages/mizo.yaml` via the reference engine,
