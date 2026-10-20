@@ -59,14 +59,15 @@ jobs:
         working-directory: packages/python
         run: pytest
 
-      # vectors/mizo.json is a checked-in snapshot, not computed at test time.
-      # If this step fails, mizo.yaml changed without a regenerate: run
-      # `python generate_vectors.py` from reference/ and commit the result.
+      # vectors/mizo.json and vectors/mizo.phrases.json are checked-in
+      # snapshots, not computed at test time. If this step fails, mizo.yaml
+      # changed without a regenerate: run `python generate_vectors.py` from
+      # reference/ and commit the result.
       - name: Check vectors are up to date
         working-directory: reference
         run: |
           python generate_vectors.py
-          git diff --exit-code ../vectors/mizo.json
+          git diff --exit-code ../vectors/mizo.json ../vectors/mizo.phrases.json
 
       # Same idea for the compiled target-package artifact. The drift test in
       # pytest compares the text the compiler produces; this checks what it

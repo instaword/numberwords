@@ -233,11 +233,44 @@ large to walk still gets a suite that finishes.
 The two rules are independent and compose: sampling picks the rows, the
 per-feature rule fills each one in.
 
+### The phrase file
+
+The vectors only say what `text_to_number()` must accept, so a target that
+accepts too much passes all of them. On #75, two bugs planted in a JS port
+made it accept phrases the oracle rejects, and the vectors caught neither.
+[`../vectors/mizo.phrases.json`](../vectors/mizo.phrases.json) covers the
+other half:
+
+```json
+{
+  "vocabulary": ["bial", "hnih", "khat", "kua", "leh", ...],
+  "max_words": 3,
+  "accepted": {"khat": "1", "sawm hnih": "20", ...}
+}
+```
+
+It is **closed-world**. A target builds every phrase of 1 to `max_words`
+words from `vocabulary` itself, joined by one space — 30,783 of them. A phrase
+listed in `accepted` must give that number; every other one must be
+rejected. Listing only the accepted 2,245 is what keeps the file small, and
+it is why the rejections cannot be checked one at a time:
+`test_the_phrase_file_is_up_to_date` regenerates the whole file and compares.
+
+The vocabulary is every lexicon form, connector and alias spelling,
+normalised (`phrase_vocabulary()`), and it is the same one the short-phrase
+checks in `test_engine.py` use. Numbers are strings here too, for the reason
+above.
+
+Because the vocabulary is normalised — lowercase, diacritics stripped — the
+file never tests case or diacritic handling; the vectors' `accepted_inputs`
+cover those. A target that folds case or strips diacritics wrongly can still
+pass this file.
+
 ### Regenerating
 
-It's generated from `languages/mizo.yaml` via the reference engine, not
-hand-maintained. **Regenerate and commit it whenever `mizo.yaml`'s lexicon or
-grammar changes:**
+Both files are generated from `languages/mizo.yaml` via the reference engine,
+not hand-maintained. **Regenerate and commit them whenever `mizo.yaml`'s
+lexicon or grammar changes:**
 
 ```
 python generate_vectors.py
@@ -251,7 +284,8 @@ string the oracle itself rejects.
 If you change the spec and forget to regenerate,
 `test_vectors_match_number_to_text`, `test_vectors_parse_back` and
 `test_every_accepted_input_parses` in `test_engine.py` will fail, since they
-assert the engine's current output against the checked-in vectors file. CI
+assert the engine's current output against the checked-in vectors file, and
+so will `test_the_phrase_file_is_up_to_date` for the phrase file. CI
 additionally re-runs the generator and diffs the result, so a stale snapshot
 can't merge.
 

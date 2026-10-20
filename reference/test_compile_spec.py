@@ -9,7 +9,6 @@ tooling; it is not shipped.
 import ast
 import importlib
 import importlib.util
-import itertools
 import re
 import sys
 
@@ -463,42 +462,6 @@ def package():
         sys.path.remove(source)
 
 
-def test_the_package_parser_agrees_with_the_engine_on_every_short_phrase(spec, package):
-    """Since #65 the package carries a real parser, and it is a second copy
-    of the engine's -- deliberately, since the package never imports the
-    oracle. The vectors hold the two together on every spelling they
-    certify, all of which must be accepted, and on nothing that must be
-    rejected. This holds them together on everything up to three words the
-    lexicon can spell, connectors and alias spellings included: same
-    number, or both refuse.
-
-    It is the check that made the prototype for #65 trustworthy -- run then
-    over every phrase of up to four words, 245,410 of them, with no
-    disagreement -- kept at three so it costs seconds.
-    """
-    vocabulary = sorted(
-        {spec._normalize_word(w) for table in spec.lexicon.values()
-         for entry in table.values() for w in entry.values()}
-        | {spec._normalize_word(c) for c in spec.parse_config["connectors"]}
-        | {spec._normalize_word(a) for a in spec.parse_config["aliases"]}
-    )
-    disagreements = []
-    for length in (1, 2, 3):
-        for words in itertools.product(vocabulary, repeat=length):
-            text = " ".join(words)
-            try:
-                expected = spec.text_to_number(text)
-            except ValueError:
-                expected = None
-            try:
-                got = package.text_to_number(text)
-            except package.NumberWordsError:
-                got = None
-            if got != expected:
-                disagreements.append((text, expected, got))
-    assert not disagreements, disagreements[:10]
-
-
 # The longest slip, in words, that the one-slip test below checks. See its
 # docstring for why eight.
 SLIP_PHRASE_MAX_WORDS = 8
@@ -519,10 +482,11 @@ def _near_misses(text):
 
 
 def test_the_package_parser_agrees_with_the_engine_one_slip_from_the_vectors(spec, package):
-    """The short-phrase check above stops at three words, and the vectors
-    only hold spellings that must be accepted. This covers the gap between:
-    longer phrases that are *nearly* right, which is where a second copy of
-    a parser is most likely to accept what the first one refuses.
+    """The phrase file (vectors/mizo.phrases.json) stops at three words,
+    and the vectors only hold spellings that must be accepted. This covers
+    the gap between: longer phrases that are *nearly* right, which is where
+    a second copy of a parser is most likely to accept what the first one
+    refuses.
 
     Every certified spelling of one number per shape (numbers_to_sweep),
     with one word deleted, doubled or swapped with its neighbour: same

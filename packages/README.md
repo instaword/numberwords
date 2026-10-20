@@ -13,7 +13,7 @@ The published target packages — the libraries a consumer actually installs.
 version `0.3.0`, `_mizo.py` — a module compiled from `languages/mizo.yaml` by
 `reference/compile_spec.py` — and `_render.py`, which interprets it. It
 exports `number_to_text`, `text_to_number` and `NumberWordsError`, and it
-passes `vectors/mizo.json` in both directions.
+passes `vectors/mizo.json` in both directions and `vectors/mizo.phrases.json`.
 
 `npm/` is still a name-reservation placeholder at version `0.0.0` that exports
 nothing. It exists so the name is ours before we need it.
