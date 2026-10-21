@@ -15,6 +15,7 @@ Python 3.9 is the floor (pyproject's requires-python), so nothing newer than
 3.9 syntax appears here.
 """
 
+import operator
 import re
 import unicodedata
 
@@ -178,6 +179,46 @@ _EMITTING_SCALES = sorted(
 )
 
 
+# Conditions arrive as data, written by the compiler from the engine's own
+# (engine._condition_tree):
+#
+#     ("and" | "or", tree, tree, ...)
+#     ("cmp", op, tree, tree)
+#     ("var", "multiplier" | "remainder")
+#     ("int", k)
+#
+# Evaluated here by a second copy of the engine's evaluator, deliberately:
+# this module never imports the oracle. reference/test_compile_spec.py holds
+# the two together on every operator and on every rule's condition (#75).
+_COMPARISONS = {
+    "==": operator.eq,
+    "!=": operator.ne,
+    ">": operator.gt,
+    ">=": operator.ge,
+    "<": operator.lt,
+    "<=": operator.le,
+}
+
+
+def _eval_tree(tree: tuple, variables: dict):
+    kind = tree[0]
+    if kind == "cmp":
+        _, op, left, right = tree
+        return _COMPARISONS[op](_eval_tree(left, variables), _eval_tree(right, variables))
+    if kind == "and":
+        return all(_eval_tree(t, variables) for t in tree[1:])
+    if kind == "or":
+        return any(_eval_tree(t, variables) for t in tree[1:])
+    if kind == "var":
+        return variables[tree[1]]
+    if kind == "int":
+        return tree[1]
+    # Unreachable from a compiled spec: the engine checked every condition
+    # when it loaded. A plain ValueError, not NumberWordsError, because this
+    # would be a fault in the package rather than in the caller's input.
+    raise ValueError(f"unknown condition data: {tree!r}")
+
+
 def _rule_applies(rule: dict, multiplier: int, remainder: int) -> bool:
     """A rule's fixed multiplier, if it has one, and its condition.
 
@@ -190,7 +231,7 @@ def _rule_applies(rule: dict, multiplier: int, remainder: int) -> bool:
     condition = rule["condition"]
     if condition is None:
         return True
-    return condition({"multiplier": multiplier, "remainder": remainder})
+    return _eval_tree(condition, {"multiplier": multiplier, "remainder": remainder})
 
 
 def _find_rule(n: int) -> dict:
@@ -292,8 +333,8 @@ def _parse_readings(tokens: list) -> dict:
     Recursive descent over the rules, the same algorithm as the engine's
     Spec._parse_readings and deliberately a separate copy of it: this module
     never imports the oracle. The two are held together by vectors/mizo.json,
-    and by reference/test_compile_spec.py, which feeds both every phrase of
-    up to three words and requires the same answer.
+    and by vectors/mizo.phrases.json, which both are checked against on every
+    phrase of up to three words.
 
     Memoised on (start, end, whole, below). `whole` is whether the span is
     the entire input -- a `scope: whole` rule is only ever the whole phrase,
