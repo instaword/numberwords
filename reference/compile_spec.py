@@ -14,17 +14,15 @@ changes. test_compile_spec.py fails if the checked-in copy is out of date.
 
 This module intentionally uses a few private names from engine.py. The
 compiler is part of the same reference implementation, so sharing the
-template parser and the variable names avoids keeping duplicate copies that
-could drift apart.
+template parser, the condition data and the variable names avoids keeping
+duplicate copies that could drift apart.
 """
 
-import ast
 from pathlib import Path
 
 from engine import (
     _VARIABLE_NAMES,
     _parse_template,
-    _validate_condition_node,
     load,
 )
 
@@ -57,66 +55,93 @@ reference/ and commit the result.
 # could hold a segment.
 
 
-# Compiling conditions means there are two places that define how a
-# condition works: engine._eval_node and the compiled lambda below.
-# What keeps them in sync is vectors/mizo.json. It covers every number
-# from 0 to 999, and so every (multiplier, remainder) pair a condition is
-# evaluated at while rendering one; above 999 it keeps every multiplier at
-# every scale (generate_vectors.numbers_to_cover). test_compile_spec.py
-# also evaluates both directly at every pair those numbers give each rule.
+# Conditions are compiled as the engine already holds them: as data
+# (engine._parse_condition), checked against the allowlist when the spec was
+# loaded -- a Spec cannot hold a condition that was not. Nothing is written
+# as code, so _mizo.py is plain literals from end to end, and there is one
+# definition of what a condition means: the data, which the engine's
+# evaluator and the package's both read (#75). Until #75 each condition was
+# emitted as a lambda through ast.unparse, the one place the compiler wrote
+# code rather than data.
 
 
-# The allowlist moved into engine.py in #37, where it now also runs over the
-# whole tree when a spec is loaded. The compiler keeps validating before it
-# emits -- docs/architecture.md: "Never emit an unvalidated string" -- it just
-# stops being the only place that checks, and stops being a second
-# implementation that could drift from the oracle's.
-#
-# Kept under the local name because _compile_condition and
-# test_compile_spec.py both call it.
-_validate_condition = _validate_condition_node
+def compile_data(spec) -> dict:
+    """Everything the compiled module holds, as plain data, decided once.
 
+    A target's writer only spells this out in its own language -- _write_python
+    below for packages/python -- so every decision about *what* a target
+    ships is made here, and two targets cannot come to ship different things
+    (#75).
 
-class _NameToLookup(ast.NodeTransformer):
-    """Rewrites a variable name like `multiplier` into
-    `variables['multiplier']`, so the generated lambda reads values
-    from the dictionary provided by the renderer.
+    `emit` and `whole_only` are booleans rather than the spec's strings
+    ("never", "whole"): the renderer asks yes-or-no questions of them, and a
+    bool cannot be misspelt in a comparison the way a string can.
+
+    `stacks` is grammar.stacking resolved per rule, by the engine: whether
+    this rule's multiplier slot also takes a whole numeral on input. Shipped
+    as the answer rather than as `accepted_from` plus the test for a
+    multiplier word, so the package holds no second copy of that test.
+
+    The connector is grammar.connector, or None for a language that writes
+    none, cut to the two values the renderer reads: `placement` has one legal
+    value, and the schema already refuses any other.
+
+    The parse config has its connectors and aliases already normalised, so
+    the renderer only compares plain strings instead of normalising them on
+    every call. `word_separators` defaults to empty, not [' ']: since #46
+    whitespace is a separator in every language and the renderer applies it,
+    so a spec that declares nothing has no *extra* separators rather than
+    one. Lists become tuples: the renderer only reads them, and a literal
+    tuple cannot be mutated by accident once it ships inside the package.
     """
+    meta = spec._data["meta"]
+    config = spec.parse_config
+    connector = spec.connector
+    return {
+        "LANGUAGE": meta["language"],
+        "CODE": meta["code"],
+        "SPEC_VERSION": str(meta["version"]),
+        "SUPPORTS": (spec.supports["min"], spec.supports["max"]),
+        "LEXICON": spec.lexicon,
+        "RULES": tuple(
+            {
+                "name": rule["name"],
+                "scale": rule["scale"],
+                "multiplier": rule.get("multiplier"),
+                "condition": spec._conditions.get(id(rule)),
+                "output": _parse_template(rule["output"]),
+                "emit": rule.get("emit") != "never",
+                "whole_only": rule.get("scope") == "whole",
+                "stacks": id(rule) in spec._stacking_rules,
+            }
+            for rule in spec.rules
+        ),
+        "CONNECTOR": (
+            None if connector is None
+            else {"word": connector["word"], "min": connector["min"]}
+        ),
+        "PARSE": {
+            "case_insensitive": config.get("case_insensitive", False),
+            "strip_diacritics": config.get("strip_diacritics", False),
+            "word_separators": tuple(config.get("word_separators", [])),
+            "accepted_forms": {
+                table: tuple(fields)
+                for table, fields
+                in sorted(config.get("accepted_forms", {}).items())
+            },
+            "connectors": tuple(sorted(
+                spec._normalize_word(c) for c in config.get("connectors", [])
+            )),
+            "aliases": {
+                spec._normalize_word(variant): spec._normalize_word(canonical)
+                for variant, canonical
+                in sorted(config.get("aliases", {}).items())
+            },
+        },
+    }
 
-    def visit_Name(self, node):
-        return ast.Subscript(
-            value=ast.Name(id="variables", ctx=ast.Load()),
-            slice=ast.Constant(value=node.id),
-            ctx=ast.Load(),
-        )
 
-
-def _compile_condition(expression):
-    """Turns a condition from the spec into the source code for a lambda.
-    The tree is validated first, then rewritten, then converted back into
-    code. That way, an invalid expression is never passed to ast.unparse.
-    The lambda is created with ast.unparse instead of building the code by
-    hand. This lets Python define what the condition means, instead of
-    having a second implementation in the compiler. That is especially
-    important for chained comparisons like `0 < d < 5`, whose behaviour is
-    already defined by engine._eval_node.
-    """
-    tree = ast.parse(expression, mode="eval").body
-    _validate_condition(tree)
-    rewritten = ast.fix_missing_locations(_NameToLookup().visit(tree))
-    return f"lambda variables: {ast.unparse(rewritten)}"
-
-
-def _format_condition(condition):
-    """A rule without a condition emits None; the renderer treats that as
-    "always applies", the same way engine.Spec._rule_applies does.
-    """
-    if condition is None:
-        return "None"
-    return _compile_condition(condition)
-
-
-def _format_lexicon(lexicon):
+def _python_lexicon(lexicon):
     lines = ["LEXICON = {"]
     for table in sorted(lexicon):
         lines.append(f"    {table!r}: {{")
@@ -131,107 +156,45 @@ def _format_lexicon(lexicon):
     return "\n".join(lines)
 
 
-def _format_rules(spec):
-    """Each rule as a dict of plain literals.
-
-    `emit` and `whole_only` are booleans rather than the spec's strings
-    ("never", "whole"): the renderer asks yes-or-no questions of them, and a
-    bool cannot be misspelt in a comparison the way a string can.
-
-    `stacks` is grammar.stacking resolved per rule, by the engine: whether
-    this rule's multiplier slot also takes a whole numeral on input. Shipped
-    as the answer rather than as `accepted_from` plus the test for a
-    multiplier word, so the package holds no second copy of that test.
-    """
+def _python_rules(rules):
     lines = ["RULES = ("]
-    for rule in spec.rules:
+    for rule in rules:
         lines.append("    {")
-        lines.append(f"        'name': {rule['name']!r},")
-        lines.append(f"        'scale': {rule['scale']!r},")
-        lines.append(f"        'multiplier': {rule.get('multiplier')!r},")
-        lines.append(
-            f"        'condition': "
-            f"{_format_condition(rule.get('condition'))},"
+        lines.extend(
+            f"        {field!r}: {value!r}," for field, value in rule.items()
         )
-        lines.append(f"        'output': {_parse_template(rule['output'])!r},")
-        lines.append(f"        'emit': {rule.get('emit') != 'never'!r},")
-        lines.append(f"        'whole_only': {rule.get('scope') == 'whole'!r},")
-        lines.append(f"        'stacks': {id(rule) in spec._stacking_rules!r},")
         lines.append("    },")
     lines.append(")")
     return "\n".join(lines)
 
 
-def _format_connector(spec):
-    """grammar.connector, or None for a language that writes none. Only the
-    two values the renderer reads: `placement` has one legal value, and the
-    schema already refuses any other."""
-    connector = spec.connector
-    if connector is None:
-        return "CONNECTOR = None"
-    return (
-        f"CONNECTOR = {{'word': {connector['word']!r}, "
-        f"'min': {connector['min']!r}}}"
-    )
-
-
-def _format_parse(spec):
-    """The parse config, with connectors and aliases already normalised.
-    Doing this here means the renderer only needs to compare plain strings,
-    instead of normalising them on every call.
-    """
-    config = spec.parse_config
-    connectors = tuple(
-        sorted(spec._normalize_word(c) for c in config.get("connectors", []))
-    )
-    aliases = {
-        spec._normalize_word(variant): spec._normalize_word(canonical)
-        for variant, canonical in sorted(config.get("aliases", {}).items())
-    }
-    # Field lists become tuples, like connectors and word_separators above:
-    # the renderer only reads them, and a literal tuple cannot be mutated by
-    # accident once it ships inside the package.
-    accepted = {
-        table: tuple(fields)
-        for table, fields in sorted(config.get("accepted_forms", {}).items())
-    }
-    lines = [
-        "PARSE = {",
-        f"    'case_insensitive': {config.get('case_insensitive', False)!r},",
-        f"    'strip_diacritics': {config.get('strip_diacritics', False)!r},",
-        # Default is empty, not [' ']: since #46 whitespace is a separator
-        # in every language and the renderer applies it, so a spec that
-        # declares nothing here has no *extra* separators rather than one.
-        f"    'word_separators': "
-        f"{tuple(config.get('word_separators', []))!r},",
-        f"    'accepted_forms': {accepted!r},",
-        f"    'connectors': {connectors!r},",
-        f"    'aliases': {aliases!r},",
-        "}",
-    ]
+def _python_parse(parse):
+    lines = ["PARSE = {"]
+    lines.extend(f"    {field!r}: {value!r}," for field, value in parse.items())
+    lines.append("}")
     return "\n".join(lines)
 
 
-def render_module(spec):
-    """Returns the full source text of the compiled module."""
-    meta = spec._data["meta"]
+def _write_python(data) -> str:
+    """compile_data's output as the source text of a Python module."""
     provenance = "\n".join(
-        [
-            f"LANGUAGE = {meta['language']!r}",
-            f"CODE = {meta['code']!r}",
-            f"SPEC_VERSION = {str(meta['version'])!r}",
-            f"SUPPORTS = ({spec.supports['min']}, {spec.supports['max']})",
-        ]
+        f"{name} = {data[name]!r}"
+        for name in ("LANGUAGE", "CODE", "SPEC_VERSION", "SUPPORTS")
     )
     sections = [
         _HEADER,
         provenance,
-        _format_lexicon(spec.lexicon),
-        _format_rules(spec),
-        _format_connector(spec),
-        _format_parse(spec),
+        _python_lexicon(data["LEXICON"]),
+        _python_rules(data["RULES"]),
+        f"CONNECTOR = {data['CONNECTOR']!r}",
+        _python_parse(data["PARSE"]),
     ]
     return "\n\n".join(sections) + "\n"
+
+
+def render_module(spec):
+    """Returns the full source text of the compiled module."""
+    return _write_python(compile_data(spec))
 
 
 def write_module(spec, path):

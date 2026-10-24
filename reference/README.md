@@ -308,9 +308,11 @@ python compile_spec.py
 temporary file rather than to the real path, so a failing test never rewrites
 the artifact it is supposed to be checking.
 
-Each rule's `condition` is emitted as a lambda derived from the validated
-syntax tree with `ast.unparse`, rather than assembled as a string by hand.
-That keeps Python itself the single definition of what a condition means,
-instead of one definition in `engine.py` and a second in the compiler. The
-compiler accepts only what `engine._eval_node` accepts, and raises at build
-time on anything else.
+Each rule's `condition` is written as data, not code (#75): the small tree
+the engine converted it into when the spec loaded, after checking it against
+the allowlist — `("cmp", ">", ("var", "multiplier"), ("int", 1))` for
+`multiplier > 1`. So `_mizo.py` is plain literals from end to end, and the
+engine's evaluator and the package's read the same data.
+`test_compile_spec.py` holds the two evaluators together on every operator
+and on every rule's condition. Until #75 each condition was emitted as a
+lambda through `ast.unparse`, which no target but Python could have read.

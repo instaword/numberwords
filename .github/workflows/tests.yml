@@ -26,11 +26,12 @@ jobs:
     # every version it claims to support rather than only the newest one.
     # CI follows the versions we support; it does not decide them.
     #
-    # It matters more than it looks for the compiled artifact. compile_spec.py
-    # emits conditions with ast.unparse, whose exact output is not guaranteed
-    # to be identical across Python versions, and _mizo.py is generated on
-    # whichever version the author happens to run. The matrix is what proves
-    # the checked-in file is reproducible everywhere, not just on one machine.
+    # It matters more than it looks for the compiled artifact. _mizo.py is
+    # generated on whichever version the author happens to run, and the
+    # matrix is what proves the checked-in file is reproducible everywhere,
+    # not just on one machine. Until #75 it held conditions emitted with
+    # ast.unparse, whose output is not guaranteed identical across versions;
+    # it is plain literals now, but their spelling is still Python's repr().
     strategy:
       fail-fast: false
       matrix:
