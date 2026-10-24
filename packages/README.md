@@ -37,7 +37,8 @@ published. Metadata changes take effect on the **next** version bump.
 `python/` is published by
 [`.github/workflows/release.yml`](../.github/workflows/release.yml), not from a
 laptop (#23). Run it from the Actions tab and type the version. It checks the
-version against `pyproject.toml`, refuses a version already tagged, runs the
+version against `pyproject.toml`, refuses a version already tagged
+(`packages/python/vX.Y.Z`, or a bare `vX.Y.Z` from before #75), runs the
 full test gate, builds, and only then publishes — creating the git tag and
 GitHub release last, so a tag here always means "this shipped" rather than
 "this was attempted".
@@ -77,9 +78,15 @@ exporting a public API, to `0.2.0` when that API reached 0–199, and to
 `0.3.0` when it reached 0–9,999,999,999, while `npm/` stays at `0.0.0` until
 there is an npm target to release. A version is most useful attached to the
 release that publishes it, so the bump belongs to the PR that makes it true
-rather than to the groundwork before it. Whether the two should share a version
-line once the npm target becomes real is a question for #23, not something to
-fix by bumping npm now.
+rather than to the groundwork before it.
+
+That stays true once npm is real (decided on #75): **each package keeps its
+own version line**, so a fix that only touches one target doesn't force a
+release of the other that changes nothing. Tags carry the package path —
+`packages/python/vX.Y.Z`, `packages/npm/vX.Y.Z` — which is the form Go
+requires for a module in a subdirectory, used for every package so there is
+one convention. The bare `v0.1.0`–`v0.3.0` tags are earlier Python releases
+and stay as they are.
 
 The **descriptions** now diverge for the same reason. `python/` describes what
 it ships — Mizo 0–9,999,999,999 — while `npm/` keeps the placeholder wording,

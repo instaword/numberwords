@@ -13,6 +13,11 @@ name: release
 # reservation whose version deliberately diverges (see packages/README.md);
 # it gets its own job when there is an npm target to gate on.
 #
+# Each package has its own version line, so tags carry the package path:
+# packages/python/vX.Y.Z (#75). Go requires that form for a module in a
+# subdirectory, and using it for every package keeps one convention. The
+# bare vX.Y.Z tags (v0.1.0-v0.3.0) are earlier Python releases and stay.
+#
 # One-time setup on PyPI, before this can run -- Manage project -> Publishing
 # -> Add a new publisher:
 #
@@ -74,10 +79,13 @@ jobs:
             echo "::error::asked to publish $VERSION, but pyproject.toml declares $declared"
             exit 1
           fi
-          if git rev-parse --verify "refs/tags/v$VERSION" >/dev/null 2>&1; then
-            echo "::error::tag v$VERSION already exists -- that version was already released"
-            exit 1
-          fi
+          # The bare tag too: v0.1.0-v0.3.0 predate the per-package tags.
+          for tag in "packages/python/v$VERSION" "v$VERSION"; do
+            if git rev-parse --verify "refs/tags/$tag" >/dev/null 2>&1; then
+              echo "::error::tag $tag already exists -- that version was already released"
+              exit 1
+            fi
+          done
           echo "publishing $VERSION"
 
   # The full suite, across the supported Python matrix, plus the vectors and
@@ -151,7 +159,7 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          gh release create "v$VERSION" \
-            --title "v$VERSION" \
+          gh release create "packages/python/v$VERSION" \
+            --title "Python v$VERSION" \
             --target "$GITHUB_SHA" \
             --generate-notes
