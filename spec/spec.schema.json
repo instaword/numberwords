@@ -163,7 +163,7 @@
               "condition": {
                 "type": "string",
                 "minLength": 1,
-                "description": "Optional extra test over the variables `multiplier` and `remainder`. Evaluated by a restricted AST walker in engine.py -- comparisons, and/or, names and integer constants only. NOT eval(). Anything outside that subset raises rather than executing."
+                "description": "Optional extra test over the variables `multiplier` and `remainder`. Checked against an allowlist in engine.py -- comparisons, and/or, names and integer constants only -- and kept as data that every target evaluates (#75). NOT eval(). Anything outside that subset raises rather than executing. It means what it means in Python: `0 < multiplier < 5` is `0 < multiplier and multiplier < 5`."
               },
               "output": {
                 "type": "string",

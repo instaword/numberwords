@@ -191,7 +191,7 @@ Concretely, in the first target package (#20):
 
 | Component | What it is |
 |---|---|
-| `_mizo.py` — generated literals, pre-parsed templates, normalised parse config | the **normalised IR** |
+| `_mizo.py` — generated literals, pre-parsed templates, condition data, normalised parse config | the **normalised IR** |
 | `_render.py` — selects the rule, matches tokens, collects matches | the **thin interpreter** |
 
 **What we are deliberately *not* doing** is Option B proper: emitting code where
@@ -209,18 +209,21 @@ Two consequences worth stating, because they're easy to get wrong:
   how much each target reimplements; it does not eliminate it. The conformance
   vectors — not this decision — are what keep those implementations honest.
 
-### The one bounded exception
+### The one bounded exception — gone since #75
 
-The compiler emits each rule's `condition` as an executable expression rather
-than as data. That is genuinely codegen, and it's recorded here as an exception
-rather than glossed over. It is acceptable because it is small (ten one-line
-comparisons in `mizo.yaml` today), and guarded: the compiler validates every
-condition against the same restricted allowlist the engine uses, and only then
-emits.
-Never emit an unvalidated string.
+Until #75 the compiler emitted each rule's `condition` as an executable
+expression rather than as data: genuinely codegen, recorded here as an
+exception rather than glossed over, and acceptable while there was one target
+and ten one-line comparisons to emit.
 
-If that exception ever grows beyond simple predicates, revisit this decision
-rather than widening it quietly.
+The npm target is what retired it. Emitting code means an expression generator
+per language, and an expression does not mean the same thing in every
+language: Python reads `0 < d < 5` as `0 < d and d < 5`, JavaScript as
+`(0 < d) < 5`, which is true for every `d`. So a condition is data too now. The
+engine checks each condition string against the allowlist when the spec loads
+and converts it into a small tree, with chains spelled out as `and`; the
+compiler writes that tree. `_mizo.py` holds no code at all, and every
+evaluator reads the same data.
 
 ### Why this is more clearly right than when first written
 
@@ -239,9 +242,15 @@ Three things we've learned since strengthen Option A:
   behaviour in data is a discipline that needs active maintenance, not a
   property we get for free.
 
-### Still open: one artifact or one per target
+### One artifact per target — **decided**
 
-Deciding A-vs-B leaves a real question underneath it. The compiled IR can be:
+> **Decision (2026-10-18, #75): one compiled file per target, written from one
+> set of data.** `compile_spec.py` decides what a target ships once
+> (`compile_data()`), and each target has a writer that only spells it out in
+> its own language: `_mizo.py` for Python, and `_mizo.js` for npm when that
+> target lands.
+
+Deciding A-vs-B left a real question underneath it. The compiled IR can be:
 
 1. **Per-target source** — a `.py` for Python, a `.js` for npm. Avoids
    package-data inclusion problems, which are a genuine and irritating class of
@@ -249,9 +258,10 @@ Deciding A-vs-B leaves a real question underneath it. The compiled IR can be:
 2. **One shared normalised JSON IR** every target embeds. One compiler total, at
    the cost of each target bundling a data file and parsing it at import.
 
-Option 1 is what #20 builds, and is right for now — the packaging pitfalls are
-real and the compiler is small. **Revisit at the npm target**, when the cost of a
-second backend is concrete rather than hypothetical.
+Option 1 is what #20 built, and #75 kept it at the npm target, which is when
+this was to be revisited. The packaging pitfalls are real, and with conditions
+as data (above) a second backend is a writer, not a compiler: no code
+generation is left in it to cost anything per language.
 
 > This is the single most important decision in the repo. Don't let a target
 > package quietly hard-code rules and become a third source of truth.

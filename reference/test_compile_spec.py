@@ -16,7 +16,7 @@ import pytest
 
 import compile_spec
 import generate_vectors
-from engine import _eval_condition, load
+from engine import _eval_tree, _parse_condition, load
 
 
 @pytest.fixture(scope="module")
@@ -74,13 +74,31 @@ def test_artifact_imports_nothing(artifact):
     assert imports == []
 
 
-def test_compiled_conditions_match_the_engine(spec, artifact):
-    """The compiled lambda and engine._eval_condition are two
-    implementations of the same condition, which is the risk that made
-    ast.unparse the right way to emit them. This checks they agree at every
-    (multiplier, remainder) pair a covered number gives the rule's scale.
-    Up to 999 that is every input the renderer can hand a condition; above
-    it, every multiplier, with the remainders the sampled numbers leave.
+def test_artifact_is_data_only():
+    """Since #75 the compiled module holds no code at all: every name it
+    defines is a literal. Conditions were compiled as lambdas until then,
+    and a lambda creeping back in would put a second definition of what a
+    condition means into the package -- in Python, which no other target
+    can read.
+    """
+    tree = ast.parse(compile_spec.ARTIFACT_PATH.read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+            continue    # the module docstring
+        assert isinstance(node, ast.Assign), ast.dump(node)[:120]
+        # literal_eval refuses anything but a literal: a lambda, a call, a
+        # name.
+        ast.literal_eval(node.value)
+
+
+def test_compiled_conditions_match_the_engine(spec, artifact, package):
+    """The compiler writes each condition as the engine's own data, and the
+    package evaluates that data with a second copy of the engine's
+    evaluator. This checks the data is the engine's, unchanged, and that the
+    two evaluators agree at every (multiplier, remainder) pair a covered
+    number gives the rule's scale. Up to 999 that is every input the
+    renderer can hand a condition; above it, every multiplier, with the
+    remainders the sampled numbers leave.
     """
     # zip() stops at the shorter sequence, so without this the test would
     # quietly check fewer rules if the compiler ever dropped one. The name
@@ -94,30 +112,87 @@ def test_compiled_conditions_match_the_engine(spec, artifact):
     covered = generate_vectors.numbers_to_cover(spec)
     for yaml_rule, compiled_rule in zip(spec.rules, artifact.RULES):
         assert yaml_rule["name"] == compiled_rule["name"]
-        condition = yaml_rule.get("condition")
-        if condition is None:
-            assert compiled_rule["condition"] is None
+        tree = spec._conditions.get(id(yaml_rule))
+        assert compiled_rule["condition"] == tree, yaml_rule["name"]
+        if tree is None:
             continue
         pairs = {divmod(n, yaml_rule["scale"]) for n in covered}
         for multiplier, remainder in sorted(pairs):
             variables = {"multiplier": multiplier, "remainder": remainder}
-            assert bool(compiled_rule["condition"](variables)) == bool(
-                _eval_condition(condition, variables)
+            assert package._render._eval_tree(compiled_rule["condition"], variables) == (
+                _eval_tree(tree, variables)
             ), f"rule {yaml_rule['name']} disagrees at {variables}"
 
 
-def test_chained_comparison_keeps_python_semantics():
-    """A chained comparison is the case an emitter that pasted strings
-    together would get wrong: `0 < d < 5` means `0 < d and d < 5`, not
-    `(0 < d) < 5`, which would evaluate a bool against 5 and be true for
-    d = 0. No rule in mizo.yaml uses one today, so this guards the
-    mechanism rather than the current data.
+# One row per thing condition data can hold (engine._condition_tree), named
+# after it, so an evaluator that mishandles one fails the row that says
+# which. mizo.yaml uses only `>` and `and` today; these guard the mechanism
+# for the next spec, and for the next target's evaluator.
+@pytest.mark.parametrize(
+    "what, expression",
+    [
+        ("==", "multiplier == 3"),
+        ("!=", "multiplier != 3"),
+        (">", "multiplier > 3"),
+        (">=", "multiplier >= 3"),
+        ("<", "multiplier < 3"),
+        ("<=", "multiplier <= 3"),
+        ("and", "multiplier > 1 and remainder > 0"),
+        ("or", "multiplier == 0 or remainder == 5"),
+        ("and inside or", "remainder != 0 or multiplier >= 3 and multiplier <= 7"),
+        ("the remainder variable", "remainder > 4"),
+        ("a constant on the left", "5 < multiplier"),
+        ("a chained comparison", "0 < multiplier < 5"),
+        ("a bool constant", "multiplier == True"),
+    ],
+)
+def test_both_evaluators_read_condition_data_as_python_reads_the_condition(
+    package, what, expression
+):
+    # The meaning a spec author wrote is Python's reading of the string, so
+    # Python is the oracle here: eval() on these fixed test strings, never
+    # on a spec. The package gets the data as the compiler writes it --
+    # repr(), read back as a literal -- not the engine's object.
+    tree = _parse_condition(expression)
+    compiled = ast.literal_eval(repr(tree))
+    for multiplier in range(11):
+        for remainder in range(11):
+            variables = {"multiplier": multiplier, "remainder": remainder}
+            expected = eval(expression, {"__builtins__": {}}, dict(variables))
+            assert _eval_tree(tree, variables) == expected, (what, variables)
+            assert package._render._eval_tree(compiled, variables) == expected, (what, variables)
+
+
+def test_a_chained_comparison_becomes_an_explicit_and():
+    """A chained comparison is the case another language gets wrong:
+    `0 < d < 5` means `0 < d and d < 5` in Python, and `(0 < d) < 5` in
+    JavaScript, which is true for every d. The engine spells the `and` out
+    when it converts the condition to data, so no evaluator -- the engine's,
+    the package's, or a future target's -- ever sees a chain (#75). No rule
+    in mizo.yaml uses one today, so this guards the mechanism rather than
+    the current data.
     """
-    condition = eval(compile_spec._compile_condition("0 < multiplier < 5"))
+    tree = _parse_condition("0 < multiplier < 5")
+    assert tree == (
+        "and",
+        ("cmp", "<", ("int", 0), ("var", "multiplier")),
+        ("cmp", "<", ("var", "multiplier"), ("int", 5)),
+    )
     results = [
-        condition({"multiplier": n, "remainder": 0}) for n in (0, 1, 4, 5)
+        _eval_tree(tree, {"multiplier": n, "remainder": 0}) for n in (0, 1, 4, 5)
     ]
     assert results == [False, True, True, False]
+
+
+def test_a_bool_constant_becomes_a_plain_int():
+    """Python counts True as the int 1, so the allowlist has always accepted
+    it. The data carries the number, because not every target's language
+    agrees: in JavaScript `true === 1` is false. Checked by type, since
+    True == 1 would let an equality check pass either way.
+    """
+    tree = _parse_condition("multiplier == True")
+    assert tree == ("cmp", "==", ("var", "multiplier"), ("int", 1))
+    assert type(tree[3][1]) is int
 
 
 @pytest.mark.parametrize(
@@ -131,12 +206,12 @@ def test_chained_comparison_keeps_python_semantics():
     ],
 )
 def test_validator_rejects_unsupported_conditions(expression):
-    """The compiler only accepts what engine._eval_node accepts. Anything
-    else raises here, at build time, instead of being written into the
-    package as code.
+    """Only what the allowlist accepts becomes condition data. Anything else
+    raises when the spec loads, so it can never reach the compiler or be
+    written into a package.
     """
     with pytest.raises(ValueError):
-        compile_spec._compile_condition(expression)
+        _parse_condition(expression)
 
 
 @pytest.mark.parametrize(
@@ -149,7 +224,7 @@ def test_validator_rejects_unsupported_conditions(expression):
     ],
 )
 def test_validator_accepts_the_shapes_the_engine_supports(expression):
-    compile_spec._compile_condition(expression)
+    _parse_condition(expression)
 
 
 # The tests below check the rest of the artifact against the spec. The
@@ -229,8 +304,8 @@ def _render_from_artifact(artifact, n):
             if rule["multiplier"] not in (None, multiplier):
                 continue
             condition = rule["condition"]
-            if condition is None or condition(
-                {"multiplier": multiplier, "remainder": remainder}
+            if condition is None or _eval_tree(
+                condition, {"multiplier": multiplier, "remainder": remainder}
             ):
                 return rule
         raise AssertionError(f"no compiled rule matches n={n}")

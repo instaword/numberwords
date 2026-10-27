@@ -55,68 +55,108 @@ import unicodedata
 
 import yaml
 
-_COMPARISONS = {
-    ast.Eq: operator.eq,
-    ast.NotEq: operator.ne,
-    ast.Gt: operator.gt,
-    ast.GtE: operator.ge,
-    ast.Lt: operator.lt,
-    ast.LtE: operator.le,
-}
+# Each operator a condition may use, listed once: the Python syntax a spec
+# writes it in, the name condition data gives it (see _condition_tree), and
+# what it does. The allowlist and the conversion to data look operators up
+# by syntax, the evaluator by name; both lookups are built from these two
+# lists, so they cannot disagree about which operators exist.
+_COMPARISON_OPERATORS = (
+    (ast.Eq, "==", operator.eq),
+    (ast.NotEq, "!=", operator.ne),
+    (ast.Gt, ">", operator.gt),
+    (ast.GtE, ">=", operator.ge),
+    (ast.Lt, "<", operator.lt),
+    (ast.LtE, "<=", operator.le),
+)
+_COMPARISONS = {name: function for _, name, function in _COMPARISON_OPERATORS}
+_COMPARISON_SYNTAX = {syntax: name for syntax, name, _ in _COMPARISON_OPERATORS}
 
-_BOOL_COMBINERS = {
-    ast.And: all,
-    ast.Or: any,
-}
+_BOOL_COMBINER_OPERATORS = (
+    (ast.And, "and", all),
+    (ast.Or, "or", any),
+)
+_BOOL_COMBINERS = {name: function for _, name, function in _BOOL_COMBINER_OPERATORS}
+_BOOL_COMBINER_SYNTAX = {syntax: name for syntax, name, _ in _BOOL_COMBINER_OPERATORS}
 
 _PLACEHOLDER_RE = re.compile(r"\{(\w+)\[(\w+)\]\.(\w+)\}")
 
 
-def _eval_condition(expr: str, variables: dict) -> bool:
-    """Evaluate a `condition` string like "multiplier > 1 and remainder > 0"
-    against `variables`. Deliberately not eval()/exec(): `condition` is data
-    loaded from a YAML spec file, not code we wrote, so only a small allowed
-    set of nodes (comparisons, and/or, names, int constants) is permitted --
-    anything else raises ValueError instead of silently running arbitrary
-    Python.
+def _parse_condition(expression: str) -> tuple:
+    """A `condition` string as data: checked against the allowlist
+    (_validate_condition_node), then converted by _condition_tree.
 
-    Since #37 the same allowlist runs over the whole tree at load, in
-    _validate_condition_node, so by the time anything is evaluated here it
-    has already been accepted. _eval_node's own raises are kept as a
-    backstop and are unreachable through Spec: they can only fire for a
-    caller who evaluates an expression without a Spec around it, as the
-    tests do. Kept rather than deleted for the reason #36 settled on for the
-    connector-normalisation assert -- an invariant that cannot currently
-    fail is still worth stating, provided the limit is written down.
+    A spec writes a condition as a Python expression, because that is easy
+    to read. The engine keeps it as data, because the data is what the
+    compiler writes into every target package and what every target
+    evaluates (#75): a Python expression means something else in another
+    language. `0 < d < 5` is the case in point -- in JavaScript it is
+    `(0 < d) < 5`, which is true for every d.
+
+    Deliberately not eval()/exec(): `condition` is data loaded from a YAML
+    spec file, not code we wrote, so only a small allowed set of nodes
+    (comparisons, and/or, names, int constants) is permitted -- anything
+    else raises ValueError instead of silently running arbitrary Python.
     """
-    tree = ast.parse(expr, mode="eval").body
-    return _eval_node(tree, variables)
+    node = ast.parse(expression, mode="eval").body
+    _validate_condition_node(node)
+    return _condition_tree(node)
 
 
-def _eval_node(node, variables):
-    if isinstance(node, ast.Compare):
-        left = _eval_node(node.left, variables)
-        for op, comparator in zip(node.ops, node.comparators):
-            op_type = type(op)
-            if op_type not in _COMPARISONS:
-                raise ValueError(f"Unsupported comparison operator: {op_type.__name__}")
-            right = _eval_node(comparator, variables)
-            if not _COMPARISONS[op_type](left, right):
-                return False
-            left = right
-        return True
+def _condition_tree(node) -> tuple:
+    """A validated condition's syntax tree, as data:
+
+        ("and" | "or", tree, tree, ...)
+        ("cmp", op, tree, tree)          op: a key of _COMPARISONS
+        ("var", name)                    name: one of _VARIABLE_NAMES
+        ("int", k)
+
+    A chained comparison becomes an explicit "and" of its links here, once,
+    so that no evaluator -- this engine's or a target's -- has to implement
+    Python's chaining rule. A bool constant becomes the int it equals: the
+    allowlist has always accepted True as an int, and this keeps what it
+    means while handing every target a plain number.
+    """
     if isinstance(node, ast.BoolOp):
-        op_type = type(node.op)
-        if op_type not in _BOOL_COMBINERS:
-            raise ValueError(f"Unsupported boolean operator: {op_type.__name__}")
-        return _BOOL_COMBINERS[op_type](_eval_node(v, variables) for v in node.values)
+        return (_BOOL_COMBINER_SYNTAX[type(node.op)],) + tuple(
+            _condition_tree(value) for value in node.values
+        )
+    if isinstance(node, ast.Compare):
+        operands = [node.left] + node.comparators
+        links = tuple(
+            ("cmp", _COMPARISON_SYNTAX[type(op)], _condition_tree(left), _condition_tree(right))
+            for op, left, right in zip(node.ops, operands, operands[1:])
+        )
+        return links[0] if len(links) == 1 else ("and",) + links
     if isinstance(node, ast.Name):
-        if node.id not in variables:
-            raise ValueError(f"Unknown variable in condition: {node.id!r}")
-        return variables[node.id]
-    if isinstance(node, ast.Constant) and isinstance(node.value, int):
-        return node.value
-    raise ValueError(f"Unsupported expression in condition: {ast.dump(node)}")
+        return ("var", node.id)
+    return ("int", int(node.value))
+
+
+def _eval_tree(tree: tuple, variables: dict):
+    """Evaluate condition data (see _condition_tree) against `variables`.
+
+    Every condition is validated when its spec loads, so the raises here
+    are a backstop, unreachable through Spec: they can only fire for data
+    built by hand, as the tests do. Kept rather than deleted for the reason
+    #36 settled on for the connector-normalisation assert -- an invariant
+    that cannot currently fail is still worth stating, provided the limit
+    is written down.
+    """
+    kind = tree[0]
+    if kind == "cmp":
+        _, op, left, right = tree
+        if op not in _COMPARISONS:
+            raise ValueError(f"Unsupported comparison operator: {op!r}")
+        return _COMPARISONS[op](_eval_tree(left, variables), _eval_tree(right, variables))
+    if kind in _BOOL_COMBINERS:
+        return _BOOL_COMBINERS[kind](_eval_tree(t, variables) for t in tree[1:])
+    if kind == "var":
+        if tree[1] not in variables:
+            raise ValueError(f"Unknown variable in condition: {tree[1]!r}")
+        return variables[tree[1]]
+    if kind == "int":
+        return tree[1]
+    raise ValueError(f"Unsupported condition data: {tree!r}")
 
 
 def _strip_diacritics(word: str) -> str:
@@ -389,7 +429,7 @@ def _validate_condition_node(node):
     """The allowlist for a `condition` expression, expressed once.
 
     Walks the whole tree rather than checking each node as it is evaluated.
-    _eval_node's checks only fire on the nodes it actually reaches, and
+    An evaluator's checks only fire on the nodes it actually reaches, and
     `and`/`or` short-circuit, so a subtree behind one was never visited and
     therefore never rejected -- which is how this engine came to accept
     expressions compile_spec.py refuses (#37). The trigger was never "an
@@ -399,14 +439,14 @@ def _validate_condition_node(node):
     """
     if isinstance(node, ast.Compare):
         for op in node.ops:
-            if type(op) not in _COMPARISONS:
+            if type(op) not in _COMPARISON_SYNTAX:
                 raise ValueError(f"Unsupported comparison operator: {type(op).__name__}")
         _validate_condition_node(node.left)
         for comparator in node.comparators:
             _validate_condition_node(comparator)
         return
     if isinstance(node, ast.BoolOp):
-        if type(node.op) not in _BOOL_COMBINERS:
+        if type(node.op) not in _BOOL_COMBINER_SYNTAX:
             raise ValueError(f"Unsupported boolean operator: {type(node.op).__name__}")
         for value in node.values:
             _validate_condition_node(value)
@@ -522,7 +562,7 @@ def _validate_spec(data: dict) -> None:
         if condition is None:
             continue
         try:
-            _validate_condition_node(ast.parse(condition, mode="eval").body)
+            _parse_condition(condition)
         except (ValueError, SyntaxError) as exc:
             raise ValueError(f"rule {_rule_name(rule)!r}: {exc}") from None
 
@@ -773,9 +813,11 @@ class Spec:
         self._items = {id(rule): _parse_template(rule["output"]) for rule in self.rules}
         # Conditions are parsed once, for the same reason: ast.parse on every
         # evaluation cost more than the whole rest of a parse in the #65
-        # prototype, and nearly hid how cheap the algorithm is.
+        # prototype, and nearly hid how cheap the algorithm is. Kept as
+        # data (_parse_condition), which is also what compile_spec.py
+        # writes into the target package.
         self._conditions = {
-            id(rule): ast.parse(rule["condition"], mode="eval").body
+            id(rule): _parse_condition(rule["condition"])
             for rule in self.rules
             if rule.get("condition") is not None
         }
@@ -812,7 +854,7 @@ class Spec:
         tree = self._conditions.get(id(rule))
         if tree is None:
             return True
-        return _eval_node(tree, {"multiplier": multiplier, "remainder": remainder})
+        return _eval_tree(tree, {"multiplier": multiplier, "remainder": remainder})
 
     def _find_rule(self, n: int) -> dict:
         """The rule number_to_text() renders n with.

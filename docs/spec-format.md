@@ -131,10 +131,12 @@ Four things that example is carrying:
   there; the same hyphen is a declared `word_separator` when parsing, and
   `forty two` is accepted as well, by the whitespace rule rather than by the
   declaration — see "Word separators and whitespace" below.
-- **`condition` is evaluated by a restricted AST walker**, not `eval()` —
+- **`condition` is checked against an allowlist, never `eval()`'d** —
   comparisons, `and`/`or`, names and integer constants only. Anything else
   raises rather than executing. `condition` is data from a YAML file, not code
-  we wrote.
+  we wrote, and the engine keeps it as data: a small tree that every target
+  evaluates (#75). It means what it means in Python, so `0 < multiplier < 5`
+  is `0 < multiplier and multiplier < 5`.
 
 A rule may also fix its multiplier: `multiplier: 1`. That is how a rule whose
 template never writes its multiplier is read back. Mizo says 10 as a bare

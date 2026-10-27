@@ -439,10 +439,10 @@ def _with_connector(data: dict, **changes) -> dict:
 #
 # A call is the unsupported node here, and len() is deliberately a dull one.
 # #37 demonstrated the bug with __import__("os").system(...), which reads as a
-# sandbox escape and is not one: _eval_node raises on ast.Call, it never
-# evaluates it, so the short-circuited subtree was not executed either. What
-# was broken is only that validity depended on the input, and any unsupported
-# node shows that.
+# sandbox escape and is not one: the evaluator of the time (_eval_node, until
+# #75) raised on ast.Call rather than evaluating it, so the short-circuited
+# subtree was not executed either. What was broken is only that validity
+# depended on the input, and any unsupported node shows that.
 _UNSUPPORTED_NODE_BEHIND_OR = 'multiplier > 1 or len("x") == 0'
 _UNSUPPORTED_NODE_BEHIND_AND = 'multiplier == 99 and len("x") == 0'
 
