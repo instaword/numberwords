@@ -191,7 +191,7 @@ Concretely, in the first target package (#20):
 
 | Component | What it is |
 |---|---|
-| `_mizo.py` — generated literals, pre-parsed templates, condition data, normalised parse config | the **normalised IR** |
+| `_mizo.py` — generated literals, pre-parsed templates, condition data, normalised parse config, the whitespace and ignorable-character lists | the **normalised IR** |
 | `_render.py` — selects the rule, matches tokens, collects matches | the **thin interpreter** |
 
 **What we are deliberately *not* doing** is Option B proper: emitting code where

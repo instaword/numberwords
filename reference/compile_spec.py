@@ -14,14 +14,16 @@ changes. test_compile_spec.py fails if the checked-in copy is out of date.
 
 This module intentionally uses a few private names from engine.py. The
 compiler is part of the same reference implementation, so sharing the
-template parser, the condition data and the variable names avoids keeping
-duplicate copies that could drift apart.
+template parser, the condition data, the variable names and the text lists
+avoids keeping duplicate copies that could drift apart.
 """
 
 from pathlib import Path
 
 from engine import (
+    _IGNORABLE,
     _VARIABLE_NAMES,
+    _WHITESPACE,
     _parse_template,
     load,
 )
@@ -93,6 +95,13 @@ def compile_data(spec) -> dict:
     so a spec that declares nothing has no *extra* separators rather than
     one. Lists become tuples: the renderer only reads them, and a literal
     tuple cannot be mutated by accident once it ships inside the package.
+
+    WHITESPACE and IGNORABLE are not read from the spec: since #46 they are
+    properties of text that every language shares, and the engine states
+    them once. They ship here so that no target keeps its own copy (#75),
+    and beside PARSE rather than inside it, which holds what the spec says.
+    Both are strings of the characters themselves; IGNORABLE is the
+    engine's translate table turned back into one.
     """
     meta = spec._data["meta"]
     config = spec.parse_config
@@ -138,6 +147,8 @@ def compile_data(spec) -> dict:
                 in sorted(config.get("aliases", {}).items())
             },
         },
+        "WHITESPACE": _WHITESPACE,
+        "IGNORABLE": "".join(chr(code) for code in _IGNORABLE),
     }
 
 
@@ -188,6 +199,9 @@ def _write_python(data) -> str:
         _python_rules(data["RULES"]),
         f"CONNECTOR = {data['CONNECTOR']!r}",
         _python_parse(data["PARSE"]),
+        "\n".join(
+            f"{name} = {data[name]!r}" for name in ("WHITESPACE", "IGNORABLE")
+        ),
     ]
     return "\n\n".join(sections) + "\n"
 
