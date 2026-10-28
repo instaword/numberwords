@@ -436,7 +436,7 @@ def test_package_version_is_stated_once():
     nothing stops one being bumped without the other.
 
     Read as text rather than imported: tomllib is 3.11+ and the package
-    floor is 3.9, and __init__.py will grow real imports once it exports
+    floor is 3.10, and __init__.py will grow real imports once it exports
     an API. Single-sourcing this properly (hatch's dynamic version) is
     worth doing when the version actually moves.
     """
