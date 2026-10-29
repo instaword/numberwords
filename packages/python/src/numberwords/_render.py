@@ -11,8 +11,8 @@ Deliberately boring. Every behaviour here exists because the engine has it,
 and the comments say which decision each one implements rather than
 restating the code.
 
-Python 3.9 is the floor (pyproject's requires-python), so nothing newer than
-3.9 syntax appears here.
+Python 3.10 is the floor (pyproject's requires-python), so nothing newer than
+3.10 syntax appears here.
 """
 
 import operator

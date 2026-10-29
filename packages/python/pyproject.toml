@@ -7,7 +7,7 @@ name = "numberwords"
 version = "0.3.0"
 description = "Bidirectional text-number conversion driven by a single language-agnostic rule spec. Supports Mizo (Lushai) 0-9,999,999,999."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 authors = [{ name = "instaword" }]
 keywords = ["numbers", "numerals", "number-to-words", "words-to-number", "mizo", "i18n"]
