@@ -331,6 +331,22 @@ def test_every_shipped_whitespace_character_separates_words(char):
     assert numberwords.text_to_number("sawm" + char + "nga pariat") == 58
 
 
+def test_the_renderer_splits_on_nothing_but_the_shipped_whitespace():
+    # The test above shows no listed character is missing from the split;
+    # this shows nothing is added to it, over every code point. Before #88
+    # the renderer's own list was what the White_Space test above checked,
+    # so an extra character failed there. That test now checks the shipped
+    # list, and this checks what the renderer built from it (#88).
+    declared = {
+        sep for sep in _render.PARSE["word_separators"] if len(sep) == 1
+    }
+    split_on = {
+        ch for ch in map(chr, range(0x110000))
+        if _render._SEPARATOR_RE.fullmatch(ch)
+    }
+    assert split_on == set(_render.WHITESPACE) | declared
+
+
 @pytest.mark.parametrize("char", ["\x1c", "\x1d", "\x1e", "\x1f"])
 def test_a_c0_separator_that_is_not_white_space_is_rejected(char):
     # The case that fails closed. A target built on str.isspace() parses this
@@ -372,6 +388,19 @@ def test_ignorable_characters_are_stripped(position):
 @pytest.mark.parametrize("char", _render.IGNORABLE, ids=_code_point)
 def test_every_shipped_ignorable_character_is_stripped(char):
     assert numberwords.text_to_number("sa" + char + "wm nga pariat") == 58
+
+
+def test_the_renderer_strips_nothing_but_the_shipped_ignorable_characters():
+    # The same pair for the strip table: the test above shows no listed
+    # character is left in, and this shows no other character is taken out.
+    # Before #88 an extra character in the renderer's own list failed the
+    # comparison of the two copies; this is that check, against the one
+    # copy that is left (#88).
+    stripped = {
+        ch for ch in map(chr, range(0x110000))
+        if not ch.translate(_render._IGNORABLE)
+    }
+    assert stripped == set(_render.IGNORABLE)
 
 
 def test_a_zero_width_character_is_not_a_separator():

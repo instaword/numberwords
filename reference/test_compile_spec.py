@@ -437,10 +437,12 @@ def test_compiled_text_lists_match_the_engine(artifact):
     Until #75 _render.py kept a second copy of each, and the ignorable one
     had nothing outside itself to be checked against, so a one-sided edit
     passed both suites (zoramt, #56). Now there is one copy, the package
-    reads it from _mizo.py, and what is left to check is that the compiler
-    shipped all of it. IGNORABLE is compared as the translate table the
-    package builds from it, so this is not the compiler's own expression
-    run a second time.
+    reads it from _mizo.py, and what is left to check here is that the
+    compiler shipped all of it. Whether the list holds the right characters
+    is test_engine.py's job: test_the_ignorable_list_is_the_one_decided_on_46
+    states them. IGNORABLE is compared as the translate table the package
+    builds from it, so this is not the compiler's own expression run a
+    second time.
     """
     assert artifact.WHITESPACE == _WHITESPACE
     assert {ord(ch): None for ch in artifact.IGNORABLE} == _IGNORABLE
