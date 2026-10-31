@@ -307,6 +307,10 @@ would need a third-party dependency to test in Python and would drift between
 Unicode versions, leaving two targets built against different versions to
 disagree.
 
+Both lists are stated once, in the reference engine, and ship in each target's
+compiled file (#75), so a target reads them there rather than keeping its own
+copy of either.
+
 ## Relationship to CLDR RBNF
 
 [`architecture.md`](architecture.md) asks that we either build on CLDR RBNF

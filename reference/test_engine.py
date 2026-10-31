@@ -39,6 +39,7 @@ import pytest
 import engine
 import generate_vectors
 from engine import (
+    _IGNORABLE,
     _WHITESPACE,
     Spec,
     _joinable_separators,
@@ -1511,6 +1512,17 @@ def test_a_c0_separator_that_is_not_white_space_is_rejected(spec, char):
     # either way, so this test is the only thing standing there.
     with pytest.raises(ValueError):
         spec.text_to_number("sawm" + char + "nga pariat")
+
+
+def test_the_ignorable_list_is_the_one_decided_on_46():
+    # The six characters chosen on #46. Whitespace is checked against
+    # str.isspace() above, but nothing outside this list derives these, so
+    # this test states them: it is the check on the list's contents, not a
+    # second copy of it. Until #88 the copy in _render.py did this as a side
+    # effect, and removing that copy removed the check (zoramt, #88). A
+    # deliberate change to the list changes this test in the same PR, with
+    # the reason.
+    assert set(_IGNORABLE) == {0x200B, 0xFEFF, 0x2060, 0x200C, 0x200D, 0x00AD}
 
 
 # Enumerated by position rather than by example. The first version of this

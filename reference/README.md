@@ -296,6 +296,9 @@ can't merge.
 module holding the lexicon, the grammar rules, and the parse settings, which
 the Python package ships. Compiling at build time is what lets that package
 avoid a PyYAML dependency and avoid reading the spec at import time (#20).
+It also holds the whitespace and ignorable-character lists, which come from
+`engine.py` rather than the spec because every language shares them (#46):
+shipping them is what saves each target keeping its own copy (#75).
 
 Like the vectors, it is a checked-in snapshot rather than something computed
 at install time. **Regenerate and commit it whenever `mizo.yaml` changes:**

@@ -19,7 +19,15 @@ import operator
 import re
 import unicodedata
 
-from ._mizo import CONNECTOR, LEXICON, PARSE, RULES, SUPPORTS
+from ._mizo import (
+    CONNECTOR,
+    IGNORABLE,
+    LEXICON,
+    PARSE,
+    RULES,
+    SUPPORTS,
+    WHITESPACE,
+)
 
 
 class NumberWordsError(ValueError):
@@ -41,39 +49,21 @@ class NumberWordsError(ValueError):
 # be handed a new spec at any time. Here the spec is compiled in and cannot
 # change, so they are built once at import. Same values, computed once.
 #
-# _WHITESPACE and _IGNORABLE are not spec-derived at all: since #46 they are
-# properties of text that every language shares, so they are stated here
-# rather than read out of the compiled spec.
+# WHITESPACE and IGNORABLE are not spec-derived at all: since #46 they are
+# properties of text that every language shares. The engine states them
+# once and the compiler ships them beside PARSE (#75), so this module, like
+# every target, reads them rather than keeping its own copy. Why each list
+# holds what it does: reference/engine.py and docs/spec-format.md.
 
-# Unicode's White_Space property, enumerated. The engine's _WHITESPACE, and
-# it has to be stated here rather than read out of the compiled spec: after
-# #46 a spec declares only its non-whitespace separators, so
-# PARSE["word_separators"] is ("-",) and a renderer trusting it alone would
-# silently stop splitting on spaces.
+# Unicode's White_Space property, as the compiled file lists it. It has to
+# be applied here on top of PARSE["word_separators"]: after #46 a spec
+# declares only its non-whitespace separators, so that tuple is ("-",) and
+# a renderer trusting it alone would silently stop splitting on spaces.
 #
-# Neither runtime's convenience function is this set. Python's str.isspace()
-# -- and re's \s, which matches it exactly -- also accepts U+001C-U+001F;
-# JavaScript's \s also accepts U+FEFF. Implementing the named property is
-# what keeps two targets agreeing, and no conformance vector can check it:
-# every accepted_input is built by joining words with a separator the
-# generator chose, so none contains an exotic space. tests/ pins this
-# against str.isspace() on this side too.
-_WHITESPACE = (
-    "\t\n\v\f\r"                            # U+0009-U+000D
-    " "                                     # U+0020 SPACE
-    "\x85"                                  # U+0085 NEXT LINE
-    "\xa0"                                  # U+00A0 NO-BREAK SPACE
-    "\u1680"                                # U+1680 OGHAM SPACE MARK
-    "\u2000\u2001\u2002\u2003\u2004\u2005"
-    "\u2006\u2007\u2008\u2009\u200a"        # U+2000-U+200A
-    "\u2028"                                # U+2028 LINE SEPARATOR
-    "\u2029"                                # U+2029 PARAGRAPH SEPARATOR
-    "\u202f"                                # U+202F NARROW NO-BREAK SPACE
-    "\u205f"                                # U+205F MEDIUM MATHEMATICAL SPACE
-    "\u3000"                                # U+3000 IDEOGRAPHIC SPACE
-)
-
-_WHITESPACE_CLASS = "[{}]".format("".join(re.escape(ch) for ch in _WHITESPACE))
+# Not str.isspace(), and not re's \s, which matches it exactly: both also
+# accept U+001C-U+001F, and no conformance vector contains an exotic space
+# that would show it. tests/ pins the shipped set against str.isspace().
+_WHITESPACE_CLASS = "[{}]".format("".join(re.escape(ch) for ch in WHITESPACE))
 
 # Declared separators first, so a multi-character one is tried before a
 # single whitespace character that could match inside it.
@@ -87,8 +77,8 @@ _SEPARATOR_RE = re.compile(
 )
 
 
-# Zero-width and format characters, removed from every word before it is
-# compared.
+# Zero-width and format characters, as the compiled file lists them,
+# removed from every word before it is compared.
 #
 # The engine decision (#46): strip, rather than treat as a separator or
 # reject. The dominant real case is a BOM at position 0 -- a file read as
@@ -98,25 +88,7 @@ _SEPARATOR_RE = re.compile(
 # there, and calling one a separator asserts a boundary meaning these
 # characters do not have. The one case where separator would win, U+200B as
 # the only thing between two words, does not arise in Latin-script Mizo.
-#
-# An explicit list rather than the Default_Ignorable_Code_Point property,
-# which covers exactly these six for our purposes but needs the third-party
-# regex package to test in Python -- and this library is deliberately
-# dependency-free. Hardcoding that property's table instead would reintroduce
-# the problem #46 exists to remove: it changes between Unicode versions, so
-# two targets built against different versions would disagree. Six characters
-# covers anything realistic and cannot drift.
-_IGNORABLE = {
-    ord(ch): None
-    for ch in (
-        "\u200b"    # ZERO WIDTH SPACE
-        "\ufeff"    # ZERO WIDTH NO-BREAK SPACE / BOM
-        "\u2060"    # WORD JOINER
-        "\u200c"    # ZERO WIDTH NON-JOINER
-        "\u200d"    # ZERO WIDTH JOINER
-        "\u00ad"    # SOFT HYPHEN
-    )
-}
+_IGNORABLE = {ord(ch): None for ch in IGNORABLE}
 
 
 def _normalize_word(word: str) -> str:

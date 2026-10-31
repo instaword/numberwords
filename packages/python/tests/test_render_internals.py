@@ -282,8 +282,8 @@ def test_the_whitespace_set_is_unicode_white_space():
     # target needs. A Unicode update that moved the property would fail here.
     over_matched = {"\x1c", "\x1d", "\x1e", "\x1f"}
     derived = {chr(c) for c in range(0x110000) if chr(c).isspace()}
-    assert set(_render._WHITESPACE) == derived - over_matched
-    assert len(_render._WHITESPACE) == len(set(_render._WHITESPACE)) == 25
+    assert set(_render.WHITESPACE) == derived - over_matched
+    assert len(_render.WHITESPACE) == len(set(_render.WHITESPACE)) == 25
 
 
 def test_the_renderer_does_not_trust_the_compiled_separator_tuple():
@@ -316,6 +316,35 @@ def test_the_renderer_does_not_trust_the_compiled_separator_tuple():
 )
 def test_any_unicode_whitespace_separates_words(gap):
     assert numberwords.text_to_number("sawm" + gap + "nga pariat") == 58
+
+
+def _code_point(ch):
+    return f"U+{ord(ch):04X}"
+
+
+# Every character the compiled file lists, not a hand-picked few. Since #75
+# the renderer reads both lists from _mizo.py, so these check that it
+# applies the whole of each. Whether the whitespace list is the right one is
+# test_the_whitespace_set_is_unicode_white_space's job, above.
+@pytest.mark.parametrize("char", _render.WHITESPACE, ids=_code_point)
+def test_every_shipped_whitespace_character_separates_words(char):
+    assert numberwords.text_to_number("sawm" + char + "nga pariat") == 58
+
+
+def test_the_renderer_splits_on_nothing_but_the_shipped_whitespace():
+    # The test above shows no listed character is missing from the split;
+    # this shows nothing is added to it, over every code point. Before #88
+    # the renderer's own list was what the White_Space test above checked,
+    # so an extra character failed there. That test now checks the shipped
+    # list, and this checks what the renderer built from it (#88).
+    declared = {
+        sep for sep in _render.PARSE["word_separators"] if len(sep) == 1
+    }
+    split_on = {
+        ch for ch in map(chr, range(0x110000))
+        if _render._SEPARATOR_RE.fullmatch(ch)
+    }
+    assert split_on == set(_render.WHITESPACE) | declared
 
 
 @pytest.mark.parametrize("char", ["\x1c", "\x1d", "\x1e", "\x1f"])
@@ -351,6 +380,27 @@ IGNORABLE_POSITIONS = {
 @pytest.mark.parametrize("position", sorted(IGNORABLE_POSITIONS))
 def test_ignorable_characters_are_stripped(position):
     assert numberwords.text_to_number(IGNORABLE_POSITIONS[position]) == 58
+
+
+# The positions above use four of the six characters; this covers the
+# characters, from the list the renderer actually reads. Inside a word, so
+# one that was not stripped would leave a word that matches nothing.
+@pytest.mark.parametrize("char", _render.IGNORABLE, ids=_code_point)
+def test_every_shipped_ignorable_character_is_stripped(char):
+    assert numberwords.text_to_number("sa" + char + "wm nga pariat") == 58
+
+
+def test_the_renderer_strips_nothing_but_the_shipped_ignorable_characters():
+    # The same pair for the strip table: the test above shows no listed
+    # character is left in, and this shows no other character is taken out.
+    # Before #88 an extra character in the renderer's own list failed the
+    # comparison of the two copies; this is that check, against the one
+    # copy that is left (#88).
+    stripped = {
+        ch for ch in map(chr, range(0x110000))
+        if not ch.translate(_render._IGNORABLE)
+    }
+    assert stripped == set(_render.IGNORABLE)
 
 
 def test_a_zero_width_character_is_not_a_separator():

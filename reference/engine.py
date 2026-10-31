@@ -129,6 +129,7 @@ def _condition_tree(node) -> tuple:
         return links[0] if len(links) == 1 else ("and",) + links
     if isinstance(node, ast.Name):
         return ("var", node.id)
+    # True becomes 1 here until the allowlist tightening (#75) rejects bools.
     return ("int", int(node.value))
 
 
