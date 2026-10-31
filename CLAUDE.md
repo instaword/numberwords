@@ -171,6 +171,7 @@ packages/
 .githooks/
   pre-push             Local guard that blocks pushes to main.
 .github/
+  CODEOWNERS           Requests the owner's review on every PR, forks included.
   pull_request_template.md
   ISSUE_TEMPLATE/
   workflows/tests.yml  Runs the reference suite and the vectors drift check.

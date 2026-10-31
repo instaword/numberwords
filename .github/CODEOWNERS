@@ -1,0 +1,3 @@
+# Requests the owner's review on every pull request, including ones from
+# forks, whose authors cannot request reviewers themselves.
+* @zoramt
