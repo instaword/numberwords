@@ -143,7 +143,6 @@ def test_compiled_conditions_match_the_engine(spec, artifact, package):
         ("the remainder variable", "remainder > 4"),
         ("a constant on the left", "5 < multiplier"),
         ("a chained comparison", "0 < multiplier < 5"),
-        ("a bool constant", "multiplier == True"),
     ],
 )
 def test_both_evaluators_read_condition_data_as_python_reads_the_condition(
@@ -184,17 +183,6 @@ def test_a_chained_comparison_becomes_an_explicit_and():
     assert results == [False, True, True, False]
 
 
-def test_a_bool_constant_becomes_a_plain_int():
-    """Python counts True as the int 1, so the allowlist has always accepted
-    it. The data carries the number, because not every target's language
-    agrees: in JavaScript `true === 1` is false. Checked by type, since
-    True == 1 would let an equality check pass either way.
-    """
-    tree = _parse_condition("multiplier == True")
-    assert tree == ("cmp", "==", ("var", "multiplier"), ("int", 1))
-    assert type(tree[3][1]) is int
-
-
 @pytest.mark.parametrize(
     "expression",
     [
@@ -203,6 +191,7 @@ def test_a_bool_constant_becomes_a_plain_int():
         "multiplier.real == 1",    # attribute access
         "ones_digit == 1",         # a name the format no longer defines
         "multiplier == 'zero'",    # a constant that is not an integer
+        "multiplier > -1",         # minus applied to 1, not one number
     ],
 )
 def test_validator_rejects_unsupported_conditions(expression):
@@ -214,6 +203,49 @@ def test_validator_rejects_unsupported_conditions(expression):
         _parse_condition(expression)
 
 
+# The grammar has two kinds of position. Where a condition goes -- the
+# whole expression, or inside an and/or -- it holds a comparison or an
+# and/or; a comparison's operand holds a variable or a non-negative
+# integer. Keyed by position, then by what wrongly sits there, so a missing
+# cell reads as a missing row. The five forms named on #75 are here, with
+# the four that complete the grid. Each is checked against its own message,
+# so it is refused for the reason the row says.
+WRONG_VALUE_IN_A_POSITION = {
+    ("the whole condition", "a bool"): ("True", "Not a condition"),
+    ("the whole condition", "a variable"): ("remainder", "Not a condition"),
+    ("the whole condition", "an integer"): ("1", "Not a condition"),
+    ("inside and/or", "a bool"): ("multiplier > 1 and True", "Not a condition"),
+    ("inside and/or", "a variable"): (
+        "multiplier > 1 and remainder", "Not a condition"
+    ),
+    ("inside and/or", "an integer"): ("multiplier > 1 or 0", "Not a condition"),
+    ("a comparison operand", "a bool"): (
+        "multiplier == True", "True is not a number"
+    ),
+    ("a comparison operand", "a comparison"): (
+        "(multiplier > 1) == 1", "Not a comparison operand"
+    ),
+    ("a comparison operand", "an and/or"): (
+        "(multiplier > 1 and remainder > 0) == 1", "Not a comparison operand"
+    ),
+}
+
+
+@pytest.mark.parametrize("position, value", sorted(WRONG_VALUE_IN_A_POSITION))
+def test_a_value_python_would_coerce_is_not_a_condition(position, value):
+    """Every row is valid Python, which counts True as 1 and any integer as
+    true or false, so each one evaluates there -- the eval() call checks
+    that, so a row cannot pass by being rejected for a typo. The allowlist
+    refuses them anyway (zoramt, #75): no spec uses them, and other
+    languages coerce differently, so every target would otherwise have to
+    copy Python's rules.
+    """
+    expression, reason = WRONG_VALUE_IN_A_POSITION[position, value]
+    eval(expression, {"__builtins__": {}}, {"multiplier": 2, "remainder": 1})
+    with pytest.raises(ValueError, match=reason):
+        _parse_condition(expression)
+
+
 @pytest.mark.parametrize(
     "expression",
     [
@@ -221,6 +253,10 @@ def test_validator_rejects_unsupported_conditions(expression):
         "multiplier > 1",
         "multiplier > 1 and remainder > 0",
         "remainder == 0 or remainder == 5",
+        "5 < multiplier",
+        "0 < multiplier < 5",
+        "remainder != 0 or multiplier >= 3 and multiplier <= 7",
+        "(multiplier > 1 or remainder > 0) and remainder < 9",
     ],
 )
 def test_validator_accepts_the_shapes_the_engine_supports(expression):

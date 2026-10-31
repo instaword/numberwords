@@ -155,9 +155,12 @@ _EMITTING_SCALES = sorted(
 # (engine._condition_tree):
 #
 #     ("and" | "or", tree, tree, ...)
-#     ("cmp", op, tree, tree)
-#     ("var", "multiplier" | "remainder")
-#     ("int", k)
+#     ("cmp", op, operand, operand)
+#     ("var", "multiplier" | "remainder")    an operand
+#     ("int", k)                             an operand; k >= 0, never a bool
+#
+# The engine's grammar puts "var" and "int" only inside a "cmp", so every
+# "and"/"or" here combines true/false values, never numbers (#75).
 #
 # Evaluated here by a second copy of the engine's evaluator, deliberately:
 # this module never imports the oracle. reference/test_compile_spec.py holds
