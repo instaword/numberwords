@@ -93,9 +93,9 @@ def _parse_condition(expression: str) -> tuple:
     `(0 < d) < 5`, which is true for every d.
 
     Deliberately not eval()/exec(): `condition` is data loaded from a YAML
-    spec file, not code we wrote, so only a small allowed set of nodes
-    (comparisons, and/or, names, int constants) is permitted -- anything
-    else raises ValueError instead of silently running arbitrary Python.
+    spec file, not code we wrote, so only a small grammar is permitted (see
+    _validate_condition_node) -- anything else raises ValueError instead of
+    silently running arbitrary Python.
     """
     node = ast.parse(expression, mode="eval").body
     _validate_condition_node(node)
@@ -106,15 +106,18 @@ def _condition_tree(node) -> tuple:
     """A validated condition's syntax tree, as data:
 
         ("and" | "or", tree, tree, ...)
-        ("cmp", op, tree, tree)          op: a key of _COMPARISONS
+        ("cmp", op, operand, operand)    op: a key of _COMPARISONS
         ("var", name)                    name: one of _VARIABLE_NAMES
-        ("int", k)
+        ("int", k)                       k: an int >= 0, never a bool
+
+    "var" and "int" are only ever a comparison's operands, and "and"/"or"
+    only ever join comparisons or other "and"/"or" trees -- the validator's
+    grammar -- so every "and"/"or" an evaluator meets combines true/false
+    values, never numbers.
 
     A chained comparison becomes an explicit "and" of its links here, once,
     so that no evaluator -- this engine's or a target's -- has to implement
-    Python's chaining rule. A bool constant becomes the int it equals: the
-    allowlist has always accepted True as an int, and this keeps what it
-    means while handing every target a plain number.
+    Python's chaining rule.
     """
     if isinstance(node, ast.BoolOp):
         return (_BOOL_COMBINER_SYNTAX[type(node.op)],) + tuple(
@@ -129,8 +132,7 @@ def _condition_tree(node) -> tuple:
         return links[0] if len(links) == 1 else ("and",) + links
     if isinstance(node, ast.Name):
         return ("var", node.id)
-    # True becomes 1 here until the allowlist tightening (#75) rejects bools.
-    return ("int", int(node.value))
+    return ("int", node.value)
 
 
 def _eval_tree(tree: tuple, variables: dict):
@@ -427,7 +429,24 @@ def _refers_to_remainder(items: tuple) -> bool:
 
 
 def _validate_condition_node(node):
-    """The allowlist for a `condition` expression, expressed once.
+    """The allowlist for a `condition` expression, expressed once, as a
+    grammar:
+
+        condition   a comparison, or conditions joined by `and` / `or`
+        comparison  operand OP operand [OP operand ...]
+        operand     multiplier, remainder, or a non-negative integer
+
+    So `and`/`or` only ever join true/false values, and a comparison only
+    ever compares numbers. Python accepts more -- it counts True as 1 and
+    any integer as true or false, so `multiplier == True`, a bare
+    `remainder` and `(multiplier > 1) == 1` all mean something there -- but
+    no spec uses those forms, and other languages coerce differently: in
+    JavaScript `true === 1` is false. Refusing them is cheaper than making
+    every target copy Python's coercions (zoramt, #75).
+
+    Non-negative, because Python reads `-1` as minus applied to 1 rather
+    than as one number, which has never been an operand. Neither variable
+    is ever below 0, so no spec needs one.
 
     Walks the whole tree rather than checking each node as it is evaluated.
     An evaluator's checks only fire on the nodes it actually reaches, and
@@ -442,9 +461,8 @@ def _validate_condition_node(node):
         for op in node.ops:
             if type(op) not in _COMPARISON_SYNTAX:
                 raise ValueError(f"Unsupported comparison operator: {type(op).__name__}")
-        _validate_condition_node(node.left)
-        for comparator in node.comparators:
-            _validate_condition_node(comparator)
+        for operand in [node.left, *node.comparators]:
+            _validate_operand(operand)
         return
     if isinstance(node, ast.BoolOp):
         if type(node.op) not in _BOOL_COMBINER_SYNTAX:
@@ -452,13 +470,33 @@ def _validate_condition_node(node):
         for value in node.values:
             _validate_condition_node(value)
         return
+    raise ValueError(
+        f"Not a condition: {ast.unparse(node)!r}. A condition is a comparison, "
+        f"or conditions joined by and/or"
+    )
+
+
+def _validate_operand(node):
+    """One side of a comparison, for _validate_condition_node's grammar.
+
+    The bool check comes before the int one because a bool is an int to
+    Python: isinstance(True, int) holds.
+    """
     if isinstance(node, ast.Name):
         if node.id not in _VARIABLE_NAMES:
             raise ValueError(f"Unknown variable in condition: {node.id!r}")
         return
+    if isinstance(node, ast.Constant) and isinstance(node.value, bool):
+        raise ValueError(
+            f"{node.value!r} is not a number in a condition: compare "
+            f"multiplier or remainder with a non-negative integer"
+        )
     if isinstance(node, ast.Constant) and isinstance(node.value, int):
         return
-    raise ValueError(f"Unsupported expression in condition: {ast.dump(node)}")
+    raise ValueError(
+        f"Not a comparison operand: {ast.unparse(node)!r}. A comparison "
+        f"compares multiplier, remainder or a non-negative integer"
+    )
 
 
 def _rule_name(rule: dict) -> str:
