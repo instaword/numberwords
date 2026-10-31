@@ -2,7 +2,8 @@
 
 > This file is loaded into every Claude Code session in this repo. It defines
 > **how you (Claude) should behave here** and gives contributors the context they
-> need. Read it fully before acting.
+> need. Read it fully before acting. Cursor reads it too, through
+> `.cursor/rules/working-agreement.mdc`, so it stays the only copy.
 
 ## Your role
 
@@ -159,8 +160,9 @@ spec/
                        Authoritative where it and spec-format.md disagree.
 reference/
   engine.py            The oracle — interprets a spec directly.
+  compile_spec.py      Compiles a spec into packages/python's _mizo.py.
   generate_vectors.py  Regenerates vectors/. Run after spec edits.
-  test_*.py            Engine, English control, and schema validation.
+  test_*.py            Engine, compiler, English control, and schema validation.
 vectors/
   mizo.json            Checked-in conformance vectors. Generated, not edited.
   mizo.phrases.json    Which short phrases are accepted; all others are rejected.
@@ -168,13 +170,17 @@ packages/
   python/              The first real target package: _mizo.py (compiled spec),
                        _render.py (thin interpreter), and its own test suite.
   npm/                 Still a name-reservation placeholder (0.0.0).
+.cursor/
+  rules/               Points Cursor at this file; holds no rules of its own.
 .githooks/
   pre-push             Local guard that blocks pushes to main.
 .github/
   CODEOWNERS           Requests the owner's review on every PR, forks included.
   pull_request_template.md
   ISSUE_TEMPLATE/
-  workflows/tests.yml  Runs the reference suite and the vectors drift check.
+  workflows/tests.yml  Both test suites on every supported Python, the drift
+                       checks on vectors/ and _mizo.py, and a wheel smoke test.
+  workflows/release.yml  Publishes packages/python to PyPI. Run by hand.
 ```
 
 Directories still unbuilt are described in the architecture doc and get created
