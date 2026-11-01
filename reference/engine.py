@@ -49,6 +49,7 @@ costs.
 """
 
 import ast
+import functools
 import operator
 import re
 import unicodedata
@@ -164,9 +165,13 @@ def _eval_tree(tree: tuple, variables: dict):
 
 def _strip_diacritics(word: str) -> str:
     """Remove diacritics by splitting letters and their marks (NFD), then
-    keep only the base letters. This is used for parse.strip_diacritics, so
-    input typed without diacritics can still match lexicon words that
-    include them ("sawm" -> "sâwm").
+    keep only the base letters ("sâwm" -> "sawm").
+
+    This is Python's rule, so its answer depends on the Unicode version
+    Python ships. Parsing no longer uses it directly: it is what the fold
+    table is built from (see _fold_table), and generate_vectors.py uses it
+    to write the spellings typed without diacritics, which are plain words
+    on every version.
     """
     decomposed = unicodedata.normalize("NFD", word)
     return "".join(ch for ch in decomposed if not unicodedata.combining(ch))
@@ -275,8 +280,122 @@ _IGNORABLE = {
 }
 
 
-def _normalize(word: str, parse_config: dict) -> str:
-    """Apply the spec's parse flags to one word.
+# The fold table: what case_insensitive and strip_diacritics mean (#75).
+#
+# Folding with the runtime's own rules -- str.lower() and NFD -- made both
+# flags depend on the Unicode version underneath. Newer Unicode versions add
+# combining marks, so the same spec stripped 875 marks on Python 3.10 and 937
+# on 3.14, and a JavaScript, Go or Rust target would have answered with its
+# own runtime's version again. So the flags now mean a table, built from the
+# spec's own words:
+#
+#   letters  every character the flags turn into letters those words use:
+#            the uppercase and accented forms of the spec's letters.
+#   marks    the combining marks found inside those letters, folded to
+#            nothing, so a circumflex typed as a separate mark is stripped
+#            the same as one written as part of its letter.
+#
+# Every other character is left as it is. That is narrower than Python's rule
+# on purpose: a mark that occurs in no accented Latin letter -- a Hebrew
+# point, an Arabic vowel -- is no longer ignored. What that buys is a table
+# that comes out the same on every Python from 3.10 to 3.14 (439 entries for
+# Mizo), so every target ships the same answer and _mizo.py stays identical
+# on every version CI runs. If a later Python ever changes it, that check is
+# what fails.
+
+
+def _flag_fold(
+    word: str, case_insensitive: bool, strip_diacritics: bool
+) -> str:
+    """What the parse flags make of a word by this Python's own rules. The
+    fold table is built from this; parsing uses the table."""
+    if case_insensitive:
+        word = word.lower()
+    if strip_diacritics:
+        word = _strip_diacritics(word)
+    return word
+
+
+@functools.lru_cache(maxsize=None)
+def _changed_characters(case_insensitive: bool, strip_diacritics: bool) -> dict:
+    """Every character the flags change, and what they change it into.
+
+    One pass over every code point, which costs most of a second, so it is
+    cached: the answer depends on the two flags alone, and every spec that
+    sets the same flags shares it. A character can only change if it has a
+    lowercase mapping, a decomposition or a combining class, so the rest are
+    skipped without being folded. unicodedata.decomposition() reports none
+    for the Hangul syllables, which NFD decomposes by algorithm instead,
+    hence their range. test_engine.py checks the shortcut against folding
+    every code point.
+    """
+    changed = {}
+    if not (case_insensitive or strip_diacritics):
+        return changed
+    for code in range(0x110000):
+        if 0xD800 <= code <= 0xDFFF:   # surrogates are not characters
+            continue
+        ch = chr(code)
+        if (
+            ch.lower() == ch
+            and not unicodedata.decomposition(ch)
+            and not unicodedata.combining(ch)
+            and not 0xAC00 <= code <= 0xD7A3
+        ):
+            continue
+        folded = _flag_fold(ch, case_insensitive, strip_diacritics)
+        if folded != ch:
+            changed[ch] = folded
+    return changed
+
+
+@functools.lru_cache(maxsize=None)
+def _fold_for(
+    alphabet: frozenset, case_insensitive: bool, strip_diacritics: bool
+) -> dict:
+    """The fold table for one alphabet, keyed by code point for
+    str.translate. Cached and shared, so callers copy it (_fold_table)."""
+    changed = _changed_characters(case_insensitive, strip_diacritics)
+    letters = {
+        ch: folded for ch, folded in changed.items()
+        if folded and ch not in alphabet and set(folded) <= alphabet
+    }
+    marks = {
+        mark for ch in letters for mark in unicodedata.normalize("NFD", ch)
+        if changed.get(mark) == ""
+    }
+    table = {ord(ch): folded for ch, folded in letters.items()}
+    table.update(dict.fromkeys(map(ord, marks), ""))
+    return table
+
+
+def _fold_table(lexicon: dict, parse_config: dict) -> dict:
+    """The spec's fold table (see the comment above), as a str.translate
+    table: code point -> what it folds to, "" for a mark.
+
+    The alphabet is every letter of the spec's words -- the lexicon, the
+    connectors and both sides of the aliases, the words input is compared
+    against -- after the flags. A spec that sets neither flag folds nothing.
+    """
+    case_insensitive = bool(parse_config.get("case_insensitive", False))
+    strip_diacritics = bool(parse_config.get("strip_diacritics", False))
+    if not (case_insensitive or strip_diacritics):
+        return {}
+    aliases = parse_config.get("aliases", {})
+    words = [
+        form for table in lexicon.values() for entry in table.values()
+        for form in entry.values() if isinstance(form, str)
+    ]
+    words += [*parse_config.get("connectors", []), *aliases, *aliases.values()]
+    alphabet = frozenset("".join(
+        _flag_fold(word.translate(_IGNORABLE), case_insensitive, strip_diacritics)
+        for word in words
+    ))
+    return dict(_fold_for(alphabet, case_insensitive, strip_diacritics))
+
+
+def _normalize(word: str, fold: dict) -> str:
+    """Apply the spec's parse flags to one word, through its fold table.
 
     Module-level rather than a method, because _validate_spec has to do this
     before there is a Spec to call it on -- and writing a second copy there
@@ -285,15 +404,10 @@ def _normalize(word: str, parse_config: dict) -> str:
 
     The ignorable-character strip is unconditional rather than a parse
     flag, for the same reason whitespace is (#46): it is a property of
-    text, not of a language. It runs first so the flags below see the
-    word a reader would.
+    text, not of a language. It runs first so the fold sees the word a
+    reader would.
     """
-    word = word.translate(_IGNORABLE)
-    if parse_config.get("case_insensitive", False):
-        word = word.lower()
-    if parse_config.get("strip_diacritics", False):
-        word = _strip_diacritics(word)
-    return word
+    return word.translate(_IGNORABLE).translate(fold)
 
 # The variables a condition or a placeholder key may name. Two, and they are
 # the same two at every scale: that is what lets one rule describe every
@@ -594,7 +708,8 @@ def _validate_spec(data: dict) -> None:
             )
 
     separator_pattern = _separator_pattern(parse)
-    connectors = {_normalize(c, parse) for c in parse.get("connectors", [])}
+    fold = _fold_table(lexicon, parse)
+    connectors = {_normalize(c, fold) for c in parse.get("connectors", [])}
 
     for rule in rules:
         condition = rule.get("condition")
@@ -620,7 +735,7 @@ def _validate_spec(data: dict) -> None:
     # drops "and" on input but emits it nowhere below 100.
     connector = data["grammar"].get("connector")
     if connector is not None:
-        if _normalize(connector.get("word", ""), parse) not in connectors:
+        if _normalize(connector.get("word", ""), fold) not in connectors:
             raise ValueError(
                 f"grammar.connector: {connector.get('word')!r} is not one of "
                 f"parse.connectors, so the canonical spelling would not parse back"
@@ -653,7 +768,7 @@ def _validate_spec(data: dict) -> None:
         _validate_readable(name, rule, items)
         _validate_placeholders(name, items, lexicon)
         for sequence in _linearisations(items):
-            _validate_literals(name, sequence, separator_pattern, connectors, parse)
+            _validate_literals(name, sequence, separator_pattern, connectors, fold)
 
 
 def _writes_multiplier(items: tuple) -> bool:
@@ -731,7 +846,7 @@ def _validate_placeholders(rule_name: str, items: tuple, lexicon: dict) -> None:
 
 def _validate_literals(
     rule_name: str, sequence: list, separator_pattern: str, connectors: set,
-    parse_config: dict,
+    fold: dict,
 ) -> None:
     """Every template literal is a separator or connector, and separates.
 
@@ -774,7 +889,7 @@ def _validate_literals(
 
     for position, literal in enumerate(literals):
         for word in (w for w in re.split(separator_pattern, literal) if w):
-            if _normalize(word, parse_config) not in connectors:
+            if _normalize(word, fold) not in connectors:
                 raise ValueError(
                     f"rule {rule_name!r}: template literal {word!r} is neither a "
                     f"word separator nor a connector, so it would be emitted on "
@@ -847,6 +962,9 @@ class Spec:
         self.connector = data["grammar"].get("connector")
         self.supports = data["meta"]["supports"]
         self.parse_config = data.get("parse", {})
+        # What the parse flags mean for this spec's words (see _fold_table).
+        # compile_spec.py ships it as the package's FOLD.
+        self._fold = _fold_table(self.lexicon, self.parse_config)
         # Parsed once here rather than on every conversion. Keyed by identity
         # because two rules may be equal as dicts and still be two rules.
         self._items = {id(rule): _parse_template(rule["output"]) for rule in self.rules}
@@ -1224,7 +1342,7 @@ class Spec:
         If a flag were applied only to the input, it could stop matching the
         lexicon.
         """
-        return _normalize(word, self.parse_config)
+        return _normalize(word, self._fold)
 
     def _tokenize(self, text: str) -> list:
         """Normalise text per the spec's `parse` section: apply the parse

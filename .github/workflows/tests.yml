@@ -32,6 +32,9 @@ jobs:
     # not just on one machine. Until #75 it held conditions emitted with
     # ast.unparse, whose output is not guaranteed identical across versions;
     # it is plain literals now, but their spelling is still Python's repr().
+    # It also holds the fold table (#75), which the engine derives from
+    # Python's Unicode data, so a Python whose data would change that table
+    # fails the artifact check below as soon as it joins this matrix.
     strategy:
       fail-fast: false
       matrix:

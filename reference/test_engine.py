@@ -32,6 +32,7 @@ import copy
 import itertools
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 import pytest
@@ -1056,6 +1057,154 @@ def test_aliases_are_normalised_on_both_sides():
     assert spec.text_to_number("âlt_five") == 5
     assert spec.text_to_number("alt_five") == 5
     assert spec.text_to_number("canonical_five") == 5
+
+
+# Combining marks, by name, so no test below holds an invisible character.
+CIRCUMFLEX = chr(0x0302)    # COMBINING CIRCUMFLEX ACCENT
+ACUTE = chr(0x0301)         # COMBINING ACUTE ACCENT
+SHEVA = chr(0x05B0)         # HEBREW POINT SHEVA
+LOW_LINE = chr(0x0332)      # COMBINING LOW LINE
+
+# What Mizo's two flags accept, keyed by the kind of character involved
+# rather than by example (#56), so a kind nobody thought of shows up as a
+# missing row.
+FOLDED_SPELLINGS = {
+    "the spec's own accent": "sâwm",
+    "no accent": "sawm",
+    "uppercase": "SAWM",
+    "uppercase with the accent": "SÂWM",
+    "another accent on the same letter": "sáwm",
+    "the accent typed as a separate mark": "sa" + CIRCUMFLEX + "wm",
+    "another accent typed as a separate mark": "sa" + ACUTE + "wm",
+}
+
+
+@pytest.mark.parametrize("kind", sorted(FOLDED_SPELLINGS))
+def test_folded_spellings_parse(spec, kind):
+    assert spec.text_to_number(FOLDED_SPELLINGS[kind]) == 10
+
+
+@pytest.mark.parametrize("mark", [SHEVA, LOW_LINE], ids=["Hebrew point", "low line"])
+def test_a_mark_no_accented_latin_letter_uses_is_not_ignored(spec, mark):
+    # Decision (#75): the fold table strips only the marks found inside the
+    # letters it folds, so its answer is the same on every Python. Python's
+    # own NFD rule strips both of these, and stripped 875 marks on 3.10 and
+    # 937 on 3.14 -- the version dependence the table exists to remove.
+    with pytest.raises(ValueError):
+        spec.text_to_number("sâwm" + mark)
+
+
+def test_the_mizo_fold_table_is_its_letters_and_the_marks_inside_them(spec):
+    # The shape #75 decided, stated from the outside: every entry folds to
+    # letters Mizo's words use, or is a mark found inside one of the entries
+    # that does. 439 on every Python from 3.10 to 3.14; a later Python that
+    # changes it fails here, and in the artifact drift check in CI.
+    fold = {chr(code): folded for code, folded in spec._fold.items()}
+    letters = {ch: folded for ch, folded in fold.items() if folded}
+    marks = {ch for ch, folded in fold.items() if not folded}
+    aliases = spec.parse_config["aliases"]
+    words = [
+        form for table in spec.lexicon.values()
+        for entry in table.values() for form in entry.values()
+    ]
+    words += [*spec.parse_config["connectors"], *aliases, *aliases.values()]
+    used = set("".join(spec._normalize_word(word) for word in words))
+    assert all(set(folded) <= used for folded in letters.values())
+    inside = {
+        mark for ch in letters for mark in unicodedata.normalize("NFD", ch)
+        if unicodedata.combining(mark)
+    }
+    assert marks == inside
+    assert CIRCUMFLEX in marks
+    assert (len(fold), len(letters), len(marks)) == (439, 414, 25)
+
+
+def _five_spellings_spec(flags):
+    return Spec({
+        "meta": {"supports": {"min": 10, "max": 10}},
+        "lexicon": {"scales": {10: {"standalone": "sâwm"}}},
+        "grammar": {
+            "rules": [{"name": "ten", "scale": 10, "multiplier": 1, "output": "{scales[10].standalone}"}]
+        },
+        "parse": flags,
+    })
+
+
+@pytest.mark.parametrize(
+    "flags, accepted",
+    [
+        ({}, {"sâwm"}),
+        ({"case_insensitive": True}, {"sâwm", "SÂWM"}),
+        ({"strip_diacritics": True}, {"sâwm", "sawm", "sa" + CIRCUMFLEX + "wm"}),
+        (
+            {"case_insensitive": True, "strip_diacritics": True},
+            {"sâwm", "SÂWM", "sawm", "SAWM", "sa" + CIRCUMFLEX + "wm"},
+        ),
+    ],
+    ids=["neither flag", "case_insensitive", "strip_diacritics", "both flags"],
+)
+def test_each_flag_folds_only_its_own_kind_of_character(flags, accepted):
+    # Every combination of the two flags against every kind of spelling.
+    # Since #75 both flags mean one table, so a table built with the wrong
+    # flag -- folding case for strip_diacritics, or a mark for
+    # case_insensitive -- would still pass every Mizo test, which sets both.
+    spec = _five_spellings_spec(flags)
+    spellings = {"sâwm", "SÂWM", "sawm", "SAWM", "sa" + CIRCUMFLEX + "wm"}
+    parsed = set()
+    for text in spellings:
+        try:
+            spec.text_to_number(text)
+        except ValueError:
+            continue
+        parsed.add(text)
+    assert parsed == accepted
+
+
+@pytest.mark.parametrize("where", ["connector", "alias"])
+def test_a_letter_only_a_connector_or_alias_uses_still_folds(where):
+    # The fold table's alphabet is every word input is compared against, not
+    # the lexicon alone. Here only the connector, or only the alias, has an
+    # "h", so an alphabet read from the lexicon alone would leave "H" as it
+    # is and the uppercase spelling would match nothing.
+    parse = {"case_insensitive": True}
+    if where == "connector":
+        parse["connectors"] = ["leh"]
+        text = "five LEH"
+    else:
+        parse["aliases"] = {"vhf": "five"}
+        text = "VHF"
+    spec = Spec({
+        "meta": {"supports": {"min": 5, "max": 5}},
+        "lexicon": {"units": {5: {"standalone": "five"}}},
+        "grammar": {
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"}]
+        },
+        "parse": parse,
+    })
+    assert spec.text_to_number(text) == 5
+
+
+@pytest.mark.parametrize(
+    "case_insensitive, strip_diacritics",
+    [(True, False), (False, True), (True, True)],
+    ids=["case_insensitive", "strip_diacritics", "both flags"],
+)
+def test_the_fold_sweep_skips_only_characters_the_flags_leave_alone(
+    case_insensitive, strip_diacritics
+):
+    # _changed_characters does not fold a code point with no lowercase
+    # mapping, no decomposition and no combining class. Fold every one of
+    # them here instead, so that shortcut cannot quietly lose a character on
+    # some later Python.
+    every = {}
+    for code in range(0x110000):
+        if 0xD800 <= code <= 0xDFFF:
+            continue
+        ch = chr(code)
+        folded = engine._flag_fold(ch, case_insensitive, strip_diacritics)
+        if folded != ch:
+            every[ch] = folded
+    assert engine._changed_characters(case_insensitive, strip_diacritics) == every
 
 
 def test_unparseable_text_raises(spec):

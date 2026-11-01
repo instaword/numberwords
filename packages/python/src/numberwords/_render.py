@@ -17,10 +17,10 @@ Python 3.10 is the floor (pyproject's requires-python), so nothing newer than
 
 import operator
 import re
-import unicodedata
 
 from ._mizo import (
     CONNECTOR,
+    FOLD,
     IGNORABLE,
     LEXICON,
     PARSE,
@@ -90,9 +90,16 @@ _SEPARATOR_RE = re.compile(
 # the only thing between two words, does not arise in Latin-script Mizo.
 _IGNORABLE = {ord(ch): None for ch in IGNORABLE}
 
+# What case_insensitive and strip_diacritics mean for this spec, as the
+# compiled file lists it: each character that folds, and what it folds to,
+# "" for a combining mark. The engine builds it from the spec's own words
+# (#75), so it is the same on every Python, where str.lower() and NFD follow
+# the Unicode version Python ships.
+_FOLD = {ord(ch): folded for ch, folded in FOLD.items()}
+
 
 def _normalize_word(word: str) -> str:
-    """Apply the parse flags to a single word.
+    """Apply the parse flags to a single word, through FOLD.
 
     Applied to *both* sides -- the input and the lexicon value it is
     compared against -- so a flag only ever loosens the comparison. It
@@ -102,18 +109,10 @@ def _normalize_word(word: str) -> str:
 
     The ignorable-character strip is unconditional rather than a parse
     flag, for the same reason whitespace is (#46): it is a property of
-    text, not of a language. It runs first so the flags below see the
-    word a reader would, and it is a no-op on authored lexicon entries.
+    text, not of a language. It runs first so the fold sees the word a
+    reader would, and it is a no-op on authored lexicon entries.
     """
-    word = word.translate(_IGNORABLE)
-    if PARSE.get("case_insensitive", False):
-        word = word.lower()
-    if PARSE.get("strip_diacritics", False):
-        # NFD splits a letter from its combining marks; dropping the marks
-        # leaves the base letters, so "sâwm" and "sawm" compare equal.
-        decomposed = unicodedata.normalize("NFD", word)
-        word = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
-    return word
+    return word.translate(_IGNORABLE).translate(_FOLD)
 
 
 # Connectors and aliases are normalised too, so they still match after the

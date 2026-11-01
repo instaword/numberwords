@@ -196,11 +196,11 @@
       "properties": {
         "case_insensitive": {
           "type": "boolean",
-          "description": "Lowercase input and lexicon before comparing."
+          "description": "Fold uppercase forms of the spec's letters to the letters themselves, on input and lexicon before comparing. Through the engine's fold table, not the runtime's lowercasing (#75): see spec-format.md, 'Case and diacritics'."
         },
         "strip_diacritics": {
           "type": "boolean",
-          "description": "Remove combining marks from input and lexicon before comparing, so ASCII-typed input matches. Applied to both sides -- applying it to input alone would stop it matching the lexicon."
+          "description": "Fold accented forms of the spec's letters to the letters themselves, and strip the combining marks found in those forms, on input and lexicon before comparing, so ASCII-typed input matches. Applied to both sides -- applying it to input alone would stop it matching the lexicon. Other combining marks are not stripped (#75): see spec-format.md, 'Case and diacritics'."
         },
         "word_separators": {
           "type": "array",
