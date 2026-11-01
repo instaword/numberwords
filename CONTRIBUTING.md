@@ -15,8 +15,6 @@ git config core.hooksPath .githooks
 # Install reference engine dependencies (needed for the oracle and its tests).
 pip install -r reference/requirements.txt
 
-# Install the Python package in editable mode so the package tests can import it.
-pip install -e packages/python
 ```
 
 ## Running the tests
