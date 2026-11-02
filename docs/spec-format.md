@@ -334,14 +334,33 @@ spec's own words — every lexicon form, connector and alias, after the flags:
   so a circumflex typed as a separate mark is stripped like one written as part
   of its letter.
 
-Every other character is left alone. A mark found in no accented letter — a
+Every other character is left alone. A mark found in none of those letters — a
 Hebrew point, an Arabic vowel, a combining underline — is not ignored, so
 `sâwm` followed by one does not parse. For Mizo the table has 439 entries, the
-same on every Python from 3.10 to 3.14.
+same on every Python from 3.10 to 3.14, and its 25 marks are exactly the marks
+found in accented Latin letters.
 
 The table ships in each target's compiled file as `FOLD`. A target removes the
 ignorable characters, then applies `FOLD`, and applies nothing else: no
 lowercasing and no normalisation of its own.
+
+Folding one character at a time has two limits, and the engine **rejects a spec
+that runs into either** when it loads, rather than letting it load and quietly
+refuse input the flags promise:
+
+- **A letter whose lowercase depends on its neighbours.** Greek `Σ` lowercases
+  to `ς` at the end of a word and to `σ` elsewhere, and a table can only pick
+  one, so with `case_insensitive` a spec word `τρεις` would not read back from
+  `ΤΡΕΙΣ`.
+- **A mark that none of the table's letters contains,** such as a combining
+  underline written into a spec word. The table keeps it, where
+  `strip_diacritics` would remove it.
+
+The check: every word input is compared against, and with `case_insensitive`
+its uppercase form, must fold through the table to what the flags make of it —
+whenever the flags read that spelling back to the word. The last part is what
+leaves German `ß` alone: `DREISSIG` lowercases to `dreissig`, not `dreißig`, so
+the flags never accepted that spelling and the table is not asked to.
 
 ## Relationship to CLDR RBNF
 
