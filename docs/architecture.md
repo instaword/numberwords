@@ -191,7 +191,7 @@ Concretely, in the first target package (#20):
 
 | Component | What it is |
 |---|---|
-| `_mizo.py` — generated literals, pre-parsed templates, condition data, normalised parse config, the whitespace and ignorable-character lists | the **normalised IR** |
+| `_mizo.py` — generated literals, pre-parsed templates, condition data, normalised parse config, the whitespace and ignorable-character lists, the fold table | the **normalised IR** |
 | `_render.py` — selects the rule, matches tokens, collects matches | the **thin interpreter** |
 
 **What we are deliberately *not* doing** is Option B proper: emitting code where
@@ -265,6 +265,25 @@ generation is left in it to cost anything per language.
 
 > This is the single most important decision in the repo. Don't let a target
 > package quietly hard-code rules and become a third source of truth.
+
+### Case and diacritics are a table — **decided**
+
+> **Decision (2026-11-01, #75): `case_insensitive` and `strip_diacritics` mean
+> a fold table built from the spec's words, not the runtime's `lower()` and
+> NFD.** It holds the characters the flags turn into the spec's own letters and
+> the combining marks found inside those characters, and nothing else.
+
+Folding with the runtime made the flags follow the Unicode version underneath:
+the same spec stripped 875 marks on Python 3.10 and 937 on 3.14, and each other
+target's runtime would have had an answer of its own. Keeping every mark and
+pinning one Python's table would have kept the old behaviour, at the cost of a
+pinned CI version and of `_mizo.py` no longer coming out identical on every
+Python. The narrower table is the same on every Python from 3.10 to 3.14, which
+keeps that guarantee; what it gives up is ignoring marks that no accented
+letter uses, and Mizo's spec uses none. Same principle as the whitespace and
+ignorable lists (#46) and the condition allowlist: follow what the spec uses
+rather than copy one runtime. The details are in
+[`spec-format.md`](spec-format.md), "Case and diacritics".
 
 ## Prior art — learn from it before designing
 

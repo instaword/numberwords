@@ -102,6 +102,14 @@ def compile_data(spec) -> dict:
     and beside PARSE rather than inside it, which holds what the spec says.
     Both are strings of the characters themselves; IGNORABLE is the
     engine's translate table turned back into one.
+
+    FOLD is what case_insensitive and strip_diacritics mean for this spec:
+    each character that folds, and what it folds to ("" for a mark),
+    built by the engine from the spec's words (#75, engine._fold_table).
+    A target applies it after removing IGNORABLE and applies nothing else:
+    no lowercasing and no Unicode normalisation of its own, which is the
+    point of shipping it. The two flags stay in PARSE because they are what
+    the spec says, but no target needs to read them.
     """
     meta = spec._data["meta"]
     config = spec.parse_config
@@ -149,6 +157,9 @@ def compile_data(spec) -> dict:
         },
         "WHITESPACE": _WHITESPACE,
         "IGNORABLE": "".join(chr(code) for code in _IGNORABLE),
+        "FOLD": {
+            chr(code): folded for code, folded in sorted(spec._fold.items())
+        },
     }
 
 
@@ -186,6 +197,18 @@ def _python_parse(parse):
     return "\n".join(lines)
 
 
+def _python_fold(fold):
+    # ascii(), not repr(): most entries are accented letters, and the marks
+    # are combining characters, which repr() writes raw -- invisible in a
+    # diff, or drawn on top of the quote before them.
+    lines = ["FOLD = {"]
+    lines.extend(
+        f"    {ascii(ch)}: {ascii(folded)}," for ch, folded in fold.items()
+    )
+    lines.append("}")
+    return "\n".join(lines)
+
+
 def _write_python(data) -> str:
     """compile_data's output as the source text of a Python module."""
     provenance = "\n".join(
@@ -202,6 +225,7 @@ def _write_python(data) -> str:
         "\n".join(
             f"{name} = {data[name]!r}" for name in ("WHITESPACE", "IGNORABLE")
         ),
+        _python_fold(data["FOLD"]),
     ]
     return "\n\n".join(sections) + "\n"
 

@@ -164,8 +164,9 @@ say that; bringing the hundreds back is a change of its own.
   whose `multiplier` and `condition` both hold. Order only matters between
   rules of the same scale — which is where a language's ×1 behaviour lives:
   Mizo's `ten` (bare `sâwm`) and `tens` (`sawm hnih`) are both scale 10.
-- **`text → number`:** normalise the text using `parse` (lowercase, strip
-  diacritics, split on the effective separators — whitespace plus whatever
+- **`text → number`:** normalise the text using `parse` (fold case and
+  diacritics through the spec's fold table — see "Case and diacritics" below —
+  split on the effective separators — whitespace plus whatever
   `word_separators` declares — drop `connectors`, resolve `aliases`), then
   parse it by recursive descent over the same rules, collecting every value
   some derivation gives. More than one is an ambiguity in the spec and raises;
@@ -314,6 +315,33 @@ disagree.
 Both lists are stated once, in the reference engine, and ship in each target's
 compiled file (#75), so a target reads them there rather than keeping its own
 copy of either.
+
+## Case and diacritics
+
+`case_insensitive` and `strip_diacritics` do not mean "call your runtime's
+`lower()` and Unicode normalisation". Both follow the Unicode version the
+runtime ships, and newer versions add combining marks: Python 3.10 strips 875 of
+them and 3.14 strips 937, and a JavaScript, Go or Rust target would answer with
+its own runtime's version again (#75).
+
+Instead the engine turns the two flags into a **fold table**, built from the
+spec's own words — every lexicon form, connector and alias, after the flags:
+
+- **Letters:** every character the flags turn into letters those words use. For
+  Mizo, that is the uppercase and accented forms of its letters (`S`, `Â`,
+  `á`).
+- **Marks:** the combining marks found inside those letters, folded to nothing,
+  so a circumflex typed as a separate mark is stripped like one written as part
+  of its letter.
+
+Every other character is left alone. A mark found in no accented letter — a
+Hebrew point, an Arabic vowel, a combining underline — is not ignored, so
+`sâwm` followed by one does not parse. For Mizo the table has 439 entries, the
+same on every Python from 3.10 to 3.14.
+
+The table ships in each target's compiled file as `FOLD`. A target removes the
+ignorable characters, then applies `FOLD`, and applies nothing else: no
+lowercasing and no normalisation of its own.
 
 ## Relationship to CLDR RBNF
 

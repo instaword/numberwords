@@ -298,7 +298,10 @@ the Python package ships. Compiling at build time is what lets that package
 avoid a PyYAML dependency and avoid reading the spec at import time (#20).
 It also holds the whitespace and ignorable-character lists, which come from
 `engine.py` rather than the spec because every language shares them (#46):
-shipping them is what saves each target keeping its own copy (#75).
+shipping them is what saves each target keeping its own copy (#75). And it
+holds the fold table, `FOLD`: what `case_insensitive` and `strip_diacritics`
+mean for this spec, built by the engine from the spec's words so that it comes
+out the same on every Python (#75).
 
 Like the vectors, it is a checked-in snapshot rather than something computed
 at install time. **Regenerate and commit it whenever `mizo.yaml` changes:**

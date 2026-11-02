@@ -403,6 +403,48 @@ def test_the_renderer_strips_nothing_but_the_shipped_ignorable_characters():
     assert stripped == set(_render.IGNORABLE)
 
 
+def test_every_shipped_fold_entry_is_applied():
+    # The same pair again for FOLD (#75): this one shows every listed
+    # character folds to what the table says...
+    wrong = {
+        ch for ch, folded in _render.FOLD.items()
+        if _render._normalize_word(ch) != folded
+    }
+    assert not wrong
+
+
+def test_the_renderer_folds_nothing_but_the_shipped_table():
+    # ...and this one that no other character changes, over every code
+    # point: no lowercasing and no Unicode normalisation of the renderer's
+    # own, which would bring back the dependence on Python's Unicode version
+    # the table exists to remove.
+    changed = {
+        ch for ch in map(chr, range(0x110000))
+        if ch not in _render.IGNORABLE and _render._normalize_word(ch) != ch
+    }
+    assert changed == set(_render.FOLD)
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["SÂWM", "sáwm", "sa" + chr(0x0302) + "wm"],
+    ids=["uppercase with the accent", "another accent", "a separate circumflex"],
+)
+def test_folded_spellings_parse(text):
+    assert numberwords.text_to_number(text) == 10
+
+
+@pytest.mark.parametrize(
+    "mark", [chr(0x05B0), chr(0x0332)], ids=["Hebrew point", "low line"]
+)
+def test_a_mark_no_accented_latin_letter_uses_is_not_ignored(mark):
+    # Decision (#75), stated here independently of the engine's tests, as
+    # the whitespace set is: a target implements the decision, not the
+    # oracle.
+    with pytest.raises(numberwords.NumberWordsError):
+        numberwords.text_to_number("sâwm" + mark)
+
+
 def test_a_zero_width_character_is_not_a_separator():
     # Stripped, not treated as a separator (#46), so this reads as one
     # run-together word and matches nothing. The intended answer, not a gap.

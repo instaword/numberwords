@@ -486,6 +486,25 @@ def test_compiled_text_lists_match_the_engine(artifact):
     assert len(set(artifact.IGNORABLE)) == len(artifact.IGNORABLE) == 6
 
 
+def test_compiled_fold_is_the_engines(artifact, spec):
+    """FOLD is the engine's fold table for the spec, shipped whole (#75).
+
+    Compared as the translate table the package builds from it, as
+    IGNORABLE is above. Which characters belong in it is test_engine.py's
+    job (test_the_mizo_fold_table_is_its_letters_and_the_marks_inside_them).
+    """
+    assert {ord(ch): folded for ch, folded in artifact.FOLD.items()} == spec._fold
+    assert len(artifact.FOLD) == 439
+
+
+def test_the_compiled_fold_is_written_in_ascii(spec):
+    # Its marks are combining characters. Written raw, as repr() would, each
+    # would be invisible in a diff or drawn over the quote before it, so a
+    # reviewer could not see what the table holds.
+    fold = compile_spec.compile_data(spec)["FOLD"]
+    assert compile_spec._python_fold(fold).isascii()
+
+
 def test_package_version_is_stated_once():
     """pyproject.toml and __init__.py both carry the package version, and
     nothing stops one being bumped without the other.
