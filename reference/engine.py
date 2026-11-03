@@ -425,14 +425,18 @@ def _validate_fold(lexicon: dict, parse_config: dict, fold: dict) -> None:
     flags fold to the word's own fold is checked. That is what leaves German
     ß alone: DREISSIG lowercases to dreissig, not dreißig, so the flags never
     accepted that spelling and the table is not asked to either.
+
+    Ignorable characters are removed first, the order _normalize applies
+    them in, so each spelling is folded exactly as parsing folds it (#93).
     """
     case_insensitive = bool(parse_config.get("case_insensitive", False))
     strip_diacritics = bool(parse_config.get("strip_diacritics", False))
     if not (case_insensitive or strip_diacritics):
         return
     for where, word in _spec_words(lexicon, parse_config):
-        expected = _flag_fold(word, case_insensitive, strip_diacritics)
-        for form in [word, word.upper()] if case_insensitive else [word]:
+        clean = word.translate(_IGNORABLE)
+        expected = _flag_fold(clean, case_insensitive, strip_diacritics)
+        for form in [clean, clean.upper()] if case_insensitive else [clean]:
             if _flag_fold(form, case_insensitive, strip_diacritics) != expected:
                 continue
             folded = form.translate(fold)
