@@ -231,6 +231,15 @@ connectors from any gap, so it parses strings the vectors never bless. That
 asymmetry is intended (#12, #34): the vectors are a floor every target must
 reach, not a ceiling.
 
+A run of connectors, however many in a row, is accepted on input in every
+language. `zâ leh leh pariat` and `zâ leh leh leh pariat` both parse as 108,
+and a target must accept that run wherever the engine does. "Not idiomatic"
+means "never generated", not "must be rejected": the vectors still omit a
+doubled connector (#19), and there is no cap on the length, because connectors
+are dropped before matching so a longer run adds no new reading (#95). A
+connector in a gap the grammar does not certify, such as `sawm leh hnih` for
+20, stays outside that requirement (#12, #34).
+
 `grammar.stacking` widens what is accepted a third way, for a pattern no rule
 can list because it is productive: on input, a scale word may take a whole
 numeral as its multiplier. Mizo's `nuai za hnih` is 10⁵ × 200 = 20,000,000,

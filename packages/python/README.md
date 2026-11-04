@@ -24,7 +24,9 @@ spellings it never writes: `nuaih` and `maktaduaih` for `nuai` and
 `maktaduai`, and a multiplier stacked onto a scale word from `nuai` (100,000)
 up, as in `nuai za hnih` (200 × 100,000). A stacked multiplier takes as many
 words as it can, so `nuai za hnih sawm nga` is 25,000,000. `number_to_text()`
-always emits the canonical spelling.
+always emits the canonical spelling. `text_to_number()` is lenient, so a caller
+who needs only the canonical spelling should check
+`number_to_text(text_to_number(t)) == t`.
 
 ## Supported range
 
