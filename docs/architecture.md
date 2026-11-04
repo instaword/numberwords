@@ -279,10 +279,13 @@ target's runtime would have had an answer of its own. Keeping every mark and
 pinning one Python's table would have kept the old behaviour, at the cost of a
 pinned CI version and of `_mizo.py` no longer coming out identical on every
 Python. The narrower table is the same on every Python from 3.10 to 3.14, which
-keeps that guarantee; what it gives up is ignoring marks that no accented
-letter uses, and Mizo's spec uses none. Same principle as the whitespace and
-ignorable lists (#46) and the condition allowlist: follow what the spec uses
-rather than copy one runtime. The details are in
+keeps that guarantee; what it gives up is ignoring marks that none of the
+spec's accented letters uses, and no word in Mizo's spec has one. Same
+principle as the whitespace and ignorable lists (#46) and the condition
+allowlist: follow what the spec uses rather than copy one runtime. A table
+folds one character at a time, so a spec whose words need more than that —
+Greek final sigma is the case found in #92's review — is rejected when it loads
+instead of quietly losing input. The details are in
 [`spec-format.md`](spec-format.md), "Case and diacritics".
 
 ## Prior art — learn from it before designing

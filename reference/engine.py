@@ -296,7 +296,7 @@ _IGNORABLE = {
 #            the same as one written as part of its letter.
 #
 # Every other character is left as it is. That is narrower than Python's rule
-# on purpose: a mark that occurs in no accented Latin letter -- a Hebrew
+# on purpose: a mark that occurs in none of those letters -- a Hebrew
 # point, an Arabic vowel -- is no longer ignored. What that buys is a table
 # that comes out the same on every Python from 3.10 to 3.14 (439 entries for
 # Mizo), so every target ships the same answer and _mizo.py stays identical
@@ -381,17 +381,74 @@ def _fold_table(lexicon: dict, parse_config: dict) -> dict:
     strip_diacritics = bool(parse_config.get("strip_diacritics", False))
     if not (case_insensitive or strip_diacritics):
         return {}
-    aliases = parse_config.get("aliases", {})
-    words = [
-        form for table in lexicon.values() for entry in table.values()
-        for form in entry.values() if isinstance(form, str)
-    ]
-    words += [*parse_config.get("connectors", []), *aliases, *aliases.values()]
     alphabet = frozenset("".join(
         _flag_fold(word.translate(_IGNORABLE), case_insensitive, strip_diacritics)
-        for word in words
+        for _, word in _spec_words(lexicon, parse_config)
     ))
     return dict(_fold_for(alphabet, case_insensitive, strip_diacritics))
+
+
+def _spec_words(lexicon: dict, parse_config: dict) -> list:
+    """Every word input is compared against, with where the spec states it:
+    each lexicon form, each connector, and both sides of each alias."""
+    aliases = parse_config.get("aliases", {})
+    words = [
+        ("lexicon word", form) for table in lexicon.values()
+        for entry in table.values() for form in entry.values()
+        if isinstance(form, str)
+    ]
+    words += [
+        ("parse.connectors entry", c) for c in parse_config.get("connectors", [])
+    ]
+    words += [
+        ("parse.aliases entry", w) for pair in aliases.items() for w in pair
+    ]
+    return words
+
+
+def _validate_fold(lexicon: dict, parse_config: dict, fold: dict) -> None:
+    """Every word of the spec folds through its table the way the flags mean.
+
+    The table folds one character at a time, which is what lets every target
+    apply it the same way, and what it cannot express is a fold that depends
+    on the letters around it. Greek is the case found (#92): str.lower()
+    turns a word-final Σ into ς and any other into σ, so a spec word ending
+    in ς reads its uppercase form back through lower() but not through the
+    table. A mark found inside none of the table's letters is the other:
+    the table keeps it where strip_diacritics would remove it. Without this check
+    either spec would load, and input the flags promise to accept would be
+    quietly rejected.
+
+    So the table has to read back every spelling of a word that the flags
+    read back: the word itself, and with case_insensitive its uppercase
+    form, the case variant generate_vectors.py writes. Only a spelling the
+    flags fold to the word's own fold is checked. That is what leaves German
+    ß alone: DREISSIG lowercases to dreissig, not dreißig, so the flags never
+    accepted that spelling and the table is not asked to either.
+
+    Ignorable characters are removed first, the order _normalize applies
+    them in, so each spelling is folded exactly as parsing folds it (#93).
+    """
+    case_insensitive = bool(parse_config.get("case_insensitive", False))
+    strip_diacritics = bool(parse_config.get("strip_diacritics", False))
+    if not (case_insensitive or strip_diacritics):
+        return
+    for where, word in _spec_words(lexicon, parse_config):
+        clean = word.translate(_IGNORABLE)
+        expected = _flag_fold(clean, case_insensitive, strip_diacritics)
+        for form in [clean, clean.upper()] if case_insensitive else [clean]:
+            if _flag_fold(form, case_insensitive, strip_diacritics) != expected:
+                continue
+            folded = form.translate(fold)
+            if folded != expected:
+                raise ValueError(
+                    f"{where} {word!r}: the parse flags read {form!r} as "
+                    f"{expected!r}, but the fold table makes it {folded!r}. "
+                    f"The table folds one character at a time, so it cannot "
+                    f"follow a letter whose fold depends on its neighbours, "
+                    f"such as Greek final sigma, or strip a mark that none "
+                    f"of its letters contains"
+                )
 
 
 def _normalize(word: str, fold: dict) -> str:
@@ -709,6 +766,7 @@ def _validate_spec(data: dict) -> None:
 
     separator_pattern = _separator_pattern(parse)
     fold = _fold_table(lexicon, parse)
+    _validate_fold(lexicon, parse, fold)
     connectors = {_normalize(c, fold) for c in parse.get("connectors", [])}
 
     for rule in rules:

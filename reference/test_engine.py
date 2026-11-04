@@ -1184,6 +1184,125 @@ def test_a_letter_only_a_connector_or_alias_uses_still_folds(where):
     assert spec.text_to_number(text) == 5
 
 
+# Words the fold table cannot fold the way the flags mean, keyed by why
+# (#92). The table folds one character at a time.
+UNFOLDABLE_WORDS = {
+    "a letter whose lowercase depends on its neighbours": (
+        "τρεις", {"case_insensitive": True},           # ΤΡΕΙΣ: Σ -> ς only at the end
+    ),
+    "a mark that none of the table's letters contains": (
+        "thre" + LOW_LINE + "e", {"strip_diacritics": True},
+    ),
+}
+
+
+def _spec_stating(word, place, flags):
+    """A one-number spec that states `word` in `place`."""
+    parse = dict(flags)
+    standalone = "three"
+    if place == "lexicon":
+        standalone = word
+    elif place == "connector":
+        parse["connectors"] = [word]
+    else:
+        parse["aliases"] = {word: "three"}
+    return {
+        "meta": {"supports": {"min": 3, "max": 3}},
+        "lexicon": {"units": {3: {"standalone": standalone}}},
+        "grammar": {
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"}]
+        },
+        "parse": parse,
+    }
+
+
+@pytest.mark.parametrize("place", ["lexicon", "connector", "alias"])
+@pytest.mark.parametrize("why", sorted(UNFOLDABLE_WORDS))
+def test_a_spec_the_fold_table_cannot_fold_is_rejected(why, place):
+    # Decision (#92, option 2): reject at load rather than document the limit.
+    # Without this the spec loads and the table quietly rejects a spelling
+    # the flags promise: before #92, ΤΡΕΙΣ read as 3 through str.lower()'s
+    # final-sigma rule. Every place a spec states a word input is compared
+    # against, since the table's alphabet is built from all of them.
+    word, flags = UNFOLDABLE_WORDS[why]
+    with pytest.raises(ValueError, match="fold table"):
+        Spec(_spec_stating(word, place, flags))
+
+
+def test_the_fold_error_names_the_word_and_both_folds():
+    word, flags = UNFOLDABLE_WORDS["a letter whose lowercase depends on its neighbours"]
+    with pytest.raises(ValueError) as error:
+        Spec(_spec_stating(word, "lexicon", flags))
+    message = str(error.value)
+    assert repr(word) in message            # the word the spec states
+    assert repr("ΤΡΕΙΣ") in message         # the spelling that failed
+    assert repr("τρειΣ") in message         # what the table makes of it
+
+
+def test_a_spelling_the_flags_never_accepted_is_not_required():
+    # Only the spellings the flags read back are checked. DREISSIG
+    # lowercases to dreissig, not dreißig, so str.lower() never accepted it,
+    # before #92 or since, and the table is not asked to: the spec loads,
+    # and DREIßIG still reads.
+    spec = Spec(_spec_stating("dreißig", "lexicon", {"case_insensitive": True}))
+    assert spec.text_to_number("DREIßIG") == 3
+    with pytest.raises(ValueError):
+        spec.text_to_number("DREISSIG")
+
+
+# Words whose capitalisations are hard for a table that folds one character
+# at a time: Greek sigma in each position, letters whose uppercase is more
+# than one character (ß, ǰ, ΐ), digraphs whose title case differs from their
+# uppercase (ǆ, ǉ), and two plain words as controls (istanbul, sâwm).
+HARD_WORDS = [
+    "τρεις", "σας", "ασσος", "τρεισ", "εσυ", "ΐ",
+    "dreißig", "straße", "ǆem", "ǉubav", "ǰa", "istanbul", "sâwm",
+]
+
+
+@pytest.mark.parametrize(
+    "flags",
+    [
+        {"case_insensitive": True},
+        {"strip_diacritics": True},
+        {"case_insensitive": True, "strip_diacritics": True},
+    ],
+    ids=["case_insensitive", "strip_diacritics", "both flags"],
+)
+@pytest.mark.parametrize("word", HARD_WORDS)
+def test_a_spec_loads_exactly_when_the_table_keeps_every_casing(word, flags):
+    # _validate_fold looks at a word and its uppercase form only. This is
+    # the claim that those two are enough (#93): over every capitalisation
+    # of the word, letter by letter, a spec loads exactly when the table
+    # reads back every one the flags read back. A spec that loads loses no
+    # casing, and a spec that is rejected would have lost one.
+    data = _spec_stating(word, "lexicon", flags)
+    case_insensitive = flags.get("case_insensitive", False)
+    strip_diacritics = flags.get("strip_diacritics", False)
+    fold = engine._fold_table(data["lexicon"], data["parse"])
+    target = engine._flag_fold(word, case_insensitive, strip_diacritics)
+    casings = {
+        "".join(letters)
+        for letters in itertools.product(*((c.lower(), c.upper(), c.title()) for c in word))
+    }
+    lost = sorted(
+        casing for casing in casings
+        if engine._flag_fold(casing, case_insensitive, strip_diacritics) == target
+        and engine._normalize(casing, fold) != engine._normalize(word, fold)
+    )
+    if lost:
+        with pytest.raises(ValueError, match="fold table"):
+            Spec(data)
+    else:
+        Spec(data)
+
+
+def test_a_word_is_only_checked_against_the_flags_its_spec_sets():
+    # Without case_insensitive, nobody promised ΤΡΕΙΣ, so τρεις is fine.
+    word, _ = UNFOLDABLE_WORDS["a letter whose lowercase depends on its neighbours"]
+    assert Spec(_spec_stating(word, "lexicon", {})).text_to_number(word) == 3
+
+
 @pytest.mark.parametrize(
     "case_insensitive, strip_diacritics",
     [(True, False), (False, True), (True, True)],
