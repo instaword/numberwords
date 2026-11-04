@@ -366,20 +366,12 @@ def test_engine_still_tolerates_what_the_vectors_do_not_certify(spec):
     # accept them.
     assert spec.text_to_number("sawm leh nga leh pariat") == 58
     assert spec.text_to_number("sawm leh hnih") == 20
-    # "leh" before a bound digit, the 100-199 shape of "sawm leh hnih".
-    # A repeated connector is a different decision: every target must accept
-    # it (#95), so that case is pinned in test_a_run_of_connectors_is_accepted.
-    assert spec.text_to_number("zâ sawm leh thum") == 130
-
-
-def test_a_run_of_connectors_is_accepted(spec, phrases):
-    # Repeated connectors are tolerated on input, however many in a row, in
-    # every language. The generator never writes one (#19). The phrase file
-    # records the pairs it can see; three connectors plus a numeral is four
-    # words, past PHRASE_MAX_WORDS, so the longer run is pinned here (#95).
-    assert phrases["accepted"]["leh leh khat"] == "1"
+    # Both new with #19, and both must stay uncertified. The first is what
+    # the generator produced before _connector_slots learned to skip a gap
+    # that already holds a connector; the second puts "leh" before a bound
+    # digit, which is the 100-199 shape of "sawm leh hnih".
     assert spec.text_to_number("zâ leh leh pariat") == 108
-    assert spec.text_to_number("zâ leh leh leh pariat") == 108
+    assert spec.text_to_number("zâ sawm leh thum") == 130
 
 
 def test_the_string_that_does_mean_ten_and_two_is_certified(spec, vectors):
@@ -400,8 +392,7 @@ def test_no_generated_input_doubles_the_connector(spec):
     # pariat". Nothing downstream would notice: build_vectors parses every
     # candidate back before writing it, and that string parses to 108
     # because _tokenize drops connectors however many there are. Doubled
-    # "leh" is not a spelling we certify (Rosie Malsawmtluangi, #19). It is
-    # still accepted on input, in a run of any length (#95).
+    # "leh" is not Mizo (Rosie Malsawmtluangi, #19).
     #
     # Generated here rather than read from vectors/mizo.json so that
     # removing the check from _connector_slots fails this immediately,

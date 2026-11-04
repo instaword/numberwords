@@ -656,11 +656,10 @@ def _connector_slots(spec, n: int, words) -> tuple:
 
     2. Is the gap still empty? From 100 up the canonical output itself
        contains "leh", before the final addend (Q-M on #27). A gap whose
-       neighbour is already a connector is spoken for. Adding another would
-       produce "zâ leh leh pariat". The generator skips that gap, so the
-       spelling is not certified: doubled "leh" is not Mizo (Rosie
-       Malsawmtluangi, #19). The engine still accepts it, and a run of any
-       length, because _tokenize drops every connector before matching (#95).
+       neighbour is already a connector is spoken for; adding another
+       produces "zâ leh leh pariat", which is not Mizo and which nothing
+       downstream would catch -- the generator's own parse-back check passes
+       it, since _tokenize drops connectors however many there are.
 
     The certified set stays deliberately narrower than what the engine
     tolerates (#12, #34): the engine drops a connector from any gap, so it
@@ -885,10 +884,6 @@ def build_phrases(spec) -> dict:
     in `accepted` must give that number, and every other one must be
     rejected. Of the bugs planted in a JS port on #75, it caught both that
     changed an answer; the vectors caught neither.
-
-    The file certifies whatever the engine accepts, repeated connectors
-    included, and that is deliberate (#95). A run of "leh" is not a spelling
-    the vectors generate, and a target that rejects one fails this file.
 
     Only engine.NoNumberError is written down as a rejection. Anything else
     the engine raises -- an ambiguous phrase, a fault in the spec -- stops

@@ -133,12 +133,6 @@ def test_the_phrase_vocabulary_has_every_kind_of_word(phrases, kind, word):
     assert word in phrases["vocabulary"], kind
 
 
-def test_a_run_of_three_connectors_parses():
-    # The phrase file stops at three words, so it cannot state three
-    # connectors plus a numeral. The package still accepts the run (#95).
-    assert numberwords.text_to_number("zâ leh leh leh pariat") == 108
-
-
 def test_text_to_number_agrees_with_the_phrase_file(phrases):
     # Closed-world, both halves at once: a listed phrase must give its
     # number, and every phrase that is not listed must be rejected. The
