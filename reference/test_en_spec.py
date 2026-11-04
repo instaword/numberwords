@@ -11,9 +11,10 @@ matters: irregular teens that can't be composed, a hyphen inside the
 canonical form ("forty-two") that is also a word separator when parsing, and
 lexicon entries with one form each rather than two.
 
-Scope is 0-99. English above 99 needed recursion the format did not have;
-since #65 it has it (`{remainder}`), and extending en.yaml is a change of
-its own rather than part of that one.
+Scope is 0-999. The hundreds rule writes "and" before the remainder
+("three hundred and five"). That is the canonical form; "three hundred
+five" is accepted, because "and" is dropped before matching (#82). Below
+100 the same word is still ignorable filler.
 """
 
 import copy
@@ -35,7 +36,7 @@ def en():
 def test_spec_loads_in_the_engine(en):
     # Before #29 this raised KeyError: 'output' -- en.yaml was written in a
     # format the engine never implemented.
-    assert en.supports == {"min": 0, "max": 99}
+    assert en.supports == {"min": 0, "max": 999}
 
 
 def test_examples_match(en):
@@ -45,12 +46,12 @@ def test_examples_match(en):
         assert en.number_to_text(example["number"]) == example["text"]
 
 
-@pytest.mark.parametrize("n", range(0, 100))
+@pytest.mark.parametrize("n", range(0, 1000))
 def test_round_trip_number_text_number(en, n):
     assert en.text_to_number(en.number_to_text(n)) == n
 
 
-@pytest.mark.parametrize("n", range(0, 100))
+@pytest.mark.parametrize("n", range(0, 1000))
 def test_round_trip_text_number_text(en, n):
     text = en.number_to_text(n)
     assert en.number_to_text(en.text_to_number(text)) == text
@@ -69,6 +70,14 @@ def test_round_trip_text_number_text(en, n):
         (42, "forty-two"),
         (70, "seventy"),
         (99, "ninety-nine"),
+        (100, "one hundred"),
+        (101, "one hundred and one"),
+        (110, "one hundred and ten"),
+        (115, "one hundred and fifteen"),
+        (120, "one hundred and twenty"),
+        (121, "one hundred and twenty-one"),
+        (305, "three hundred and five"),
+        (999, "nine hundred and ninety-nine"),
     ],
 )
 def test_number_to_text(en, n, expected):
@@ -95,7 +104,14 @@ def test_teens_are_keyed_by_the_remainder_not_by_value(en):
         ("forty two", 42),      # space instead of the canonical hyphen
         ("FORTY-TWO", 42),      # case_insensitive
         ("Ninety-Nine", 99),    # mixed case
-        ("twenty and one", 21),  # "and" is a connector, dropped when parsing
+        ("twenty and one", 21),  # "and" is filler here: nothing writes it
+        ("one hundred and", 100),  # a dangling "and" with no remainder
+        ("and three hundred and five", 305),  # leading filler
+        ("three hundred and and five", 305),  # a doubled "and" is still one
+        ("THREE HUNDRED AND FIVE", 305),
+        ("three hundred five", 305),  # American form, "and" dropped (#82)
+        ("one hundred one", 101),
+        ("nine hundred ninety-nine", 999),
     ],
 )
 def test_accepted_input_forms(en, text, expected):
@@ -105,7 +121,6 @@ def test_accepted_input_forms(en, text, expected):
 @pytest.mark.parametrize(
     "text",
     [
-        "one hundred",   # above supports.max -- no rule generates it
         "twenty-ten",    # well-formed words, not a well-formed number
         "banana",        # not a numeral at all
         "",              # empty
@@ -116,7 +131,7 @@ def test_unparseable_text_raises(en, text):
         en.text_to_number(text)
 
 
-@pytest.mark.parametrize("n", [-1, 100, 1000])
+@pytest.mark.parametrize("n", [-1, 1000])
 def test_out_of_range_raises(en, n):
     with pytest.raises(ValueError):
         en.number_to_text(n)
@@ -174,14 +189,18 @@ def test_single_digits_parse_without_mizo_form_names(en):
 
 
 def test_no_connector_position_is_certified(en):
-    # en.yaml drops "and" on input but declares no grammar.connector, and the
-    # generator certifies connector positions only for a language that does
-    # (#65). Before that, the same gating came from en.yaml declaring no
-    # parse.connector_precedes. Either way "forty and two" is tolerated by
-    # the engine and blessed by nothing.
+    # en.yaml declares no grammar.connector, and the generator certifies
+    # connector positions only for a language that does (#65). "forty and
+    # two" is tolerated by the engine and blessed by nothing. The "and" the
+    # hundreds rule writes is different: it is in the canonical spelling, and
+    # leaving it out is certified too, because that is the accepted American
+    # form (#82).
     assert en.connector is None
     assert en.text_to_number("forty and two") == 42
     assert not any(
         "and" in candidate
         for candidate in generate_vectors.accepted_inputs(en, 42)
     )
+    accepted = generate_vectors.accepted_inputs(en, 305)
+    assert "three hundred and five" in accepted
+    assert "three hundred five" in accepted

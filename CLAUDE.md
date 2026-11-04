@@ -151,7 +151,7 @@ docs/
   architecture.md      The design: spec → multi-target, trade-offs, prior art.
   spec-format.md       The rule-spec format, prose companion to the schema.
 languages/
-  en.yaml              Worked reference example (English, 0–99) — a real spec,
+  en.yaml              Worked reference example (English, 0–999) — a real spec,
                        not a sketch: it loads, round-trips, and validates.
   mizo.yaml            Mizo spec, 0–9,999,999,999. Numeral data verified by
                        native speakers; nothing marked TODO(verify).
