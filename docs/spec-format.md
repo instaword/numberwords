@@ -83,11 +83,11 @@ Versions are per file and do not track each other: `en.yaml` and `mizo.yaml`
 move independently. Neither is the version of a *package* that compiles a spec
 — `packages/python` versions the artifact it ships, on its own schedule.
 
-## Worked example (English, 0–99)
+## Worked example (English, 0–999)
 
 **The example lives in [`languages/en.yaml`](../languages/en.yaml). Read it
 there.** It is a real spec: it loads in the reference engine, round-trips all
-of 0–99, and is validated against the schema on every test run.
+of 0–999, and is validated against the schema on every test run.
 
 This document deliberately does *not* reproduce it in full. An earlier version
 did, and the copy here and the file drifted apart until `en.yaml` described a
@@ -151,11 +151,13 @@ condition, and 190 of the 1,000 shipped spellings then parsed to nothing while
 still rendering correctly. The engine now refuses, at load, a rule that
 neither writes its multiplier outside a segment nor fixes it.
 
-English stops at 99 in this example by choice rather than necessity now.
-"Three hundred and five" is `{units[multiplier].word} {scales[100].word}[ and
-{remainder}]` at scale 100 — "hundred" as a lexicon entry, since a template
-literal has to be a separator or a connector, and "and" is one. The format can
-say that; bringing the hundreds back is a change of its own.
+English runs to 999. "Three hundred and five" is `{units[multiplier].word}
+{scales[100].word}[ and {remainder}]` at scale 100 — "hundred" as a lexicon
+entry, since a template literal has to be a separator or a connector, and
+"and" is one. That is the canonical form. "Three hundred five" parses too:
+`and` is a connector, so it is dropped before matching (#82). Below 100 the
+same word is still filler, and there is no `grammar.connector`, so no other
+gap is certified.
 
 ## How the engine uses it
 
@@ -213,7 +215,10 @@ before the final addend of every number from 100 up — the innermost
 (#27 Q-M). It used to be a literal in ten of Mizo's seventeen templates. The
 word must also be one of `parse.connectors`, or the canonical spelling would
 not parse back; the engine checks that at load. English declares no
-`grammar.connector` — it drops "and" on input and writes it nowhere below 100.
+`grammar.connector`. The "and" in "one hundred and one" is written by the
+hundreds rule, and because it is a connector both that spelling and "one
+hundred one" parse. `grammar.connector` would instead put "and" before the
+innermost remainder ("one hundred twenty and one").
 
 The same declaration says where else a connector may idiomatically stand:
 before any addend, never before a digit bound to the scale word it multiplies.

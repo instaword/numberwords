@@ -85,9 +85,9 @@ format" from "the schema describes Mizo".
 worked reference example, and English is a useful control precisely because it
 is unlike Mizo where it matters — irregular teens that can't be composed, a
 hyphen that is both canonical output and a word separator, and lexicon entries
-with one form rather than two. It's capped at 0–99: English above 99 needed
-recursion the format did not have. It has it since #65 (`{remainder}`), and
-bringing the hundreds back is a change of its own.
+with one form rather than two. It covers 0–999. The hundreds rule writes
+"and" before the remainder ("three hundred and five"); leaving "and" out is
+accepted (#82). Below 100 the same word is still ignorable filler.
 
 ## Conformance vectors
 

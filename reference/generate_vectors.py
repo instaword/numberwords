@@ -417,6 +417,8 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
         # canonical output emits "leh", leaving it out is equally idiomatic.
         # It only arises where the canonical output carries a connector, so
         # nothing below grammar.connector's `min` produces one.
+        # English has no grammar.connector; its hundreds rule writes "and",
+        # and leaving that out is the accepted American form (#82).
         dropped = _without_connectors(spec, canonical_words)
         if len(dropped) != len(canonical_words):
             variants.add(canonical_joiner.join(dropped))
