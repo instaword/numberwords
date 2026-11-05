@@ -11,7 +11,29 @@ cd numberwords
 
 # Enable the shared git hooks (blocks accidental pushes to main).
 git config core.hooksPath .githooks
+
+# Install reference engine dependencies (needed for the oracle and its tests).
+pip install -r reference/requirements.txt
+
 ```
+
+## Running the tests
+
+There are two independent test suites. Both must pass before a change is considered ready.
+
+**Reference engine** (from the repository root or inside `reference/`):
+
+```bash
+python -m pytest reference/
+```
+
+**Python package** (from the repository root or inside `packages/python/`):
+
+```bash
+python -m pytest packages/python/
+```
+
+You can also `cd` into each directory and run `pytest` directly. The CI workflow runs both.
 
 ## The golden rule: never work directly on `main`
 
