@@ -361,10 +361,13 @@ def test_certified_connectors_are_followed_by_a_top_level_addend(spec, vectors):
 
 def test_engine_still_tolerates_what_the_vectors_do_not_certify(spec):
     # The other half of both decisions above: the narrower vectors must not
-    # be read as the engine having become stricter. These strings still
-    # parse -- they are simply not certified, so no target is required to
-    # accept them.
+    # be read as the engine having become stricter. These strings still parse.
+    #
+    # "sawm leh nga leh pariat" is five words. The phrase file stops at three,
+    # the vectors do not list it, and no target is required to accept it.
     assert spec.text_to_number("sawm leh nga leh pariat") == 58
+    # "sawm leh hnih" is three words. The vectors do not certify that gap, but
+    # the phrase file lists it as 20, so a target must accept it (#77).
     assert spec.text_to_number("sawm leh hnih") == 20
     # "leh" before a bound digit, the 100-199 shape of "sawm leh hnih".
     # A repeated connector is a different decision: every target must accept

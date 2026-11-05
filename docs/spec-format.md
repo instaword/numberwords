@@ -238,7 +238,8 @@ means "never generated", not "must be rejected": the vectors still omit a
 doubled connector (#19), and there is no cap on the length, because connectors
 are dropped before matching so a longer run adds no new reading (#95). A
 connector in a gap the grammar does not certify, such as `sawm leh hnih` for
-20, stays outside that requirement (#12, #34).
+20, is never generated either, but the engine accepts it, so a target must too:
+the phrase file lists it (#77).
 
 `grammar.stacking` widens what is accepted a third way, for a pattern no rule
 can list because it is productive: on input, a scale word may take a whole
