@@ -26,8 +26,8 @@ also test the canonical form. See below for how the list is chosen.
 
 Why `number` is a string (#12)
 ------------------------------
-Every number in this file is at most Mizo's ceiling, 10^10 - 1 (#27, revised
-2026-09-25), which JavaScript's Number.MAX_SAFE_INTEGER holds exactly -- so
+Every number in this file is at most Mizo's ceiling, 10^13 - 1 (#74),
+which JavaScript's Number.MAX_SAFE_INTEGER holds exactly -- so
 JSON's number type would do. It is written as a string anyway, because the
 format outlives the ceiling. The decision was taken when the ceiling was
 10^18 - 1, 111x past MAX_SAFE_INTEGER, where a standard JSON.parse reads
@@ -849,8 +849,9 @@ def build_vectors(spec) -> list:
 
 
 # The longest phrase the phrase file covers, in words. Every phrase up to
-# three words is 30,783 phrases, about ten seconds to check in either suite;
-# four would be 954,304, minutes in each. Three is also the length the
+# three words is 40,494 phrases with the current vocabulary, about ten
+# seconds to check in either suite; four would be over a million, minutes
+# in each. Three is also the length the
 # short-phrase checks in test_engine.py had already settled on.
 PHRASE_MAX_WORDS = 3
 

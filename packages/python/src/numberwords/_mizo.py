@@ -6,8 +6,8 @@ reference/ and commit the result.
 
 LANGUAGE = 'Mizo'
 CODE = 'lus'
-SPEC_VERSION = '0.8.0'
-SUPPORTS = (0, 9999999999)
+SPEC_VERSION = '0.9.0'
+SUPPORTS = (0, 9999999999999)
 
 LEXICON = {
     'scales': {
@@ -20,6 +20,9 @@ LEXICON = {
         10000000: {'multiplied': 'vaibêlchhe', 'standalone': 'vaibêlchhe'},
         100000000: {'multiplied': 'vaibêlchhetak', 'standalone': 'vaibêlchhetak'},
         1000000000: {'multiplied': 'tlûklehdingâwn', 'standalone': 'tlûklehdingâwn'},
+        10000000000: {'multiplied': 'vatelubeuh', 'standalone': 'vatelubeuh'},
+        100000000000: {'multiplied': 'diarphawngen', 'standalone': 'diarphawngen'},
+        1000000000000: {'multiplied': 'huau', 'standalone': 'huau'},
     },
     'units': {
         0: {'bound': 'bial', 'standalone': 'bial'},
@@ -152,6 +155,36 @@ RULES = (
         'multiplier': None,
         'condition': ('cmp', '>', ('var', 'multiplier'), ('int', 0)),
         'output': (('lex', 'scales', 1000000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+        'stacks': True,
+    },
+    {
+        'name': 'ten_billions',
+        'scale': 10000000000,
+        'multiplier': None,
+        'condition': ('cmp', '>', ('var', 'multiplier'), ('int', 0)),
+        'output': (('lex', 'scales', 10000000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+        'stacks': True,
+    },
+    {
+        'name': 'hundred_billions',
+        'scale': 100000000000,
+        'multiplier': None,
+        'condition': ('cmp', '>', ('var', 'multiplier'), ('int', 0)),
+        'output': (('lex', 'scales', 100000000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
+        'emit': True,
+        'whole_only': False,
+        'stacks': True,
+    },
+    {
+        'name': 'trillions',
+        'scale': 1000000000000,
+        'multiplier': None,
+        'condition': ('cmp', '>', ('var', 'multiplier'), ('int', 0)),
+        'output': (('lex', 'scales', 1000000000000, 'multiplied'), ' ', ('lex', 'units', 'multiplier', 'bound'), ('optional', (' ', ('remainder',)))),
         'emit': True,
         'whole_only': False,
         'stacks': True,
