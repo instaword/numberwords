@@ -131,6 +131,24 @@ def test_unparseable_text_raises(en, text):
         en.text_to_number(text)
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "zero hundred",
+        "zero hundred five",
+        "zero hundred and five",
+    ],
+)
+def test_a_zero_hundreds_multiplier_is_rejected(en, text):
+    # Output never writes "zero hundred": number_to_text only reaches this
+    # rule with a multiplier of at least 1. Dropping `multiplier > 0` changes
+    # no rendering, so the round-trip tests still pass. The condition is what
+    # refuses these (#98), for the same reason
+    # test_no_scale_word_is_multiplied_by_zero exists for Mizo.
+    with pytest.raises(ValueError):
+        en.text_to_number(text)
+
+
 @pytest.mark.parametrize("n", [-1, 1000])
 def test_out_of_range_raises(en, n):
     with pytest.raises(ValueError):

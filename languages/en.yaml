@@ -112,8 +112,13 @@ grammar:
     # is accepted (#82). The segment is dropped for 100, 200, …
     # {remainder} is the 0–99 rules, so 121 is "one hundred and twenty-one":
     # "and" comes before the whole remainder, not before the ones digit.
+    #
+    # `multiplier > 0` never matters for output, which only reaches this
+    # rule with a multiplier of at least 1. It is for input: without it
+    # "zero hundred and five" parses as 5 (#98).
     - name: hundreds                 # one hundred, three hundred and five, …
       scale: 100
+      condition: "multiplier > 0"
       output: "{units[multiplier].word} {scales[100].word}[ and {remainder}]"
 
 parse:
