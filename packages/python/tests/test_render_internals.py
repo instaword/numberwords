@@ -62,6 +62,9 @@ def test_every_literal_in_a_template_is_a_separator_or_a_connector():
         (10_000_000, "ten_millions"), (99_999_999, "ten_millions"),
         (100_000_000, "hundred_millions"), (999_999_999, "hundred_millions"),
         (1_000_000_000, "billions"), (9_999_999_999, "billions"),
+        (10_000_000_000, "ten_billions"), (99_999_999_999, "ten_billions"),
+        (100_000_000_000, "hundred_billions"), (999_999_999_999, "hundred_billions"),
+        (1_000_000_000_000, "trillions"), (9_999_999_999_999, "trillions"),
     ],
 )
 def test_rule_selection_follows_the_scale(n, expected):

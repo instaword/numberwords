@@ -288,7 +288,8 @@ def test_compiled_rules_match_the_spec(spec, artifact):
     # the compiler reads it from: every rule from 10^5 up (#27 rule 6, the
     # floor from Q-K), and none below it.
     assert {r["name"] for r in artifact.RULES if r["stacks"]} == {
-        "hundred_thousands", "millions", "ten_millions", "hundred_millions", "billions",
+        "hundred_thousands", "millions", "ten_millions", "hundred_millions",
+        "billions", "ten_billions", "hundred_billions", "trillions",
     }
 
 
@@ -636,9 +637,11 @@ def test_the_package_parser_agrees_with_the_engine_one_slip_from_the_vectors(spe
         "maktaduai sawm pakhat",
         "vaibêlchhetak khat nuai sawm pakhat",
         "NUAIH-ZA-HNIH",
+        # 20 x 10^9, in range since #74, written "vatelubeuh hnih".
+        "tlûklehdingâwn sawm hnih",
         # Refused by both, each for its own reason: above the range, below
         # the floor, and a single digit offered as a stacked multiplier.
-        "tlûklehdingâwn sawm hnih",
+        "huau sawm",
         "sîng za",
         "vaibêlchhe pahnih",
     ],
