@@ -28,6 +28,7 @@ These tests check that the engine correctly follows the grammar as written,
 not whether the grammar itself is linguistically correct.
 """
 
+import ast
 import copy
 import itertools
 import json
@@ -682,9 +683,188 @@ def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking():
 def test_a_stacked_reading_above_the_range_is_refused_not_shortened(spec):
     # Greedy first, then the range. "tlûklehdingâwn sawm hnih" is 20 x 10^9
     # (#27 rule 5) -- sayable, above the 10^10 - 1 ceiling -- and is refused
-    # with the number it reads as rather than as "no match".
-    with pytest.raises(ValueError, match=r"reads as 20000000000, outside"):
+    # as above the range rather than as "no match". Since #75 the message
+    # names the bound, not 20000000000: every reading above max is capped
+    # at one value, which is what spares a target big integers.
+    with pytest.raises(ValueError, match=r"reads as more than 9999999999, outside"):
         spec.text_to_number("tlûklehdingâwn sawm hnih")
+
+
+# Chains of descending scale words, each longer one reading further past the
+# range: 9 x 10^17 at three words, 10^37 at six without the cap (#75).
+_SCALE_CHAIN = ["tlûklehdingâwn", "vaibêlchhetak", "vaibêlchhe", "maktaduai", "nuai"]
+
+
+@pytest.mark.parametrize("words", range(2, len(_SCALE_CHAIN) + 1))
+def test_no_reading_holds_more_than_max_plus_one(spec, words):
+    # Every reading above the range is the one capped value, so nothing a
+    # target computes ever needs more than supports.max + 1 to hold.
+    text = " ".join(_SCALE_CHAIN[:words]) + " kua"
+    assert max(spec._parse_readings(text)) == SUPPORTED_MAX + 1
+
+
+def test_capping_changes_no_short_phrase_answer(spec, short_phrase_readings):
+    # The cap is only sound if greed still picks what it would have between
+    # the exact numbers. Compared here with the same spec and a range wide
+    # enough that nothing is capped, over every phrase of up to three words:
+    # the winning numbers, with any above the real range written as "over",
+    # must be the same.
+    uncapped = Spec(copy.deepcopy(spec._data) | {"meta": {
+        **spec._data["meta"], "supports": {"min": 0, "max": 10**40},
+    }})
+
+    def winners(readings):
+        if not readings:
+            return set()
+        top = max(readings.values())
+        return {
+            "over" if n > SUPPORTED_MAX else n
+            for n, rank in readings.items() if rank == top
+        }
+
+    changed = [
+        text for text, readings in short_phrase_readings.items()
+        if winners(readings) != winners(uncapped._parse_readings(text))
+    ]
+    assert not changed, changed[:10]
+
+
+@pytest.mark.parametrize(
+    "path", sorted(MIZO_SPEC_PATH.parent.glob("*.yaml")), ids=lambda p: p.name
+)
+def test_nothing_a_reading_is_compared_with_is_above_max(path):
+    # The test above is exhaustive only to three words. What makes it hold
+    # at any length is that nothing the parser compares a reading with is
+    # above max, so a capped reading passes every test its exact number
+    # would (docs/spec-format.md, #75). Past that, with max 50, a word for
+    # 20 and rules for 100 and 1000, "one thousand twenty hundred" reads as
+    # the cap, where the exact 2000 is no remainder of a thousand. Every
+    # spec here is kept clear of that.
+    spec = load(path)
+    rules = spec._data["grammar"]["rules"]
+    numbers = [rule["scale"] for rule in rules]
+    numbers += [rule["multiplier"] for rule in rules if "multiplier" in rule]
+    numbers += [key for table in spec.lexicon.values() for key in table]
+    numbers += [
+        node.value
+        for rule in rules if "condition" in rule
+        for node in ast.walk(ast.parse(rule["condition"], mode="eval"))
+        if isinstance(node, ast.Constant)
+    ]
+    high = spec.supports["max"]
+    assert not [n for n in numbers if n > high]
+
+
+def _ones_and_tens_spec(high):
+    """'one ten' reads as 10 (one x ten) and as 100 (a rule for 100), and
+    no rule stacks, so the two tie at the top rank."""
+    return Spec({
+        "meta": {"supports": {"min": 0, "max": high}},
+        "lexicon": {
+            "units": {1: {"word": "one"}},
+            "scales": {10: {"word": "ten"}},
+        },
+        "grammar": {
+            "rules": [
+                {"name": "units", "scale": 1, "output": "{units[multiplier].word}"},
+                {"name": "tens", "scale": 10,
+                 "output": "{units[multiplier].word} {scales[10].word}"},
+                {"name": "hundred", "scale": 100, "multiplier": 1,
+                 "output": "{units[1].word} {scales[10].word}"},
+            ],
+        },
+        "parse": {},
+    })
+
+
+def test_an_ambiguity_with_a_reading_above_the_range_names_the_bound():
+    # 100 is above this spec's max of 50, so it is the capped value; the
+    # message says so rather than printing that value as if it were read.
+    with pytest.raises(ValueError, match=r"ambiguous: matches \[10, more than 50\]"):
+        _ones_and_tens_spec(50).text_to_number("one ten")
+
+
+def test_a_reading_below_the_range_is_still_named():
+    # The cap is only above the range. Below supports.min the number is
+    # small and exact, so the refusal still says which it is.
+    spec = Spec({
+        "meta": {"supports": {"min": 5, "max": 5}},
+        "lexicon": {"units": {3: {"word": "three"}, 5: {"word": "five"}}},
+        "grammar": {
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].word}"}]
+        },
+        "parse": {},
+    })
+    with pytest.raises(ValueError, match=r"reads as 3, outside the supported range \[5, 5\]"):
+        spec.text_to_number("three")
+
+
+def test_a_capped_remainder_with_a_zero_multiplier_is_above_the_range():
+    # zoramt on #75: once a remainder is capped, max - remainder is -1, and
+    # floor and truncating division disagree on a negative number. The
+    # remainder is checked first, so no division sees one. Here max is 50,
+    # "seventy" is a remainder read above it and capped, and the rule lets
+    # "zero" be its multiplier: the reading must still be above the range.
+    spec = Spec({
+        "meta": {"supports": {"min": 0, "max": 50}},
+        "lexicon": {
+            "units": {0: {"w": "zero"}, 1: {"w": "one"}, 70: {"w": "seventy"}},
+            "scales": {100: {"w": "hundred"}},
+        },
+        "grammar": {
+            "rules": [
+                {"name": "units", "scale": 1, "output": "{units[multiplier].w}"},
+                {"name": "hundreds", "scale": 100,
+                 "output": "{units[multiplier].w} {scales[100].w}[ {remainder}]"},
+            ],
+        },
+        "parse": {},
+    })
+    assert set(spec._parse_readings("zero hundred seventy")) == {51}
+    with pytest.raises(ValueError, match=r"reads as more than 50, outside"):
+        spec.text_to_number("zero hundred seventy")
+
+
+def test_a_capped_multiplier_is_never_taken_for_a_word():
+    # A stacked multiplier the word slot could hold is skipped (#27 Q-L).
+    # Here "big" is the key max + 1, the capped value: if the cap were
+    # taken for that word, "two hundred thousand" (stacked, 200 x 1000)
+    # would lose its only reading and be refused as no match -- and with an
+    # in-range alternative in the spec, that alternative would answer.
+    spec = Spec({
+        "meta": {"supports": {"min": 0, "max": 150}},
+        "lexicon": {
+            "units": {1: {"w": "one"}, 2: {"w": "two"}, 151: {"w": "big"}},
+            "scales": {100: {"w": "hundred"}, 1000: {"w": "thousand"}},
+        },
+        "grammar": {
+            "stacking": {"accepted_from": 1000, "emit": "never"},
+            "rules": [
+                {"name": "units", "scale": 1, "output": "{units[multiplier].w}"},
+                {"name": "hundreds", "scale": 100,
+                 "output": "{units[multiplier].w} {scales[100].w}"},
+                {"name": "thousands", "scale": 1000,
+                 "output": "{units[multiplier].w} {scales[1000].w}"},
+            ],
+        },
+        "parse": {},
+    })
+    with pytest.raises(ValueError, match=r"reads as more than 150, outside"):
+        spec.text_to_number("two hundred thousand")
+
+
+def test_a_negative_lexicon_key_is_refused():
+    # The cap relies on a reading never shrinking as it is built (#75). The
+    # schema keeps the format open to negatives; the engine says "not yet".
+    with pytest.raises(ValueError, match=r"lexicon.units: key -1 is negative"):
+        Spec({
+            "meta": {"supports": {"min": 0, "max": 9}},
+            "lexicon": {"units": {-1: {"word": "minus one"}, 1: {"word": "one"}}},
+            "grammar": {
+                "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].word}"}]
+            },
+            "parse": {},
+        })
 
 
 # Where a scale word multiplied by zero ("sâng bial") can stand, one row

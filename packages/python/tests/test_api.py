@@ -92,3 +92,15 @@ def test_the_error_message_names_the_supported_range():
     # A bare "invalid value" tells a caller nothing about what to do next.
     with pytest.raises(numberwords.NumberWordsError, match=r"\[0, %d\]" % SUPPORTED_MAX):
         numberwords.number_to_text(SUPPORTED_MAX + 1)
+
+
+def test_text_above_the_range_is_refused_naming_the_bound():
+    # 9 x 10^17 (10^9 x 9 x 10^8), sayable and far above the range, is
+    # refused as above it rather than as "no match". The message names the
+    # bound, not the number: every reading above the range is one capped
+    # value, so no target needs big integers (#75).
+    pattern = r"reads as more than %d, outside the supported range \[0, %d\]" % (
+        SUPPORTED_MAX, SUPPORTED_MAX,
+    )
+    with pytest.raises(numberwords.NumberWordsError, match=pattern):
+        numberwords.text_to_number("tlûklehdingâwn vaibêlchhetak kua")
