@@ -25,10 +25,11 @@ Windows, `reference/.venv/bin/python` elsewhere.
 | 3 | `node prototype/npm-design/check.mjs` | 0 failures, 0 differ, 0 wrong on all four lines | ~30 s |
 | 4 | `node prototype/npm-design/mutants.mjs` | mutants 3 and 4 caught (945, 504 wrong); 1 and 2 not | ~30 s |
 | 5 | `$PY prototype/npm-design/python_shape.py` | 108 passed; 0 of 30783 differ | ~1 min |
-| 6 | `$PY prototype/npm-design/overflow.py` | 4 words already > int64 | seconds |
+| 6 | `$PY prototype/npm-design/overflow.py` | ending on `kua`, 4 words already > int64; on `za`, 10^19 at 3 words, 10^37 at 6 | seconds |
 | 7 | `$PY prototype/npm-design/per_char.py` then `node prototype/npm-design/per_char.mjs` | runtime Unicode: 1618 code points differ, all JS accepting what Python rejects; fold table: 0 | ~25 min |
 | 8 | `$PY prototype/npm-design/rank_clash.py` | 0 rank clashes on every line | ~15 min |
 | 9 | `$PY prototype/npm-design/fold_options.py` | Latin-only table: 439 entries, sha256 `4d4967ed2a6c`, reads all four spellings as 10; 0 other | seconds |
+| 10 | `$PY prototype/npm-design/overflow_options.py` | drop: 0 / 6,633 / 631 / 28,826 answers differ; cap: 0 on all four | ~17 min |
 
 Steps 3-8 need steps 1 and 2 first. Two kinds of number depend on the
 versions you run, and were measured on Node 24 (Unicode 17) and Python 3.12
@@ -51,6 +52,17 @@ the rest follows Python's Unicode version:
 | 3.13 | 15.1 | 1339 | 900 | 3600 |
 | 3.14 | 16.0 | 1351 | 912 | 3648 |
 
+Step 10 was added for the overflow comment on #75. It needs nothing but the
+package and `vectors/mizo.json`, and every count is fixed by the spec: the
+random set is drawn with seed 75. Expected output:
+
+| Phrases | Count | Drop: answers that differ | Cap: answers that differ |
+|---|---|---|---|
+| Vectors (canonical + accepted inputs) | 7,644 | 0 | 0 |
+| Every phrase of 1-4 words from the 31-word vocabulary | 954,304 | 6,633 | 0 |
+| Random phrases of 5-8 words (seed 75) | 400,000 | 631 | 0 |
+| Every 5- and 6-word chain of the scale words, `hnih`, `kua` and `leh` | 3,234,816 | 28,826 | 0 |
+
 ## What each check is
 
 - **check.mjs** -- both compiled variants, with and without the fold table,
@@ -72,13 +84,23 @@ the rest follows Python's Unicode version:
   conditions as data and the fold table, run through its own 108 tests and
   compared with the shipped package on every phrase.
 - **overflow.py** -- readings before the range check grow with every
-  stacked scale word.
+  stacked scale word. Each chain ends on `kua` (9), the largest digit, and
+  then on `za` (100), the largest word that reads alone as a multiplier,
+  which gives the 10^19 and 10^37 in the #75 overflow comment.
 - **fold_options.py** -- the two fold tables in the #75 fold-table comment.
   The full table holds every combining mark Python's Unicode knows, which
   is why its size follows the Python version. The Latin-only table keeps the
   same letters and only the 25 marks found inside them, and is the same on
   every Python. It is tried against today's package on every mark it drops,
   alone, before, inside and after `sâwm`, and as a second word.
+- **overflow_options.py** -- the two ways to bound a reading in the #75
+  overflow comment, each a patched copy of `_render.py` in a temporary
+  folder. Drop throws away a reading above `supports.max`; cap records
+  every such reading as one value, max + 1, keeping its greedy rank, checks
+  the remainder before dividing, and never takes a capped multiplier for a
+  word. Each phrase's answer is compared with today's by class: a number,
+  ambiguous, above the range, or no match. Dropping turns every phrase
+  above the range into "no match"; capping changes none.
 - **per_char.py / per_char.mjs** -- every Unicode code point alone,
   replacing the `a` of `sawm`, and inside `sawm` after the `a` (3.3M
   strings), Python against JS.
