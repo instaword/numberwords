@@ -212,6 +212,68 @@ def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking(monkeypatch):
     with pytest.raises(numberwords.NumberWordsError, match=r"ambiguous"):
         numberwords.text_to_number("one ten")
 
+    # And with a range that ends at 50, 100 is the capped value (#75): the
+    # message names the bound instead of printing that value as a reading.
+    monkeypatch.setattr(_render, "SUPPORTS", (0, 50))
+    assert set(_render._parse_readings(["one", "ten"])) == {10, 51}
+    with pytest.raises(numberwords.NumberWordsError, match=r"matches \[10, more than 50\]"):
+        numberwords.text_to_number("one ten")
+
+
+def test_a_capped_multiplier_is_never_taken_for_a_word(monkeypatch):
+    # The package's half of the engine test of the same name: "big" is the
+    # key max + 1, the capped value, and "two hundred thousand" (stacked,
+    # 200 x 1000) must still read as above the range, not lose its reading.
+    word = ("lex", "units", "multiplier", "w")
+    rule = {"condition": None, "emit": True, "whole_only": False, "multiplier": None}
+    monkeypatch.setattr(_render, "LEXICON", {
+        "units": {1: {"w": "one"}, 2: {"w": "two"}, 151: {"w": "big"}},
+        "scales": {100: {"w": "hundred"}, 1000: {"w": "thousand"}},
+    })
+    monkeypatch.setattr(_render, "RULES", (
+        {**rule, "name": "units", "scale": 1, "stacks": False, "output": (word,)},
+        {**rule, "name": "hundreds", "scale": 100, "stacks": False,
+         "output": (word, " ", ("lex", "scales", 100, "w"))},
+        {**rule, "name": "thousands", "scale": 1000, "stacks": True,
+         "output": (word, " ", ("lex", "scales", 1000, "w"))},
+    ))
+    monkeypatch.setattr(_render, "SUPPORTS", (0, 150))
+    with pytest.raises(numberwords.NumberWordsError, match=r"reads as more than 150, outside"):
+        numberwords.text_to_number("two hundred thousand")
+
+
+def test_a_capped_remainder_with_a_zero_multiplier_is_above_the_range(monkeypatch):
+    # The package's half of the engine test of the same name: with max 50,
+    # "seventy" is a remainder capped at 51 and "zero" a multiplier the rule
+    # allows. The remainder is checked before any division (#75).
+    word = ("lex", "units", "multiplier", "w")
+    rule = {"condition": None, "emit": True, "whole_only": False, "multiplier": None,
+            "stacks": False}
+    monkeypatch.setattr(_render, "LEXICON", {
+        "units": {0: {"w": "zero"}, 1: {"w": "one"}, 70: {"w": "seventy"}},
+        "scales": {100: {"w": "hundred"}},
+    })
+    monkeypatch.setattr(_render, "RULES", (
+        {**rule, "name": "units", "scale": 1, "output": (word,)},
+        {**rule, "name": "hundreds", "scale": 100,
+         "output": (word, " ", ("lex", "scales", 100, "w"),
+                    ("optional", (" ", ("remainder",))))},
+    ))
+    monkeypatch.setattr(_render, "SUPPORTS", (0, 50))
+    assert set(_render._parse_readings(["zero", "hundred", "seventy"])) == {51}
+    with pytest.raises(numberwords.NumberWordsError, match=r"reads as more than 50, outside"):
+        numberwords.text_to_number("zero hundred seventy")
+
+
+@pytest.mark.parametrize("words", range(2, 6))
+def test_no_reading_holds_more_than_max_plus_one(words):
+    # Every reading above the range is one capped value (#75), so a chain of
+    # scale words -- 10^37 at six words without the cap -- never needs more
+    # than max + 1 to hold. The package's half of the engine test.
+    chain = ["tlûklehdingâwn", "vaibêlchhetak", "vaibêlchhe", "maktaduai", "nuai"]
+    tokens = _render._tokenize(" ".join(chain[:words]) + " kua")
+    assert max(_render._parse_readings(tokens)) == _render.SUPPORTS[1] + 1
+
 
 def test_ambiguity_raises_instead_of_returning_the_first_match(monkeypatch):
     # parse_text collects every derivation's number and only then decides.

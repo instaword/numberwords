@@ -272,6 +272,36 @@ Canonical output never needs greed — every canonical multiplier is a single
 bound word, which cannot take in what follows — and the reference suite checks
 that at every covered number against the readings before greed, as #65 asked.
 
+**Every reading above `supports.max` is recorded as one value, `max + 1`,**
+keeping the best rank among them (#75). A reading is multiplier × scale +
+remainder, every scale is at least 1 and no part is negative, so a reading
+built on one above the range is above it too. Without the cap a chain of
+stacked scale words reads far past 64 bits (10³⁷ in six words), which a target
+with fixed-size integers would wrap or crash on before the range check. So the
+test comes before the multiplication: the reading is above the range if
+`remainder > max`, or else if `multiplier > (max − remainder) / scale` in
+integer division. The remainder comes first because once it is capped,
+`max − remainder` is negative, and floor division (Python's `//`) and
+truncating division (JavaScript's `Math.trunc`, Go and Rust's `/`) disagree on
+a negative number. Checked in this order, the division never sees one. Three
+notes:
+
+- The refusal names the bound, not the number: `reads as more than <max>,
+  outside the supported range [<min>, <max>]`.
+- The cap relies on no part of a number being negative. The schema already
+  requires every scale to be at least 1, and the engine refuses a negative
+  lexicon key for now, although the schema leaves room for one.
+- Greed picks exactly what it would between the exact numbers while nothing
+  the parser compares a reading with (a rule's scale or fixed multiplier, a
+  lexicon key, a number in a condition) is above `max`. Every spec in
+  `languages/` meets that, and the reference suite checks it. Past it, a
+  capped reading can pass a test its exact number fails: in a spec with
+  `max` 50, a word for 20 and rules for 100 and 1000, "one thousand twenty
+  hundred" has no exact reading, since 2000 is no remainder of a thousand,
+  but its capped remainder, 51, is one. A remainder can only be capped under
+  a scale above `max + 1`, so on no spec here does the remainder-first check
+  fire; the targets make it anyway rather than depend on that.
+
 **What a parse costs.** Until #65 `text → number` brute-forced the supported
 range and template-matched every candidate, so its cost grew with the range on
 every parse — the reference suite took 16–20 minutes at 0–999, and at 10⁵ the
@@ -439,3 +469,5 @@ Still genuinely open, no data yet:
 - How to express irregular joins (elision, mutation, tone changes) that some
   languages have.
 - Ordinals, negatives, decimals — in scope later; keep the format open to them.
+  Negatives will also need the cap on readings above the range revisited (see
+  "How the engine uses it"), since it assumes a reading never shrinks.

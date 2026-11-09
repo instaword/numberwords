@@ -732,6 +732,19 @@ def _validate_spec(data: dict) -> None:
     rules = data["grammar"]["rules"]
     parse = data.get("parse", {})
 
+    # The parser caps every reading above supports.max at one value, which
+    # is only sound while a reading can never shrink as it is built: every
+    # part of a number non-negative (#75). The schema keeps the format open
+    # to negatives, so this is where "not yet" is said, rather than a cap
+    # that would quietly turn wrong when one arrives.
+    for table, entries in lexicon.items():
+        for key in entries:
+            if isinstance(key, int) and key < 0:
+                raise ValueError(
+                    f"lexicon.{table}: key {key} is negative; negative numbers "
+                    f"are not supported yet"
+                )
+
     # Schema-valid data never trips these -- output and condition are both
     # `type: string` there, and output is required. They exist for the same
     # reason the section check above does: Spec() can be built from a raw
@@ -1196,18 +1209,30 @@ class Spec:
         # speaker did not say. At 10^13 - 1 the case cannot arise -- every
         # shorter multiplier starts with the same scale word and is as far out
         # of range -- and test_engine pins that rather than trusting it.
+        #
+        # Every reading above the range is the same capped value (see
+        # _parse_readings), so the refusal names the bound, not the number:
+        # that number is what a target without big integers cannot compute.
         readings = self._parse_readings(text)
         if not readings:
             raise NoNumberError(f"{text!r} does not match any number in the supported range")
+        low, high = self.supports["min"], self.supports["max"]
         top = max(readings.values())
         winners = sorted(n for n, rank in readings.items() if rank == top)
         if len(winners) > 1:
-            raise ValueError(f"{text!r} is ambiguous: matches {winners}")
+            named = ", ".join(
+                f"more than {high}" if n > high else str(n) for n in winners
+            )
+            raise ValueError(f"{text!r} is ambiguous: matches [{named}]")
         n = winners[0]
-        if not (self.supports["min"] <= n <= self.supports["max"]):
+        if n > high:
             raise NoNumberError(
-                f"{text!r} reads as {n}, outside the supported range "
-                f"[{self.supports['min']}, {self.supports['max']}]"
+                f"{text!r} reads as more than {high}, outside the supported "
+                f"range [{low}, {high}]"
+            )
+        if n < low:
+            raise NoNumberError(
+                f"{text!r} reads as {n}, outside the supported range [{low}, {high}]"
             )
         return n
 
@@ -1222,7 +1247,9 @@ class Spec:
 
     def _parse_readings(self, text: str) -> dict:
         """Every number some derivation of `text` gives, mapped to the rank
-        greedy binding gives its best derivation. The range is not applied.
+        greedy binding gives its best derivation. The range is not applied,
+        except that every reading above supports.max is the one value
+        supports.max + 1 (#75, see the comment below).
 
         Recursive descent over the rules, memoised on (start, end, whole,
         below): `whole` is whether the span is the entire input, which is
@@ -1254,6 +1281,20 @@ class Spec:
         # let "sawm hnih" (20) also read as 10 + 2 through the bound form of
         # 2, which is real ambiguity rather than an alternate spelling.
         lenient = len(tokens) == 1
+        # Readings above supports.max are all recorded as one value, `over`,
+        # keeping the best rank among them (#75). A reading is multiplier x
+        # scale + remainder, every scale at least 1 (the schema's minimum) and
+        # no part negative (_validate_spec refuses a negative lexicon key), so
+        # a reading built on one above max is above max too. While nothing a
+        # reading is compared with -- a rule's scale or fixed multiplier, a
+        # lexicon key, a number in a condition -- is above max, greed picks
+        # what it would have picked between the exact numbers; test_engine
+        # checks every spec in languages/ for that. Without the cap a stacked
+        # chain reads far past 64 bits -- 10^37 in six words -- and a target
+        # with fixed-size integers would wrap or crash before the range
+        # check. The test is made before multiplying, as such a target has to.
+        high = self.supports["max"]
+        over = high + 1
         cache = {}
 
         def span(start, end, whole, below):
@@ -1282,7 +1323,18 @@ class Spec:
                                 + bound.get("_multiplier_rank", ())
                                 + rank
                             )
-                        value = multiplier * rule["scale"] + remainder
+                        # The remainder first: once it is capped, max -
+                        # remainder is negative, and floor and truncating
+                        # division disagree on a negative number. Checked
+                        # this way the division never sees one, so a port
+                        # gets the same answer whichever its `/` does.
+                        if (
+                            remainder > high
+                            or multiplier > (high - remainder) // rule["scale"]
+                        ):
+                            value = over
+                        else:
+                            value = multiplier * rule["scale"] + remainder
                         if value not in readings or rank > readings[value]:
                             readings[value] = rank
                 cache[key] = readings
@@ -1340,7 +1392,12 @@ class Spec:
                     # bound form, so "vaibêlchhe pahnih" is not 2 x 10^7 (Q-L).
                     for stop in range(position + 1, end + 1):
                         for value, rank in span(position, stop, False, rule["scale"]).items():
-                            if value in self.lexicon[table]:
+                            # The capped value stands for some number above
+                            # the range, never a word, even when a key happens
+                            # to equal max + 1 (#75). Skipping it here could
+                            # drop greed's winner and let a shorter reading in
+                            # range answer instead.
+                            if value <= high and value in self.lexicon[table]:
                                 continue
                             rebound = bind(bound, "multiplier", value)
                             if rebound is not None:
