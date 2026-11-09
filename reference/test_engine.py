@@ -22,9 +22,10 @@ mizo.yaml's core numeral data has been verified by a native Mizo speaker
 (see meta.sources). The "leh" connector (parse.connectors) is a separate,
 deliberate exception -- not unverified, but a documented team decision to
 leave it unresolved (see mizo.yaml's header and its `# Decision (#10)` tag).
-The scale words for 10^10-10^12 are marked TODO(verify) on #74: a textbook
-reading with no diacritics. parse.aliases was the last such mark before that,
-and its diacritic part is handled by parse.strip_diacritics (#15).
+The scale words for 10^10-10^12 are attested in Zairema 2009 (see
+meta.sources); the book prints them without diacritics. Nothing in mizo.yaml
+is marked TODO(verify) as of #15: parse.aliases was the last one, and its
+diacritic part is now handled by parse.strip_diacritics.
 These tests check that the engine correctly follows the grammar as written,
 not whether the grammar itself is linguistically correct.
 """

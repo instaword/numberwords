@@ -3,8 +3,9 @@
 Convert numbers to words and words back to numbers, starting with **Mizo**
 (Lushai). Every whole number from 0 to 9,999,999,999,999 converts in both
 directions. The words through 10⁹ were checked by native speakers. The words
-for 10¹⁰, 10¹¹ and 10¹² are a textbook reading with no tone marks, marked
-`TODO(verify)` in the spec until a speaker confirms them.
+for 10¹⁰, 10¹¹ and 10¹² are attested in Zairema 2009, cited in
+`meta.sources` in [`languages/mizo.yaml`](languages/mizo.yaml). The book
+prints them without tone marks.
 
 ```python
 >>> import numberwords
@@ -18,8 +19,9 @@ It is for software that writes or reads Mizo numbers: spelling out an amount,
 or turning a number someone typed in words back into digits.
 
 - **Writing** gives one spelling. Through 10⁹ that spelling was checked by
-  native speakers. From 10¹⁰ up it uses the textbook reading, cited as
-  `TODO(verify)` in [`languages/mizo.yaml`](languages/mizo.yaml).
+  native speakers. From 10¹⁰ up it uses the spelling attested in Zairema
+  2009, cited in `meta.sources` in
+  [`languages/mizo.yaml`](languages/mizo.yaml).
 - **Reading** accepts what people actually write: any case, missing
   diacritics, the connector `leh` left out, and forms it never writes itself,
   such as `nuai za hnih` (200 × 100,000) for 20,000,000.
@@ -34,10 +36,9 @@ npm install @instaword/numberwords   # JS/TS -- placeholder release, exports not
 ```
 
 The Python package in this repository exports `number_to_text`,
-`text_to_number` and `NumberWordsError`. Its range stops at 10¹³ − 1. Above
-it the 10¹² scale
-would take a multi-digit multiplier, and a trailing addend would be read
-into that multiplier
+`text_to_number` and `NumberWordsError`. Its range stops at 10¹³ − 1.
+Above it the 10¹² scale would take a multi-digit multiplier, and a
+trailing addend would be read into that multiplier
 ([#74](https://github.com/instaword/numberwords/issues/74)).
 
 ## How it works

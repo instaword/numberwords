@@ -9,9 +9,9 @@
 # decision -- it would take more than a rule engine to disambiguate, and
 # the expectation is that callers (e.g. a post-ASR pipeline deciding phrase
 # boundaries) hand this library unambiguous single-number phrases in the
-# first place. The words for 10^10, 10^11 and 10^12 are outside the
-# speaker verification: TODO(verify) on #74, a textbook reading with no
-# diacritics.
+# first place. The words for 10^10, 10^11 and 10^12 are not in everyday
+# use, but they are attested (Zairema 2009, p. 509); see meta.sources.
+# #27 rule 4 is amended to that.
 #
 # Units have two grammatical forms depending on context: a standalone form
 # (used alone, e.g. counting) and a bound form (used when combined with a
@@ -34,7 +34,6 @@ meta:
   code: lus           # ISO 639-3 for Lushai/Mizo.
   version: 0.9.0      # 0.9.0: supports.max raised to 10^13 - 1, with
                       # scale words for 10^10, 10^11 and 10^12 (#74).
-                      # Their spellings are TODO(verify).
                       # 0.8.0: grammar.stacking -- a multiplier may be a
                       # whole numeral on input, from 10^5 up, binding
                       # greedily (#27 rule 6).
@@ -92,13 +91,13 @@ meta:
        addend attaches (Q-E, 2026-08-16), greedy binding (2026-08-30,
        confirmed 2026-09-03), and the head-scale reading of the floor
        (#65, 2026-09-24)."
-    - "TODO(verify): the scale words for 10^10-10^12 are the textbook
-       reading on #74 (Dan IV, \"Number hi hetia ziaka chhiar tur a ni\"),
-       which has no diacritics: vatelubeuh (10^10), diarphawngen (10^11),
-       huau (10^12). Not a native-speaker confirmation, and not a confirmed
-       missionary spelling. The forms when multiplied, and the rules that
-       combine them, follow #27 rules 1 and 2, the same shape as
-       tlûklehdingâwn. The ceiling is 10^13 - 1."
+    - "The scale words for 10^10-10^12 are attested in Thukhawchâng Min
+       Pêkte Hi, Rev Dr Zairema, 2009, p. 509: vatelubeuh (10^10),
+       diarphawngen (10^11), huau (10^12). The book prints them without
+       diacritics. They are not in everyday use, but attested (#27 rule 4,
+       as amended). The forms when multiplied, and the rules that combine
+       them, follow #27 rules 1 and 2, the same shape as tlûklehdingâwn.
+       Zairema lists nothing past huau, so the ceiling is 10^13 - 1."
 
 lexicon:
   units:               # 0–9. standalone = used alone; bound = used after a scale word (e.g. "sawm").
@@ -129,9 +128,9 @@ lexicon:
     10000000:   { standalone: "vaibêlchhe",     multiplied: "vaibêlchhe"     }
     100000000:  { standalone: "vaibêlchhetak",  multiplied: "vaibêlchhetak"  }
     1000000000: { standalone: "tlûklehdingâwn", multiplied: "tlûklehdingâwn" }
-    # 10^10-10^12 (#74). TODO(verify): the textbook photo has no diacritics,
-    # so these strings are its reading, not a confirmed missionary spelling.
-    # Both fields are the same word, as from 10^3 up.
+    # 10^10-10^12 (#74). #27 rule 4, as amended: not in everyday use, but
+    # attested (Zairema 2009, p. 509; see meta.sources). The book has no
+    # diacritics. Both fields are the same word, as from 10^3 up.
     10000000000:    { standalone: "vatelubeuh",   multiplied: "vatelubeuh"   }
     100000000000:   { standalone: "diarphawngen", multiplied: "diarphawngen" }
     1000000000000:  { standalone: "huau",         multiplied: "huau"         }
@@ -276,8 +275,9 @@ grammar:
       condition: "multiplier > 0"
       output: "{scales[1000000000].multiplied} {units[multiplier].bound}[ {remainder}]"
 
-    # 10^10-10^12 (#74). TODO(verify) on the three words; the rule shape is
-    # the billions rule. x1 is said, and the multiplier is one bound digit.
+    # 10^10-10^12 (#74). Attested in Zairema 2009 (see meta.sources); the
+    # rule shape is the billions rule. x1 is said, and the multiplier is one
+    # bound digit.
     - name: ten_billions            # vatelubeuh khat, vatelubeuh hnih, …
       scale: 10000000000
       condition: "multiplier > 0"

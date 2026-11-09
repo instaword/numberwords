@@ -155,7 +155,8 @@ languages/
                        not a sketch: it loads, round-trips, and validates.
   mizo.yaml            Mizo spec, 0–9,999,999,999,999. Numeral data through
                        10^9 verified by native speakers. The words for
-                       10^10–10^12 are marked TODO(verify) (#74).
+                       10^10–10^12 are attested (Zairema 2009); see
+                       meta.sources in that file (#74).
 spec/
   spec.schema.json     Machine-checkable definition of the spec format.
                        Authoritative where it and spec-format.md disagree.

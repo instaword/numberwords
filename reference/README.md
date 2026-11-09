@@ -54,10 +54,12 @@ Add `-v` to see each test name individually.
 data has been verified by a native Mizo speaker (see `meta.sources`); the
 `leh` connector is a separate, deliberate exception — not unverified, but a
 documented team decision to leave it unresolved (see `mizo.yaml`'s header
-and the `# Decision (#10)` tag on `parse.connectors`). The scale words for
-10¹⁰–10¹² are marked `TODO(verify)` on #74: a textbook reading with no
-diacritics. A `TODO(verify)` mark is a genuine open question rather than a
-settled fact — see [`CLAUDE.md`](../CLAUDE.md) on why that distinction matters.
+and the `# Decision (#10)` tag on `parse.connectors`). Nothing in `mizo.yaml`
+is marked `TODO(verify)` as of #15. The scale words for 10¹⁰–10¹² are
+attested in Zairema 2009, cited in `meta.sources`; the book prints them
+without diacritics. A `TODO(verify)` mark is a genuine open question rather
+than a settled fact — see [`CLAUDE.md`](../CLAUDE.md) on why that distinction
+matters.
 
 ## Spec schema
 
