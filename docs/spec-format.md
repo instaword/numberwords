@@ -282,7 +282,7 @@ test comes before the multiplication: the reading is above the range if
 integer division. The remainder comes first because once it is capped,
 `max − remainder` is negative, and floor division (Python's `//`) and
 truncating division (JavaScript's `Math.trunc`, Go and Rust's `/`) disagree on
-a negative number. Checked in this order, the division never sees one. Three
+a negative number. Checked in this order, the division never sees one. Five
 notes:
 
 - The refusal names the bound, not the number: `reads as more than <max>,
@@ -290,16 +290,31 @@ notes:
 - The cap relies on no part of a number being negative. The schema already
   requires every scale to be at least 1, and the engine refuses a negative
   lexicon key for now, although the schema leaves room for one.
-- Greed picks exactly what it would between the exact numbers while nothing
-  the parser compares a reading with (a rule's scale or fixed multiplier, a
-  lexicon key, a number in a condition) is above `max`. Every spec in
-  `languages/` meets that, and the reference suite checks it. Past it, a
-  capped reading can pass a test its exact number fails: in a spec with
-  `max` 50, a word for 20 and rules for 100 and 1000, "one thousand twenty
-  hundred" has no exact reading, since 2000 is no remainder of a thousand,
-  but its capped remainder, 51, is one. A remainder can only be capped under
-  a scale above `max + 1`, so on no spec here does the remainder-first check
-  fire; the targets make it anyway rather than depend on that.
+- Greed picks the winners it would between the exact numbers, every winner
+  above the range now one value, while nothing the parser compares a reading
+  with (a rule's scale or fixed multiplier, a lexicon key, a number in a
+  condition) is above `max`. Every spec in `languages/` meets that, and the
+  reference suite checks it. Past it, a capped reading can pass a test its
+  exact number fails: in a spec with `max` 50, a word for 20 and rules for
+  100 and 1000, "one thousand twenty hundred" has no exact reading, since
+  2000 is no remainder of a thousand, but its capped remainder, 51, is one.
+  A remainder can only be capped under a scale above `max + 1`, so on no
+  spec here does the remainder-first check fire; the targets make it anyway
+  rather than depend on that.
+- Merging every reading above the range into one value changes one answer.
+  Two different readings above the range that tie at the top rank were
+  refused as ambiguous; they are now one reading, refused as
+  `reads as more than <max>`. None of the Mizo phrases that step 10 of #76's
+  prototype compares does this, but a new spec could.
+- Python's integers never overflow, so a parser that multiplied before
+  checking would give the same answers in Python and go wrong only in a
+  target with fixed-size integers. The reference and package suites
+  therefore give every rule's scale a type that raises on a product above
+  `max + 1`, more than the cap promises any target will need to hold, and
+  on dividing a negative number. A parser that divided before checking the
+  remainder would still answer right in every language, since
+  0 × scale + (max + 1) is the cap again; the second check holds it to the
+  order above anyway, so that no port comes to depend on the coincidence.
 
 **What a parse costs.** Until #65 `text → number` brute-forced the supported
 range and template-matched every candidate, so its cost grew with the range on
