@@ -302,7 +302,8 @@ def _acceptable_fields(table: str, named_field: str, lenient: bool) -> list:
 
 def _parse_readings(tokens: list) -> dict:
     """Every number some derivation of `tokens` gives, mapped to the rank
-    greedy binding gives its best derivation. The range is not applied.
+    greedy binding gives its best derivation. The range is not applied,
+    except that every reading above the range is the one value max + 1.
 
     Recursive descent over the rules, the same algorithm as the engine's
     Spec._parse_readings and deliberately a separate copy of it: this module
@@ -326,6 +327,15 @@ def _parse_readings(tokens: list) -> dict:
     # would let "sawm hnih" (20) also read as 10 + 2 through the bound form of
     # 2, which is real ambiguity rather than an accepted alternate spelling.
     lenient = len(tokens) == 1
+    # Every reading above the range is recorded as one value, max + 1,
+    # keeping the best rank among them, as in the engine (#75). Readings
+    # only grow, so no reading needs more than max + 1 to hold, and greed
+    # picks what it would have between exact numbers while nothing a
+    # reading is compared with is above max, as in _mizo.py. The test
+    # comes before multiplying, as it must in a target with fixed-size
+    # integers.
+    high = SUPPORTS[1]
+    over = high + 1
     cache = {}
 
     def span(start, end, whole, below):
@@ -354,7 +364,15 @@ def _parse_readings(tokens: list) -> dict:
                             + bound.get("_multiplier_rank", ())
                             + rank
                         )
-                    value = multiplier * rule["scale"] + remainder
+                    # The remainder first, so the division never sees a
+                    # negative number and every target's `/` agrees (#75).
+                    if (
+                        remainder > high
+                        or multiplier > (high - remainder) // rule["scale"]
+                    ):
+                        value = over
+                    else:
+                        value = multiplier * rule["scale"] + remainder
                     if value not in readings or rank > readings[value]:
                         readings[value] = rank
             cache[key] = readings
@@ -408,7 +426,10 @@ def _parse_readings(tokens: list) -> dict:
                 # hold -- a single digit takes the bound form (#27 Q-L).
                 for stop in range(position + 1, end + 1):
                     for value, rank in span(position, stop, False, rule["scale"]).items():
-                        if value in LEXICON[table]:
+                        # The capped value stands for a number above the
+                        # range, never a word, even if a key equals max + 1
+                        # (#75): skipping it could drop greed's winner.
+                        if value <= high and value in LEXICON[table]:
                             continue
                         rebound = bind(bound, "multiplier", value)
                         if rebound is not None:
@@ -491,15 +512,25 @@ def parse_text(text: str) -> int:
         raise NumberWordsError(
             f"{text!r} does not match any number in the supported range"
         )
+    low, high = SUPPORTS
     top = max(readings.values())
     winners = sorted(n for n, rank in readings.items() if rank == top)
     if len(winners) > 1:
+        named = ", ".join(
+            f"more than {high}" if n > high else str(n) for n in winners
+        )
         raise NumberWordsError(
-            f"{text!r} is ambiguous: matches {winners}"
+            f"{text!r} is ambiguous: matches [{named}]"
         )
     n = winners[0]
-    low, high = SUPPORTS
-    if not (low <= n <= high):
+    # A reading above the range is the capped value, so the bound is named
+    # rather than a number this module never computes (#75).
+    if n > high:
+        raise NumberWordsError(
+            f"{text!r} reads as more than {high}, outside the supported range "
+            f"[{low}, {high}]"
+        )
+    if n < low:
         raise NumberWordsError(
             f"{text!r} reads as {n}, outside the supported range [{low}, {high}]"
         )
