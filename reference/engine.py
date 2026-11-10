@@ -71,6 +71,12 @@ _COMPARISON_OPERATORS = (
 )
 _COMPARISONS = {name: function for _, name, function in _COMPARISON_OPERATORS}
 _COMPARISON_SYNTAX = {syntax: name for syntax, name, _ in _COMPARISON_OPERATORS}
+# "==, !=, >, >=, < or <=", for the error that refuses any other operator.
+# Each name is the operator as a spec writes it.
+_ALLOWED_COMPARISONS = "{} or {}".format(
+    ", ".join(name for _, name, _ in _COMPARISON_OPERATORS[:-1]),
+    _COMPARISON_OPERATORS[-1][1],
+)
 
 _BOOL_COMBINER_OPERATORS = (
     (ast.And, "and", all),
@@ -605,6 +611,7 @@ def _validate_condition_node(node):
 
         condition   a comparison, or conditions joined by `and` / `or`
         comparison  operand OP operand [OP operand ...]
+        OP          one of _COMPARISON_OPERATORS
         operand     multiplier, remainder, or a non-negative integer
 
     So `and`/`or` only ever join true/false values, and a comparison only
@@ -631,7 +638,10 @@ def _validate_condition_node(node):
     if isinstance(node, ast.Compare):
         for op in node.ops:
             if type(op) not in _COMPARISON_SYNTAX:
-                raise ValueError(f"Unsupported comparison operator: {type(op).__name__}")
+                raise ValueError(
+                    f"Unsupported comparison operator in {ast.unparse(node)!r}. "
+                    f"A comparison uses {_ALLOWED_COMPARISONS}"
+                )
         for operand in [node.left, *node.comparators]:
             _validate_operand(operand)
         return
@@ -655,7 +665,11 @@ def _validate_operand(node):
     """
     if isinstance(node, ast.Name):
         if node.id not in _VARIABLE_NAMES:
-            raise ValueError(f"Unknown variable in condition: {node.id!r}")
+            known = " and ".join(sorted(_VARIABLE_NAMES))
+            raise ValueError(
+                f"Unknown variable in condition: {node.id!r}. A condition's "
+                f"variables are {known}"
+            )
         return
     if isinstance(node, ast.Constant) and isinstance(node.value, bool):
         raise ValueError(
