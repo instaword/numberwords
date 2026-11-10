@@ -290,17 +290,18 @@ notes:
 - The cap relies on no part of a number being negative. The schema already
   requires every scale to be at least 1, and the engine refuses a negative
   lexicon key for now, although the schema leaves room for one.
-- Greed picks the winners it would between the exact numbers, every winner
-  above the range now one value, while nothing the parser compares a reading
-  with (a rule's scale or fixed multiplier, a lexicon key, a number in a
-  condition) is above `max`. Every spec in `languages/` meets that, and the
-  reference suite checks it. Past it, a capped reading can pass a test its
-  exact number fails: in a spec with `max` 50, a word for 20 and rules for
-  100 and 1000, "one thousand twenty hundred" has no exact reading, since
-  2000 is no remainder of a thousand, but its capped remainder, 51, is one.
-  A remainder can only be capped under a scale above `max + 1`, so on no
-  spec here does the remainder-first check fire; the targets make it anyway
-  rather than depend on that.
+- Greed picks the same winners it would between the exact numbers, as long
+  as nothing the parser compares a reading with (a rule's scale or fixed
+  multiplier, a lexicon key, a number in a condition) is above `max`. The
+  winners above the range are now one value, `max + 1`. Every spec in
+  `languages/` meets that condition, and the reference suite checks it.
+  Past it, a capped reading can pass a test its exact number fails: in a
+  spec with `max` 50, a word for 20 and rules for 100 and 1000, "one
+  thousand twenty hundred" has no exact reading, since 2000 is no remainder
+  of a thousand, but its capped remainder, 51, is one. A remainder can only
+  be capped under a scale above `max + 1`, so on no spec here does the
+  remainder-first check fire; the targets make it anyway rather than depend
+  on that.
 - Merging every reading above the range into one value changes one answer.
   Two different readings above the range that tie at the top rank were
   refused as ambiguous; they are now one reading, refused as

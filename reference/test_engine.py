@@ -711,6 +711,9 @@ class _CheckedScale(int):
     overrides that method -- hence `__rmul__ = __mul__`, without which
     int's own would run. Both operand orders are covered, so the check does
     not depend on how the parser happens to write the product.
+
+    packages/python/tests/test_render_internals.py keeps a copy, since the
+    package's tests never import this suite: change the two together.
     """
 
     def __new__(cls, value, limit):

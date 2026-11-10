@@ -227,7 +227,7 @@ class _CheckedScale(int):
     type subclasses the left's and overrides that method, so
     `multiplier * rule["scale"]` and `(high - remainder) // rule["scale"]`
     reach these. A copy rather than an import, since the package's tests
-    never import the reference.
+    never import the reference: change the two together.
     """
 
     def __new__(cls, value, limit):
