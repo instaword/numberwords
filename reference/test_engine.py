@@ -695,12 +695,102 @@ def test_a_stacked_reading_above_the_range_is_refused_not_shortened(spec):
 _SCALE_CHAIN = ["tlûklehdingâwn", "vaibêlchhetak", "vaibêlchhe", "maktaduai", "nuai"]
 
 
+class _CheckedScale(int):
+    """A rule's scale that does arithmetic the way a target with fixed-size
+    integers needs it done (zoramt on #101). Python's integers never
+    overflow, so a parser that multiplies before it checks the range gives
+    the same answers here and only goes wrong in such a target. With every
+    scale one of these, it raises instead.
+
+    Two things raise: a product above `limit` (supports.max + 1), more than
+    the cap promises any target will need to hold, and dividing a negative
+    number, where floor and truncating division part (docs/spec-format.md).
+    `multiplier * rule["scale"]` and `(max - remainder) // rule["scale"]`
+    reach the methods below because Python tries the right operand's
+    reflected method first when its type subclasses the left operand's and
+    overrides that method -- hence `__rmul__ = __mul__`, without which
+    int's own would run. Both operand orders are covered, so the check does
+    not depend on how the parser happens to write the product.
+
+    packages/python/tests/test_render_internals.py keeps a copy, since the
+    package's tests never import this suite: change the two together.
+    """
+
+    def __new__(cls, value, limit):
+        scale = super().__new__(cls, value)
+        scale.limit = limit
+        return scale
+
+    def __getnewargs__(self):
+        return int(self), self.limit
+
+    def __mul__(self, other):
+        product = int(self) * int(other)
+        if product > self.limit:
+            raise OverflowError(f"{other} x {int(self)} is above {self.limit}")
+        return product
+
+    __rmul__ = __mul__
+
+    def __rfloordiv__(self, other):
+        if other < 0:
+            raise ArithmeticError(f"{other} // {int(self)} divides a negative number")
+        return int(other) // int(self)
+
+    def __rtruediv__(self, other):
+        if other < 0:
+            raise ArithmeticError(f"{other} / {int(self)} divides a negative number")
+        return int(other) / int(self)
+
+
+def _checked(data):
+    """Spec(data) with every rule's scale a _CheckedScale."""
+    data = copy.deepcopy(data)
+    limit = data["meta"]["supports"]["max"] + 1
+    for rule in data["grammar"]["rules"]:
+        rule["scale"] = _CheckedScale(rule["scale"], limit)
+    return Spec(data)
+
+
+@pytest.fixture(scope="module")
+def checked_spec(spec):
+    return _checked(spec._data)
+
+
+def test_the_checked_scale_refuses_what_a_fixed_size_target_cannot_do():
+    # The answer key for the tests that use it: what passes, what raises.
+    scale = _CheckedScale(100, limit=51)
+    assert scale == 100 and isinstance(scale, int)
+    assert 0 * scale == 0 and scale * 0 == 0
+    assert 50 // scale == 0 and 50 / scale == 0.5
+    with pytest.raises(OverflowError):
+        1 * scale
+    with pytest.raises(OverflowError):
+        scale * 1
+    with pytest.raises(ArithmeticError, match="negative"):
+        -1 // scale
+    with pytest.raises(ArithmeticError, match="negative"):
+        -1 / scale
+    assert copy.deepcopy(scale).limit == 51
+
+
 @pytest.mark.parametrize("words", range(2, len(_SCALE_CHAIN) + 1))
-def test_no_reading_holds_more_than_max_plus_one(spec, words):
+def test_no_reading_holds_more_than_max_plus_one(checked_spec, words):
     # Every reading above the range is the one capped value, so nothing a
-    # target computes ever needs more than supports.max + 1 to hold.
+    # target computes ever needs more than supports.max + 1 to hold -- and
+    # with checked scales, no product on the way does either.
     text = " ".join(_SCALE_CHAIN[:words]) + " kua"
-    assert max(spec._parse_readings(text)) == SUPPORTED_MAX + 1
+    assert max(checked_spec._parse_readings(text)) == SUPPORTED_MAX + 1
+
+
+def test_no_short_phrase_needs_arithmetic_a_fixed_size_target_lacks(
+    checked_spec, short_phrase_readings
+):
+    # Every phrase of up to three words, stacked ones above the range
+    # included, parses with checked scales and to the same readings.
+    assert all(isinstance(rule["scale"], _CheckedScale) for rule in checked_spec.rules)
+    for text, readings in short_phrase_readings.items():
+        assert checked_spec._parse_readings(text) == readings, text
 
 
 def test_capping_changes_no_short_phrase_answer(spec, short_phrase_readings):
@@ -805,7 +895,9 @@ def test_a_capped_remainder_with_a_zero_multiplier_is_above_the_range():
     # remainder is checked first, so no division sees one. Here max is 50,
     # "seventy" is a remainder read above it and capped, and the rule lets
     # "zero" be its multiplier: the reading must still be above the range.
-    spec = Spec({
+    # A parser that divided first would get it right anyway, since
+    # 0 x 100 + 51 is the cap again; the checked scales make it fail.
+    spec = _checked({
         "meta": {"supports": {"min": 0, "max": 50}},
         "lexicon": {
             "units": {0: {"w": "zero"}, 1: {"w": "one"}, 70: {"w": "seventy"}},
@@ -831,7 +923,7 @@ def test_a_capped_multiplier_is_never_taken_for_a_word():
     # taken for that word, "two hundred thousand" (stacked, 200 x 1000)
     # would lose its only reading and be refused as no match -- and with an
     # in-range alternative in the spec, that alternative would answer.
-    spec = Spec({
+    spec = _checked({
         "meta": {"supports": {"min": 0, "max": 150}},
         "lexicon": {
             "units": {1: {"w": "one"}, 2: {"w": "two"}, 151: {"w": "big"}},

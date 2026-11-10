@@ -6,6 +6,7 @@ event; these are the gaps it structurally cannot cover.
 """
 
 import copy
+import itertools
 import re
 from pathlib import Path
 
@@ -217,6 +218,85 @@ def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking(monkeypatch):
         numberwords.text_to_number("one ten")
 
 
+class _CheckedScale(int):
+    """The package's copy of reference/test_engine.py's _CheckedScale
+    (zoramt on #101): a rule's scale that raises on a product above `limit`
+    (max + 1), more than the cap promises any target will need to hold, and
+    on dividing a negative number, where floor and truncating division
+    part. Python tries the right operand's reflected method first when its
+    type subclasses the left's and overrides that method, so
+    `multiplier * rule["scale"]` and `(high - remainder) // rule["scale"]`
+    reach these. A copy rather than an import, since the package's tests
+    never import the reference: change the two together.
+    """
+
+    def __new__(cls, value, limit):
+        scale = super().__new__(cls, value)
+        scale.limit = limit
+        return scale
+
+    def __getnewargs__(self):
+        return int(self), self.limit
+
+    def __mul__(self, other):
+        product = int(self) * int(other)
+        if product > self.limit:
+            raise OverflowError(f"{other} x {int(self)} is above {self.limit}")
+        return product
+
+    __rmul__ = __mul__
+
+    def __rfloordiv__(self, other):
+        if other < 0:
+            raise ArithmeticError(f"{other} // {int(self)} divides a negative number")
+        return int(other) // int(self)
+
+    def __rtruediv__(self, other):
+        if other < 0:
+            raise ArithmeticError(f"{other} / {int(self)} divides a negative number")
+        return int(other) / int(self)
+
+
+def _check_scales(monkeypatch):
+    """Give every rule in _render.RULES a _CheckedScale, limited by the
+    SUPPORTS in force when this is called."""
+    limit = _render.SUPPORTS[1] + 1
+    monkeypatch.setattr(_render, "RULES", tuple(
+        {**rule, "scale": _CheckedScale(rule["scale"], limit)} for rule in _render.RULES
+    ))
+
+
+def test_the_checked_scale_refuses_what_a_fixed_size_target_cannot_do():
+    # The answer key for the tests that use it: what passes, what raises.
+    scale = _CheckedScale(100, limit=51)
+    assert scale == 100 and isinstance(scale, int)
+    assert 0 * scale == 0 and scale * 0 == 0
+    assert 50 // scale == 0 and 50 / scale == 0.5
+    with pytest.raises(OverflowError):
+        1 * scale
+    with pytest.raises(OverflowError):
+        scale * 1
+    with pytest.raises(ArithmeticError, match="negative"):
+        -1 // scale
+    with pytest.raises(ArithmeticError, match="negative"):
+        -1 / scale
+    assert copy.deepcopy(scale).limit == 51
+
+
+def test_no_short_phrase_needs_arithmetic_a_fixed_size_target_lacks(
+    monkeypatch, phrases
+):
+    # The package's half of the engine test: every phrase the phrase file
+    # covers, stacked ones above the range included, parses with checked
+    # scales. Where a checked scale does not raise it gives the same numbers
+    # as a plain one (the answer-key test above), so parsing is the check.
+    _check_scales(monkeypatch)
+    assert all(isinstance(rule["scale"], _CheckedScale) for rule in _render.RULES)
+    for length in range(1, phrases["max_words"] + 1):
+        for words in itertools.product(phrases["vocabulary"], repeat=length):
+            _render._parse_readings(_render._tokenize(" ".join(words)))
+
+
 def test_a_capped_multiplier_is_never_taken_for_a_word(monkeypatch):
     # The package's half of the engine test of the same name: "big" is the
     # key max + 1, the capped value, and "two hundred thousand" (stacked,
@@ -235,6 +315,7 @@ def test_a_capped_multiplier_is_never_taken_for_a_word(monkeypatch):
          "output": (word, " ", ("lex", "scales", 1000, "w"))},
     ))
     monkeypatch.setattr(_render, "SUPPORTS", (0, 150))
+    _check_scales(monkeypatch)
     with pytest.raises(numberwords.NumberWordsError, match=r"reads as more than 150, outside"):
         numberwords.text_to_number("two hundred thousand")
 
@@ -242,7 +323,9 @@ def test_a_capped_multiplier_is_never_taken_for_a_word(monkeypatch):
 def test_a_capped_remainder_with_a_zero_multiplier_is_above_the_range(monkeypatch):
     # The package's half of the engine test of the same name: with max 50,
     # "seventy" is a remainder capped at 51 and "zero" a multiplier the rule
-    # allows. The remainder is checked before any division (#75).
+    # allows. The remainder is checked before any division (#75); a parser
+    # that divided first would still answer right, since 0 x 100 + 51 is
+    # the cap again, so the checked scales are what make it fail.
     word = ("lex", "units", "multiplier", "w")
     rule = {"condition": None, "emit": True, "whole_only": False, "multiplier": None,
             "stacks": False}
@@ -257,16 +340,19 @@ def test_a_capped_remainder_with_a_zero_multiplier_is_above_the_range(monkeypatc
                     ("optional", (" ", ("remainder",))))},
     ))
     monkeypatch.setattr(_render, "SUPPORTS", (0, 50))
+    _check_scales(monkeypatch)
     assert set(_render._parse_readings(["zero", "hundred", "seventy"])) == {51}
     with pytest.raises(numberwords.NumberWordsError, match=r"reads as more than 50, outside"):
         numberwords.text_to_number("zero hundred seventy")
 
 
 @pytest.mark.parametrize("words", range(2, 6))
-def test_no_reading_holds_more_than_max_plus_one(words):
+def test_no_reading_holds_more_than_max_plus_one(monkeypatch, words):
     # Every reading above the range is one capped value (#75), so a chain of
     # scale words -- 10^37 at six words without the cap -- never needs more
-    # than max + 1 to hold. The package's half of the engine test.
+    # than max + 1 to hold, and with checked scales no product on the way
+    # does either. The package's half of the engine test.
+    _check_scales(monkeypatch)
     chain = ["tlûklehdingâwn", "vaibêlchhetak", "vaibêlchhe", "maktaduai", "nuai"]
     tokens = _render._tokenize(" ".join(chain[:words]) + " kua")
     assert max(_render._parse_readings(tokens)) == _render.SUPPORTS[1] + 1
