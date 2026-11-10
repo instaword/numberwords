@@ -22,8 +22,10 @@ mizo.yaml's core numeral data has been verified by a native Mizo speaker
 (see meta.sources). The "leh" connector (parse.connectors) is a separate,
 deliberate exception -- not unverified, but a documented team decision to
 leave it unresolved (see mizo.yaml's header and its `# Decision (#10)` tag).
-Nothing in mizo.yaml is marked TODO(verify) as of #15: parse.aliases was the
-last one, and its diacritic part is now handled by parse.strip_diacritics.
+The scale words for 10^10-10^12 are attested in Zairema 2009 (see
+meta.sources); the book prints them without diacritics. Nothing in mizo.yaml
+is marked TODO(verify) as of #15: parse.aliases was the last one, and its
+diacritic part is now handled by parse.strip_diacritics.
 These tests check that the engine correctly follows the grammar as written,
 not whether the grammar itself is linguistically correct.
 """
@@ -57,7 +59,7 @@ PHRASES_PATH = Path(__file__).resolve().parent.parent / "vectors" / "mizo.phrase
 # these tests are meant to be an independent claim about what must work, so
 # a spec edit that narrowed the range should fail them rather than shrink
 # them. Widen it in the same PR that widens the spec (#19).
-SUPPORTED_MAX = 9_999_999_999
+SUPPORTED_MAX = 9_999_999_999_999
 
 # The numbers the per-number tests below visit, where they used to walk the
 # whole supported range: every number below EXHAUSTIVE_BELOW, and one of
@@ -100,8 +102,8 @@ def test_vectors_match_number_to_text(spec, vectors):
 def test_vector_numbers_are_strings(vectors):
     # #12: `number` is deliberately a string, so that a JS target reading
     # this file cannot silently lose precision above 2^53 - 1. The current
-    # 10^10 - 1 ceiling (#27) does not need it; a ceiling raised past
-    # 2^53 - 1 would (#27 rule 5 lets the 10^9 multiplier grow).
+    # 10^13 - 1 ceiling (#74) does not need it; a ceiling raised past
+    # 2^53 - 1 would.
     # The format outlives the range. Asserted so that a future regenerate
     # cannot quietly drop back to a JSON number.
     for vector in vectors:
@@ -643,10 +645,8 @@ def test_what_stacking_still_refuses(spec, text, why):
 @pytest.mark.parametrize("text", ["nuai maktaduai khat", "nuai nuai khat"])
 def test_a_stacked_multiplier_descends(spec, text):
     # A multiplier's scale words sit below the word it multiplies: "nuai za
-    # hnih", never "nuai maktaduai khat". At 10^10 - 1 the order cannot
-    # change an answer -- an ascending reading is at least 10^11 -- so it is
-    # asked of every reading, out of range included: there must be none,
-    # not one that the range then throws away.
+    # hnih", never "nuai maktaduai khat". The parser must find no reading
+    # at all, rather than one the range then throws away.
     assert spec._parse_readings(text) == {}
 
 
@@ -681,13 +681,25 @@ def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking():
 
 
 def test_a_stacked_reading_above_the_range_is_refused_not_shortened(spec):
-    # Greedy first, then the range. "tlûklehdingâwn sawm hnih" is 20 x 10^9
-    # (#27 rule 5) -- sayable, above the 10^10 - 1 ceiling -- and is refused
-    # as above the range rather than as "no match". Since #75 the message
-    # names the bound, not 20000000000: every reading above max is capped
-    # at one value, which is what spares a target big integers.
-    with pytest.raises(ValueError, match=r"reads as more than 9999999999, outside"):
-        spec.text_to_number("tlûklehdingâwn sawm hnih")
+    # Greedy first, then the range. "huau sawm" is 10 x 10^12 -- sayable,
+    # above the 10^13 - 1 ceiling (#74) -- and is refused as above the range
+    # rather than as "no match". Since #75 the message names the bound, not
+    # 10000000000000: every reading above max is capped at one value.
+    with pytest.raises(ValueError, match=r"reads as more than 9999999999999, outside"):
+        spec.text_to_number("huau sawm")
+
+
+def test_the_old_10_12_composition_stays_input_only(spec):
+    # #74. The written form is the new scale word. "tlûklehdingâwn sâng khat"
+    # is 10^9 x 1000, accepted by the stacking rule that already exists, and
+    # greed still reads a trailing addend into that multiplier.
+    assert spec.number_to_text(10**12) == "huau khat"
+    assert spec.text_to_number("tlûklehdingâwn sâng khat") == 10**12
+    assert spec.number_to_text(2 * 10**10) == "vatelubeuh hnih"
+    assert spec.text_to_number("tlûklehdingâwn sawm hnih") == 2 * 10**10
+    assert spec.text_to_number("tlûklehdingâwn sâng khat leh pakhat") == 1001 * 10**9
+    assert spec.number_to_text(1001 * 10**9) == "huau khat leh tlûklehdingâwn khat"
+    assert spec.text_to_number(spec.number_to_text(10**13 - 1)) == 10**13 - 1
 
 
 # Chains of descending scale words, each longer one reading further past the
@@ -979,7 +991,7 @@ def test_no_scale_word_is_multiplied_by_zero(spec, position):
     # rule is only reached with a multiplier of at least 1; what keeps it out
     # of input is each rule's condition -- "multiplier > 1" for sawm and za,
     # "multiplier > 0" from sâng up -- and nothing else. Without this test,
-    # dropping that condition from any of the seven ladder rules passed both
+    # dropping that condition from any of the ten ladder rules passed both
     # suites, since it changes no rendering and so no vector.
     #
     # Every scale word, in both forms, because the guard is per rule.
@@ -1158,14 +1170,16 @@ def test_the_sample_keeps_the_structural_cases(spec):
 
     # And at the real threshold, where the vectors come from: the first
     # scale above it, which holds 1990 itself (#27's hard case for "leh"),
-    # and the top of the ladder, whose multiplier runs to 9 rather than to
-    # the next scale word.
+    # and the top of the ladder (10^12, #74), whose multiplier runs to 9
+    # rather than to a next scale word.
     cases = generate_vectors._structural_cases(spec, generate_vectors.EXHAUSTIVE_BELOW)
     expected = (
         {999, 1000, 1001, 1010, 1100, 1099, 1909, 1990}
         | {m * 1000 for m in range(1, 10)}
         | {10**9 - 1, 10**9, 10**9 + 1}
         | {m * 10**9 for m in range(1, 10)}
+        | {10**12 - 1, 10**12, 10**12 + 1}
+        | {m * 10**12 for m in range(1, 10)}
     )
     assert expected <= cases, sorted(expected - cases)
     assert cases <= set(COVERED), sorted(cases - set(COVERED))
@@ -1181,7 +1195,7 @@ def test_everything_below_the_threshold_is_covered():
 def test_the_covered_numbers_stay_a_sample():
     # Every per-number test pays for each number in COVERED, and the vectors
     # hold an entry for each. It is all of 0-999 plus a few hundred numbers
-    # above: 1,234 with the ladder to 10^10 - 1 (#27). A sampler that stopped
+    # above. A sampler that stopped
     # deduplicating shapes would grow with the range instead, and this names
     # that rather than leaving a suite that never finishes.
     assert len(COVERED) <= 5_000
@@ -1839,22 +1853,21 @@ def test_a_rule_that_cannot_render_its_remainder_raises():
 
 def test_a_range_beyond_the_rules_is_named_not_crashed(spec):
     # supports.max raised past what the rules cover is the likeliest mistake
-    # the next time the ceiling moves: at 10^10 there is no scale word above
-    # tlûklehdingâwn (#27 rule 4), and its rule, written for a one-digit
-    # multiplier, asks for the digit 10. The engine names the rule and the
-    # missing word rather than surfacing KeyError: 10.
+    # the next time the ceiling moves: one past 10^13 - 1 the top rule,
+    # written for a one-digit multiplier, asks for the digit 10. The engine
+    # names the rule and the missing word rather than surfacing KeyError: 10.
     data = copy.deepcopy(spec._data)
     data["meta"]["supports"]["max"] = SUPPORTED_MAX + 1
     widened = Spec(data)
     assert widened.number_to_text(SUPPORTED_MAX) == spec.number_to_text(SUPPORTED_MAX)
-    with pytest.raises(ValueError, match=r"'billions' needs units\[10\]"):
+    with pytest.raises(ValueError, match=r"'trillions' needs units\[10\]"):
         widened.number_to_text(SUPPORTED_MAX + 1)
 
 
 @pytest.fixture(scope="module")
 def short_phrase_readings(spec):
     """Every reading of every phrase of up to three words the lexicon can
-    spell, connectors and alias spellings included -- 30,783 phrases --
+    spell, connectors and alias spellings included -- 40,494 phrases --
     before greed chooses. Computed once for the tests below.
 
     The oracle raises on ambiguity rather than guessing, which only helps if
@@ -1864,7 +1877,7 @@ def short_phrase_readings(spec):
     a separate twenty-minute job, run once while prototyping #65.
     """
     vocabulary = generate_vectors.phrase_vocabulary(spec)
-    assert len(vocabulary) == 31, vocabulary
+    assert len(vocabulary) == 34, vocabulary
     readings = {}
     for length in range(1, generate_vectors.PHRASE_MAX_WORDS + 1):
         for words in itertools.product(vocabulary, repeat=length):
@@ -1912,7 +1925,7 @@ def test_a_greedy_reading_out_of_range_has_nothing_in_range_to_fall_back_to(
     short_phrase_readings,
 ):
     # text_to_number applies the range to greed's choice rather than using
-    # it to choose. At 10^10 - 1 that cannot change an answer: a stacked
+    # it to choose. At 10^13 - 1 that cannot change an answer: a stacked
     # multiplier and every shorter one start with the same scale word, so
     # when the longest is out of range, so is every reading. Measured here
     # rather than trusted, so that a higher ceiling or a new rule that makes

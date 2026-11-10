@@ -10,7 +10,7 @@ The published target packages — the libraries a consumer actually installs.
 ## What's here right now
 
 `python/` is the first real target package (#20). It has the `src/` layout,
-version `0.3.0`, `_mizo.py` — a module compiled from `languages/mizo.yaml` by
+version `0.4.0`, `_mizo.py` — a module compiled from `languages/mizo.yaml` by
 `reference/compile_spec.py` — and `_render.py`, which interprets it. It
 exports `number_to_text`, `text_to_number` and `NumberWordsError`, and it
 passes `vectors/mizo.json` in both directions and `vectors/mizo.phrases.json`.
@@ -75,8 +75,9 @@ and two packages.
 The **versions** are deliberately allowed to diverge. Each package is versioned
 by what it actually ships, so `python/` moved to `0.1.0` when it started
 exporting a public API, to `0.2.0` when that API reached 0–199, and to
-`0.3.0` when it reached 0–9,999,999,999, while `npm/` stays at `0.0.0` until
-there is an npm target to release. A version is most useful attached to the
+`0.3.0` when it reached 0–9,999,999,999, and to `0.4.0` when it reached
+0–9,999,999,999,999, while `npm/` stays at `0.0.0` until there is an npm
+target to release. A version is most useful attached to the
 release that publishes it, so the bump belongs to the PR that makes it true
 rather than to the groundwork before it.
 
@@ -89,6 +90,6 @@ one convention. The bare `v0.1.0`–`v0.3.0` tags are earlier Python releases
 and stay as they are.
 
 The **descriptions** now diverge for the same reason. `python/` describes what
-it ships — Mizo 0–9,999,999,999 — while `npm/` keeps the placeholder wording,
+it ships — Mizo 0–9,999,999,999,999 — while `npm/` keeps the placeholder wording,
 because that is still what it is. Keep the *shared* fields (keywords, repo
 URL) in step; let the fields that describe the contents follow the contents.

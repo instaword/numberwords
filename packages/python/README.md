@@ -30,10 +30,12 @@ who needs only the canonical spelling should check
 
 ## Supported range
 
-Mizo (Lushai) **0–9,999,999,999**, that is 10¹⁰ − 1. Anything outside it
-raises `NumberWordsError`, which subclasses `ValueError`. There is no language
-argument yet — adding one before a second language exists would mean guessing
-at its shape.
+Mizo (Lushai) **0–9,999,999,999,999**, that is 10¹³ − 1. Anything outside it
+raises `NumberWordsError`, which subclasses `ValueError`. The words for 10¹⁰,
+10¹¹ and 10¹² are attested in Zairema 2009, cited in `meta.sources` in
+`languages/mizo.yaml`. The book prints them without tone marks. There is no
+language argument yet — adding one before a second language exists would mean
+guessing at its shape.
 
 Published from CI (`.github/workflows/release.yml`), gated on the conformance
 vectors passing — a release that fails them cannot be built.

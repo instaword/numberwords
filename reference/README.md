@@ -55,9 +55,11 @@ data has been verified by a native Mizo speaker (see `meta.sources`); the
 `leh` connector is a separate, deliberate exception — not unverified, but a
 documented team decision to leave it unresolved (see `mizo.yaml`'s header
 and the `# Decision (#10)` tag on `parse.connectors`). Nothing in `mizo.yaml`
-is marked `TODO(verify)` as of #15. If something is tagged that way later, it
-means a genuine open question rather than a settled fact — see
-[`CLAUDE.md`](../CLAUDE.md) on why that distinction matters here.
+is marked `TODO(verify)` as of #15. The scale words for 10¹⁰–10¹² are
+attested in Zairema 2009, cited in `meta.sources`; the book prints them
+without diacritics. A `TODO(verify)` mark is a genuine open question rather
+than a settled fact — see [`CLAUDE.md`](../CLAUDE.md) on why that distinction
+matters.
 
 ## Spec schema
 
@@ -116,7 +118,7 @@ Mizo speaker actually types.
 
 `number` is a **string**, and deliberately so even though every value here
 fits comfortably in a JSON number — as does Mizo's ceiling of
-10<sup>10</sup> − 1 (#27, revised 2026-09-25). The encoding was decided when
+10<sup>13</sup> − 1 (#74). The encoding was decided when
 that ceiling was 10<sup>18</sup> − 1, which is 111× past JavaScript's
 `MAX_SAFE_INTEGER`: a standard `JSON.parse` would read it back as a different
 number, and a JS target would compare against a silently wrong expected value

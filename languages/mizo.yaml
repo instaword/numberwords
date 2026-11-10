@@ -2,13 +2,16 @@
 #
 # This is the primary target language. Numeral data (lexicon, grammar, and
 # the compound-tens shorthand) has been verified by a native Mizo speaker --
-# see meta.sources. The one deliberate exception is the "leh" connector
-# (see parse.connectors below): it is genuinely ambiguous between an
-# intra-number filler and the inter-number conjunction "and", and resolving
-# that is out of scope for this rule engine by team decision -- it would
-# take more than a rule engine to disambiguate, and the expectation is that
-# callers (e.g. a post-ASR pipeline deciding phrase boundaries) hand this
-# library unambiguous single-number phrases in the first place.
+# see meta.sources. Separately, the "leh" connector
+# (see parse.connectors below) is a deliberate exception: it is genuinely
+# ambiguous between an intra-number filler and the inter-number conjunction
+# "and", and resolving that is out of scope for this rule engine by team
+# decision -- it would take more than a rule engine to disambiguate, and
+# the expectation is that callers (e.g. a post-ASR pipeline deciding phrase
+# boundaries) hand this library unambiguous single-number phrases in the
+# first place. The words for 10^10, 10^11 and 10^12 are not in everyday
+# use, but they are attested (Zairema 2009, p. 509); see meta.sources.
+# #27 rule 4 is amended to that.
 #
 # Units have two grammatical forms depending on context: a standalone form
 # (used alone, e.g. counting) and a bound form (used when combined with a
@@ -29,7 +32,9 @@
 meta:
   language: Mizo
   code: lus           # ISO 639-3 for Lushai/Mizo.
-  version: 0.8.0      # 0.8.0: grammar.stacking -- a multiplier may be a
+  version: 0.9.0      # 0.9.0: supports.max raised to 10^13 - 1, with
+                      # scale words for 10^10, 10^11 and 10^12 (#74).
+                      # 0.8.0: grammar.stacking -- a multiplier may be a
                       # whole numeral on input, from 10^5 up, binding
                       # greedily (#27 rule 6).
                       # 0.7.0: supports.max raised to 10^10 - 1, with the
@@ -48,18 +53,16 @@ meta:
                       # connector_precedes (#19).
                       # 0.2.0: accepted_forms now names the table and fields
                       # it applies to, instead of Mizo-specific flags (#31).
-  supports: { min: 0, max: 9999999999 }   # 10^10 - 1 (#27). The ladder's
-                                   # top lexeme is 10^9 (#27 rule 4), but rule
-                                   # 5 lets that scale take a multi-digit
-                                   # multiplier (10^12 = "tlûklehdingâwn
-                                   # sâng khat"), so the ceiling is a project
-                                   # decision, not a linguistic one.
-                                   # Decision (#27, 2026-09-25): 10^10 - 1.
-                                   # Above it greedy binding reads a trailing
-                                   # addend into the 10^9 multiplier, and no
-                                   # spelling round-trips. Below it every
-                                   # multiplier is a single digit, which is
+  supports: { min: 0, max: 9999999999999 }  # 10^13 - 1 (#74).
+                                   # Words at 10^10, 10^11 and 10^12 make every
+                                   # multiplier a single digit again, which is
                                    # what the rules above scale 100 rely on.
+                                   # #27 stopped at 10^10 - 1 because the top
+                                   # lexeme was 10^9 and a larger multiplier is
+                                   # multi-digit: greedy binding then reads a
+                                   # trailing addend into it. 10^13 - 1 is the
+                                   # largest number before a word for 10^13
+                                   # would be needed.
   orthography: missionary   # The writing system used by this spec. The
                             # diacritics depend on it, so a different writing
                             # system would change them throughout the lexicon.
@@ -88,6 +91,13 @@ meta:
        addend attaches (Q-E, 2026-08-16), greedy binding (2026-08-30,
        confirmed 2026-09-03), and the head-scale reading of the floor
        (#65, 2026-09-24)."
+    - "The scale words for 10^10-10^12 are attested in Thukhawchâng Min
+       Pêkte Hi, Rev Dr Zairema, 2009, p. 509: vatelubeuh (10^10),
+       diarphawngen (10^11), huau (10^12). The book prints them without
+       diacritics. They are not in everyday use, but attested (#27 rule 4,
+       as amended). The forms when multiplied, and the rules that combine
+       them, follow #27 rules 1 and 2, the same shape as tlûklehdingâwn.
+       Zairema lists nothing past huau, so the ceiling is 10^13 - 1."
 
 lexicon:
   units:               # 0–9. standalone = used alone; bound = used after a scale word (e.g. "sawm").
@@ -118,7 +128,12 @@ lexicon:
     10000000:   { standalone: "vaibêlchhe",     multiplied: "vaibêlchhe"     }
     100000000:  { standalone: "vaibêlchhetak",  multiplied: "vaibêlchhetak"  }
     1000000000: { standalone: "tlûklehdingâwn", multiplied: "tlûklehdingâwn" }
-    # Nothing above 10^9: Mizo has no larger scale word (#27 rule 4).
+    # 10^10-10^12 (#74). #27 rule 4, as amended: not in everyday use, but
+    # attested (Zairema 2009, p. 509; see meta.sources). The book has no
+    # diacritics. Both fields are the same word, as from 10^3 up.
+    10000000000:    { standalone: "vatelubeuh",   multiplied: "vatelubeuh"   }
+    100000000000:   { standalone: "diarphawngen", multiplied: "diarphawngen" }
+    1000000000000:  { standalone: "huau",         multiplied: "huau"         }
 
 # Rules are keyed by the scale they consume (#65), and each one sees two
 # variables derived from the number being rendered and that scale:
@@ -214,13 +229,13 @@ grammar:
       condition: "multiplier > 1"
       output: "{scales[100].multiplied} {units[multiplier].bound}[ {remainder}]"
 
-    # 10^3-10^9 (#27). One shape at every scale, and simpler than hundreds:
+    # 10^3-10^12 (#27, extended at 10^10-10^12 by #74). One shape at every scale, and simpler than hundreds:
     # the x1 is always said ("sâng khat", "nuai khat" -- #27 rule 1), so there
     # is no bare-word rule like `ten` or `hundred`, and the word is the same
     # multiplied or not (rule 2), so there is no circumflex to drop. The
     # multiplier is always the bound form: "sâng hnih", never "sâng pahnih"
     # (Q-L). Canonical output takes the largest scale that fits (#27, Decision
-    # 2 of 2026-08-30), so below 10^10 every multiplier is one digit.
+    # 2 of 2026-08-30), so below 10^13 every multiplier is one digit.
     #
     # `multiplier > 0` never matters for output, which only reaches a rule
     # with a multiplier of at least 1. It is for input: without it "sâng
@@ -259,6 +274,24 @@ grammar:
       scale: 1000000000
       condition: "multiplier > 0"
       output: "{scales[1000000000].multiplied} {units[multiplier].bound}[ {remainder}]"
+
+    # 10^10-10^12 (#74). Attested in Zairema 2009 (see meta.sources); the
+    # rule shape is the billions rule. x1 is said, and the multiplier is one
+    # bound digit.
+    - name: ten_billions            # vatelubeuh khat, vatelubeuh hnih, …
+      scale: 10000000000
+      condition: "multiplier > 0"
+      output: "{scales[10000000000].multiplied} {units[multiplier].bound}[ {remainder}]"
+
+    - name: hundred_billions        # diarphawngen khat, …
+      scale: 100000000000
+      condition: "multiplier > 0"
+      output: "{scales[100000000000].multiplied} {units[multiplier].bound}[ {remainder}]"
+
+    - name: trillions               # huau khat, …
+      scale: 1000000000000
+      condition: "multiplier > 0"
+      output: "{scales[1000000000000].multiplied} {units[multiplier].bound}[ {remainder}]"
 
     # Accepted shorthand for 21-99, never produced by number_to_text: drops
     # the scale word ("sawm") and uses the bound form of both digits, e.g.

@@ -70,7 +70,8 @@ that file would have to notice. Bump it when:
   discover without loading the spec and probing it, so widening it is a visible
   change even though no structure moved. Raising Mizo to 199 is part of the
   same 0.3.0 (#19), raising it to 999 is 0.5.0 on its own (#27 step 2b), and
-  raising it to 10^10 - 1 with the scale words that reach it is 0.7.0 (#27) --
+  raising it to 10^10 - 1 with the scale words that reach it is 0.7.0 (#27),
+  and raising it to 10^13 - 1 with the words for 10^10-10^12 is 0.9.0 (#74) --
   a range change alone is enough.
 
 Do **not** bump it for numeral data that leaves both the shape and the range
@@ -472,12 +473,12 @@ Not speculative — each has been hit by a real language.
 - **No recursive multiplier on output.** `{remainder}` recurses; in a
   template the multiplier is a lexicon key, so `number_to_text` always writes
   it as a single word. (`grammar.stacking` makes the slot recursive on input
-  only.) Mizo's ladder would need more only at 10⁹, where the multiplier can
-  itself be a numeral (#27 rule 5: `tlûklehdingâwn sawm hnih`). Mizo's ceiling
-  is 10¹⁰ − 1 (#27, revised 2026-09-25), where every 10⁹ multiplier is a single
-  digit, so it is not needed; above it, greedy binding reabsorbs a trailing
-  addend into the multiplier and no spelling round-trips. Reopening that needs
-  a Mizo answer, not a format change.
+  only.) A multi-digit multiplier on output would be needed where a scale
+  has no word of its own and the multiplier is itself a numeral (#27 rule 5:
+  `tlûklehdingâwn sawm hnih` for 2 × 10¹⁰, before #74). Mizo's ceiling is
+  10¹³ − 1 (#74), where every multiplier is a single digit, so the format
+  still does not need it. Above that ceiling, greedy binding reabsorbs a
+  trailing addend into the multiplier and no spelling round-trips.
 
 Still genuinely open, no data yet:
 

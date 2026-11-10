@@ -1206,7 +1206,7 @@ class Spec:
         # The range is applied to the winner, not before choosing one. A
         # greedy reading above supports.max is refused rather than replaced by
         # a shorter reading that fits: that would answer with a number the
-        # speaker did not say. At 10^10 - 1 the case cannot arise -- every
+        # speaker did not say. At 10^13 - 1 the case cannot arise -- every
         # shorter multiplier starts with the same scale word and is as far out
         # of range -- and test_engine pins that rather than trusting it.
         #
@@ -1258,8 +1258,8 @@ class Spec:
         smaller than the scale (`0 < value < rule["scale"]` below), which
         alone rejects a derivation through a larger rule. For a stacked
         multiplier it is the descending order #27 requires -- `nuai za hnih`,
-        never `nuai maktaduai khat` -- though at 10^10 - 1 any ascending
-        reading is out of range anyway.
+        never `nuai maktaduai khat`. An ascending reading is rejected by
+        that order, not by the range.
 
         A rank is a tuple, compared like a word in a dictionary. A stacking
         rule contributes how many words its multiplier took, then its

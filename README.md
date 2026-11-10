@@ -1,7 +1,11 @@
 # numberwords
 
 Convert numbers to words and words back to numbers, starting with **Mizo**
-(Lushai). Every whole number from 0 to 9,999,999,999 works in both directions.
+(Lushai). Every whole number from 0 to 9,999,999,999,999 converts in both
+directions. The words through 10⁹ were checked by native speakers. The words
+for 10¹⁰, 10¹¹ and 10¹² are attested in Zairema 2009, cited in
+`meta.sources` in [`languages/mizo.yaml`](languages/mizo.yaml). The book
+prints them without tone marks.
 
 ```python
 >>> import numberwords
@@ -14,8 +18,10 @@ Convert numbers to words and words back to numbers, starting with **Mizo**
 It is for software that writes or reads Mizo numbers: spelling out an amount,
 or turning a number someone typed in words back into digits.
 
-- **Writing** gives one correct spelling, from numeral data checked by native
-  speakers and cited in [`languages/mizo.yaml`](languages/mizo.yaml).
+- **Writing** gives one spelling. Through 10⁹ that spelling was checked by
+  native speakers. From 10¹⁰ up it uses the spelling attested in Zairema
+  2009, cited in `meta.sources` in
+  [`languages/mizo.yaml`](languages/mizo.yaml).
 - **Reading** accepts what people actually write: any case, missing
   diacritics, the connector `leh` left out, and forms it never writes itself,
   such as `nuai za hnih` (200 × 100,000) for 20,000,000.
@@ -25,14 +31,15 @@ or turning a number someone typed in words back into digits.
 ## Install
 
 ```bash
-pip install numberwords              # Python -- Mizo 0-9,999,999,999
+pip install numberwords              # Python -- 0.3.0 on PyPI, Mizo 0-9,999,999,999
 npm install @instaword/numberwords   # JS/TS -- placeholder release, exports nothing
 ```
 
-The Python package exports `number_to_text`, `text_to_number` and
-`NumberWordsError`. The range stops at 10¹⁰ − 1 because above it some numbers
-would not read back as themselves, starting with 10,000,000,001
-([#27](https://github.com/instaword/numberwords/issues/27)).
+The Python package in this repository exports `number_to_text`,
+`text_to_number` and `NumberWordsError`. Its range stops at 10¹³ − 1.
+Above it the 10¹² scale would take a multi-digit multiplier, and a
+trailing addend would be read into that multiplier
+([#74](https://github.com/instaword/numberwords/issues/74)).
 
 ## How it works
 
@@ -47,8 +54,9 @@ package for JS/TS later. The design is in
 
 ## Status
 
-`numberwords` 0.3.0 is on PyPI, released from CI against the conformance
-vectors. It handles Mizo 0–9,999,999,999 in both directions. The npm package
+`numberwords` 0.4.0 handles Mizo 0–9,999,999,999,999 in both directions.
+0.3.0, which stops at 9,999,999,999, is the release on PyPI until 0.4.0 is
+published. The npm package
 is still a name reservation. Open work, including a second language
 ([#48](https://github.com/instaword/numberwords/issues/48)), is tracked in the
 [issues](https://github.com/instaword/numberwords/issues).
