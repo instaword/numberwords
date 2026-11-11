@@ -703,7 +703,7 @@ def test_the_old_10_12_composition_stays_input_only(spec):
 
 
 # Chains of descending scale words, each longer one reading further past the
-# range: 9 x 10^17 at three words, 10^37 at six without the cap (#75).
+# range: 9 x 10^17 at three words, 9 x 10^35 at six without the cap (#75).
 _SCALE_CHAIN = ["tlûklehdingâwn", "vaibêlchhetak", "vaibêlchhe", "maktaduai", "nuai"]
 
 

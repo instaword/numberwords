@@ -22,8 +22,10 @@ nothing. It exists so the name is ours before we need it.
 `0.2.0` (#51) and `0.1.0` (#23) were before it. `npm/` has only ever had its
 `0.0.0` placeholder published.
 
-`python/` is the reference for how a target package is laid out. Read it
-alongside `docs/architecture.md`, which records the interpret-vs-generate
+`python/` is the reference for how a target package is laid out, and
+[`docs/interpreter-contract.md`](../docs/interpreter-contract.md) for what its
+interpreter, and any new target's, must do. Read them alongside
+`docs/architecture.md`, which records the interpret-vs-generate
 decision (#33): compiling the spec at build time *is* that doc's Option A,
 since `_mizo.py` is the normalised IR and the renderer is the thin interpreter.
 The build step moves normalisation from import time to build time, which is why
