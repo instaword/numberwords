@@ -64,9 +64,10 @@ Shown as `_mizo.py` writes them:
                                     above 0
 
 `("remainder",)` only ever appears inside an optional segment. Every literal
-is a word separator or a connector, and the engine refuses a spec with any
-other literal when it loads. That is why parsing can skip literals: by the
-time words are matched, separators have been split on and connectors dropped.
+is made only of word separators and connectors, such as the `" and "` in
+English's hundreds rule, and the engine refuses a spec with any other literal
+when it loads. That is why parsing can skip literals: by the time words are
+matched, separators have been split on and connectors dropped.
 
 ### Conditions
 
@@ -186,7 +187,10 @@ A rank is a list of integers:
 
 - **A rule that stacks** gives the number of words its multiplier took,
   followed by its multiplier's rank, then its remainder's rank. A multiplier
-  that is one word took 1 word, and its rank is empty.
+  that is one word took 1 word, and its rank is empty. The count is never 0:
+  a rule only stacks if its template writes its multiplier as a word, outside
+  any optional segment, so the multiplier always took at least one word, even
+  in a rule that also fixes it.
 - **Any other rule** passes up its remainder's rank, or gives an empty rank
   if it has no remainder.
 
