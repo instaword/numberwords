@@ -15,8 +15,9 @@ checked against, on purpose, because they prove different things:
   speaker types. See generate_vectors.accepted_inputs() for the rule.
 - vectors/mizo.phrases.json -- generated the same way, and the half the
   vectors cannot state: which short phrases must be rejected, namely every
-  one it does not list (generate_vectors.build_phrases). Catches drift the
-  same way.
+  one it does not list, and which longer ones, listed with the number each
+  names or null (generate_vectors.build_phrases). Catches drift the same
+  way.
 
 mizo.yaml's core numeral data has been verified by a native Mizo speaker
 (see meta.sources). The "leh" connector (parse.connectors) is a separate,
@@ -164,7 +165,12 @@ def test_the_phrase_file_is_up_to_date(spec, phrases):
     # can be parsed back on its own but a missing one cannot -- this is the
     # only test that sees a phrase the engine now accepts and the file
     # still rejects.
-    assert generate_vectors.build_phrases(spec) == phrases
+    built = generate_vectors.build_phrases(spec)
+    assert built == phrases
+    # Dictionaries compare without their order, and CI diffs the file byte
+    # for byte, so the order has to be one a regenerate reproduces.
+    for section in ("accepted", "one_slip", "stacked"):
+        assert list(built[section]) == list(phrases[section]), section
 
 
 def test_phrase_numbers_are_strings(phrases):
@@ -172,6 +178,11 @@ def test_phrase_numbers_are_strings(phrases):
     # a target reads both files with the same JSON parser.
     for text, number in phrases["accepted"].items():
         assert isinstance(number, str), text
+    # A listed phrase is a number, as a string, or null where it must be
+    # rejected.
+    for section in ("one_slip", "stacked"):
+        for text, number in phrases[section].items():
+            assert number is None or isinstance(number, str), text
 
 
 # The ways text_to_number() refuses, and which of them build_phrases may
@@ -214,13 +225,88 @@ def test_build_phrases_refuses_to_write_an_ambiguous_phrase():
         generate_vectors.build_phrases(_two_number_spec("same_word", "same_word"))
 
 
+def test_a_listed_phrase_that_is_ambiguous_stops_the_build():
+    # The same rule for the phrases the file writes out one by one: null
+    # means "names no number", never "the engine could not decide".
+    spec = _two_number_spec("same_word", "same_word")
+    with pytest.raises(ValueError, match="ambiguous"):
+        generate_vectors._number_or_refusal(spec, "same_word")
+    assert generate_vectors._number_or_refusal(spec, "no_such_word") is None
+
+
 def test_build_phrases_handles_a_spec_with_no_connectors_or_aliases():
     phrases = generate_vectors.build_phrases(_two_number_spec("zero_word", "one_word"))
     assert phrases == {
         "vocabulary": ["one_word", "zero_word"],
         "max_words": generate_vectors.PHRASE_MAX_WORDS,
         "accepted": {"one_word": "1", "zero_word": "0"},
+        # One slip from a one-word spelling is that word doubled; deleting
+        # its only word leaves nothing to list.
+        "one_slip": {"one_word one_word": None, "zero_word zero_word": None},
+        # Hand-picked per language, and this spec is no language.
+        "stacked": {},
     }
+
+
+def test_one_slip_is_a_word_deleted_doubled_or_swapped():
+    assert generate_vectors.near_misses("a b c") == {
+        "b c", "a c", "a b",              # one word deleted
+        "a a b c", "a b b c", "a b c c",  # one word doubled
+        "b a c", "a c b",                 # two neighbours swapped
+    }
+    assert generate_vectors.near_misses("a") == {"a a"}
+
+
+def test_the_one_slip_phrases_are_some_accepted_and_some_refused(phrases):
+    # Both halves have to be there, or "the target agrees" means little:
+    # some slips still spell a number ("sâwm pakhat" with a word dropped is
+    # "sâwm"), and most do not.
+    slips = phrases["one_slip"]
+    accepted = sum(1 for number in slips.values() if number is not None)
+    assert 0 < accepted < len(slips), (accepted, len(slips))
+    assert all(
+        len(text.split()) <= generate_vectors.SLIP_PHRASE_MAX_WORDS for text in slips
+    )
+
+
+def test_the_slip_cap_costs_no_rule(spec):
+    # Every emitting rule heads some number whose canonical spelling,
+    # doubled in one word, still fits under SLIP_PHRASE_MAX_WORDS. At
+    # 10^10 - 1 each one already did at six words.
+    headed = {
+        spec._find_rule(n)["name"] for n in generate_vectors.numbers_to_sweep(spec)
+        if len(spec.number_to_text(n).split()) < generate_vectors.SLIP_PHRASE_MAX_WORDS
+    }
+    emitting = {r["name"] for r in spec.rules if r.get("emit") != "never"}
+    assert emitting <= headed, sorted(emitting - headed)
+
+
+def _decided_at(readings):
+    """Which element of the rank separates greed's winner from the runner-up,
+    or None where there was nothing to choose between."""
+    if len(readings) < 2:
+        return None
+    first, second = sorted(readings.values(), reverse=True)[:2]
+    return next(
+        (i for i in range(len(first)) if first[i:i + 1] != second[i:i + 1]),
+        len(first),
+    )
+
+
+def test_the_listed_phrases_take_greed_past_its_first_comparison(spec, phrases):
+    # Why the file lists them. No phrase of the closed world needs more
+    # than the first element of a rank to pick its winner, so a target that
+    # compared only that would pass the whole closed world.
+    closed = {
+        _decided_at(spec._parse_readings(text)) for text in phrases["accepted"]
+    }
+    assert closed == {None, 0}
+    for section in ("one_slip", "stacked"):
+        deeper = [
+            text for text in phrases[section]
+            if (_decided_at(spec._parse_readings(text)) or 0) > 0
+        ]
+        assert deeper, section
 
 
 @pytest.mark.parametrize(
@@ -564,6 +650,26 @@ def test_stacked_spellings_are_never_emitted(spec, n):
     # Rule 6: number_to_text takes the largest scale that fits (Decision 2
     # of 2026-08-30), so 20,000,000 is "vaibêlchhe hnih", never "nuai za hnih".
     assert spec.number_to_text(n) not in _STACKED_FORMS
+
+
+def test_the_phrase_file_lists_every_stacked_spelling(phrases):
+    # The phrase file is how a target comes to be held to these, so each
+    # one is in it, with the number written above rather than the engine's.
+    for text, number in _STACKED_FORMS.items():
+        assert phrases["stacked"][text] == str(number), text
+
+
+def test_one_stacked_phrase_tells_ranks_compared_as_text_apart(spec, phrases):
+    # JavaScript's `>` compares two arrays as text, so [11, 1] ranks below
+    # [8, 1]. Word counts stay under ten in every other listed phrase, where
+    # that mistake gives the right answer. Here the multiplier takes eleven
+    # words, and the mistake answers with the reading that took eight.
+    text = "maktaduai nuai kua sîng kua sâng kua za kua sawm kua pakua"
+    readings = spec._parse_readings(text)
+    assert max(readings.values()) == (11, 1)
+    as_text = max(readings, key=lambda value: ",".join(map(str, readings[value])))
+    assert phrases["stacked"][text] == "999999000000"
+    assert as_text == 999_900_000_099
 
 
 # Where a stacked spelling has more than one reading and greed decides, with

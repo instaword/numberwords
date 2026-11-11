@@ -874,45 +874,154 @@ def phrase_vocabulary(spec) -> list:
     )
 
 
-def build_phrases(spec) -> dict:
-    """Build the phrase file: the vocabulary, the longest phrase, and every
-    phrase of 1 to PHRASE_MAX_WORDS words from the vocabulary that
-    text_to_number() accepts, with the number it names (#75).
+# The longest one-slip phrase the phrase file lists, in words. A parse costs
+# more the longer the phrase: uncapped, the slips ran to 29 words and 12,525
+# phrases at 10^10 - 1 (#27). At 0-999 the longest was eight words, a
+# seven-word spelling with one word doubled, so the cap would have dropped
+# nothing there. And length is not where two parsers differ: a longer phrase
+# is the same rules reached through one more {remainder}. What has to survive
+# the cap is every rule, which test_engine.py checks.
+SLIP_PHRASE_MAX_WORDS = 8
 
-    The vectors only say what must be accepted, so a target that accepts
-    too much passes all of them. This file says what must be rejected as
-    well, without listing it: it is closed-world. A target builds every
-    phrase from `vocabulary` itself, words joined by one space; one listed
-    in `accepted` must give that number, and every other one must be
-    rejected. Of the bugs planted in a JS port on #75, it caught both that
-    changed an answer; the vectors caught neither.
+
+def near_misses(text: str) -> set:
+    """Every spelling one slip away from `text`: one word deleted, one word
+    doubled, or two neighbouring words swapped."""
+    words = text.split()
+    slips = set()
+    for i in range(len(words)):
+        slips.add(" ".join(words[:i] + words[i + 1:]))
+        slips.add(" ".join(words[:i + 1] + words[i:]))
+        if i + 1 < len(words):
+            slips.add(" ".join(words[:i] + [words[i + 1], words[i]] + words[i + 2:]))
+    slips.discard("")
+    return slips
+
+
+def one_slip_phrases(spec) -> list:
+    """Every certified spelling of one number per shape (numbers_to_sweep),
+    one slip away (near_misses), up to SLIP_PHRASE_MAX_WORDS words, sorted.
+
+    Longer phrases that are *nearly* right, which is where a second copy of
+    a parser is most likely to accept what the first one refuses. One number
+    per shape, so the list grows with the grammar rather than the range.
+    """
+    slips = set()
+    for n in numbers_to_sweep(spec):
+        for text in accepted_inputs(spec, n):
+            slips |= {
+                slip for slip in near_misses(text)
+                if len(slip.split()) <= SLIP_PHRASE_MAX_WORDS
+            }
+    return sorted(slips)
+
+
+# Phrases in which a stacked multiplier has to bind as the engine binds it,
+# or be refused, by language code. Hand-picked: no rule generates them, and
+# the one-slip phrases stop at eight words.
+STACKED_PHRASES = {
+    "lus": (
+        # Written on #27 and #65 with the numbers they name, which
+        # test_engine._STACKED_FORMS holds them to.
+        "nuai za hnih",
+        "maktaduai za thum",
+        "nuai za pahnih",
+        "nuaih za hnih",
+        "nuai sawm hnih",
+        "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum",
+        "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga",
+        # Places greedy binding has to choose (#27 rule 6, Q-E, and the
+        # 2026-08-30 / 2026-09-03 decisions).
+        "nuai za hnih leh sawm nga",
+        "nuai za hnih leh pathum",
+        "maktaduai sawm pakhat",
+        "vaibêlchhetak khat nuai sawm pakhat",
+        "NUAIH-ZA-HNIH",
+        # 20 x 10^9, in range since #74, written "vatelubeuh hnih".
+        "tlûklehdingâwn sawm hnih",
+        # Refused, each for its own reason: above the range, below the
+        # floor for stacking, and a single digit offered as a stacked
+        # multiplier.
+        "huau sawm",
+        "sîng za",
+        "vaibêlchhe pahnih",
+        # Not an attested spelling: what the stacking rule accepts, written
+        # to test the parser. A multiplier of eleven words, with readings
+        # whose multipliers take ten, eight, six, four and two. Greed takes
+        # the eleven. A target that compares ranks as text, as JavaScript's
+        # `>` does on arrays, puts "11" below "8" and answers with the
+        # eight.
+        "maktaduai nuai kua sîng kua sâng kua za kua sawm kua pakua",
+    ),
+}
+
+
+def _number_or_refusal(spec, text: str):
+    """The number `text` names, as a string, or None where the engine
+    refuses it as naming no number.
+
+    Only engine.NoNumberError is a refusal. Anything else the engine
+    raises -- an ambiguous phrase, a fault in the spec -- stops the build
+    instead, because writing it down as "must be rejected" would make that
+    the answer every target is tested against (#77).
+    """
+    try:
+        return str(spec.text_to_number(text))
+    except NoNumberError:
+        return None
+
+
+def build_phrases(spec) -> dict:
+    """Build the phrase file. It has two parts (#75).
+
+    The closed world: `vocabulary`, `max_words`, and in `accepted` every
+    phrase of 1 to PHRASE_MAX_WORDS words from the vocabulary that
+    text_to_number() accepts, with the number it names. The vectors only
+    say what must be accepted, so a target that accepts too much passes all
+    of them. This part says what must be rejected as well, without listing
+    it. A target builds every phrase from `vocabulary` itself, words joined
+    by one space; one listed in `accepted` must give that number, and every
+    other one must be rejected. Of the bugs planted in a JS port on #75, it
+    caught both that changed an answer; the vectors caught neither.
+
+    The listed phrases: `one_slip` (one_slip_phrases) and `stacked`
+    (STACKED_PHRASES). No target can build these from the vocabulary, so
+    each is written out with the number it names, or null where it must be
+    rejected. They reach what three words cannot: longer phrases that are
+    nearly right, and greed choosing past its first comparison, which no
+    phrase of the closed world needs.
 
     The file certifies whatever the engine accepts, repeated connectors
     included, and that is deliberate (#95). A run of "leh" is not a spelling
     the vectors generate, and a target that rejects one fails this file.
 
-    Only engine.NoNumberError is written down as a rejection. Anything else
-    the engine raises -- an ambiguous phrase, a fault in the spec -- stops
-    the build instead, because leaving the phrase out would certify "must
-    be rejected" as the answer every target is tested against (#77).
+    Only a phrase that names no number is recorded as rejected, in either
+    part (_number_or_refusal).
 
     Numbers are strings, for the reason the vectors' are (see the top of
-    this module). `accepted` is sorted, so the file is byte-stable for the
-    CI drift check.
+    this module). Every mapping is sorted, so the file is byte-stable for
+    the CI drift check.
     """
     vocabulary = phrase_vocabulary(spec)
     accepted = {}
     for length in range(1, PHRASE_MAX_WORDS + 1):
         for words in itertools.product(vocabulary, repeat=length):
             text = " ".join(words)
-            try:
-                accepted[text] = str(spec.text_to_number(text))
-            except NoNumberError:
-                pass
+            number = _number_or_refusal(spec, text)
+            if number is not None:
+                accepted[text] = number
+    code = spec._data.get("meta", {}).get("code")
     return {
         "vocabulary": vocabulary,
         "max_words": PHRASE_MAX_WORDS,
         "accepted": dict(sorted(accepted.items())),
+        "one_slip": {
+            text: _number_or_refusal(spec, text) for text in one_slip_phrases(spec)
+        },
+        "stacked": {
+            text: _number_or_refusal(spec, text)
+            for text in sorted(STACKED_PHRASES.get(code, ()))
+        },
     }
 
 
@@ -937,7 +1046,9 @@ def main() -> None:
     print(
         f"Wrote {len(phrases['accepted'])} accepted phrases of up to "
         f"{phrases['max_words']} words, from a vocabulary of "
-        f"{len(phrases['vocabulary'])}, to {PHRASES_PATH.relative_to(REPO_ROOT)}"
+        f"{len(phrases['vocabulary'])}, and {len(phrases['one_slip'])} one-slip "
+        f"and {len(phrases['stacked'])} stacked phrases, to "
+        f"{PHRASES_PATH.relative_to(REPO_ROOT)}"
     )
 
 

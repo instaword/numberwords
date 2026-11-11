@@ -309,7 +309,7 @@ def _parse_readings(tokens: list) -> dict:
     Spec._parse_readings and deliberately a separate copy of it: this module
     never imports the oracle. The two are held together by vectors/mizo.json,
     and by vectors/mizo.phrases.json, which both are checked against on every
-    phrase of up to three words.
+    phrase of up to three words and on the longer ones it lists.
 
     Memoised on (start, end, whole, below). `whole` is whether the span is
     the entire input -- a `scope: whole` rule is only ever the whole phrase,
