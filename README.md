@@ -66,6 +66,8 @@ is still a name reservation. Open work, including a second language
 - **Start here:** [`CONTRIBUTING.md`](CONTRIBUTING.md) — workflow, branching, PRs.
 - **The design:** [`docs/architecture.md`](docs/architecture.md) and
   [`docs/spec-format.md`](docs/spec-format.md).
+- **Writing a target package:**
+  [`docs/interpreter-contract.md`](docs/interpreter-contract.md).
 - **Using Claude Code?** [`CLAUDE.md`](CLAUDE.md) sets the working agreement.
 
 Golden rule: **never push to `main`.** Every change goes through a branch and a

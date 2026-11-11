@@ -1306,7 +1306,7 @@ class Spec:
         # lexicon key, a number in a condition -- is above max, greed picks
         # what it would have picked between the exact numbers; test_engine
         # checks every spec in languages/ for that. Without the cap a stacked
-        # chain reads far past 64 bits -- 10^37 in six words -- and a target
+        # chain reads far past 64 bits -- 10^25 in three words -- and a target
         # with fixed-size integers would wrap or crash before the range
         # check. The test is made before multiplying, as such a target has to.
         high = self.supports["max"]
@@ -1476,12 +1476,12 @@ class Spec:
         return _normalize(word, self._fold)
 
     def _tokenize(self, text: str) -> list:
-        """Normalise text per the spec's `parse` section: apply the parse
-        flags (see _normalize_word), split on the effective separators
-        (_separator_pattern: declared plus Unicode whitespace), remove
-        connector words, and resolve aliases. Mirrors docs/spec-format.md's
-        description of the reverse direction ("drop connectors, resolve
-        aliases").
+        """Normalise text per the spec's `parse` section: split on the
+        effective separators (_separator_pattern: declared plus Unicode
+        whitespace), apply the parse flags to each word (see
+        _normalize_word), remove connector words, and resolve aliases.
+        Mirrors docs/spec-format.md's description of the reverse direction
+        ("drop connectors, resolve aliases").
 
         Connector words and aliases are normalised the same way, so they
         still match even if they are written differently in the spec.

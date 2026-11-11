@@ -352,9 +352,9 @@ def test_a_capped_remainder_with_a_zero_multiplier_is_above_the_range(monkeypatc
 @pytest.mark.parametrize("words", range(2, 6))
 def test_no_reading_holds_more_than_max_plus_one(monkeypatch, words):
     # Every reading above the range is one capped value (#75), so a chain of
-    # scale words -- 10^37 at six words without the cap -- never needs more
-    # than max + 1 to hold, and with checked scales no product on the way
-    # does either. The package's half of the engine test.
+    # scale words -- 9 x 10^35 at six words without the cap -- never needs
+    # more than max + 1 to hold, and with checked scales no product on the
+    # way does either. The package's half of the engine test.
     _check_scales(monkeypatch)
     chain = ["tlûklehdingâwn", "vaibêlchhetak", "vaibêlchhe", "maktaduai", "nuai"]
     tokens = _render._tokenize(" ".join(chain[:words]) + " kua")

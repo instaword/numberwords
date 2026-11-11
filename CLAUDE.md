@@ -150,6 +150,7 @@ LICENSE                MIT.
 docs/
   architecture.md      The design: spec → multi-target, trade-offs, prior art.
   spec-format.md       The rule-spec format, prose companion to the schema.
+  interpreter-contract.md  What every target's interpreter implements.
 languages/
   en.yaml              Worked reference example (English, 0–999) — a real spec,
                        not a sketch: it loads, round-trips, and validates.

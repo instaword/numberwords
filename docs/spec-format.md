@@ -167,16 +167,17 @@ gap is certified.
   whose `multiplier` and `condition` both hold. Order only matters between
   rules of the same scale — which is where a language's ×1 behaviour lives:
   Mizo's `ten` (bare `sâwm`) and `tens` (`sawm hnih`) are both scale 10.
-- **`text → number`:** normalise the text using `parse` (fold case and
-  diacritics through the spec's fold table — see "Case and diacritics" below —
-  split on the effective separators — whitespace plus whatever
-  `word_separators` declares — drop `connectors`, resolve `aliases`), then
-  parse it by recursive descent over the same rules, collecting every value
-  some derivation gives. More than one is an ambiguity in the spec and raises;
-  it is never resolved by picking one — except where `grammar.stacking` lets a
-  multiplier be a whole numeral, which binds greedily (below). The normalising
-  flags apply to the lexicon word too, so only the comparison is loosened —
-  `number → text` still emits the canonical spelling, diacritics and all.
+- **`text → number`:** split the text on the effective separators —
+  whitespace plus whatever `word_separators` declares — and normalise the
+  words using `parse` (fold case and diacritics through the spec's fold
+  table — see "Case and diacritics" below — drop `connectors`, resolve
+  `aliases`), then parse them by recursive descent over the same rules,
+  collecting every value some derivation gives. More than one is an
+  ambiguity in the spec and raises; it is never resolved by picking one —
+  except where `grammar.stacking` lets a multiplier be a whole numeral, which
+  binds greedily (below). The normalising flags apply to the lexicon word
+  too, so only the comparison is loosened — `number → text` still emits the
+  canonical spelling, diacritics and all.
 
 A rule may be marked `emit: never`: accepted when parsing but never produced.
 Mizo's `tens_shorthand` is one — `hnih thum` for 23. `number_to_text` stays the
@@ -213,13 +214,15 @@ have let leniency leak into every remainder (`sawm khat` as 11).
 whole number: `{ word: leh, placement: final_addend, min: 100 }` puts `leh`
 before the final addend of every number from 100 up — the innermost
 `{remainder}`, so 108 is `zâ leh pariat` and 128 is `zâ sawm hnih leh pariat`
-(#27 Q-M). It used to be a literal in ten of Mizo's seventeen templates. The
-word must also be one of `parse.connectors`, or the canonical spelling would
-not parse back; the engine checks that at load. English declares no
-`grammar.connector`. The "and" in "one hundred and one" is written by the
-hundreds rule, and because it is a connector both that spelling and "one
-hundred one" parse. `grammar.connector` would instead put "and" before the
-innermost remainder ("one hundred twenty and one").
+(#27 Q-M). It is written followed by one space, whatever separators the spec
+declares; the separator before it comes from the template. It used to be a
+literal in ten of Mizo's seventeen templates. The word must also be one of
+`parse.connectors`, or the canonical spelling would not parse back; the
+engine checks that at load. English declares no `grammar.connector`. The
+"and" in "one hundred and one" is written by the hundreds rule, and because
+it is a connector both that spelling and "one hundred one" parse.
+`grammar.connector` would instead put "and" before the innermost remainder
+("one hundred twenty and one").
 
 The same declaration says where else a connector may idiomatically stand:
 before any addend, never before a digit bound to the scale word it multiplies.
@@ -276,14 +279,14 @@ that at every covered number against the readings before greed, as #65 asked.
 keeping the best rank among them (#75). A reading is multiplier × scale +
 remainder, every scale is at least 1 and no part is negative, so a reading
 built on one above the range is above it too. Without the cap a chain of
-stacked scale words reads far past 64 bits (10³⁷ in six words), which a target
+stacked scale words reads far past 64 bits (10²⁵ in three words), which a target
 with fixed-size integers would wrap or crash on before the range check. So the
 test comes before the multiplication: the reading is above the range if
 `remainder > max`, or else if `multiplier > (max − remainder) / scale` in
 integer division. The remainder comes first because once it is capped,
 `max − remainder` is negative, and floor division (Python's `//`) and
 truncating division (JavaScript's `Math.trunc`, Go and Rust's `/`) disagree on
-a negative number. Checked in this order, the division never sees one. Five
+a negative number. Checked in this order, the division never sees one. Six
 notes:
 
 - The refusal names the bound, not the number: `reads as more than <max>,
@@ -303,6 +306,10 @@ notes:
   be capped under a scale above `max + 1`, so on no spec here does the
   remainder-first check fire; the targets make it anyway rather than depend
   on that.
+- A stacked multiplier skips a numeral the scale word's own slot could hold
+  (`grammar.stacking` above), but never the capped value, even if the
+  lexicon has a key equal to `max + 1`: it stands for a number above the
+  range, not a word, and skipping it could drop greed's winner.
 - Merging every reading above the range into one value changes one answer.
   Two different readings above the range that tie at the top rank were
   refused as ambiguous; they are now one reading, refused as

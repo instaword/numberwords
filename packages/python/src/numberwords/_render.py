@@ -271,8 +271,8 @@ def _with_connector(n: int, text: str, boundaries: list) -> str:
 
 
 def _tokenize(text: str) -> list:
-    """Split text into comparable tokens: normalise, split on the spec's
-    word separators, drop connectors, resolve aliases."""
+    """Split text into comparable tokens: split on the spec's word
+    separators, normalise each piece, drop connectors, resolve aliases."""
     # Filter after normalising, not before: a split piece holding only an
     # ignorable character is truthy going in and empty coming out, and an
     # empty token matches nothing (#46). The engine does the same.
