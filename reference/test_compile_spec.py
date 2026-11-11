@@ -246,6 +246,77 @@ def test_a_value_python_would_coerce_is_not_a_condition(position, value):
         _parse_condition(expression)
 
 
+# Python has ten comparison operators, and a condition may use six. These
+# are the other four, each in a comparison that is wrong in nothing else.
+REFUSED_OPERATORS = {
+    "in": "multiplier in 1",
+    "not in": "multiplier not in 1",
+    "is": "multiplier is 1",
+    "is not": "multiplier is not 1",
+}
+
+
+def test_the_refused_operators_are_all_the_others():
+    """So the test below cannot miss one: with the six a condition may use,
+    written out, the four rows above are every operator Python has."""
+    used = {
+        type(ast.parse(expression, mode="eval").body.ops[0])
+        for expression in REFUSED_OPERATORS.values()
+    }
+    allowed = {ast.Eq, ast.NotEq, ast.Gt, ast.GtE, ast.Lt, ast.LtE}
+    assert len(used) == len(REFUSED_OPERATORS)
+    assert used | allowed == set(ast.cmpop.__subclasses__())
+
+
+# Where a refused operator can stand: alone, or as either link of a chain.
+POSITIONS_IN_A_COMPARISON = {
+    "alone": "{}",
+    "first of a chain": "{} < 5",
+    "second of a chain": "0 < {}",
+}
+
+
+@pytest.mark.parametrize("position", sorted(POSITIONS_IN_A_COMPARISON))
+@pytest.mark.parametrize("operator", sorted(REFUSED_OPERATORS))
+def test_a_comparison_operator_outside_the_six_is_refused(operator, position):
+    """Each refused operator in each position, since every link of a chain
+    has to be checked, not only the first or the last. The message lists
+    the six, as the grammar's other refusals say what is allowed (zoramt,
+    #89).
+    """
+    expression = POSITIONS_IN_A_COMPARISON[position].format(
+        REFUSED_OPERATORS[operator]
+    )
+    with pytest.raises(ValueError) as refused:
+        _parse_condition(expression)
+    assert str(refused.value) == (
+        f"Unsupported comparison operator in {expression!r}. "
+        "A comparison uses ==, !=, >, >=, < or <="
+    )
+
+
+# Where an operand can stand: either side of a comparison, or further along
+# a chain. Every operand has to be checked.
+OPERAND_POSITIONS = {
+    "left": "{} == 1",
+    "right": "1 == {}",
+    "third of a chain": "0 < multiplier < {}",
+}
+
+
+@pytest.mark.parametrize("position", sorted(OPERAND_POSITIONS))
+def test_an_unknown_variable_is_refused_naming_the_two_there_are(position):
+    """The message names multiplier and remainder, as the grammar's other
+    refusals say what is allowed."""
+    expression = OPERAND_POSITIONS[position].format("ones_digit")
+    with pytest.raises(ValueError) as refused:
+        _parse_condition(expression)
+    assert str(refused.value) == (
+        "Unknown variable in condition: 'ones_digit'. A condition's "
+        "variables are multiplier and remainder"
+    )
+
+
 @pytest.mark.parametrize(
     "expression",
     [
