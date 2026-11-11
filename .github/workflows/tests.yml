@@ -63,6 +63,13 @@ jobs:
         working-directory: packages/python
         run: pytest
 
+      # #83. py.typed says these hints can be trusted, so check them. The
+      # same list as the tests above: that is the oldest Python the package
+      # claims and the newest, and a new version is added in one place.
+      # mypy is a development dependency, installed with the others above.
+      - name: Type-check the package
+        run: mypy --strict packages/python/src
+
       # vectors/mizo.json and vectors/mizo.phrases.json are checked-in
       # snapshots, not computed at test time. If this step fails, mizo.yaml
       # changed without a regenerate: run `python generate_vectors.py` from
