@@ -476,6 +476,9 @@ def _normalize(word: str, fold: dict) -> str:
 # the same two at every scale: that is what lets one rule describe every
 # multiple of its scale instead of one rule per digit position (#65).
 _VARIABLE_NAMES = frozenset({"multiplier", "remainder"})
+# "multiplier and remainder", for the error that refuses any other name.
+# Sorted, since a frozenset has no order of its own.
+_ALLOWED_VARIABLES = " and ".join(sorted(_VARIABLE_NAMES))
 
 # The one placeholder that is not a lexicon lookup: the remainder, rendered
 # by the same rules. Only legal inside a [...] segment -- see _parse_template.
@@ -665,10 +668,9 @@ def _validate_operand(node):
     """
     if isinstance(node, ast.Name):
         if node.id not in _VARIABLE_NAMES:
-            known = " and ".join(sorted(_VARIABLE_NAMES))
             raise ValueError(
                 f"Unknown variable in condition: {node.id!r}. A condition's "
-                f"variables are {known}"
+                f"variables are {_ALLOWED_VARIABLES}"
             )
         return
     if isinstance(node, ast.Constant) and isinstance(node.value, bool):
