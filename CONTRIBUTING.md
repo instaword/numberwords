@@ -21,13 +21,13 @@ pip install -r reference/requirements.txt
 
 There are two independent test suites. Both must pass before a change is considered ready.
 
-**Reference engine** (from the repository root or inside `reference/`):
+**Reference engine** (from the repository root):
 
 ```bash
 python -m pytest reference/
 ```
 
-**Python package** (from the repository root or inside `packages/python/`):
+**Python package** (from the repository root):
 
 ```bash
 python -m pytest packages/python/
