@@ -253,7 +253,9 @@ these messages as far as its language allows, quoting the text its own way.
 
 ## Runtime traps
 
-Each of these passes every shared vector and is still wrong.
+Each of these is wrong and can still pass every shared vector, except comparing
+ranks with `>`: one phrase the phrase file lists under `stacked` has a
+multiplier of eleven words, and catches it.
 
 | Tempting | What goes wrong | Instead |
 |---|---|---|
@@ -274,19 +276,18 @@ From the shared files, on every change:
   `text` and each of its `accepted_inputs` parse back to it.
 - **`vectors/mizo.phrases.json`:** every phrase of up to `max_words` words
   from its `vocabulary` either gives the number it lists or, by being left
-  out, is refused.
+  out, is refused. And every phrase it lists under `one_slip` and `stacked`
+  gives its number, or is refused where it lists `null`. Those are longer
+  phrases, which take greed past its first comparison.
 
 On its own, for what the shared files never reach. The Python package tests
-each of these that Mizo can reach, in its own suite or, for greed, in the
-reference suite, which runs the package against the engine:
+each of these that Mizo can reach:
 
 - every character of `WHITESPACE` separates words, every one of `IGNORABLE`
   is removed and every entry of `FOLD` is applied, and no other character
   does any of that; these loop over the compiled lists;
 - a tie at the top rank is refused as ambiguous, on hand-built tables, since
   Mizo has none;
-- greed choosing past its first comparison, as in
-  `vaibêlchhetak khat nuai sawm pakhat`;
 - the cap computed as a fixed-size integer type would, so that a parser that
   multiplies first fails (#102);
 - each case under "Errors", including the argument checks, and the

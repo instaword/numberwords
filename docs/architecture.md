@@ -134,7 +134,9 @@ Five pieces:
    much passes them. **The phrase file** beside them
    (`vectors/<lang>.phrases.json`, #75) states the other half: every phrase
    of up to three words its vocabulary can spell either names the number it
-   lists or must be rejected. Every target must pass both.
+   lists or must be rejected. It also lists longer phrases one by one, each
+   with its number or `null`: spellings one slip from a certified one, and
+   stacked multipliers that greed has to bind. Every target must pass both.
 
    What they govern is **conversion**: which text a number produces, and
    which text parses back to it. Every vector names a whole number in the

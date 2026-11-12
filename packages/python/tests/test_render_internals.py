@@ -289,10 +289,11 @@ def test_the_checked_scale_refuses_what_a_fixed_size_target_cannot_do():
 def test_no_short_phrase_needs_arithmetic_a_fixed_size_target_lacks(
     monkeypatch, phrases
 ):
-    # The package's half of the engine test: every phrase the phrase file
-    # covers, stacked ones above the range included, parses with checked
-    # scales. Where a checked scale does not raise it gives the same numbers
-    # as a plain one (the answer-key test above), so parsing is the check.
+    # The package's half of the engine test: every phrase of the phrase
+    # file's closed world, stacked ones above the range included, parses
+    # with checked scales. Where a checked scale does not raise it gives the
+    # same numbers as a plain one (the answer-key test above), so parsing is
+    # the check.
     _check_scales(monkeypatch)
     assert all(isinstance(rule["scale"], _CheckedScale) for rule in _render.RULES)
     for length in range(1, phrases["max_words"] + 1):
