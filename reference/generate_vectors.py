@@ -916,20 +916,36 @@ def one_slip_phrases(spec) -> list:
     return sorted(slips)
 
 
+# Stacked spellings with the numbers their sources give, by language code.
+# Written out rather than derived from the rules, so that a wrong rule fails
+# test_engine.py instead of agreeing with itself. Every one is accepted on
+# input and never emitted. STACKED_PHRASES lists them in the phrase file,
+# and the engine suite holds the engine's answer for each to the number here.
+STACKED_FORMS = {
+    "lus": {
+        "nuai za hnih": 20_000_000,  # #27 rule 6
+        "maktaduai za thum": 300_000_000,  # #27 rule 6
+        "nuai za pahnih": 10_200_000,  # #27 Q-E: 10^5 x (100 + 2)
+        "nuaih za hnih": 20_000_000,  # #27 Q-O, multiplied position
+        "nuai sawm hnih": 2_000_000,  # a native speaker, #65, 2026-09-24
+        # 2026-08-30, the repo owner's ordinary way to say it: 201 x 10^5,
+        # then the rest, with "leh" only before the final addend.
+        "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum":
+            20_146_713,
+        # Mizo Ṭawng Ziah Dân Dik, ch. 4, via #27 (2026-09-03): "leh" in
+        # every gap, and "sâwm" keeping its circumflex as nuai's multiplier.
+        "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga":
+            1_098_765,
+    },
+}
+
 # Phrases in which a stacked multiplier has to bind as the engine binds it,
-# or be refused, by language code. Hand-picked: no rule generates them, and
-# the one-slip phrases stop at eight words.
+# or be refused, by language code: the sourced spellings above, and more.
+# Hand-picked: no rule generates them, and the one-slip phrases stop at
+# eight words.
 STACKED_PHRASES = {
     "lus": (
-        # Written on #27 and #65 with the numbers they name, which
-        # test_engine._STACKED_FORMS holds them to.
-        "nuai za hnih",
-        "maktaduai za thum",
-        "nuai za pahnih",
-        "nuaih za hnih",
-        "nuai sawm hnih",
-        "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum",
-        "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga",
+        *STACKED_FORMS["lus"],
         # Places greedy binding has to choose (#27 rule 6, Q-E, and the
         # 2026-08-30 / 2026-09-03 decisions).
         "nuai za hnih leh sawm nga",
@@ -945,12 +961,12 @@ STACKED_PHRASES = {
         "huau sawm",
         "sîng za",
         "vaibêlchhe pahnih",
-        # Not an attested spelling: what the stacking rule accepts, written
-        # to test the parser. A multiplier of eleven words, with readings
-        # whose multipliers take ten, eight, six, four and two. Greed takes
-        # the eleven. A target that compares ranks as text, as JavaScript's
-        # `>` does on arrays, puts "11" below "8" and answers with the
-        # eight.
+        # Grammatical stacking (zoramt, #107), though in practice nuai and
+        # vaibêlchhe are the scales most often stacked, in financial
+        # figures. A multiplier of eleven words, with readings whose
+        # multipliers take ten, eight, six, four and two. Greed takes the
+        # eleven. A target that compares ranks as text, as JavaScript's `>`
+        # does on arrays, puts "11" below "8" and answers with the eight.
         "maktaduai nuai kua sîng kua sâng kua za kua sawm kua pakua",
     ),
 }

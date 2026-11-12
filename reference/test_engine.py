@@ -623,21 +623,9 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
 
 # Stacked spellings and what they are, as written on #27 and #65 rather than
 # derived from the rules, so a wrong rule fails here instead of agreeing
-# with itself. Each is accepted on input and never emitted.
-_STACKED_FORMS = {
-    "nuai za hnih": 20_000_000,                      # #27 rule 6
-    "maktaduai za thum": 300_000_000,                # #27 rule 6
-    "nuai za pahnih": 10_200_000,                    # #27 Q-E: 10^5 x (100 + 2)
-    "nuaih za hnih": 20_000_000,                     # #27 Q-O, multiplied position
-    "nuai sawm hnih": 2_000_000,                     # a native speaker, #65, 2026-09-24
-    # 2026-08-30, the repo owner's ordinary way to say it: 201 x 10^5, then
-    # the rest, with "leh" only before the final addend.
-    "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum": 20_146_713,
-    # Mizo Ṭawng Ziah Dân Dik, ch. 4, via #27 (2026-09-03): "leh" in every
-    # gap, and "sâwm" keeping its circumflex as nuai's multiplier.
-    "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga":
-        1_098_765,
-}
+# with itself. Each is accepted on input and never emitted. The one table is
+# in the generator, which lists them in the phrase file (#107).
+_STACKED_FORMS = generate_vectors.STACKED_FORMS["lus"]
 
 
 @pytest.mark.parametrize("text", sorted(_STACKED_FORMS))
@@ -653,8 +641,9 @@ def test_stacked_spellings_are_never_emitted(spec, n):
 
 
 def test_the_phrase_file_lists_every_stacked_spelling(phrases):
-    # The phrase file is how a target comes to be held to these, so each
-    # one is in it, with the number written above rather than the engine's.
+    # The phrase file is how a target comes to be held to these. The file
+    # lists the engine's answer, so this checks that answer is the number
+    # the source gives.
     for text, number in _STACKED_FORMS.items():
         assert phrases["stacked"][text] == str(number), text
 
