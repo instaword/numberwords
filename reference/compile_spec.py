@@ -1,16 +1,19 @@
-"""Compiles languages/mizo.yaml into the target package's _mizo.py.
+"""Compiles languages/mizo.yaml into each target package's compiled file:
+packages/python's _mizo.py and packages/npm's _mizo.js.
 
-The Python package should not depend on PyYAML or read the spec at import
-time (#20). Instead, the spec is compiled here into a plain Python module
-that ships with the package. This is similar to generate_vectors.py -- it
-uses the same PyYAML dependency and is run the same way.
+A package should not depend on a YAML parser or read the spec at import
+time (#20). Instead, the spec is compiled here, once, into plain data
+(compile_data), and each target's writer spells that data out in its own
+language (#75). This is similar to generate_vectors.py -- it uses the same
+PyYAML dependency and is run the same way.
 
 Run from inside reference/:
 
     python compile_spec.py
 
-Regenerate and commit the generated file whenever languages/mizo.yaml
-changes. test_compile_spec.py fails if the checked-in copy is out of date.
+Regenerate and commit both generated files whenever languages/mizo.yaml
+changes. test_compile_spec.py fails if either checked-in copy is out of
+date.
 
 This module intentionally uses a few private names from engine.py. The
 compiler is part of the same reference implementation, so sharing the
@@ -18,6 +21,7 @@ template parser, the condition data, the variable names and the text lists
 avoids keeping duplicate copies that could drift apart.
 """
 
+import json
 from pathlib import Path
 
 from engine import (
@@ -33,6 +37,7 @@ SPEC_PATH = REPO_ROOT / "languages" / "mizo.yaml"
 ARTIFACT_PATH = (
     REPO_ROOT / "packages" / "python" / "src" / "numberwords" / "_mizo.py"
 )
+JS_ARTIFACT_PATH = REPO_ROOT / "packages" / "npm" / "_mizo.js"
 
 # The variable names a placeholder key or a condition may use. The engine
 # builds this set for its own load-time validation (#37); take that one
@@ -70,10 +75,10 @@ reference/ and commit the result.
 def compile_data(spec) -> dict:
     """Everything the compiled module holds, as plain data, decided once.
 
-    A target's writer only spells this out in its own language -- _write_python
-    below for packages/python -- so every decision about *what* a target
-    ships is made here, and two targets cannot come to ship different things
-    (#75).
+    A target's writer only spells this out in its own language --
+    _write_python below for packages/python, _write_js for packages/npm --
+    so every decision about *what* a target ships is made here, and two
+    targets cannot come to ship different things (#75).
 
     `emit` and `whole_only` are booleans rather than the spec's strings
     ("never", "whole"): the renderer asks yes-or-no questions of them, and a
@@ -230,25 +235,145 @@ def _write_python(data) -> str:
     return "\n\n".join(sections) + "\n"
 
 
+_JS_HEADER = """\
+// Compiled from languages/mizo.yaml by reference/compile_spec.py.
+//
+// Do not edit by hand. Regenerate with `python compile_spec.py` from
+// reference/ and commit the result."""
+
+# The names a compiled file holds, in the order _write_python writes them.
+# _write_js follows it, and test_compile_spec.py checks the two files agree.
+_NAMES = (
+    "LANGUAGE", "CODE", "SPEC_VERSION", "SUPPORTS", "LEXICON", "RULES",
+    "CONNECTOR", "PARSE", "WHITESPACE", "IGNORABLE", "FOLD",
+)
+
+# Written with \u escapes rather than as the characters themselves, as
+# _python_fold does for FOLD: the whitespace and ignorable characters and the
+# fold table's combining marks are invisible in a diff, or drawn on top of
+# the quote before them.
+_JS_ESCAPED = frozenset({"WHITESPACE", "IGNORABLE", "FOLD"})
+
+# Every integer a JavaScript number holds exactly: all of them up to 2^53.
+_JS_EXACT = 2 ** 53
+
+# How deep a name's value is laid out one item per line before the rest is
+# written on one line, so that, as in _mizo.py, a lexicon entry, a rule's
+# field, a parse setting or a fold entry is one line of a diff. Names not
+# listed are one line.
+_JS_LINES = {"LEXICON": 2, "RULES": 2, "PARSE": 1, "FOLD": 1}
+
+
+def _js_literal(value, ascii_only: bool, lines_to: int) -> str:
+    """`value` as JSON, one item per line down to depth `lines_to` and on
+    one line below it. Whatever the layout, it parses as the same JSON."""
+    def one_line(v):
+        return json.dumps(v, ensure_ascii=ascii_only, separators=(", ", ": "))
+
+    def layout(v, depth):
+        if depth >= lines_to or not isinstance(v, (dict, list, tuple)) or not v:
+            return one_line(v)
+        pad, close = "  " * (depth + 1), "  " * depth
+        if isinstance(v, dict):
+            items = [
+                f"{pad}{one_line(k)}: {layout(x, depth + 1)}" for k, x in v.items()
+            ]
+            return "{\n" + ",\n".join(items) + "\n" + close + "}"
+        items = [f"{pad}{layout(x, depth + 1)}" for x in v]
+        return "[\n" + ",\n".join(items) + "\n" + close + "]"
+
+    return layout(value, 0)
+
+
+def _js_values(data) -> dict:
+    """compile_data's output, shaped for JSON: each lexicon table as
+    [key, entry] pairs, sorted by key, since a JavaScript object's keys are
+    strings, and an interpreter that read a key from one would hold "5"
+    where it needs 5 (docs/interpreter-contract.md, "Runtime traps").
+    Tuples become arrays, as JSON writes them anyway."""
+    values = dict(data)
+    values["LEXICON"] = {
+        table: [
+            [key, {field: entry[field] for field in sorted(entry)}]
+            for key, entry in sorted(data["LEXICON"][table].items())
+        ]
+        for table in sorted(data["LEXICON"])
+    }
+    return values
+
+
+def _check_js_integers(value):
+    """Refuse any integer, anywhere in `value`, that a JavaScript number
+    would not hold exactly: it holds every integer up to 2^53, and not
+    all of those above."""
+    if isinstance(value, bool):
+        return
+    if isinstance(value, int):
+        if abs(value) > _JS_EXACT:
+            raise ValueError(f"the compiled data: {value} is above 2^53, which "
+                             f"a JavaScript number does not hold exactly")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            _check_js_integers(key)
+            _check_js_integers(item)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            _check_js_integers(item)
+
+
+def _write_js(data) -> str:
+    """compile_data's output as the source text of an ES module: one
+    `export const` per name, each value a JSON literal. So _mizo.js is plain
+    data, as _mizo.py is, and no code is written (#75).
+
+    No reading ever holds more than max + 1 (docs/interpreter-contract.md,
+    "Arithmetic"), so that has to be exact too, beside every integer the
+    file holds. A spec that outgrows the type fails here, when the file is
+    built, rather than in a caller's hands.
+    """
+    _check_js_integers(data)
+    high = data["SUPPORTS"][1]
+    if high + 1 > _JS_EXACT:
+        raise ValueError(
+            f"supports.max is {high}: max + 1 is above 2^53, which a "
+            f"JavaScript number does not hold exactly"
+        )
+    values = _js_values(data)
+    sections = [_JS_HEADER]
+    for name in _NAMES:
+        text = _js_literal(values[name], name in _JS_ESCAPED, _JS_LINES.get(name, 0))
+        sections.append(f"export const {name} = {text};")
+    return "\n\n".join(sections) + "\n"
+
+
 def render_module(spec):
-    """Returns the full source text of the compiled module."""
+    """Returns the full source text of the compiled Python module."""
     return _write_python(compile_data(spec))
 
 
-def write_module(spec, path):
-    """Writes the compiled module to `path`. Kept separate from main() so
-    the drift test can write to a temporary file instead of the real one.
-    This prevents a failing test from changing the working tree.
+def render_js_module(spec):
+    """Returns the full source text of the compiled JavaScript module."""
+    return _write_js(compile_data(spec))
+
+
+def write_module(spec, path, render=render_module):
+    """Writes a compiled module to `path`, the Python one unless `render`
+    says otherwise. Kept separate from main() so the drift tests can write
+    to a temporary file instead of the real one. This prevents a failing
+    test from changing the working tree.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        f.write(render_module(spec))
+        f.write(render(spec))
 
 
 def main():
     spec = load(SPEC_PATH)
     write_module(spec, ARTIFACT_PATH)
     print(f"Wrote {ARTIFACT_PATH.relative_to(REPO_ROOT)}")
+    write_module(spec, JS_ARTIFACT_PATH, render_js_module)
+    print(f"Wrote {JS_ARTIFACT_PATH.relative_to(REPO_ROOT)}")
 
 
 if __name__ == "__main__":

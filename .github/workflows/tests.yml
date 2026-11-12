@@ -73,17 +73,17 @@ jobs:
           python generate_vectors.py
           git diff --exit-code ../vectors/mizo.json ../vectors/mizo.phrases.json
 
-      # Same idea for the compiled target-package artifact. The drift test in
-      # pytest compares the text the compiler produces; this checks what it
-      # actually writes to disk, so an encoding or newline bug in the writing
-      # path cannot slip through. If this step fails, mizo.yaml changed
-      # without a recompile: run `python compile_spec.py` from reference/ and
-      # commit the result.
+      # Same idea for the compiled files each target package ships, _mizo.py
+      # and _mizo.js. The drift tests in pytest compare the text the compiler
+      # produces; this checks what it actually writes to disk, so an encoding
+      # or newline bug in the writing path cannot slip through. If this step
+      # fails, mizo.yaml changed without a recompile: run
+      # `python compile_spec.py` from reference/ and commit the result.
       - name: Check the compiled artifact is up to date
         working-directory: reference
         run: |
           python compile_spec.py
-          git diff --exit-code ../packages/python/src/numberwords/_mizo.py
+          git diff --exit-code ../packages/python/src/numberwords/_mizo.py ../packages/npm/_mizo.js
 
   # Everything above tests the source tree. None of it can tell whether the
   # built distribution actually contains _mizo.py and py.typed -- a src/
@@ -129,4 +129,65 @@ jobs:
           assert (installed / '_mizo.py').is_file(), 'no compiled spec'
           assert (installed / 'py.typed').is_file(), 'no py.typed'
           print('wheel smoke test ok')
+          "
+
+  # packages/npm: its own tests (the shared vectors and phrase file, and what
+  # docs/interpreter-contract.md asks a target to test itself), its type
+  # declarations, and the package as npm would publish it. The drift check on
+  # its compiled _mizo.js is in the test job above, with _mizo.py's.
+  npm:
+    runs-on: ubuntu-latest
+
+    # package.json declares engines >= 22, so the tests run on every
+    # long-term-support Node that covers.
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["22", "24"]
+
+    defaults:
+      run:
+        working-directory: packages/npm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # The lockfile pins the one development dependency, typescript.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      # The declarations are hand-written, so nothing else would notice them
+      # drifting from the code (#75).
+      - name: Type-check the declarations
+        run: npm run typecheck
+
+      # As the wheel job does for Python: pack the package, install the
+      # tarball where there is no repository, and convert a number. A file
+      # left out of `files` in package.json fails here and nowhere else.
+      - name: Pack it, install it in a clean directory and use it
+        run: |
+          npm pack
+          tar -tzf instaword-numberwords-*.tgz | sort > /tmp/packed.txt
+          for file in index.js index.d.ts render.js _mizo.js README.md package.json; do
+            grep -qx "package/$file" /tmp/packed.txt || { echo "not packed: $file"; exit 1; }
+          done
+          mkdir /tmp/npm-smoke
+          cp instaword-numberwords-*.tgz /tmp/npm-smoke/
+          cd /tmp/npm-smoke
+          npm init -y > /dev/null
+          npm install ./instaword-numberwords-*.tgz
+          node --input-type=module -e "
+          import assert from 'node:assert/strict';
+          import { numberToText, textToNumber, NumberWordsError } from '@instaword/numberwords';
+          assert.equal(numberToText(58), 'sawm nga pariat');
+          assert.equal(textToNumber('sawm nga pariat'), 58);
+          assert.throws(() => textToNumber('huau sawm'), NumberWordsError);
+          console.log('npm smoke test ok');
           "
