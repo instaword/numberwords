@@ -58,8 +58,9 @@ class _Rule(TypedDict):
 
 # Names for the compiled values. _mizo.py is literals only (#75), so it
 # cannot carry them, and a dict whose values differ in type is read as
-# object. cast() returns its argument. The loops that walk RULES read the
-# name when they run: the checked-scale tests replace it on this module.
+# object. The casts are unchecked: mypy trusts them and does not check the
+# compiled data. The loops that walk RULES read the name when they run: the
+# checked-scale tests replace it on this module.
 
 
 class NumberWordsError(ValueError):
