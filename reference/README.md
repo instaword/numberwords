@@ -247,16 +247,36 @@ other half:
 {
   "vocabulary": ["bial", "hnih", "khat", "kua", "leh", ...],
   "max_words": 3,
-  "accepted": {"khat": "1", "sawm hnih": "20", ...}
+  "accepted": {"khat": "1", "sawm hnih": "20", ...},
+  "one_slip": {"sawm sawm hnih": null, "sâwm": "10", ...},
+  "stacked": {"nuai za hnih": "20000000", "sîng za": null, ...}
 }
 ```
 
-It is **closed-world**. A target builds every phrase of 1 to `max_words`
-words from `vocabulary` itself, joined by one space — 30,783 of them. A phrase
-listed in `accepted` must give that number; every other one must be
-rejected. Listing only the accepted 2,245 is what keeps the file small, and
-it is why the rejections cannot be checked one at a time:
+Its first three fields are **closed-world**. A target builds every phrase of
+1 to `max_words` words from `vocabulary` itself, joined by one space — 40,494
+of them. A phrase listed in `accepted` must give that number; every other one
+must be rejected. Listing only the accepted 2,909 is what keeps that part
+small, and it is why the rejections cannot be checked one at a time:
 `test_the_phrase_file_is_up_to_date` regenerates the whole file and compares.
+
+The other two fields are **lists**: longer phrases no vocabulary builds, so
+each is written out with the number it names, or `null` where it must be
+rejected.
+
+- **`one_slip`** is every certified spelling of one number per shape with one
+  word deleted, doubled or swapped with its neighbour, up to eight words
+  (`one_slip_phrases()`): 6,306 phrases, 2,518 of which still name a number.
+  A longer phrase that is nearly right is where a second parser is most
+  likely to accept what the first refuses.
+- **`stacked`** is 17 hand-picked phrases in which a stacked multiplier has to
+  bind as the engine binds it, or be refused (`STACKED_PHRASES`).
+
+Between them they reach what three words cannot. Greed picks between stacked
+readings by comparing ranks, and no phrase of the closed world needs more
+than the first number in a rank; some of these need the second. One has a
+multiplier of eleven words, which a target that compares ranks as text gets
+wrong, since "11" sorts below "8".
 
 The vocabulary is every lexicon form, connector and alias spelling,
 normalised (`phrase_vocabulary()`), and it is the same one the short-phrase

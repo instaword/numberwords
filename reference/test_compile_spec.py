@@ -606,7 +606,7 @@ def package():
     """The package's own public API, imported from its source tree.
 
     Everything else in this file reads the artifact or the package source as
-    data. This one needs the package's parser running, and the package is
+    data. This one needs the package's own code running, and the package is
     importable from its src/ directory with no install step -- it depends on
     nothing, which is the point of compiling the spec (#20).
     """
@@ -616,119 +616,6 @@ def package():
         yield importlib.import_module("numberwords")
     finally:
         sys.path.remove(source)
-
-
-# The longest slip, in words, that the one-slip test below checks. See its
-# docstring for why eight.
-SLIP_PHRASE_MAX_WORDS = 8
-
-
-def _near_misses(text):
-    """Every spelling one slip away from `text`: one word deleted, one word
-    doubled, or two neighbouring words swapped."""
-    words = text.split()
-    slips = set()
-    for i in range(len(words)):
-        slips.add(" ".join(words[:i] + words[i + 1:]))
-        slips.add(" ".join(words[:i + 1] + words[i:]))
-        if i + 1 < len(words):
-            slips.add(" ".join(words[:i] + [words[i + 1], words[i]] + words[i + 2:]))
-    slips.discard("")
-    return slips
-
-
-def test_the_package_parser_agrees_with_the_engine_one_slip_from_the_vectors(spec, package):
-    """The phrase file (vectors/mizo.phrases.json) stops at three words,
-    and the vectors only hold spellings that must be accepted. This covers
-    the gap between: longer phrases that are *nearly* right, which is where
-    a second copy of a parser is most likely to accept what the first one
-    refuses.
-
-    Every certified spelling of one number per shape (numbers_to_sweep),
-    with one word deleted, doubled or swapped with its neighbour: same
-    number, or both refuse. One number per shape, so it grows with the
-    grammar rather than the range.
-
-    Capped at SLIP_PHRASE_MAX_WORDS, because a parse costs more the longer
-    the phrase: with the ladder to 10^10 - 1 (#27) the slips run to 29
-    words, 12,525 phrases, about 70 s here. At 0-999 the longest slip was
-    eight words (a seven-word spelling with one word doubled), so the cap
-    would have dropped nothing there. And the length of a phrase is not
-    where the two parsers can differ: a longer one is the same rules reached
-    through one more {remainder}. What has to survive the cap is every rule,
-    which the last assertion checks.
-    """
-    sweep = generate_vectors.numbers_to_sweep(spec)
-    phrases = set()
-    for n in sweep:
-        for text in generate_vectors.accepted_inputs(spec, n):
-            phrases |= {
-                slip for slip in _near_misses(text)
-                if len(slip.split()) <= SLIP_PHRASE_MAX_WORDS
-            }
-    disagreements = []
-    accepted = 0
-    for text in sorted(phrases):
-        try:
-            expected = spec.text_to_number(text)
-            accepted += 1
-        except ValueError:
-            expected = None
-        try:
-            got = package.text_to_number(text)
-        except package.NumberWordsError:
-            got = None
-        if got != expected:
-            disagreements.append((text, expected, got))
-    assert not disagreements, disagreements[:10]
-    # Both halves have to be exercised, or "they agree" means little: some
-    # slips still spell a number ("sâwm pakhat" with a word dropped is
-    # "sâwm"), and most do not.
-    assert 0 < accepted < len(phrases), (accepted, len(phrases))
-    # The cap must not cost a rule: every emitting rule heads some number
-    # whose canonical spelling, doubled in one word, still fits under it.
-    # At 10^10 - 1 each one already does at six words.
-    headed = {
-        spec._find_rule(n)["name"] for n in sweep
-        if len(spec.number_to_text(n).split()) < SLIP_PHRASE_MAX_WORDS
-    }
-    emitting = {r["name"] for r in spec.rules if r.get("emit") != "never"}
-    assert emitting <= headed, sorted(emitting - headed)
-
-
-@pytest.mark.parametrize(
-    "text",
-    [
-        # Longer than the sweeps above reach, and each one a place where the
-        # package's copy of greedy binding has to choose as the engine does
-        # (#27 rule 6, Q-E, and the 2026-08-30 / 2026-09-03 decisions).
-        "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum",
-        "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga",
-        "nuai za hnih leh sawm nga",
-        "nuai za hnih leh pathum",
-        "nuai za pahnih",
-        "maktaduai sawm pakhat",
-        "vaibêlchhetak khat nuai sawm pakhat",
-        "NUAIH-ZA-HNIH",
-        # 20 x 10^9, in range since #74, written "vatelubeuh hnih".
-        "tlûklehdingâwn sawm hnih",
-        # Refused by both, each for its own reason: above the range, below
-        # the floor, and a single digit offered as a stacked multiplier.
-        "huau sawm",
-        "sîng za",
-        "vaibêlchhe pahnih",
-    ],
-)
-def test_the_package_stacks_and_binds_greedily_as_the_engine_does(spec, package, text):
-    try:
-        expected = spec.text_to_number(text)
-    except ValueError:
-        expected = None
-    try:
-        got = package.text_to_number(text)
-    except package.NumberWordsError:
-        got = None
-    assert got == expected
 
 
 @settings(max_examples=100, database=None)

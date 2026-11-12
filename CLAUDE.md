@@ -169,6 +169,7 @@ reference/
 vectors/
   mizo.json            Checked-in conformance vectors. Generated, not edited.
   mizo.phrases.json    Which short phrases are accepted; all others are rejected.
+                       And longer phrases listed one by one, accepted or not.
 packages/
   python/              The first real target package: _mizo.py (compiled spec),
                        _render.py (thin interpreter), and its own test suite.

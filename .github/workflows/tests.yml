@@ -59,9 +59,15 @@ jobs:
       # The target package has its own suite: the public API, and conformance
       # against vectors/mizo.json. It imports numberwords from src/ and never
       # from reference/, so this proves the shipped code stands on its own.
+      # pytest and hypothesis come from the package's dependency group, so
+      # this step does not borrow the reference suite's install. Reading a
+      # group needs pip 25.1 or newer.
       - name: Run the package tests
         working-directory: packages/python
-        run: pytest
+        run: |
+          python -m pip install --upgrade "pip>=25.1"
+          python -m pip install --group test
+          pytest
 
       # vectors/mizo.json and vectors/mizo.phrases.json are checked-in
       # snapshots, not computed at test time. If this step fails, mizo.yaml

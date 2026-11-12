@@ -24,24 +24,18 @@ _RUN = settings(max_examples=100, database=None)
 def edge_numbers(low, high):
     """Powers of ten inside the range, the number below each, and both bounds."""
     found = {low, high}
-    power = 1
-    while power <= high:
-        if power >= low:
+    for k in range(len(str(high))):
+        power = 10 ** k
+        if low <= power <= high:
             found.add(power)
         below = power - 1
         if low <= below <= high:
             found.add(below)
-        if power > high // 10:
-            break
-        power *= 10
     return sorted(found)
 
 
 def largest_power(high):
-    power = 1
-    while power <= high // 10:
-        power *= 10
-    return power
+    return 10 ** (len(str(high)) - 1)
 
 
 TOP_POWER = largest_power(HIGH)
