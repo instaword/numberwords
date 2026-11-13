@@ -14,9 +14,11 @@ import re
 import sys
 
 import pytest
+from hypothesis import example, given, settings
 
 import compile_spec
 import generate_vectors
+import test_properties
 from engine import _IGNORABLE, _WHITESPACE, _eval_tree, _parse_condition, load
 
 
@@ -730,3 +732,13 @@ def package():
         yield importlib.import_module("numberwords")
     finally:
         sys.path.remove(source)
+
+
+@settings(max_examples=100, database=None)
+@example(test_properties.TOP_POWER)
+@example(test_properties.HIGH)
+@given(n=test_properties.NUMBERS)
+def test_the_package_matches_the_engine_on_random_numbers(spec, package, n):
+    # #84. The vectors compare the two on a sample of shapes. A random n,
+    # including a power of ten and the ceiling, is the rest of the range.
+    assert package.number_to_text(n) == spec.number_to_text(n)
