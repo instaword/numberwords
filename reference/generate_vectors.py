@@ -936,6 +936,11 @@ STACKED_FORMS = {
         # every gap, and "sâwm" keeping its circumflex as nuai's multiplier.
         "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga":
             1_098_765,
+        # Rosie Malsawmtluangi, native Mizo speaker, 2026-11-13: 10^6 x
+        # (10^5 x 11), a stacked multiplier inside a stacked multiplier.
+        # Greed picks it over 10^6 x (10^5 x 10 + 1) only by the inner
+        # multiplier's rank, which no other listed phrase needs.
+        "maktaduai nuai sawm pakhat": 1_100_000_000_000,
     },
 }
 
@@ -956,11 +961,15 @@ STACKED_PHRASES = {
         # 20 x 10^9, in range since #74, written "vatelubeuh hnih".
         "tlûklehdingâwn sawm hnih",
         # Refused, each for its own reason: above the range, below the
-        # floor for stacking, and a single digit offered as a stacked
-        # multiplier.
+        # floor for stacking, a single digit offered as a stacked
+        # multiplier, and a remainder as large as its scale. In the last,
+        # "nuai sawm" is 10^6, maktaduai's own scale; only a stacked
+        # remainder can reach its scale. Its refusal is the grammar's rule
+        # that a remainder is smaller than its scale, not a linguistic claim.
         "huau sawm",
         "sîng za",
         "vaibêlchhe pahnih",
+        "maktaduai khat nuai sawm",
         # Grammatical stacking (zoramt, #107), though in practice nuai and
         # vaibêlchhe are the scales most often stacked, in financial
         # figures. A multiplier of eleven words, with readings whose

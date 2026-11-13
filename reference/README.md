@@ -269,14 +269,16 @@ rejected.
   (`one_slip_phrases()`): 6,306 phrases, 2,518 of which still name a number.
   A longer phrase that is nearly right is where a second parser is most
   likely to accept what the first refuses.
-- **`stacked`** is 17 hand-picked phrases in which a stacked multiplier has to
+- **`stacked`** is 19 hand-picked phrases in which a stacked multiplier has to
   bind as the engine binds it, or be refused (`STACKED_PHRASES`).
 
 Between them they reach what three words cannot. Greed picks between stacked
 readings by comparing ranks, and no phrase of the closed world needs more
 than the first number in a rank; some of these need the second. One has a
 multiplier of eleven words, which a target that compares ranks as text gets
-wrong, since "11" sorts below "8".
+wrong, since "11" sorts below "8". In another, `maktaduai nuai sawm pakhat`,
+the multiplier `nuai sawm pakhat` stacks in turn, and only its own rank picks
+10^6 × (10^5 × 11) over 10^6 × (10^5 × 10 + 1).
 
 The vocabulary is every lexicon form, connector and alias spelling,
 normalised (`phrase_vocabulary()`), and it is the same one the short-phrase

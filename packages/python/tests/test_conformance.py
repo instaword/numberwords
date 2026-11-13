@@ -50,7 +50,7 @@ EXPECTED_ACCEPTED_PHRASES = 2909
 # (generate_vectors.STACKED_PHRASES).
 EXPECTED_LISTED_PHRASES = {
     "one_slip": (6306, 2518),
-    "stacked": (17, 14),
+    "stacked": (19, 15),
 }
 
 
