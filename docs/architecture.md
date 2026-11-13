@@ -134,7 +134,9 @@ Five pieces:
    much passes them. **The phrase file** beside them
    (`vectors/<lang>.phrases.json`, #75) states the other half: every phrase
    of up to three words its vocabulary can spell either names the number it
-   lists or must be rejected. Every target must pass both.
+   lists or must be rejected. It also lists longer phrases one by one, each
+   with its number or `null`: spellings one slip from a certified one, and
+   stacked multipliers that greed has to bind. Every target must pass both.
 
    What they govern is **conversion**: which text a number produces, and
    which text parses back to it. Every vector names a whole number in the
@@ -247,9 +249,9 @@ Three things we've learned since strengthen Option A:
 > **Decision (2026-10-18, #75): one compiled file per target, written from one
 > set of data.** `compile_spec.py` decides what a target ships once
 > (`compile_data()`), and each target has a writer that only spells it out in
-> its own language: `_mizo.py` for Python, and `_mizo.js` for npm when that
-> target lands. What a target's interpreter does with that file is written
-> down once, in [`interpreter-contract.md`](interpreter-contract.md).
+> its own language: `_mizo.py` for Python and `_mizo.js` for npm. What a
+> target's interpreter does with that file is written down once, in
+> [`interpreter-contract.md`](interpreter-contract.md).
 
 Deciding A-vs-B left a real question underneath it. The compiled IR can be:
 

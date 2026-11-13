@@ -96,9 +96,10 @@ accepted (#82). Below 100 the same word is still ignorable filler.
 [`../vectors/mizo.json`](../vectors/mizo.json) is the checked-in table
 described in [`docs/architecture.md`](../docs/architecture.md) — the shared
 contract every target package (Python, npm, …) is tested against, not just
-this reference engine. The Python package does so today, in
-[`../packages/python/tests/`](../packages/python/tests/); npm follows when it
-exists. Each entry looks like:
+this reference engine. The Python package is, in
+[`../packages/python/tests/`](../packages/python/tests/), and so is the npm
+package, in [`../packages/npm/test/`](../packages/npm/test/). Each entry looks
+like:
 
 ```json
 {
@@ -247,16 +248,38 @@ other half:
 {
   "vocabulary": ["bial", "hnih", "khat", "kua", "leh", ...],
   "max_words": 3,
-  "accepted": {"khat": "1", "sawm hnih": "20", ...}
+  "accepted": {"khat": "1", "sawm hnih": "20", ...},
+  "one_slip": {"sawm sawm hnih": null, "sâwm": "10", ...},
+  "stacked": {"nuai za hnih": "20000000", "sîng za": null, ...}
 }
 ```
 
-It is **closed-world**. A target builds every phrase of 1 to `max_words`
-words from `vocabulary` itself, joined by one space — 30,783 of them. A phrase
-listed in `accepted` must give that number; every other one must be
-rejected. Listing only the accepted 2,245 is what keeps the file small, and
-it is why the rejections cannot be checked one at a time:
+Its first three fields are **closed-world**. A target builds every phrase of
+1 to `max_words` words from `vocabulary` itself, joined by one space — 40,494
+of them. A phrase listed in `accepted` must give that number; every other one
+must be rejected. Listing only the accepted 2,909 is what keeps that part
+small, and it is why the rejections cannot be checked one at a time:
 `test_the_phrase_file_is_up_to_date` regenerates the whole file and compares.
+
+The other two fields are **lists**: longer phrases no vocabulary builds, so
+each is written out with the number it names, or `null` where it must be
+rejected.
+
+- **`one_slip`** is every certified spelling of one number per shape with one
+  word deleted, doubled or swapped with its neighbour, up to eight words
+  (`one_slip_phrases()`): 6,306 phrases, 2,518 of which still name a number.
+  A longer phrase that is nearly right is where a second parser is most
+  likely to accept what the first refuses.
+- **`stacked`** is 19 hand-picked phrases in which a stacked multiplier has to
+  bind as the engine binds it, or be refused (`STACKED_PHRASES`).
+
+Between them they reach what three words cannot. Greed picks between stacked
+readings by comparing ranks, and no phrase of the closed world needs more
+than the first number in a rank; some of these need the second. One has a
+multiplier of eleven words, which a target that compares ranks as text gets
+wrong, since "11" sorts below "8". In another, `maktaduai nuai sawm pakhat`,
+the multiplier `nuai sawm pakhat` stacks in turn, and only its own rank picks
+10^6 × (10^5 × 11) over 10^6 × (10^5 × 10 + 1).
 
 The vocabulary is every lexicon form, connector and alias spelling,
 normalised (`phrase_vocabulary()`), and it is the same one the short-phrase
@@ -305,16 +328,27 @@ holds the fold table, `FOLD`: what `case_insensitive` and `strip_diacritics`
 mean for this spec, built by the engine from the spec's words so that it comes
 out the same on every Python (#75).
 
-Like the vectors, it is a checked-in snapshot rather than something computed
-at install time. **Regenerate and commit it whenever `mizo.yaml` changes:**
+The same data goes to [`_mizo.js`](../packages/npm/_mizo.js) for the npm
+package: `compile_data()` decides what a target ships, once, and each target
+has a writer that only spells it out in its own language (#75). `_mizo.js` is
+an ES module of `export const NAME = <JSON>;` lines, plain data as `_mizo.py`
+is. Each lexicon table is written as `[key, entry]` pairs, because a
+JavaScript object's keys are strings. The writer refuses any integer above
+2^53, and a range whose `max + 1` is above it, since a JavaScript number holds
+exactly only the integers up to there: a spec that outgrows it fails the
+build, not a caller.
+
+Like the vectors, both are checked-in snapshots rather than something computed
+at install time. **Regenerate and commit them whenever `mizo.yaml` changes:**
 
 ```
 python compile_spec.py
 ```
 
-`test_compile_spec.py` fails if the checked-in copy is stale. It compiles to a
-temporary file rather than to the real path, so a failing test never rewrites
-the artifact it is supposed to be checking.
+`test_compile_spec.py` fails if either checked-in copy is stale, and checks
+that the two hold the same data. It compiles to a temporary file rather than to
+the real path, so a failing test never rewrites the artifact it is supposed to
+be checking.
 
 Each rule's `condition` is written as data, not code (#75): the small tree
 the engine converted it into when the spec loaded, after checking it against
