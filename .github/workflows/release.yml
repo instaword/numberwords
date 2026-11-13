@@ -9,9 +9,9 @@ name: release
 # is the last step, which makes a tag in this repository mean "this was
 # released" rather than "someone intended to release this".
 #
-# Only the Python package is published. packages/npm is still a 0.0.0 name
-# reservation whose version deliberately diverges (see packages/README.md);
-# it gets its own job when there is an npm target to gate on.
+# Only the Python package is published. packages/npm is built and tested,
+# but its version stays 0.0.0, deliberately diverging (see
+# packages/README.md), until its own release job, which comes in its own PR.
 #
 # Each package has its own version line, so tags carry the package path:
 # packages/python/vX.Y.Z (#75). Go requires that form for a module in a
@@ -89,8 +89,9 @@ jobs:
           echo "publishing $VERSION"
 
   # The full suite, across the supported Python matrix, plus the vectors and
-  # compiled-artifact drift checks and the wheel smoke test. Called rather
-  # than copied, so a release cannot pass a weaker gate than a pull request.
+  # compiled-artifact drift checks, the wheel smoke test and the npm
+  # package's job. Called rather than copied, so a release cannot pass a
+  # weaker gate than a pull request.
   test:
     name: Gate
     uses: ./.github/workflows/tests.yml

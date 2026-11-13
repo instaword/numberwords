@@ -4,7 +4,8 @@ What every target package does with its compiled file.
 `reference/compile_spec.py` builds one set of data from a language spec, each
 target writes it out in its own language ([`architecture.md`](architecture.md),
 "One artifact per target"), and a small interpreter in the target reads it. The
-first is `packages/python/src/numberwords/_render.py`. This doc writes its
+first is `packages/python/src/numberwords/_render.py`; the second,
+`packages/npm/render.js`, was written from this doc. This doc writes the
 behaviour down once, so that a new target does not have to work it out from
 Python (#75).
 
@@ -38,6 +39,11 @@ false.
 `PARSE`'s connectors and aliases arrive already normalised (see "Words"
 below). Its two flags are what the spec says, but no target reads them: `FOLD`
 is what they mean.
+
+Each target's file holds the same data, written in its own language's
+literals. Where a language has no literal for a mapping with integer keys,
+its writer uses another shape: `_mizo.js` writes each `LEXICON` table as
+`[key, entry]` pairs, since a JavaScript object's keys are strings.
 
 ### A rule
 
@@ -265,6 +271,7 @@ multiplier of eleven words, and catches it.
 | Multiplying, then checking the range | uncapped, three stacked words already read 10^25 (`huau diarphawngen za`): a 64-bit integer overflows, and a JavaScript number loses digits | the cap, before multiplying |
 | The language's `>` on two ranks | JavaScript compares arrays as strings, so `[2] > [10]` is true | compare element by element |
 | Integer keys that become strings | a JavaScript object's keys are strings, so a remainder bound from one is `"5"`, and `20 + "5"` is `"205"` | keep keys as integers, with a `Map` or by converting them |
+| Checking that `max + 1` fits by computing `max + 1` | in a JavaScript number, `2^53 + 1` rounds back to `2^53`, so the check passes for exactly the `max` it should refuse | test `max` itself: `Number.isSafeInteger(max)` is `max + 1 ≤ 2^53` |
 | Walking a string by its storage units | `FOLD` and `IGNORABLE` are per code point, while JavaScript indexes UTF-16 code units | walk by code point (`for…of`) |
 | A pattern built from the declared separators as they are | a separator can be a pattern character, and a capturing group puts the separators into the split result | escape them, with no capturing group |
 
