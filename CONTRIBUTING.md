@@ -71,6 +71,11 @@ git switch -c feat/my-change    # takes your uncommitted changes with you
 - **Keep them small.** A reviewable PR is under a few hundred lines of real
   change. Large PRs are hard to review well — split them.
 - **One concern per PR.** Don't mix a refactor with a feature.
+- **Stacked PRs merge into `main`, never into each other.** A PR may target
+  another PR's branch while both are in review, so its diff shows only its
+  own change. Once the lower one merges, retarget the upper one to `main`
+  before it merges: branch protection covers only PRs into `main`, so one
+  merged into another branch skips required checks and review.
 - **Tests travel with code.** New conversion logic ships with test vectors in
   the same PR. See the round-trip requirements in
   [`docs/architecture.md`](docs/architecture.md).
