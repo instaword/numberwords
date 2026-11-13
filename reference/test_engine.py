@@ -621,8 +621,8 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
     assert Spec(data)._parse_values("za sawm hnih") == {120, 2000}
 
 
-# Stacked spellings and what they are, as written on #27 and #65 rather than
-# derived from the rules, so a wrong rule fails here instead of agreeing
+# Stacked spellings and what they are, as their sources give them rather
+# than derived from the rules, so a wrong rule fails here instead of agreeing
 # with itself. Each is accepted on input and never emitted. The one table is
 # in the generator, which lists them in the phrase file (#107).
 _STACKED_FORMS = generate_vectors.STACKED_FORMS["lus"]
@@ -659,6 +659,20 @@ def test_one_stacked_phrase_tells_ranks_compared_as_text_apart(spec, phrases):
     as_text = max(readings, key=lambda value: ",".join(map(str, readings[value])))
     assert phrases["stacked"][text] == "999999000000"
     assert as_text == 999_900_000_099
+
+
+def test_one_stacked_phrase_is_decided_by_its_multipliers_own_rank(spec, phrases):
+    # Here the multiplier of maktaduai stacks too: nuai sawm pakhat is
+    # 10^5 x 11, or 10^5 x 10 then pakhat. Both readings take three words
+    # for maktaduai's multiplier, so the first numbers tie, and only the
+    # second -- the inner multiplier's own rank -- picks 11. A target that
+    # leaves that rank out ranks both (3,) and calls the phrase ambiguous.
+    text = "maktaduai nuai sawm pakhat"
+    readings = spec._parse_readings(text)
+    best, runner_up = sorted(readings, key=readings.get, reverse=True)[:2]
+    assert (best, readings[best]) == (1_100_000_000_000, (3, 2))
+    assert (runner_up, readings[runner_up]) == (1_000_001_000_000, (3, 1))
+    assert phrases["stacked"][text] == "1100000000000"
 
 
 # Where a stacked spelling has more than one reading and greed decides, with
@@ -730,6 +744,10 @@ def test_greed_never_decides_a_canonical_spelling(spec):
         ("nuai pakhat", "a single digit is not stacked"),
         # What follows a stacked multiplier is a remainder, below the head.
         ("nuai za hnih leh nuai khat", "an addend as large as the head scale"),
+        # A stacked remainder can reach the scale it follows, where no other
+        # can: "nuai sawm" is 10^6, maktaduai's own, and a remainder must be
+        # smaller.
+        ("maktaduai khat nuai sawm", "a remainder equal to its scale"),
     ],
 )
 def test_what_stacking_still_refuses(spec, text, why):
