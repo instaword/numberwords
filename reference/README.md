@@ -96,9 +96,10 @@ accepted (#82). Below 100 the same word is still ignorable filler.
 [`../vectors/mizo.json`](../vectors/mizo.json) is the checked-in table
 described in [`docs/architecture.md`](../docs/architecture.md) — the shared
 contract every target package (Python, npm, …) is tested against, not just
-this reference engine. The Python package does so today, in
-[`../packages/python/tests/`](../packages/python/tests/); npm follows when it
-exists. Each entry looks like:
+this reference engine. The Python package is, in
+[`../packages/python/tests/`](../packages/python/tests/), and so is the npm
+package, in [`../packages/npm/test/`](../packages/npm/test/). Each entry looks
+like:
 
 ```json
 {
@@ -327,16 +328,27 @@ holds the fold table, `FOLD`: what `case_insensitive` and `strip_diacritics`
 mean for this spec, built by the engine from the spec's words so that it comes
 out the same on every Python (#75).
 
-Like the vectors, it is a checked-in snapshot rather than something computed
-at install time. **Regenerate and commit it whenever `mizo.yaml` changes:**
+The same data goes to [`_mizo.js`](../packages/npm/_mizo.js) for the npm
+package: `compile_data()` decides what a target ships, once, and each target
+has a writer that only spells it out in its own language (#75). `_mizo.js` is
+an ES module of `export const NAME = <JSON>;` lines, plain data as `_mizo.py`
+is. Each lexicon table is written as `[key, entry]` pairs, because a
+JavaScript object's keys are strings. The writer refuses any integer above
+2^53, and a range whose `max + 1` is above it, since a JavaScript number holds
+exactly only the integers up to there: a spec that outgrows it fails the
+build, not a caller.
+
+Like the vectors, both are checked-in snapshots rather than something computed
+at install time. **Regenerate and commit them whenever `mizo.yaml` changes:**
 
 ```
 python compile_spec.py
 ```
 
-`test_compile_spec.py` fails if the checked-in copy is stale. It compiles to a
-temporary file rather than to the real path, so a failing test never rewrites
-the artifact it is supposed to be checking.
+`test_compile_spec.py` fails if either checked-in copy is stale, and checks
+that the two hold the same data. It compiles to a temporary file rather than to
+the real path, so a failing test never rewrites the artifact it is supposed to
+be checking.
 
 Each rule's `condition` is written as data, not code (#75): the small tree
 the engine converted it into when the spec loaded, after checking it against

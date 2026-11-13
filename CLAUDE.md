@@ -163,7 +163,8 @@ spec/
                        Authoritative where it and spec-format.md disagree.
 reference/
   engine.py            The oracle — interprets a spec directly.
-  compile_spec.py      Compiles a spec into packages/python's _mizo.py.
+  compile_spec.py      Compiles a spec into each package's compiled file:
+                       packages/python's _mizo.py and packages/npm's _mizo.js.
   generate_vectors.py  Regenerates vectors/. Run after spec edits.
   test_*.py            Engine, compiler, English control, and schema validation.
 vectors/
@@ -173,7 +174,9 @@ vectors/
 packages/
   python/              The first real target package: _mizo.py (compiled spec),
                        _render.py (thin interpreter), and its own test suite.
-  npm/                 Still a name-reservation placeholder (0.0.0).
+  npm/                 The second: _mizo.js (compiled spec), render.js
+                       (interpreter), hand-written index.d.ts, and its own
+                       tests. Not released yet; npm holds the 0.0.0 placeholder.
 .cursor/
   rules/               Points Cursor at this file; holds no rules of its own.
 .githooks/
@@ -183,7 +186,9 @@ packages/
   pull_request_template.md
   ISSUE_TEMPLATE/
   workflows/tests.yml  Both test suites on every supported Python, the drift
-                       checks on vectors/ and _mizo.py, and a wheel smoke test.
+                       checks on vectors/, _mizo.py and _mizo.js, a wheel
+                       smoke test, and the npm package's tests, types and
+                       packed tarball on Node 22 and 24.
   workflows/release.yml  Publishes packages/python to PyPI. Run by hand.
 ```
 

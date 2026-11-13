@@ -249,9 +249,9 @@ Three things we've learned since strengthen Option A:
 > **Decision (2026-10-18, #75): one compiled file per target, written from one
 > set of data.** `compile_spec.py` decides what a target ships once
 > (`compile_data()`), and each target has a writer that only spells it out in
-> its own language: `_mizo.py` for Python, and `_mizo.js` for npm when that
-> target lands. What a target's interpreter does with that file is written
-> down once, in [`interpreter-contract.md`](interpreter-contract.md).
+> its own language: `_mizo.py` for Python and `_mizo.js` for npm. What a
+> target's interpreter does with that file is written down once, in
+> [`interpreter-contract.md`](interpreter-contract.md).
 
 Deciding A-vs-B left a real question underneath it. The compiled IR can be:
 
