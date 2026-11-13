@@ -45,6 +45,10 @@ by `reference/compile_spec.py`, the same data the Python package ships, and
 describes. The tests hold it to the conformance vectors and the phrase file
 that the reference engine generates, the same files the Python package passes.
 
+Only the package itself can be imported: `exports` in `package.json` lists
+`"."` and nothing else, so `_mizo.js` and `render.js` are not part of the API,
+and a later release may move them.
+
 ## Developing
 
 From `packages/npm`:

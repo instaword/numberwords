@@ -169,15 +169,15 @@ jobs:
         run: npm run typecheck
 
       # As the wheel job does for Python: pack the package, install the
-      # tarball where there is no repository, and convert a number. A file
-      # left out of `files` in package.json fails here and nowhere else.
+      # tarball where there is no repository, and convert a number. The
+      # tarball must hold exactly these six files: one left out of `files` in
+      # package.json, or one more than these, fails here and nowhere else.
       - name: Pack it, install it in a clean directory and use it
         run: |
           npm pack
           tar -tzf instaword-numberwords-*.tgz | sort > /tmp/packed.txt
-          for file in index.js index.d.ts render.js _mizo.js README.md package.json; do
-            grep -qx "package/$file" /tmp/packed.txt || { echo "not packed: $file"; exit 1; }
-          done
+          printf 'package/%s\n' README.md _mizo.js index.d.ts index.js package.json render.js | sort > /tmp/expected.txt
+          diff /tmp/expected.txt /tmp/packed.txt
           mkdir /tmp/npm-smoke
           cp instaword-numberwords-*.tgz /tmp/npm-smoke/
           cd /tmp/npm-smoke
