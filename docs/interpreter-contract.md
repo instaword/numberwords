@@ -288,13 +288,23 @@ From the shared files, on every change:
   phrases, which take greed past its first comparison.
 
 On its own, for what the shared files never reach. The Python package tests
-each of these that Mizo can reach:
+each of these with two exceptions, both to come in #114: it does not test the
+separator, non-BMP and `emit: never` cases yet, and it skips the below-`min`
+refusal, since Mizo's `min` is 0. The cases:
 
 - every character of `WHITESPACE` separates words, every one of `IGNORABLE`
   is removed and every entry of `FOLD` is applied, and no other character
   does any of that; these loop over the compiled lists;
 - a tie at the top rank is refused as ambiguous, on hand-built tables, since
   Mizo has none;
+- a declared separator that is a pattern character, such as `.`, splits only
+  where it stands, on hand-built tables, since Mizo's one separator, `-`, is
+  not one;
+- a character outside the BMP is removed or folded as one character, on
+  hand-built tables, since Mizo's `IGNORABLE` and `FOLD` hold none;
+- an `emit: never` rule placed ahead of an emitting rule at its scale is never
+  written but still read, on hand-built tables, since Mizo's one comes after
+  the rule that writes its numbers;
 - the cap computed as a fixed-size integer type would, so that a parser that
   multiplies first fails (#102);
 - each case under "Errors", including the argument checks, and the
