@@ -12,7 +12,7 @@ The language behaviour is not written in this package. It is compiled from
 languages/mizo.yaml -- one declarative spec per language -- into _mizo.py,
 and interpreted by _render.py. See docs/architecture.md.
 
-Mizo 0-9,999,999,999 is what this version supports; anything outside that
+Mizo 0-9,999,999,999,999 is what this version supports; anything outside that
 range raises NumberWordsError. There is no language parameter yet: adding
 one before a second language exists would be guessing at its shape.
 
@@ -34,7 +34,7 @@ NumberWordsError.__module__ = "numberwords"
 
 __all__ = ["number_to_text", "text_to_number", "NumberWordsError"]
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 
 def number_to_text(n: int) -> str:

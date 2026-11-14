@@ -70,7 +70,8 @@ that file would have to notice. Bump it when:
   discover without loading the spec and probing it, so widening it is a visible
   change even though no structure moved. Raising Mizo to 199 is part of the
   same 0.3.0 (#19), raising it to 999 is 0.5.0 on its own (#27 step 2b), and
-  raising it to 10^10 - 1 with the scale words that reach it is 0.7.0 (#27) --
+  raising it to 10^10 - 1 with the scale words that reach it is 0.7.0 (#27),
+  and raising it to 10^13 - 1 with the words for 10^10-10^12 is 0.9.0 (#74) --
   a range change alone is enough.
 
 Do **not** bump it for numeral data that leaves both the shape and the range
@@ -83,11 +84,11 @@ Versions are per file and do not track each other: `en.yaml` and `mizo.yaml`
 move independently. Neither is the version of a *package* that compiles a spec
 — `packages/python` versions the artifact it ships, on its own schedule.
 
-## Worked example (English, 0–99)
+## Worked example (English, 0–999)
 
 **The example lives in [`languages/en.yaml`](../languages/en.yaml). Read it
 there.** It is a real spec: it loads in the reference engine, round-trips all
-of 0–99, and is validated against the schema on every test run.
+of 0–999, and is validated against the schema on every test run.
 
 This document deliberately does *not* reproduce it in full. An earlier version
 did, and the copy here and the file drifted apart until `en.yaml` described a
@@ -131,10 +132,16 @@ Four things that example is carrying:
   there; the same hyphen is a declared `word_separator` when parsing, and
   `forty two` is accepted as well, by the whitespace rule rather than by the
   declaration — see "Word separators and whitespace" below.
-- **`condition` is evaluated by a restricted AST walker**, not `eval()` —
-  comparisons, `and`/`or`, names and integer constants only. Anything else
-  raises rather than executing. `condition` is data from a YAML file, not code
-  we wrote.
+- **`condition` is checked against an allowlist, never `eval()`'d** — a
+  condition is a comparison, or conditions joined by `and`/`or`. A comparison
+  uses `==`, `!=`, `>`, `>=`, `<` or `<=`, and its operands are `multiplier`,
+  `remainder` or non-negative integers, never `True`/`False`. Anything else
+  raises rather than executing, including forms Python would accept by
+  coercion, such as a bare `remainder` or `multiplier == True`: other
+  languages coerce differently, and no spec needs them (#75). `condition` is
+  data from a YAML file, not code we wrote, and the engine keeps it as data: a
+  small tree that every target evaluates (#75). It means what it means in
+  Python, so `0 < multiplier < 5` is `0 < multiplier and multiplier < 5`.
 
 A rule may also fix its multiplier: `multiplier: 1`. That is how a rule whose
 template never writes its multiplier is read back. Mizo says 10 as a bare
@@ -145,11 +152,13 @@ condition, and 190 of the 1,000 shipped spellings then parsed to nothing while
 still rendering correctly. The engine now refuses, at load, a rule that
 neither writes its multiplier outside a segment nor fixes it.
 
-English stops at 99 in this example by choice rather than necessity now.
-"Three hundred and five" is `{units[multiplier].word} {scales[100].word}[ and
-{remainder}]` at scale 100 — "hundred" as a lexicon entry, since a template
-literal has to be a separator or a connector, and "and" is one. The format can
-say that; bringing the hundreds back is a change of its own.
+English runs to 999. "Three hundred and five" is `{units[multiplier].word}
+{scales[100].word}[ and {remainder}]` at scale 100 — "hundred" as a lexicon
+entry, since a template literal has to be a separator or a connector, and
+"and" is one. That is the canonical form. "Three hundred five" parses too:
+`and` is a connector, so it is dropped before matching (#82). Below 100 the
+same word is still filler, and there is no `grammar.connector`, so no other
+gap is certified.
 
 ## How the engine uses it
 
@@ -158,15 +167,17 @@ say that; bringing the hundreds back is a change of its own.
   whose `multiplier` and `condition` both hold. Order only matters between
   rules of the same scale — which is where a language's ×1 behaviour lives:
   Mizo's `ten` (bare `sâwm`) and `tens` (`sawm hnih`) are both scale 10.
-- **`text → number`:** normalise the text using `parse` (lowercase, strip
-  diacritics, split on the effective separators — whitespace plus whatever
-  `word_separators` declares — drop `connectors`, resolve `aliases`), then
-  parse it by recursive descent over the same rules, collecting every value
-  some derivation gives. More than one is an ambiguity in the spec and raises;
-  it is never resolved by picking one — except where `grammar.stacking` lets a
-  multiplier be a whole numeral, which binds greedily (below). The normalising
-  flags apply to the lexicon word too, so only the comparison is loosened —
-  `number → text` still emits the canonical spelling, diacritics and all.
+- **`text → number`:** split the text on the effective separators —
+  whitespace plus whatever `word_separators` declares — and normalise the
+  words using `parse` (fold case and diacritics through the spec's fold
+  table — see "Case and diacritics" below — drop `connectors`, resolve
+  `aliases`), then parse them by recursive descent over the same rules,
+  collecting every value some derivation gives. More than one is an
+  ambiguity in the spec and raises; it is never resolved by picking one —
+  except where `grammar.stacking` lets a multiplier be a whole numeral, which
+  binds greedily (below). The normalising flags apply to the lexicon word
+  too, so only the comparison is loosened — `number → text` still emits the
+  canonical spelling, diacritics and all.
 
 A rule may be marked `emit: never`: accepted when parsing but never produced.
 Mizo's `tens_shorthand` is one — `hnih thum` for 23. `number_to_text` stays the
@@ -203,10 +214,15 @@ have let leniency leak into every remainder (`sawm khat` as 11).
 whole number: `{ word: leh, placement: final_addend, min: 100 }` puts `leh`
 before the final addend of every number from 100 up — the innermost
 `{remainder}`, so 108 is `zâ leh pariat` and 128 is `zâ sawm hnih leh pariat`
-(#27 Q-M). It used to be a literal in ten of Mizo's seventeen templates. The
-word must also be one of `parse.connectors`, or the canonical spelling would
-not parse back; the engine checks that at load. English declares no
-`grammar.connector` — it drops "and" on input and writes it nowhere below 100.
+(#27 Q-M). It is written followed by one space, whatever separators the spec
+declares; the separator before it comes from the template. It used to be a
+literal in ten of Mizo's seventeen templates. The word must also be one of
+`parse.connectors`, or the canonical spelling would not parse back; the
+engine checks that at load. English declares no `grammar.connector`. The
+"and" in "one hundred and one" is written by the hundreds rule, and because
+it is a connector both that spelling and "one hundred one" parse.
+`grammar.connector` would instead put "and" before the innermost remainder
+("one hundred twenty and one").
 
 The same declaration says where else a connector may idiomatically stand:
 before any addend, never before a digit bound to the scale word it multiplies.
@@ -223,6 +239,16 @@ The engine stays deliberately more tolerant than the certified set — it drops
 connectors from any gap, so it parses strings the vectors never bless. That
 asymmetry is intended (#12, #34): the vectors are a floor every target must
 reach, not a ceiling.
+
+A run of connectors, however many in a row, is accepted on input in every
+language. `zâ leh leh pariat` and `zâ leh leh leh pariat` both parse as 108,
+and a target must accept that run wherever the engine does. "Not idiomatic"
+means "never generated", not "must be rejected": the vectors still omit a
+doubled connector (#19), and there is no cap on the length, because connectors
+are dropped before matching so a longer run adds no new reading (#95). A
+connector in a gap the grammar does not certify, such as `sawm leh hnih` for
+20, is never generated either, but the engine accepts it, so a target must too:
+the phrase file lists it (#77).
 
 `grammar.stacking` widens what is accepted a third way, for a pattern no rule
 can list because it is productive: on input, a scale word may take a whole
@@ -248,6 +274,56 @@ refused rather than swapped for a shorter one that fits.
 Canonical output never needs greed — every canonical multiplier is a single
 bound word, which cannot take in what follows — and the reference suite checks
 that at every covered number against the readings before greed, as #65 asked.
+
+**Every reading above `supports.max` is recorded as one value, `max + 1`,**
+keeping the best rank among them (#75). A reading is multiplier × scale +
+remainder, every scale is at least 1 and no part is negative, so a reading
+built on one above the range is above it too. Without the cap a chain of
+stacked scale words reads far past 64 bits (10²⁵ in three words), which a target
+with fixed-size integers would wrap or crash on before the range check. So the
+test comes before the multiplication: the reading is above the range if
+`remainder > max`, or else if `multiplier > (max − remainder) / scale` in
+integer division. The remainder comes first because once it is capped,
+`max − remainder` is negative, and floor division (Python's `//`) and
+truncating division (JavaScript's `Math.trunc`, Go and Rust's `/`) disagree on
+a negative number. Checked in this order, the division never sees one. Six
+notes:
+
+- The refusal names the bound, not the number: `reads as more than <max>,
+  outside the supported range [<min>, <max>]`.
+- The cap relies on no part of a number being negative. The schema already
+  requires every scale to be at least 1, and the engine refuses a negative
+  lexicon key for now, although the schema leaves room for one.
+- Greed picks the same winners it would between the exact numbers, as long
+  as nothing the parser compares a reading with (a rule's scale or fixed
+  multiplier, a lexicon key, a number in a condition) is above `max`. The
+  winners above the range are now one value, `max + 1`. Every spec in
+  `languages/` meets that condition, and the reference suite checks it.
+  Past it, a capped reading can pass a test its exact number fails: in a
+  spec with `max` 50, a word for 20 and rules for 100 and 1000, "one
+  thousand twenty hundred" has no exact reading, since 2000 is no remainder
+  of a thousand, but its capped remainder, 51, is one. A remainder can only
+  be capped under a scale above `max + 1`, so on no spec here does the
+  remainder-first check fire; the targets make it anyway rather than depend
+  on that.
+- A stacked multiplier skips a numeral the scale word's own slot could hold
+  (`grammar.stacking` above), but never the capped value, even if the
+  lexicon has a key equal to `max + 1`: it stands for a number above the
+  range, not a word, and skipping it could drop greed's winner.
+- Merging every reading above the range into one value changes one answer.
+  Two different readings above the range that tie at the top rank were
+  refused as ambiguous; they are now one reading, refused as
+  `reads as more than <max>`. None of the Mizo phrases that step 10 of #76's
+  prototype compares does this, but a new spec could.
+- Python's integers never overflow, so a parser that multiplied before
+  checking would give the same answers in Python and go wrong only in a
+  target with fixed-size integers. The reference and package suites
+  therefore give every rule's scale a type that raises on a product above
+  `max + 1`, more than the cap promises any target will need to hold, and
+  on dividing a negative number. A parser that divided before checking the
+  remainder would still answer right in every language, since
+  0 × scale + (max + 1) is the cap again; the second check holds it to the
+  order above anyway, so that no port comes to depend on the coincidence.
 
 **What a parse costs.** Until #65 `text → number` brute-forced the supported
 range and template-matched every candidate, so its cost grew with the range on
@@ -305,6 +381,56 @@ would need a third-party dependency to test in Python and would drift between
 Unicode versions, leaving two targets built against different versions to
 disagree.
 
+Both lists are stated once, in the reference engine, and ship in each target's
+compiled file (#75), so a target reads them there rather than keeping its own
+copy of either.
+
+## Case and diacritics
+
+`case_insensitive` and `strip_diacritics` do not mean "call your runtime's
+`lower()` and Unicode normalisation". Both follow the Unicode version the
+runtime ships, and newer versions add combining marks: Python 3.10 strips 875 of
+them and 3.14 strips 937, and a JavaScript, Go or Rust target would answer with
+its own runtime's version again (#75).
+
+Instead the engine turns the two flags into a **fold table**, built from the
+spec's own words — every lexicon form, connector and alias, after the flags:
+
+- **Letters:** every character the flags turn into letters those words use. For
+  Mizo, that is the uppercase and accented forms of its letters (`S`, `Â`,
+  `á`).
+- **Marks:** the combining marks found inside those letters, folded to nothing,
+  so a circumflex typed as a separate mark is stripped like one written as part
+  of its letter.
+
+Every other character is left alone. A mark found in none of those letters — a
+Hebrew point, an Arabic vowel, a combining underline — is not ignored, so
+`sâwm` followed by one does not parse. For Mizo the table has 439 entries, the
+same on every Python from 3.10 to 3.14, and its 25 marks are exactly the marks
+found in accented Latin letters.
+
+The table ships in each target's compiled file as `FOLD`. A target removes the
+ignorable characters, then applies `FOLD`, and applies nothing else: no
+lowercasing and no normalisation of its own.
+
+Folding one character at a time has two limits, and the engine **rejects a spec
+that runs into either** when it loads, rather than letting it load and quietly
+refuse input the flags promise:
+
+- **A letter whose lowercase depends on its neighbours.** Greek `Σ` lowercases
+  to `ς` at the end of a word and to `σ` elsewhere, and a table can only pick
+  one, so with `case_insensitive` a spec word `τρεις` would not read back from
+  `ΤΡΕΙΣ`.
+- **A mark that none of the table's letters contains,** such as a combining
+  underline written into a spec word. The table keeps it, where
+  `strip_diacritics` would remove it.
+
+The check: every word input is compared against, and with `case_insensitive`
+its uppercase form, must fold through the table to what the flags make of it —
+whenever the flags read that spelling back to the word. The last part is what
+leaves German `ß` alone: `DREISSIG` lowercases to `dreissig`, not `dreißig`, so
+the flags never accepted that spelling and the table is not asked to.
+
 ## Relationship to CLDR RBNF
 
 [`architecture.md`](architecture.md) asks that we either build on CLDR RBNF
@@ -354,15 +480,17 @@ Not speculative — each has been hit by a real language.
 - **No recursive multiplier on output.** `{remainder}` recurses; in a
   template the multiplier is a lexicon key, so `number_to_text` always writes
   it as a single word. (`grammar.stacking` makes the slot recursive on input
-  only.) Mizo's ladder would need more only at 10⁹, where the multiplier can
-  itself be a numeral (#27 rule 5: `tlûklehdingâwn sawm hnih`). Mizo's ceiling
-  is 10¹⁰ − 1 (#27, revised 2026-09-25), where every 10⁹ multiplier is a single
-  digit, so it is not needed; above it, greedy binding reabsorbs a trailing
-  addend into the multiplier and no spelling round-trips. Reopening that needs
-  a Mizo answer, not a format change.
+  only.) A multi-digit multiplier on output would be needed where a scale
+  has no word of its own and the multiplier is itself a numeral (#27 rule 5:
+  `tlûklehdingâwn sawm hnih` for 2 × 10¹⁰, before #74). Mizo's ceiling is
+  10¹³ − 1 (#74), where every multiplier is a single digit, so the format
+  still does not need it. Above that ceiling, greedy binding reabsorbs a
+  trailing addend into the multiplier and no spelling round-trips.
 
 Still genuinely open, no data yet:
 
 - How to express irregular joins (elision, mutation, tone changes) that some
   languages have.
 - Ordinals, negatives, decimals — in scope later; keep the format open to them.
+  Negatives will also need the cap on readings above the range revisited (see
+  "How the engine uses it"), since it assumes a reading never shrinks.

@@ -55,9 +55,11 @@ data has been verified by a native Mizo speaker (see `meta.sources`); the
 `leh` connector is a separate, deliberate exception — not unverified, but a
 documented team decision to leave it unresolved (see `mizo.yaml`'s header
 and the `# Decision (#10)` tag on `parse.connectors`). Nothing in `mizo.yaml`
-is marked `TODO(verify)` as of #15. If something is tagged that way later, it
-means a genuine open question rather than a settled fact — see
-[`CLAUDE.md`](../CLAUDE.md) on why that distinction matters here.
+is marked `TODO(verify)` as of #15. The scale words for 10¹⁰–10¹² are
+attested in Zairema 2009, cited in `meta.sources`; the book prints them
+without diacritics. A `TODO(verify)` mark is a genuine open question rather
+than a settled fact — see [`CLAUDE.md`](../CLAUDE.md) on why that distinction
+matters.
 
 ## Spec schema
 
@@ -85,18 +87,19 @@ format" from "the schema describes Mizo".
 worked reference example, and English is a useful control precisely because it
 is unlike Mizo where it matters — irregular teens that can't be composed, a
 hyphen that is both canonical output and a word separator, and lexicon entries
-with one form rather than two. It's capped at 0–99: English above 99 needed
-recursion the format did not have. It has it since #65 (`{remainder}`), and
-bringing the hundreds back is a change of its own.
+with one form rather than two. It covers 0–999. The hundreds rule writes
+"and" before the remainder ("three hundred and five"); leaving "and" out is
+accepted (#82). Below 100 the same word is still ignorable filler.
 
 ## Conformance vectors
 
 [`../vectors/mizo.json`](../vectors/mizo.json) is the checked-in table
 described in [`docs/architecture.md`](../docs/architecture.md) — the shared
 contract every target package (Python, npm, …) is tested against, not just
-this reference engine. The Python package does so today, in
-[`../packages/python/tests/`](../packages/python/tests/); npm follows when it
-exists. Each entry looks like:
+this reference engine. The Python package is, in
+[`../packages/python/tests/`](../packages/python/tests/), and so is the npm
+package, in [`../packages/npm/test/`](../packages/npm/test/). Each entry looks
+like:
 
 ```json
 {
@@ -116,7 +119,7 @@ Mizo speaker actually types.
 
 `number` is a **string**, and deliberately so even though every value here
 fits comfortably in a JSON number — as does Mizo's ceiling of
-10<sup>10</sup> − 1 (#27, revised 2026-09-25). The encoding was decided when
+10<sup>13</sup> − 1 (#74). The encoding was decided when
 that ceiling was 10<sup>18</sup> − 1, which is 111× past JavaScript's
 `MAX_SAFE_INTEGER`: a standard `JSON.parse` would read it back as a different
 number, and a JS target would compare against a silently wrong expected value
@@ -245,16 +248,38 @@ other half:
 {
   "vocabulary": ["bial", "hnih", "khat", "kua", "leh", ...],
   "max_words": 3,
-  "accepted": {"khat": "1", "sawm hnih": "20", ...}
+  "accepted": {"khat": "1", "sawm hnih": "20", ...},
+  "one_slip": {"sawm sawm hnih": null, "sâwm": "10", ...},
+  "stacked": {"nuai za hnih": "20000000", "sîng za": null, ...}
 }
 ```
 
-It is **closed-world**. A target builds every phrase of 1 to `max_words`
-words from `vocabulary` itself, joined by one space — 30,783 of them. A phrase
-listed in `accepted` must give that number; every other one must be
-rejected. Listing only the accepted 2,245 is what keeps the file small, and
-it is why the rejections cannot be checked one at a time:
+Its first three fields are **closed-world**. A target builds every phrase of
+1 to `max_words` words from `vocabulary` itself, joined by one space — 40,494
+of them. A phrase listed in `accepted` must give that number; every other one
+must be rejected. Listing only the accepted 2,909 is what keeps that part
+small, and it is why the rejections cannot be checked one at a time:
 `test_the_phrase_file_is_up_to_date` regenerates the whole file and compares.
+
+The other two fields are **lists**: longer phrases no vocabulary builds, so
+each is written out with the number it names, or `null` where it must be
+rejected.
+
+- **`one_slip`** is every certified spelling of one number per shape with one
+  word deleted, doubled or swapped with its neighbour, up to eight words
+  (`one_slip_phrases()`): 6,306 phrases, 2,518 of which still name a number.
+  A longer phrase that is nearly right is where a second parser is most
+  likely to accept what the first refuses.
+- **`stacked`** is 19 hand-picked phrases in which a stacked multiplier has to
+  bind as the engine binds it, or be refused (`STACKED_PHRASES`).
+
+Between them they reach what three words cannot. Greed picks between stacked
+readings by comparing ranks, and no phrase of the closed world needs more
+than the first number in a rank; some of these need the second. One has a
+multiplier of eleven words, which a target that compares ranks as text gets
+wrong, since "11" sorts below "8". In another, `maktaduai nuai sawm pakhat`,
+the multiplier `nuai sawm pakhat` stacks in turn, and only its own rank picks
+10^6 × (10^5 × 11) over 10^6 × (10^5 × 10 + 1).
 
 The vocabulary is every lexicon form, connector and alias spelling,
 normalised (`phrase_vocabulary()`), and it is the same one the short-phrase
@@ -296,21 +321,40 @@ can't merge.
 module holding the lexicon, the grammar rules, and the parse settings, which
 the Python package ships. Compiling at build time is what lets that package
 avoid a PyYAML dependency and avoid reading the spec at import time (#20).
+It also holds the whitespace and ignorable-character lists, which come from
+`engine.py` rather than the spec because every language shares them (#46):
+shipping them is what saves each target keeping its own copy (#75). And it
+holds the fold table, `FOLD`: what `case_insensitive` and `strip_diacritics`
+mean for this spec, built by the engine from the spec's words so that it comes
+out the same on every Python (#75).
 
-Like the vectors, it is a checked-in snapshot rather than something computed
-at install time. **Regenerate and commit it whenever `mizo.yaml` changes:**
+The same data goes to [`_mizo.js`](../packages/npm/_mizo.js) for the npm
+package: `compile_data()` decides what a target ships, once, and each target
+has a writer that only spells it out in its own language (#75). `_mizo.js` is
+an ES module of `export const NAME = <JSON>;` lines, plain data as `_mizo.py`
+is. Each lexicon table is written as `[key, entry]` pairs, because a
+JavaScript object's keys are strings. The writer refuses any integer above
+2^53, and a range whose `max + 1` is above it, since a JavaScript number holds
+exactly only the integers up to there: a spec that outgrows it fails the
+build, not a caller.
+
+Like the vectors, both are checked-in snapshots rather than something computed
+at install time. **Regenerate and commit them whenever `mizo.yaml` changes:**
 
 ```
 python compile_spec.py
 ```
 
-`test_compile_spec.py` fails if the checked-in copy is stale. It compiles to a
-temporary file rather than to the real path, so a failing test never rewrites
-the artifact it is supposed to be checking.
+`test_compile_spec.py` fails if either checked-in copy is stale, and checks
+that the two hold the same data. It compiles to a temporary file rather than to
+the real path, so a failing test never rewrites the artifact it is supposed to
+be checking.
 
-Each rule's `condition` is emitted as a lambda derived from the validated
-syntax tree with `ast.unparse`, rather than assembled as a string by hand.
-That keeps Python itself the single definition of what a condition means,
-instead of one definition in `engine.py` and a second in the compiler. The
-compiler accepts only what `engine._eval_node` accepts, and raises at build
-time on anything else.
+Each rule's `condition` is written as data, not code (#75): the small tree
+the engine converted it into when the spec loaded, after checking it against
+the allowlist — `("cmp", ">", ("var", "multiplier"), ("int", 1))` for
+`multiplier > 1`. So `_mizo.py` is plain literals from end to end, and the
+engine's evaluator and the package's read the same data.
+`test_compile_spec.py` holds the two evaluators together on every operator
+and on every rule's condition. Until #75 each condition was emitted as a
+lambda through `ast.unparse`, which no target but Python could have read.

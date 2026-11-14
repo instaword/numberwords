@@ -11,7 +11,7 @@ import pytest
 # compiled artifact: these tests are an independent claim about what the
 # package must accept, so a spec edit that narrowed the range should fail
 # them rather than shrink them. Widen with the spec (#19).
-SUPPORTED_MAX = 9_999_999_999
+SUPPORTED_MAX = 9_999_999_999_999
 
 
 def test_public_names_are_exactly_the_three_agreed():
@@ -32,7 +32,7 @@ def test_nothing_else_leaks_into_the_package_namespace():
 
 
 def test_version_is_declared():
-    assert numberwords.__version__ == "0.3.0"
+    assert numberwords.__version__ == "0.4.0"
 
 
 def test_it_converts_both_ways():
@@ -40,7 +40,7 @@ def test_it_converts_both_ways():
     assert numberwords.text_to_number("sawm nga pariat") == 58
 
 
-@pytest.mark.parametrize("n", [-1, SUPPORTED_MAX + 1, 10**12])
+@pytest.mark.parametrize("n", [-1, SUPPORTED_MAX + 1, 10**13])
 def test_out_of_range_raises(n):
     with pytest.raises(numberwords.NumberWordsError):
         numberwords.number_to_text(n)
@@ -92,3 +92,15 @@ def test_the_error_message_names_the_supported_range():
     # A bare "invalid value" tells a caller nothing about what to do next.
     with pytest.raises(numberwords.NumberWordsError, match=r"\[0, %d\]" % SUPPORTED_MAX):
         numberwords.number_to_text(SUPPORTED_MAX + 1)
+
+
+def test_text_above_the_range_is_refused_naming_the_bound():
+    # 9 x 10^17 (10^9 x 9 x 10^8), sayable and far above the range, is
+    # refused as above it rather than as "no match". The message names the
+    # bound, not the number: every reading above the range is one capped
+    # value, so no target needs big integers (#75).
+    pattern = r"reads as more than %d, outside the supported range \[0, %d\]" % (
+        SUPPORTED_MAX, SUPPORTED_MAX,
+    )
+    with pytest.raises(numberwords.NumberWordsError, match=pattern):
+        numberwords.text_to_number("tlûklehdingâwn vaibêlchhetak kua")

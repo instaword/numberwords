@@ -49,81 +49,135 @@ costs.
 """
 
 import ast
+import functools
 import operator
 import re
 import unicodedata
 
 import yaml
 
-_COMPARISONS = {
-    ast.Eq: operator.eq,
-    ast.NotEq: operator.ne,
-    ast.Gt: operator.gt,
-    ast.GtE: operator.ge,
-    ast.Lt: operator.lt,
-    ast.LtE: operator.le,
-}
+# Each operator a condition may use, listed once: the Python syntax a spec
+# writes it in, the name condition data gives it (see _condition_tree), and
+# what it does. The allowlist and the conversion to data look operators up
+# by syntax, the evaluator by name; both lookups are built from these two
+# lists, so they cannot disagree about which operators exist.
+_COMPARISON_OPERATORS = (
+    (ast.Eq, "==", operator.eq),
+    (ast.NotEq, "!=", operator.ne),
+    (ast.Gt, ">", operator.gt),
+    (ast.GtE, ">=", operator.ge),
+    (ast.Lt, "<", operator.lt),
+    (ast.LtE, "<=", operator.le),
+)
+_COMPARISONS = {name: function for _, name, function in _COMPARISON_OPERATORS}
+_COMPARISON_SYNTAX = {syntax: name for syntax, name, _ in _COMPARISON_OPERATORS}
+# "==, !=, >, >=, < or <=", for the error that refuses any other operator.
+# Each name is the operator as a spec writes it.
+_ALLOWED_COMPARISONS = "{} or {}".format(
+    ", ".join(name for _, name, _ in _COMPARISON_OPERATORS[:-1]),
+    _COMPARISON_OPERATORS[-1][1],
+)
 
-_BOOL_COMBINERS = {
-    ast.And: all,
-    ast.Or: any,
-}
+_BOOL_COMBINER_OPERATORS = (
+    (ast.And, "and", all),
+    (ast.Or, "or", any),
+)
+_BOOL_COMBINERS = {name: function for _, name, function in _BOOL_COMBINER_OPERATORS}
+_BOOL_COMBINER_SYNTAX = {syntax: name for syntax, name, _ in _BOOL_COMBINER_OPERATORS}
 
 _PLACEHOLDER_RE = re.compile(r"\{(\w+)\[(\w+)\]\.(\w+)\}")
 
 
-def _eval_condition(expr: str, variables: dict) -> bool:
-    """Evaluate a `condition` string like "multiplier > 1 and remainder > 0"
-    against `variables`. Deliberately not eval()/exec(): `condition` is data
-    loaded from a YAML spec file, not code we wrote, so only a small allowed
-    set of nodes (comparisons, and/or, names, int constants) is permitted --
-    anything else raises ValueError instead of silently running arbitrary
-    Python.
+def _parse_condition(expression: str) -> tuple:
+    """A `condition` string as data: checked against the allowlist
+    (_validate_condition_node), then converted by _condition_tree.
 
-    Since #37 the same allowlist runs over the whole tree at load, in
-    _validate_condition_node, so by the time anything is evaluated here it
-    has already been accepted. _eval_node's own raises are kept as a
-    backstop and are unreachable through Spec: they can only fire for a
-    caller who evaluates an expression without a Spec around it, as the
-    tests do. Kept rather than deleted for the reason #36 settled on for the
-    connector-normalisation assert -- an invariant that cannot currently
-    fail is still worth stating, provided the limit is written down.
+    A spec writes a condition as a Python expression, because that is easy
+    to read. The engine keeps it as data, because the data is what the
+    compiler writes into every target package and what every target
+    evaluates (#75): a Python expression means something else in another
+    language. `0 < d < 5` is the case in point -- in JavaScript it is
+    `(0 < d) < 5`, which is true for every d.
+
+    Deliberately not eval()/exec(): `condition` is data loaded from a YAML
+    spec file, not code we wrote, so only a small grammar is permitted (see
+    _validate_condition_node) -- anything else raises ValueError instead of
+    silently running arbitrary Python.
     """
-    tree = ast.parse(expr, mode="eval").body
-    return _eval_node(tree, variables)
+    node = ast.parse(expression, mode="eval").body
+    _validate_condition_node(node)
+    return _condition_tree(node)
 
 
-def _eval_node(node, variables):
-    if isinstance(node, ast.Compare):
-        left = _eval_node(node.left, variables)
-        for op, comparator in zip(node.ops, node.comparators):
-            op_type = type(op)
-            if op_type not in _COMPARISONS:
-                raise ValueError(f"Unsupported comparison operator: {op_type.__name__}")
-            right = _eval_node(comparator, variables)
-            if not _COMPARISONS[op_type](left, right):
-                return False
-            left = right
-        return True
+def _condition_tree(node) -> tuple:
+    """A validated condition's syntax tree, as data:
+
+        ("and" | "or", tree, tree, ...)
+        ("cmp", op, operand, operand)    op: a key of _COMPARISONS
+        ("var", name)                    name: one of _VARIABLE_NAMES
+        ("int", k)                       k: an int >= 0, never a bool
+
+    "var" and "int" are only ever a comparison's operands, and "and"/"or"
+    only ever join comparisons or other "and"/"or" trees -- the validator's
+    grammar -- so every "and"/"or" an evaluator meets combines true/false
+    values, never numbers.
+
+    A chained comparison becomes an explicit "and" of its links here, once,
+    so that no evaluator -- this engine's or a target's -- has to implement
+    Python's chaining rule.
+    """
     if isinstance(node, ast.BoolOp):
-        op_type = type(node.op)
-        if op_type not in _BOOL_COMBINERS:
-            raise ValueError(f"Unsupported boolean operator: {op_type.__name__}")
-        return _BOOL_COMBINERS[op_type](_eval_node(v, variables) for v in node.values)
+        return (_BOOL_COMBINER_SYNTAX[type(node.op)],) + tuple(
+            _condition_tree(value) for value in node.values
+        )
+    if isinstance(node, ast.Compare):
+        operands = [node.left] + node.comparators
+        links = tuple(
+            ("cmp", _COMPARISON_SYNTAX[type(op)], _condition_tree(left), _condition_tree(right))
+            for op, left, right in zip(node.ops, operands, operands[1:])
+        )
+        return links[0] if len(links) == 1 else ("and",) + links
     if isinstance(node, ast.Name):
-        if node.id not in variables:
-            raise ValueError(f"Unknown variable in condition: {node.id!r}")
-        return variables[node.id]
-    if isinstance(node, ast.Constant) and isinstance(node.value, int):
-        return node.value
-    raise ValueError(f"Unsupported expression in condition: {ast.dump(node)}")
+        return ("var", node.id)
+    return ("int", node.value)
+
+
+def _eval_tree(tree: tuple, variables: dict):
+    """Evaluate condition data (see _condition_tree) against `variables`.
+
+    Every condition is validated when its spec loads, so the raises here
+    are a backstop, unreachable through Spec: they can only fire for data
+    built by hand, as the tests do. Kept rather than deleted for the reason
+    #36 settled on for the connector-normalisation assert -- an invariant
+    that cannot currently fail is still worth stating, provided the limit
+    is written down.
+    """
+    kind = tree[0]
+    if kind == "cmp":
+        _, op, left, right = tree
+        if op not in _COMPARISONS:
+            raise ValueError(f"Unsupported comparison operator: {op!r}")
+        return _COMPARISONS[op](_eval_tree(left, variables), _eval_tree(right, variables))
+    if kind in _BOOL_COMBINERS:
+        return _BOOL_COMBINERS[kind](_eval_tree(t, variables) for t in tree[1:])
+    if kind == "var":
+        if tree[1] not in variables:
+            raise ValueError(f"Unknown variable in condition: {tree[1]!r}")
+        return variables[tree[1]]
+    if kind == "int":
+        return tree[1]
+    raise ValueError(f"Unsupported condition data: {tree!r}")
 
 
 def _strip_diacritics(word: str) -> str:
     """Remove diacritics by splitting letters and their marks (NFD), then
-    keep only the base letters. This is used for parse.strip_diacritics, so
-    input typed without diacritics can still match lexicon words that
-    include them ("sawm" -> "sâwm").
+    keep only the base letters ("sâwm" -> "sawm").
+
+    This is Python's rule, so its answer depends on the Unicode version
+    Python ships. Parsing no longer uses it directly: it is what the fold
+    table is built from (see _fold_table), and generate_vectors.py uses it
+    to write the spellings typed without diacritics, which are plain words
+    on every version.
     """
     decomposed = unicodedata.normalize("NFD", word)
     return "".join(ch for ch in decomposed if not unicodedata.combining(ch))
@@ -232,8 +286,179 @@ _IGNORABLE = {
 }
 
 
-def _normalize(word: str, parse_config: dict) -> str:
-    """Apply the spec's parse flags to one word.
+# The fold table: what case_insensitive and strip_diacritics mean (#75).
+#
+# Folding with the runtime's own rules -- str.lower() and NFD -- made both
+# flags depend on the Unicode version underneath. Newer Unicode versions add
+# combining marks, so the same spec stripped 875 marks on Python 3.10 and 937
+# on 3.14, and a JavaScript, Go or Rust target would have answered with its
+# own runtime's version again. So the flags now mean a table, built from the
+# spec's own words:
+#
+#   letters  every character the flags turn into letters those words use:
+#            the uppercase and accented forms of the spec's letters.
+#   marks    the combining marks found inside those letters, folded to
+#            nothing, so a circumflex typed as a separate mark is stripped
+#            the same as one written as part of its letter.
+#
+# Every other character is left as it is. That is narrower than Python's rule
+# on purpose: a mark that occurs in none of those letters -- a Hebrew
+# point, an Arabic vowel -- is no longer ignored. What that buys is a table
+# that comes out the same on every Python from 3.10 to 3.14 (439 entries for
+# Mizo), so every target ships the same answer and _mizo.py stays identical
+# on every version CI runs. If a later Python ever changes it, that check is
+# what fails.
+
+
+def _flag_fold(
+    word: str, case_insensitive: bool, strip_diacritics: bool
+) -> str:
+    """What the parse flags make of a word by this Python's own rules. The
+    fold table is built from this; parsing uses the table."""
+    if case_insensitive:
+        word = word.lower()
+    if strip_diacritics:
+        word = _strip_diacritics(word)
+    return word
+
+
+@functools.lru_cache(maxsize=None)
+def _changed_characters(case_insensitive: bool, strip_diacritics: bool) -> dict:
+    """Every character the flags change, and what they change it into.
+
+    One pass over every code point, which costs most of a second, so it is
+    cached: the answer depends on the two flags alone, and every spec that
+    sets the same flags shares it. A character can only change if it has a
+    lowercase mapping, a decomposition or a combining class, so the rest are
+    skipped without being folded. unicodedata.decomposition() reports none
+    for the Hangul syllables, which NFD decomposes by algorithm instead,
+    hence their range. test_engine.py checks the shortcut against folding
+    every code point.
+    """
+    changed = {}
+    if not (case_insensitive or strip_diacritics):
+        return changed
+    for code in range(0x110000):
+        if 0xD800 <= code <= 0xDFFF:   # surrogates are not characters
+            continue
+        ch = chr(code)
+        if (
+            ch.lower() == ch
+            and not unicodedata.decomposition(ch)
+            and not unicodedata.combining(ch)
+            and not 0xAC00 <= code <= 0xD7A3
+        ):
+            continue
+        folded = _flag_fold(ch, case_insensitive, strip_diacritics)
+        if folded != ch:
+            changed[ch] = folded
+    return changed
+
+
+@functools.lru_cache(maxsize=None)
+def _fold_for(
+    alphabet: frozenset, case_insensitive: bool, strip_diacritics: bool
+) -> dict:
+    """The fold table for one alphabet, keyed by code point for
+    str.translate. Cached and shared, so callers copy it (_fold_table)."""
+    changed = _changed_characters(case_insensitive, strip_diacritics)
+    letters = {
+        ch: folded for ch, folded in changed.items()
+        if folded and ch not in alphabet and set(folded) <= alphabet
+    }
+    marks = {
+        mark for ch in letters for mark in unicodedata.normalize("NFD", ch)
+        if changed.get(mark) == ""
+    }
+    table = {ord(ch): folded for ch, folded in letters.items()}
+    table.update(dict.fromkeys(map(ord, marks), ""))
+    return table
+
+
+def _fold_table(lexicon: dict, parse_config: dict) -> dict:
+    """The spec's fold table (see the comment above), as a str.translate
+    table: code point -> what it folds to, "" for a mark.
+
+    The alphabet is every letter of the spec's words -- the lexicon, the
+    connectors and both sides of the aliases, the words input is compared
+    against -- after the flags. A spec that sets neither flag folds nothing.
+    """
+    case_insensitive = bool(parse_config.get("case_insensitive", False))
+    strip_diacritics = bool(parse_config.get("strip_diacritics", False))
+    if not (case_insensitive or strip_diacritics):
+        return {}
+    alphabet = frozenset("".join(
+        _flag_fold(word.translate(_IGNORABLE), case_insensitive, strip_diacritics)
+        for _, word in _spec_words(lexicon, parse_config)
+    ))
+    return dict(_fold_for(alphabet, case_insensitive, strip_diacritics))
+
+
+def _spec_words(lexicon: dict, parse_config: dict) -> list:
+    """Every word input is compared against, with where the spec states it:
+    each lexicon form, each connector, and both sides of each alias."""
+    aliases = parse_config.get("aliases", {})
+    words = [
+        ("lexicon word", form) for table in lexicon.values()
+        for entry in table.values() for form in entry.values()
+        if isinstance(form, str)
+    ]
+    words += [
+        ("parse.connectors entry", c) for c in parse_config.get("connectors", [])
+    ]
+    words += [
+        ("parse.aliases entry", w) for pair in aliases.items() for w in pair
+    ]
+    return words
+
+
+def _validate_fold(lexicon: dict, parse_config: dict, fold: dict) -> None:
+    """Every word of the spec folds through its table the way the flags mean.
+
+    The table folds one character at a time, which is what lets every target
+    apply it the same way, and what it cannot express is a fold that depends
+    on the letters around it. Greek is the case found (#92): str.lower()
+    turns a word-final Σ into ς and any other into σ, so a spec word ending
+    in ς reads its uppercase form back through lower() but not through the
+    table. A mark found inside none of the table's letters is the other:
+    the table keeps it where strip_diacritics would remove it. Without this check
+    either spec would load, and input the flags promise to accept would be
+    quietly rejected.
+
+    So the table has to read back every spelling of a word that the flags
+    read back: the word itself, and with case_insensitive its uppercase
+    form, the case variant generate_vectors.py writes. Only a spelling the
+    flags fold to the word's own fold is checked. That is what leaves German
+    ß alone: DREISSIG lowercases to dreissig, not dreißig, so the flags never
+    accepted that spelling and the table is not asked to either.
+
+    Ignorable characters are removed first, the order _normalize applies
+    them in, so each spelling is folded exactly as parsing folds it (#93).
+    """
+    case_insensitive = bool(parse_config.get("case_insensitive", False))
+    strip_diacritics = bool(parse_config.get("strip_diacritics", False))
+    if not (case_insensitive or strip_diacritics):
+        return
+    for where, word in _spec_words(lexicon, parse_config):
+        clean = word.translate(_IGNORABLE)
+        expected = _flag_fold(clean, case_insensitive, strip_diacritics)
+        for form in [clean, clean.upper()] if case_insensitive else [clean]:
+            if _flag_fold(form, case_insensitive, strip_diacritics) != expected:
+                continue
+            folded = form.translate(fold)
+            if folded != expected:
+                raise ValueError(
+                    f"{where} {word!r}: the parse flags read {form!r} as "
+                    f"{expected!r}, but the fold table makes it {folded!r}. "
+                    f"The table folds one character at a time, so it cannot "
+                    f"follow a letter whose fold depends on its neighbours, "
+                    f"such as Greek final sigma, or strip a mark that none "
+                    f"of its letters contains"
+                )
+
+
+def _normalize(word: str, fold: dict) -> str:
+    """Apply the spec's parse flags to one word, through its fold table.
 
     Module-level rather than a method, because _validate_spec has to do this
     before there is a Spec to call it on -- and writing a second copy there
@@ -242,20 +467,18 @@ def _normalize(word: str, parse_config: dict) -> str:
 
     The ignorable-character strip is unconditional rather than a parse
     flag, for the same reason whitespace is (#46): it is a property of
-    text, not of a language. It runs first so the flags below see the
-    word a reader would.
+    text, not of a language. It runs first so the fold sees the word a
+    reader would.
     """
-    word = word.translate(_IGNORABLE)
-    if parse_config.get("case_insensitive", False):
-        word = word.lower()
-    if parse_config.get("strip_diacritics", False):
-        word = _strip_diacritics(word)
-    return word
+    return word.translate(_IGNORABLE).translate(fold)
 
 # The variables a condition or a placeholder key may name. Two, and they are
 # the same two at every scale: that is what lets one rule describe every
 # multiple of its scale instead of one rule per digit position (#65).
 _VARIABLE_NAMES = frozenset({"multiplier", "remainder"})
+# "multiplier and remainder", for the error that refuses any other name.
+# Sorted, since a frozenset has no order of its own.
+_ALLOWED_VARIABLES = " and ".join(sorted(_VARIABLE_NAMES))
 
 # The one placeholder that is not a lexicon lookup: the remainder, rendered
 # by the same rules. Only legal inside a [...] segment -- see _parse_template.
@@ -386,10 +609,28 @@ def _refers_to_remainder(items: tuple) -> bool:
 
 
 def _validate_condition_node(node):
-    """The allowlist for a `condition` expression, expressed once.
+    """The allowlist for a `condition` expression, expressed once, as a
+    grammar:
+
+        condition   a comparison, or conditions joined by `and` / `or`
+        comparison  operand OP operand [OP operand ...]
+        OP          one of _COMPARISON_OPERATORS
+        operand     multiplier, remainder, or a non-negative integer
+
+    So `and`/`or` only ever join true/false values, and a comparison only
+    ever compares numbers. Python accepts more -- it counts True as 1 and
+    any integer as true or false, so `multiplier == True`, a bare
+    `remainder` and `(multiplier > 1) == 1` all mean something there -- but
+    no spec uses those forms, and other languages coerce differently: in
+    JavaScript `true === 1` is false. Refusing them is cheaper than making
+    every target copy Python's coercions (zoramt, #75).
+
+    Non-negative, because Python reads `-1` as minus applied to 1 rather
+    than as one number, which has never been an operand. Neither variable
+    is ever below 0, so no spec needs one.
 
     Walks the whole tree rather than checking each node as it is evaluated.
-    _eval_node's checks only fire on the nodes it actually reaches, and
+    An evaluator's checks only fire on the nodes it actually reaches, and
     `and`/`or` short-circuit, so a subtree behind one was never visited and
     therefore never rejected -- which is how this engine came to accept
     expressions compile_spec.py refuses (#37). The trigger was never "an
@@ -399,25 +640,50 @@ def _validate_condition_node(node):
     """
     if isinstance(node, ast.Compare):
         for op in node.ops:
-            if type(op) not in _COMPARISONS:
-                raise ValueError(f"Unsupported comparison operator: {type(op).__name__}")
-        _validate_condition_node(node.left)
-        for comparator in node.comparators:
-            _validate_condition_node(comparator)
+            if type(op) not in _COMPARISON_SYNTAX:
+                raise ValueError(
+                    f"Unsupported comparison operator in {ast.unparse(node)!r}. "
+                    f"A comparison uses {_ALLOWED_COMPARISONS}"
+                )
+        for operand in [node.left, *node.comparators]:
+            _validate_operand(operand)
         return
     if isinstance(node, ast.BoolOp):
-        if type(node.op) not in _BOOL_COMBINERS:
+        if type(node.op) not in _BOOL_COMBINER_SYNTAX:
             raise ValueError(f"Unsupported boolean operator: {type(node.op).__name__}")
         for value in node.values:
             _validate_condition_node(value)
         return
+    raise ValueError(
+        f"Not a condition: {ast.unparse(node)!r}. A condition is a comparison, "
+        f"or conditions joined by and/or"
+    )
+
+
+def _validate_operand(node):
+    """One side of a comparison, for _validate_condition_node's grammar.
+
+    The bool check comes before the int one because a bool is an int to
+    Python: isinstance(True, int) holds.
+    """
     if isinstance(node, ast.Name):
         if node.id not in _VARIABLE_NAMES:
-            raise ValueError(f"Unknown variable in condition: {node.id!r}")
+            raise ValueError(
+                f"Unknown variable in condition: {node.id!r}. A condition's "
+                f"variables are {_ALLOWED_VARIABLES}"
+            )
         return
+    if isinstance(node, ast.Constant) and isinstance(node.value, bool):
+        raise ValueError(
+            f"{node.value!r} is not a number in a condition: compare "
+            f"multiplier or remainder with a non-negative integer"
+        )
     if isinstance(node, ast.Constant) and isinstance(node.value, int):
         return
-    raise ValueError(f"Unsupported expression in condition: {ast.dump(node)}")
+    raise ValueError(
+        f"Not a comparison operand: {ast.unparse(node)!r}. A comparison "
+        f"compares multiplier, remainder or a non-negative integer"
+    )
 
 
 def _rule_name(rule: dict) -> str:
@@ -482,6 +748,19 @@ def _validate_spec(data: dict) -> None:
     rules = data["grammar"]["rules"]
     parse = data.get("parse", {})
 
+    # The parser caps every reading above supports.max at one value, which
+    # is only sound while a reading can never shrink as it is built: every
+    # part of a number non-negative (#75). The schema keeps the format open
+    # to negatives, so this is where "not yet" is said, rather than a cap
+    # that would quietly turn wrong when one arrives.
+    for table, entries in lexicon.items():
+        for key in entries:
+            if isinstance(key, int) and key < 0:
+                raise ValueError(
+                    f"lexicon.{table}: key {key} is negative; negative numbers "
+                    f"are not supported yet"
+                )
+
     # Schema-valid data never trips these -- output and condition are both
     # `type: string` there, and output is required. They exist for the same
     # reason the section check above does: Spec() can be built from a raw
@@ -515,14 +794,16 @@ def _validate_spec(data: dict) -> None:
             )
 
     separator_pattern = _separator_pattern(parse)
-    connectors = {_normalize(c, parse) for c in parse.get("connectors", [])}
+    fold = _fold_table(lexicon, parse)
+    _validate_fold(lexicon, parse, fold)
+    connectors = {_normalize(c, fold) for c in parse.get("connectors", [])}
 
     for rule in rules:
         condition = rule.get("condition")
         if condition is None:
             continue
         try:
-            _validate_condition_node(ast.parse(condition, mode="eval").body)
+            _parse_condition(condition)
         except (ValueError, SyntaxError) as exc:
             raise ValueError(f"rule {_rule_name(rule)!r}: {exc}") from None
 
@@ -541,7 +822,7 @@ def _validate_spec(data: dict) -> None:
     # drops "and" on input but emits it nowhere below 100.
     connector = data["grammar"].get("connector")
     if connector is not None:
-        if _normalize(connector.get("word", ""), parse) not in connectors:
+        if _normalize(connector.get("word", ""), fold) not in connectors:
             raise ValueError(
                 f"grammar.connector: {connector.get('word')!r} is not one of "
                 f"parse.connectors, so the canonical spelling would not parse back"
@@ -574,7 +855,7 @@ def _validate_spec(data: dict) -> None:
         _validate_readable(name, rule, items)
         _validate_placeholders(name, items, lexicon)
         for sequence in _linearisations(items):
-            _validate_literals(name, sequence, separator_pattern, connectors, parse)
+            _validate_literals(name, sequence, separator_pattern, connectors, fold)
 
 
 def _writes_multiplier(items: tuple) -> bool:
@@ -652,7 +933,7 @@ def _validate_placeholders(rule_name: str, items: tuple, lexicon: dict) -> None:
 
 def _validate_literals(
     rule_name: str, sequence: list, separator_pattern: str, connectors: set,
-    parse_config: dict,
+    fold: dict,
 ) -> None:
     """Every template literal is a separator or connector, and separates.
 
@@ -695,7 +976,7 @@ def _validate_literals(
 
     for position, literal in enumerate(literals):
         for word in (w for w in re.split(separator_pattern, literal) if w):
-            if _normalize(word, parse_config) not in connectors:
+            if _normalize(word, fold) not in connectors:
                 raise ValueError(
                     f"rule {rule_name!r}: template literal {word!r} is neither a "
                     f"word separator nor a connector, so it would be emitted on "
@@ -768,14 +1049,19 @@ class Spec:
         self.connector = data["grammar"].get("connector")
         self.supports = data["meta"]["supports"]
         self.parse_config = data.get("parse", {})
+        # What the parse flags mean for this spec's words (see _fold_table).
+        # compile_spec.py ships it as the package's FOLD.
+        self._fold = _fold_table(self.lexicon, self.parse_config)
         # Parsed once here rather than on every conversion. Keyed by identity
         # because two rules may be equal as dicts and still be two rules.
         self._items = {id(rule): _parse_template(rule["output"]) for rule in self.rules}
         # Conditions are parsed once, for the same reason: ast.parse on every
         # evaluation cost more than the whole rest of a parse in the #65
-        # prototype, and nearly hid how cheap the algorithm is.
+        # prototype, and nearly hid how cheap the algorithm is. Kept as
+        # data (_parse_condition), which is also what compile_spec.py
+        # writes into the target package.
         self._conditions = {
-            id(rule): ast.parse(rule["condition"], mode="eval").body
+            id(rule): _parse_condition(rule["condition"])
             for rule in self.rules
             if rule.get("condition") is not None
         }
@@ -812,7 +1098,7 @@ class Spec:
         tree = self._conditions.get(id(rule))
         if tree is None:
             return True
-        return _eval_node(tree, {"multiplier": multiplier, "remainder": remainder})
+        return _eval_tree(tree, {"multiplier": multiplier, "remainder": remainder})
 
     def _find_rule(self, n: int) -> dict:
         """The rule number_to_text() renders n with.
@@ -936,21 +1222,33 @@ class Spec:
         # The range is applied to the winner, not before choosing one. A
         # greedy reading above supports.max is refused rather than replaced by
         # a shorter reading that fits: that would answer with a number the
-        # speaker did not say. At 10^10 - 1 the case cannot arise -- every
+        # speaker did not say. At 10^13 - 1 the case cannot arise -- every
         # shorter multiplier starts with the same scale word and is as far out
         # of range -- and test_engine pins that rather than trusting it.
+        #
+        # Every reading above the range is the same capped value (see
+        # _parse_readings), so the refusal names the bound, not the number:
+        # that number is what a target without big integers cannot compute.
         readings = self._parse_readings(text)
         if not readings:
             raise NoNumberError(f"{text!r} does not match any number in the supported range")
+        low, high = self.supports["min"], self.supports["max"]
         top = max(readings.values())
         winners = sorted(n for n, rank in readings.items() if rank == top)
         if len(winners) > 1:
-            raise ValueError(f"{text!r} is ambiguous: matches {winners}")
+            named = ", ".join(
+                f"more than {high}" if n > high else str(n) for n in winners
+            )
+            raise ValueError(f"{text!r} is ambiguous: matches [{named}]")
         n = winners[0]
-        if not (self.supports["min"] <= n <= self.supports["max"]):
+        if n > high:
             raise NoNumberError(
-                f"{text!r} reads as {n}, outside the supported range "
-                f"[{self.supports['min']}, {self.supports['max']}]"
+                f"{text!r} reads as more than {high}, outside the supported "
+                f"range [{low}, {high}]"
+            )
+        if n < low:
+            raise NoNumberError(
+                f"{text!r} reads as {n}, outside the supported range [{low}, {high}]"
             )
         return n
 
@@ -965,7 +1263,9 @@ class Spec:
 
     def _parse_readings(self, text: str) -> dict:
         """Every number some derivation of `text` gives, mapped to the rank
-        greedy binding gives its best derivation. The range is not applied.
+        greedy binding gives its best derivation. The range is not applied,
+        except that every reading above supports.max is the one value
+        supports.max + 1 (#75, see the comment below).
 
         Recursive descent over the rules, memoised on (start, end, whole,
         below): `whole` is whether the span is the entire input, which is
@@ -974,8 +1274,8 @@ class Spec:
         smaller than the scale (`0 < value < rule["scale"]` below), which
         alone rejects a derivation through a larger rule. For a stacked
         multiplier it is the descending order #27 requires -- `nuai za hnih`,
-        never `nuai maktaduai khat` -- though at 10^10 - 1 any ascending
-        reading is out of range anyway.
+        never `nuai maktaduai khat`. An ascending reading is rejected by
+        that order, not by the range.
 
         A rank is a tuple, compared like a word in a dictionary. A stacking
         rule contributes how many words its multiplier took, then its
@@ -997,6 +1297,20 @@ class Spec:
         # let "sawm hnih" (20) also read as 10 + 2 through the bound form of
         # 2, which is real ambiguity rather than an alternate spelling.
         lenient = len(tokens) == 1
+        # Readings above supports.max are all recorded as one value, `over`,
+        # keeping the best rank among them (#75). A reading is multiplier x
+        # scale + remainder, every scale at least 1 (the schema's minimum) and
+        # no part negative (_validate_spec refuses a negative lexicon key), so
+        # a reading built on one above max is above max too. While nothing a
+        # reading is compared with -- a rule's scale or fixed multiplier, a
+        # lexicon key, a number in a condition -- is above max, greed picks
+        # what it would have picked between the exact numbers; test_engine
+        # checks every spec in languages/ for that. Without the cap a stacked
+        # chain reads far past 64 bits -- 10^25 in three words -- and a target
+        # with fixed-size integers would wrap or crash before the range
+        # check. The test is made before multiplying, as such a target has to.
+        high = self.supports["max"]
+        over = high + 1
         cache = {}
 
         def span(start, end, whole, below):
@@ -1025,7 +1339,18 @@ class Spec:
                                 + bound.get("_multiplier_rank", ())
                                 + rank
                             )
-                        value = multiplier * rule["scale"] + remainder
+                        # The remainder first: once it is capped, max -
+                        # remainder is negative, and floor and truncating
+                        # division disagree on a negative number. Checked
+                        # this way the division never sees one, so a port
+                        # gets the same answer whichever its `/` does.
+                        if (
+                            remainder > high
+                            or multiplier > (high - remainder) // rule["scale"]
+                        ):
+                            value = over
+                        else:
+                            value = multiplier * rule["scale"] + remainder
                         if value not in readings or rank > readings[value]:
                             readings[value] = rank
                 cache[key] = readings
@@ -1083,7 +1408,12 @@ class Spec:
                     # bound form, so "vaibêlchhe pahnih" is not 2 x 10^7 (Q-L).
                     for stop in range(position + 1, end + 1):
                         for value, rank in span(position, stop, False, rule["scale"]).items():
-                            if value in self.lexicon[table]:
+                            # The capped value stands for some number above
+                            # the range, never a word, even when a key happens
+                            # to equal max + 1 (#75). Skipping it here could
+                            # drop greed's winner and let a shorter reading in
+                            # range answer instead.
+                            if value <= high and value in self.lexicon[table]:
                                 continue
                             rebound = bind(bound, "multiplier", value)
                             if rebound is not None:
@@ -1143,15 +1473,15 @@ class Spec:
         If a flag were applied only to the input, it could stop matching the
         lexicon.
         """
-        return _normalize(word, self.parse_config)
+        return _normalize(word, self._fold)
 
     def _tokenize(self, text: str) -> list:
-        """Normalise text per the spec's `parse` section: apply the parse
-        flags (see _normalize_word), split on the effective separators
-        (_separator_pattern: declared plus Unicode whitespace), remove
-        connector words, and resolve aliases. Mirrors docs/spec-format.md's
-        description of the reverse direction ("drop connectors, resolve
-        aliases").
+        """Normalise text per the spec's `parse` section: split on the
+        effective separators (_separator_pattern: declared plus Unicode
+        whitespace), apply the parse flags to each word (see
+        _normalize_word), remove connector words, and resolve aliases.
+        Mirrors docs/spec-format.md's description of the reverse direction
+        ("drop connectors, resolve aliases").
 
         Connector words and aliases are normalised the same way, so they
         still match even if they are written differently in the spec.

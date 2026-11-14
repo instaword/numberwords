@@ -22,19 +22,23 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    # packages/python declares requires-python = ">=3.9", so the tests run on
+    # packages/python declares requires-python = ">=3.10", so the tests run on
     # every version it claims to support rather than only the newest one.
     # CI follows the versions we support; it does not decide them.
     #
-    # It matters more than it looks for the compiled artifact. compile_spec.py
-    # emits conditions with ast.unparse, whose exact output is not guaranteed
-    # to be identical across Python versions, and _mizo.py is generated on
-    # whichever version the author happens to run. The matrix is what proves
-    # the checked-in file is reproducible everywhere, not just on one machine.
+    # It matters more than it looks for the compiled artifact. _mizo.py is
+    # generated on whichever version the author happens to run, and the
+    # matrix is what proves the checked-in file is reproducible everywhere,
+    # not just on one machine. Until #75 it held conditions emitted with
+    # ast.unparse, whose output is not guaranteed identical across versions;
+    # it is plain literals now, but their spelling is still Python's repr().
+    # It also holds the fold table (#75), which the engine derives from
+    # Python's Unicode data, so a Python whose data would change that table
+    # fails the artifact check below as soon as it joins this matrix.
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -55,9 +59,15 @@ jobs:
       # The target package has its own suite: the public API, and conformance
       # against vectors/mizo.json. It imports numberwords from src/ and never
       # from reference/, so this proves the shipped code stands on its own.
+      # pytest and hypothesis come from the package's dependency group, so
+      # this step does not borrow the reference suite's install. Reading a
+      # group needs pip 25.1 or newer.
       - name: Run the package tests
         working-directory: packages/python
-        run: pytest
+        run: |
+          python -m pip install --upgrade "pip>=25.1"
+          python -m pip install --group test
+          pytest
 
       # vectors/mizo.json and vectors/mizo.phrases.json are checked-in
       # snapshots, not computed at test time. If this step fails, mizo.yaml
@@ -69,17 +79,17 @@ jobs:
           python generate_vectors.py
           git diff --exit-code ../vectors/mizo.json ../vectors/mizo.phrases.json
 
-      # Same idea for the compiled target-package artifact. The drift test in
-      # pytest compares the text the compiler produces; this checks what it
-      # actually writes to disk, so an encoding or newline bug in the writing
-      # path cannot slip through. If this step fails, mizo.yaml changed
-      # without a recompile: run `python compile_spec.py` from reference/ and
-      # commit the result.
+      # Same idea for the compiled files each target package ships, _mizo.py
+      # and _mizo.js. The drift tests in pytest compare the text the compiler
+      # produces; this checks what it actually writes to disk, so an encoding
+      # or newline bug in the writing path cannot slip through. If this step
+      # fails, mizo.yaml changed without a recompile: run
+      # `python compile_spec.py` from reference/ and commit the result.
       - name: Check the compiled artifact is up to date
         working-directory: reference
         run: |
           python compile_spec.py
-          git diff --exit-code ../packages/python/src/numberwords/_mizo.py
+          git diff --exit-code ../packages/python/src/numberwords/_mizo.py ../packages/npm/_mizo.js
 
   # Everything above tests the source tree. None of it can tell whether the
   # built distribution actually contains _mizo.py and py.typed -- a src/
@@ -96,7 +106,7 @@ jobs:
         with:
           # The oldest version pyproject claims to support. If the wheel
           # works here it works on the rest of the matrix.
-          python-version: "3.9"
+          python-version: "3.10"
 
       - name: Build the wheel
         working-directory: packages/python
@@ -125,4 +135,65 @@ jobs:
           assert (installed / '_mizo.py').is_file(), 'no compiled spec'
           assert (installed / 'py.typed').is_file(), 'no py.typed'
           print('wheel smoke test ok')
+          "
+
+  # packages/npm: its own tests (the shared vectors and phrase file, and what
+  # docs/interpreter-contract.md asks a target to test itself), its type
+  # declarations, and the package as npm would publish it. The drift check on
+  # its compiled _mizo.js is in the test job above, with _mizo.py's.
+  npm:
+    runs-on: ubuntu-latest
+
+    # package.json declares engines >= 22, so the tests run on every
+    # long-term-support Node that covers.
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["22", "24"]
+
+    defaults:
+      run:
+        working-directory: packages/npm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # The lockfile pins the one development dependency, typescript.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      # The declarations are hand-written, so nothing else would notice them
+      # drifting from the code (#75).
+      - name: Type-check the declarations
+        run: npm run typecheck
+
+      # As the wheel job does for Python: pack the package, install the
+      # tarball where there is no repository, and convert a number. The
+      # tarball must hold exactly these six files: one left out of `files` in
+      # package.json, or one more than these, fails here and nowhere else.
+      - name: Pack it, install it in a clean directory and use it
+        run: |
+          npm pack
+          tar -tzf instaword-numberwords-*.tgz | sort > /tmp/packed.txt
+          printf 'package/%s\n' README.md _mizo.js index.d.ts index.js package.json render.js | sort > /tmp/expected.txt
+          diff /tmp/expected.txt /tmp/packed.txt
+          mkdir /tmp/npm-smoke
+          cp instaword-numberwords-*.tgz /tmp/npm-smoke/
+          cd /tmp/npm-smoke
+          npm init -y > /dev/null
+          npm install ./instaword-numberwords-*.tgz
+          node --input-type=module -e "
+          import assert from 'node:assert/strict';
+          import { numberToText, textToNumber, NumberWordsError } from '@instaword/numberwords';
+          assert.equal(numberToText(58), 'sawm nga pariat');
+          assert.equal(textToNumber('sawm nga pariat'), 58);
+          assert.throws(() => textToNumber('huau sawm'), NumberWordsError);
+          console.log('npm smoke test ok');
           "

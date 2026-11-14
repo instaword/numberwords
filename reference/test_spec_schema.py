@@ -439,10 +439,10 @@ def _with_connector(data: dict, **changes) -> dict:
 #
 # A call is the unsupported node here, and len() is deliberately a dull one.
 # #37 demonstrated the bug with __import__("os").system(...), which reads as a
-# sandbox escape and is not one: _eval_node raises on ast.Call, it never
-# evaluates it, so the short-circuited subtree was not executed either. What
-# was broken is only that validity depended on the input, and any unsupported
-# node shows that.
+# sandbox escape and is not one: the evaluator of the time (_eval_node, until
+# #75) raised on ast.Call rather than evaluating it, so the short-circuited
+# subtree was not executed either. What was broken is only that validity
+# depended on the input, and any unsupported node shows that.
 _UNSUPPORTED_NODE_BEHIND_OR = 'multiplier > 1 or len("x") == 0'
 _UNSUPPORTED_NODE_BEHIND_AND = 'multiplier == 99 and len("x") == 0'
 
@@ -703,9 +703,10 @@ def test_a_connector_that_parsing_does_not_drop_is_rejected():
     # test. Mizo already declares a connector, so the negative case in
     # LOAD_REJECTS covers a *misspelt* one; this covers the other way to get
     # there, a language that emits a connector and never lists it for
-    # parsing. English drops "and" on input but writes it nowhere below 100,
-    # so declaring it adds a connector without changing any rendering in
-    # range, and removing it from parse.connectors isolates the check.
+    # parsing. English lists "and" and now writes it from 100 up, so this
+    # only checks that the declaration loads and that clearing
+    # parse.connectors is rejected. It does not claim the rendering is
+    # unchanged: grammar.connector would put a second "and" in.
     data = _spec_data(REPO_ROOT / "languages" / "en.yaml")
     data["grammar"]["connector"] = {"word": "and", "placement": "final_addend", "min": 100}
     Spec(data)  # with "and" in parse.connectors, this is a fine spec
@@ -980,7 +981,5 @@ def test_every_case_the_literal_check_owns_is_justified_by_the_property(
 #
 # en.yaml was ported to the current format in #29; before that it was written
 # in the older illustrative `form:` mini-syntax and did not load in engine.py
-# at all. It is capped at 0-99 rather than the 0-999 it once claimed, because
-# English above 99 needed recursion ("three hundred and five" = {units}
-# hundred and {0-99}) that the format did not have. #65 added it
-# (`{remainder}`); bringing the hundreds back is a change of its own.
+# at all. It covers 0-999. Canonical hundreds are British ("three hundred
+# and five"); leaving "and" out is accepted (#82). #65 added `{remainder}`.

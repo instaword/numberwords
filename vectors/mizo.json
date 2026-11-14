@@ -15046,5 +15046,2360 @@
       "tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
       "tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
     ]
+  },
+  {
+    "number": "10000000000",
+    "text": "vatelubeuh khat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT",
+      "VATELUBEUH-KHAT",
+      "vatelubeuh khat",
+      "vatelubeuh-khat"
+    ]
+  },
+  {
+    "number": "10000000001",
+    "text": "vatelubeuh khat leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-PAKHAT",
+      "vatelubeuh khat leh pakhat",
+      "vatelubeuh khat pakhat",
+      "vatelubeuh-khat-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000000010",
+    "text": "vatelubeuh khat leh sâwm",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH SÂWM",
+      "VATELUBEUH-KHAT-LEH-SAWM",
+      "vatelubeuh khat leh sawm",
+      "vatelubeuh khat leh sâwm",
+      "vatelubeuh khat sâwm",
+      "vatelubeuh-khat-leh-sâwm"
+    ]
+  },
+  {
+    "number": "10000000011",
+    "text": "vatelubeuh khat sâwm leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT SÂWM LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-SAWM-LEH-PAKHAT",
+      "vatelubeuh khat leh sâwm leh pakhat",
+      "vatelubeuh khat sawm leh pakhat",
+      "vatelubeuh khat sâwm leh pakhat",
+      "vatelubeuh khat sâwm pakhat",
+      "vatelubeuh-khat-sâwm-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000000020",
+    "text": "vatelubeuh khat leh sawm hnih",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH SAWM HNIH",
+      "VATELUBEUH-KHAT-LEH-SAWM-HNIH",
+      "vatelubeuh khat leh sawm hnih",
+      "vatelubeuh khat sawm hnih",
+      "vatelubeuh-khat-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "10000000021",
+    "text": "vatelubeuh khat sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh sawm hnih leh pakhat",
+      "vatelubeuh khat sawm hnih leh pakhat",
+      "vatelubeuh khat sawm hnih pakhat",
+      "vatelubeuh-khat-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000000100",
+    "text": "vatelubeuh khat leh zâ",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH ZÂ",
+      "VATELUBEUH-KHAT-LEH-ZA",
+      "vatelubeuh khat leh za",
+      "vatelubeuh khat leh zâ",
+      "vatelubeuh khat zâ",
+      "vatelubeuh-khat-leh-zâ"
+    ]
+  },
+  {
+    "number": "10000000111",
+    "text": "vatelubeuh khat zâ sâwm leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT ZÂ SÂWM LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-ZA-LEH-SAWM-LEH-PAKHAT",
+      "vatelubeuh khat leh zâ leh sâwm leh pakhat",
+      "vatelubeuh khat za sawm leh pakhat",
+      "vatelubeuh khat zâ sâwm leh pakhat",
+      "vatelubeuh khat zâ sâwm pakhat",
+      "vatelubeuh-khat-zâ-sâwm-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000000121",
+    "text": "vatelubeuh khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh zâ leh sawm hnih leh pakhat",
+      "vatelubeuh khat za sawm hnih leh pakhat",
+      "vatelubeuh khat zâ sawm hnih leh pakhat",
+      "vatelubeuh khat zâ sawm hnih pakhat",
+      "vatelubeuh-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000000220",
+    "text": "vatelubeuh khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT ZA HNIH LEH SAWM HNIH",
+      "VATELUBEUH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "vatelubeuh khat leh za hnih leh sawm hnih",
+      "vatelubeuh khat za hnih leh sawm hnih",
+      "vatelubeuh khat za hnih sawm hnih",
+      "vatelubeuh-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "10000000221",
+    "text": "vatelubeuh khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat za hnih sawm hnih pakhat",
+      "vatelubeuh-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000001000",
+    "text": "vatelubeuh khat leh sâng khat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH SÂNG KHAT",
+      "VATELUBEUH-KHAT-LEH-SANG-KHAT",
+      "vatelubeuh khat leh sang khat",
+      "vatelubeuh khat leh sâng khat",
+      "vatelubeuh khat sâng khat",
+      "vatelubeuh-khat-leh-sâng-khat"
+    ]
+  },
+  {
+    "number": "10000001021",
+    "text": "vatelubeuh khat sâng khat sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT SÂNG KHAT SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-SANG-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh sâng khat leh sawm hnih leh pakhat",
+      "vatelubeuh khat sang khat sawm hnih leh pakhat",
+      "vatelubeuh khat sâng khat sawm hnih leh pakhat",
+      "vatelubeuh khat sâng khat sawm hnih pakhat",
+      "vatelubeuh-khat-sâng-khat-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000001121",
+    "text": "vatelubeuh khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "vatelubeuh khat sang khat za sawm hnih leh pakhat",
+      "vatelubeuh khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh khat sâng khat zâ sawm hnih pakhat",
+      "vatelubeuh-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000001221",
+    "text": "vatelubeuh khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat sang khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat sâng khat za hnih sawm hnih pakhat",
+      "vatelubeuh-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000010000",
+    "text": "vatelubeuh khat leh sîng khat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH SÎNG KHAT",
+      "VATELUBEUH-KHAT-LEH-SING-KHAT",
+      "vatelubeuh khat leh sing khat",
+      "vatelubeuh khat leh sîng khat",
+      "vatelubeuh khat sîng khat",
+      "vatelubeuh-khat-leh-sîng-khat"
+    ]
+  },
+  {
+    "number": "10000011121",
+    "text": "vatelubeuh khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "vatelubeuh khat sing khat sang khat za sawm hnih leh pakhat",
+      "vatelubeuh khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vatelubeuh-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000011221",
+    "text": "vatelubeuh khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vatelubeuh-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000100000",
+    "text": "vatelubeuh khat leh nuai khat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH NUAI KHAT",
+      "VATELUBEUH-KHAT-LEH-NUAIH-KHAT",
+      "vatelubeuh khat leh nuai khat",
+      "vatelubeuh khat leh nuaih khat",
+      "vatelubeuh khat nuai khat",
+      "vatelubeuh-khat-leh-nuai-khat"
+    ]
+  },
+  {
+    "number": "10000100220",
+    "text": "vatelubeuh khat nuai khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
+      "VATELUBEUH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "vatelubeuh khat leh nuai khat leh za hnih leh sawm hnih",
+      "vatelubeuh khat nuai khat za hnih leh sawm hnih",
+      "vatelubeuh khat nuai khat za hnih sawm hnih",
+      "vatelubeuh khat nuaih khat za hnih leh sawm hnih",
+      "vatelubeuh-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "10000100221",
+    "text": "vatelubeuh khat nuai khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat nuai khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat nuai khat za hnih sawm hnih pakhat",
+      "vatelubeuh khat nuaih khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000111121",
+    "text": "vatelubeuh khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "vatelubeuh khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "vatelubeuh khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vatelubeuh khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10000111221",
+    "text": "vatelubeuh khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vatelubeuh khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10001000000",
+    "text": "vatelubeuh khat leh maktaduai khat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH MAKTADUAI KHAT",
+      "VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT",
+      "vatelubeuh khat leh maktaduai khat",
+      "vatelubeuh khat leh maktaduaih khat",
+      "vatelubeuh khat maktaduai khat",
+      "vatelubeuh-khat-leh-maktaduai-khat"
+    ]
+  },
+  {
+    "number": "10001100220",
+    "text": "vatelubeuh khat maktaduai khat nuai khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
+      "VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "vatelubeuh khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih",
+      "vatelubeuh khat maktaduai khat nuai khat za hnih leh sawm hnih",
+      "vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih",
+      "vatelubeuh khat maktaduaih khat nuaih khat za hnih leh sawm hnih",
+      "vatelubeuh-khat-maktaduai-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "10001100221",
+    "text": "vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih pakhat",
+      "vatelubeuh khat maktaduaih khat nuaih khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh-khat-maktaduai-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10001111121",
+    "text": "vatelubeuh khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "vatelubeuh khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "vatelubeuh khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vatelubeuh khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10001111221",
+    "text": "vatelubeuh khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vatelubeuh khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10010000000",
+    "text": "vatelubeuh khat leh vaibêlchhe khat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH VAIBÊLCHHE KHAT",
+      "VATELUBEUH-KHAT-LEH-VAIBELCHHE-KHAT",
+      "vatelubeuh khat leh vaibelchhe khat",
+      "vatelubeuh khat leh vaibêlchhe khat",
+      "vatelubeuh khat vaibêlchhe khat",
+      "vatelubeuh-khat-leh-vaibêlchhe-khat"
+    ]
+  },
+  {
+    "number": "10011111121",
+    "text": "vatelubeuh khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "vatelubeuh khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "vatelubeuh khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vatelubeuh khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10011111221",
+    "text": "vatelubeuh khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vatelubeuh khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10100000000",
+    "text": "vatelubeuh khat leh vaibêlchhetak khat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH VAIBÊLCHHETAK KHAT",
+      "VATELUBEUH-KHAT-LEH-VAIBELCHHETAK-KHAT",
+      "vatelubeuh khat leh vaibelchhetak khat",
+      "vatelubeuh khat leh vaibêlchhetak khat",
+      "vatelubeuh khat vaibêlchhetak khat",
+      "vatelubeuh-khat-leh-vaibêlchhetak-khat"
+    ]
+  },
+  {
+    "number": "10111111121",
+    "text": "vatelubeuh khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "vatelubeuh khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "vatelubeuh khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vatelubeuh khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10111111221",
+    "text": "vatelubeuh khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vatelubeuh khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "10999999999",
+    "text": "vatelubeuh khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "VATELUBEUH-KHAT-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "vatelubeuh khat leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "vatelubeuh khat vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "vatelubeuh khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh khat vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vatelubeuh khat vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh-khat-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "11000000000",
+    "text": "vatelubeuh khat leh tlûklehdingâwn khat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT LEH TLÛKLEHDINGÂWN KHAT",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KHAT",
+      "vatelubeuh khat leh tluklehdingawn khat",
+      "vatelubeuh khat leh tlûklehdingâwn khat",
+      "vatelubeuh khat tlûklehdingâwn khat",
+      "vatelubeuh-khat-leh-tlûklehdingâwn-khat"
+    ]
+  },
+  {
+    "number": "11111111121",
+    "text": "vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "vatelubeuh khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "vatelubeuh-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "11111111221",
+    "text": "vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "vatelubeuh khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "vatelubeuh khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "vatelubeuh-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "19099999999",
+    "text": "vatelubeuh khat tlûklehdingâwn kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "vatelubeuh khat leh tlûklehdingâwn kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "vatelubeuh khat tluklehdingawn kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh-khat-tlûklehdingâwn-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "19909999999",
+    "text": "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "vatelubeuh khat leh tlûklehdingâwn kua leh vaibêlchhetak kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "vatelubeuh khat tluklehdingawn kua vaibelchhetak kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh-khat-tlûklehdingâwn-kua-vaibêlchhetak-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "19990999999",
+    "text": "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "vatelubeuh khat leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "vatelubeuh khat tluklehdingawn kua vaibelchhetak kua vaibelchhe kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh-khat-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "19999099999",
+    "text": "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "vatelubeuh khat leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "vatelubeuh khat tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua sing kua sang kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh-khat-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "19999909999",
+    "text": "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "vatelubeuh khat leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "vatelubeuh khat tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sang kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh-khat-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "19999990999",
+    "text": "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "vatelubeuh khat leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh za kua leh sawm kua leh pakua",
+      "vatelubeuh khat tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua za kua sawm kua leh pakua",
+      "vatelubeuh-khat-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "19999999099",
+    "text": "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA SAWM KUA LEH PAKUA",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "vatelubeuh khat leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh sawm kua leh pakua",
+      "vatelubeuh khat tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua sawm kua leh pakua",
+      "vatelubeuh-khat-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "19999999909",
+    "text": "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH PAKUA",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
+      "vatelubeuh khat leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh pakua",
+      "vatelubeuh khat tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua pakua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh pakua",
+      "vatelubeuh-khat-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "19999999990",
+    "text": "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
+    "accepted_inputs": [
+      "VATELUBEUH KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH SAWM KUA",
+      "VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
+      "vatelubeuh khat leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua",
+      "vatelubeuh khat tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh sawm kua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua",
+      "vatelubeuh khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh sawm kua",
+      "vatelubeuh-khat-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-sawm-kua"
+    ]
+  },
+  {
+    "number": "20000000000",
+    "text": "vatelubeuh hnih",
+    "accepted_inputs": [
+      "VATELUBEUH HNIH",
+      "VATELUBEUH-HNIH",
+      "vatelubeuh hnih",
+      "vatelubeuh-hnih"
+    ]
+  },
+  {
+    "number": "30000000000",
+    "text": "vatelubeuh thum",
+    "accepted_inputs": [
+      "VATELUBEUH THUM",
+      "VATELUBEUH-THUM",
+      "vatelubeuh thum",
+      "vatelubeuh-thum"
+    ]
+  },
+  {
+    "number": "40000000000",
+    "text": "vatelubeuh li",
+    "accepted_inputs": [
+      "VATELUBEUH LI",
+      "VATELUBEUH-LI",
+      "vatelubeuh li",
+      "vatelubeuh-li"
+    ]
+  },
+  {
+    "number": "50000000000",
+    "text": "vatelubeuh nga",
+    "accepted_inputs": [
+      "VATELUBEUH NGA",
+      "VATELUBEUH-NGA",
+      "vatelubeuh nga",
+      "vatelubeuh-nga"
+    ]
+  },
+  {
+    "number": "60000000000",
+    "text": "vatelubeuh ruk",
+    "accepted_inputs": [
+      "VATELUBEUH RUK",
+      "VATELUBEUH-RUK",
+      "vatelubeuh ruk",
+      "vatelubeuh-ruk"
+    ]
+  },
+  {
+    "number": "70000000000",
+    "text": "vatelubeuh sarih",
+    "accepted_inputs": [
+      "VATELUBEUH SARIH",
+      "VATELUBEUH-SARIH",
+      "vatelubeuh sarih",
+      "vatelubeuh-sarih"
+    ]
+  },
+  {
+    "number": "80000000000",
+    "text": "vatelubeuh riat",
+    "accepted_inputs": [
+      "VATELUBEUH RIAT",
+      "VATELUBEUH-RIAT",
+      "vatelubeuh riat",
+      "vatelubeuh-riat"
+    ]
+  },
+  {
+    "number": "90000000000",
+    "text": "vatelubeuh kua",
+    "accepted_inputs": [
+      "VATELUBEUH KUA",
+      "VATELUBEUH-KUA",
+      "vatelubeuh kua",
+      "vatelubeuh-kua"
+    ]
+  },
+  {
+    "number": "99999999999",
+    "text": "vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "100000000000",
+    "text": "diarphawngen khat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT",
+      "DIARPHAWNGEN-KHAT",
+      "diarphawngen khat",
+      "diarphawngen-khat"
+    ]
+  },
+  {
+    "number": "100000000001",
+    "text": "diarphawngen khat leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-PAKHAT",
+      "diarphawngen khat leh pakhat",
+      "diarphawngen khat pakhat",
+      "diarphawngen-khat-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000000010",
+    "text": "diarphawngen khat leh sâwm",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH SÂWM",
+      "DIARPHAWNGEN-KHAT-LEH-SAWM",
+      "diarphawngen khat leh sawm",
+      "diarphawngen khat leh sâwm",
+      "diarphawngen khat sâwm",
+      "diarphawngen-khat-leh-sâwm"
+    ]
+  },
+  {
+    "number": "100000000011",
+    "text": "diarphawngen khat sâwm leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT SÂWM LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-SAWM-LEH-PAKHAT",
+      "diarphawngen khat leh sâwm leh pakhat",
+      "diarphawngen khat sawm leh pakhat",
+      "diarphawngen khat sâwm leh pakhat",
+      "diarphawngen khat sâwm pakhat",
+      "diarphawngen-khat-sâwm-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000000020",
+    "text": "diarphawngen khat leh sawm hnih",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH SAWM HNIH",
+      "DIARPHAWNGEN-KHAT-LEH-SAWM-HNIH",
+      "diarphawngen khat leh sawm hnih",
+      "diarphawngen khat sawm hnih",
+      "diarphawngen-khat-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "100000000021",
+    "text": "diarphawngen khat sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh sawm hnih leh pakhat",
+      "diarphawngen khat sawm hnih leh pakhat",
+      "diarphawngen khat sawm hnih pakhat",
+      "diarphawngen-khat-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000000100",
+    "text": "diarphawngen khat leh zâ",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH ZÂ",
+      "DIARPHAWNGEN-KHAT-LEH-ZA",
+      "diarphawngen khat leh za",
+      "diarphawngen khat leh zâ",
+      "diarphawngen khat zâ",
+      "diarphawngen-khat-leh-zâ"
+    ]
+  },
+  {
+    "number": "100000000111",
+    "text": "diarphawngen khat zâ sâwm leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT ZÂ SÂWM LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-ZA-LEH-SAWM-LEH-PAKHAT",
+      "diarphawngen khat leh zâ leh sâwm leh pakhat",
+      "diarphawngen khat za sawm leh pakhat",
+      "diarphawngen khat zâ sâwm leh pakhat",
+      "diarphawngen khat zâ sâwm pakhat",
+      "diarphawngen-khat-zâ-sâwm-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000000121",
+    "text": "diarphawngen khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh zâ leh sawm hnih leh pakhat",
+      "diarphawngen khat za sawm hnih leh pakhat",
+      "diarphawngen khat zâ sawm hnih leh pakhat",
+      "diarphawngen khat zâ sawm hnih pakhat",
+      "diarphawngen-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000000220",
+    "text": "diarphawngen khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT ZA HNIH LEH SAWM HNIH",
+      "DIARPHAWNGEN-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "diarphawngen khat leh za hnih leh sawm hnih",
+      "diarphawngen khat za hnih leh sawm hnih",
+      "diarphawngen khat za hnih sawm hnih",
+      "diarphawngen-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "100000000221",
+    "text": "diarphawngen khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat za hnih sawm hnih pakhat",
+      "diarphawngen-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000001000",
+    "text": "diarphawngen khat leh sâng khat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH SÂNG KHAT",
+      "DIARPHAWNGEN-KHAT-LEH-SANG-KHAT",
+      "diarphawngen khat leh sang khat",
+      "diarphawngen khat leh sâng khat",
+      "diarphawngen khat sâng khat",
+      "diarphawngen-khat-leh-sâng-khat"
+    ]
+  },
+  {
+    "number": "100000001021",
+    "text": "diarphawngen khat sâng khat sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT SÂNG KHAT SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-SANG-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh sâng khat leh sawm hnih leh pakhat",
+      "diarphawngen khat sang khat sawm hnih leh pakhat",
+      "diarphawngen khat sâng khat sawm hnih leh pakhat",
+      "diarphawngen khat sâng khat sawm hnih pakhat",
+      "diarphawngen-khat-sâng-khat-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000001121",
+    "text": "diarphawngen khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "diarphawngen khat sang khat za sawm hnih leh pakhat",
+      "diarphawngen khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen khat sâng khat zâ sawm hnih pakhat",
+      "diarphawngen-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000001221",
+    "text": "diarphawngen khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat sang khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat sâng khat za hnih sawm hnih pakhat",
+      "diarphawngen-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000010000",
+    "text": "diarphawngen khat leh sîng khat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH SÎNG KHAT",
+      "DIARPHAWNGEN-KHAT-LEH-SING-KHAT",
+      "diarphawngen khat leh sing khat",
+      "diarphawngen khat leh sîng khat",
+      "diarphawngen khat sîng khat",
+      "diarphawngen-khat-leh-sîng-khat"
+    ]
+  },
+  {
+    "number": "100000011121",
+    "text": "diarphawngen khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "diarphawngen khat sing khat sang khat za sawm hnih leh pakhat",
+      "diarphawngen khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "diarphawngen-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000011221",
+    "text": "diarphawngen khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "diarphawngen-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000100000",
+    "text": "diarphawngen khat leh nuai khat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH NUAI KHAT",
+      "DIARPHAWNGEN-KHAT-LEH-NUAIH-KHAT",
+      "diarphawngen khat leh nuai khat",
+      "diarphawngen khat leh nuaih khat",
+      "diarphawngen khat nuai khat",
+      "diarphawngen-khat-leh-nuai-khat"
+    ]
+  },
+  {
+    "number": "100000100220",
+    "text": "diarphawngen khat nuai khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
+      "DIARPHAWNGEN-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "diarphawngen khat leh nuai khat leh za hnih leh sawm hnih",
+      "diarphawngen khat nuai khat za hnih leh sawm hnih",
+      "diarphawngen khat nuai khat za hnih sawm hnih",
+      "diarphawngen khat nuaih khat za hnih leh sawm hnih",
+      "diarphawngen-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "100000100221",
+    "text": "diarphawngen khat nuai khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat nuai khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat nuai khat za hnih sawm hnih pakhat",
+      "diarphawngen khat nuaih khat za hnih sawm hnih leh pakhat",
+      "diarphawngen-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000111121",
+    "text": "diarphawngen khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "diarphawngen khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "diarphawngen khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "diarphawngen khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100000111221",
+    "text": "diarphawngen khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "diarphawngen khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100001000000",
+    "text": "diarphawngen khat leh maktaduai khat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH MAKTADUAI KHAT",
+      "DIARPHAWNGEN-KHAT-LEH-MAKTADUAIH-KHAT",
+      "diarphawngen khat leh maktaduai khat",
+      "diarphawngen khat leh maktaduaih khat",
+      "diarphawngen khat maktaduai khat",
+      "diarphawngen-khat-leh-maktaduai-khat"
+    ]
+  },
+  {
+    "number": "100001100220",
+    "text": "diarphawngen khat maktaduai khat nuai khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
+      "DIARPHAWNGEN-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "diarphawngen khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih",
+      "diarphawngen khat maktaduai khat nuai khat za hnih leh sawm hnih",
+      "diarphawngen khat maktaduai khat nuai khat za hnih sawm hnih",
+      "diarphawngen khat maktaduaih khat nuaih khat za hnih leh sawm hnih",
+      "diarphawngen-khat-maktaduai-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "100001100221",
+    "text": "diarphawngen khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat maktaduai khat nuai khat za hnih sawm hnih pakhat",
+      "diarphawngen khat maktaduaih khat nuaih khat za hnih sawm hnih leh pakhat",
+      "diarphawngen-khat-maktaduai-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100001111121",
+    "text": "diarphawngen khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "diarphawngen khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "diarphawngen khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "diarphawngen khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100001111221",
+    "text": "diarphawngen khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "diarphawngen khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100010000000",
+    "text": "diarphawngen khat leh vaibêlchhe khat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH VAIBÊLCHHE KHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VAIBELCHHE-KHAT",
+      "diarphawngen khat leh vaibelchhe khat",
+      "diarphawngen khat leh vaibêlchhe khat",
+      "diarphawngen khat vaibêlchhe khat",
+      "diarphawngen-khat-leh-vaibêlchhe-khat"
+    ]
+  },
+  {
+    "number": "100011111121",
+    "text": "diarphawngen khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "diarphawngen khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "diarphawngen khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "diarphawngen khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100011111221",
+    "text": "diarphawngen khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "diarphawngen khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100100000000",
+    "text": "diarphawngen khat leh vaibêlchhetak khat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH VAIBÊLCHHETAK KHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VAIBELCHHETAK-KHAT",
+      "diarphawngen khat leh vaibelchhetak khat",
+      "diarphawngen khat leh vaibêlchhetak khat",
+      "diarphawngen khat vaibêlchhetak khat",
+      "diarphawngen-khat-leh-vaibêlchhetak-khat"
+    ]
+  },
+  {
+    "number": "100111111121",
+    "text": "diarphawngen khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "diarphawngen khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "diarphawngen khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "diarphawngen khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "100111111221",
+    "text": "diarphawngen khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "diarphawngen khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "101000000000",
+    "text": "diarphawngen khat leh tlûklehdingâwn khat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH TLÛKLEHDINGÂWN KHAT",
+      "DIARPHAWNGEN-KHAT-LEH-TLUKLEHDINGAWN-KHAT",
+      "diarphawngen khat leh tluklehdingawn khat",
+      "diarphawngen khat leh tlûklehdingâwn khat",
+      "diarphawngen khat tlûklehdingâwn khat",
+      "diarphawngen-khat-leh-tlûklehdingâwn-khat"
+    ]
+  },
+  {
+    "number": "101111111121",
+    "text": "diarphawngen khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "diarphawngen khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "diarphawngen khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "diarphawngen khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "101111111221",
+    "text": "diarphawngen khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "diarphawngen khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "109999999999",
+    "text": "diarphawngen khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen khat leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "diarphawngen khat tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "diarphawngen khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "diarphawngen khat tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen-khat-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "110000000000",
+    "text": "diarphawngen khat leh vatelubeuh khat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT LEH VATELUBEUH KHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KHAT",
+      "diarphawngen khat leh vatelubeuh khat",
+      "diarphawngen khat vatelubeuh khat",
+      "diarphawngen-khat-leh-vatelubeuh-khat"
+    ]
+  },
+  {
+    "number": "110001100220",
+    "text": "diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "diarphawngen khat leh vatelubeuh khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih",
+      "diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih leh sawm hnih",
+      "diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih",
+      "diarphawngen khat vatelubeuh khat maktaduaih khat nuaih khat za hnih leh sawm hnih",
+      "diarphawngen-khat-vatelubeuh-khat-maktaduai-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "110001100221",
+    "text": "diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh vatelubeuh khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih pakhat",
+      "diarphawngen khat vatelubeuh khat maktaduaih khat nuaih khat za hnih sawm hnih leh pakhat",
+      "diarphawngen-khat-vatelubeuh-khat-maktaduai-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "111111111121",
+    "text": "diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh vatelubeuh khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "diarphawngen khat vatelubeuh khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "diarphawngen-khat-vatelubeuh-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "111111111221",
+    "text": "diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "diarphawngen khat leh vatelubeuh khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "diarphawngen khat vatelubeuh khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "diarphawngen-khat-vatelubeuh-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "190999999999",
+    "text": "diarphawngen khat vatelubeuh kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen khat leh vatelubeuh kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "diarphawngen khat vatelubeuh kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen-khat-vatelubeuh-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "199099999999",
+    "text": "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tluklehdingawn kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "199909999999",
+    "text": "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tluklehdingawn kua vaibelchhetak kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "199990999999",
+    "text": "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "199999099999",
+    "text": "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua sing kua sang kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "199999909999",
+    "text": "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sang kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "199999990999",
+    "text": "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh za kua leh sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua za kua sawm kua leh pakua",
+      "diarphawngen-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "199999999099",
+    "text": "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua sawm kua leh pakua",
+      "diarphawngen-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "199999999909",
+    "text": "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH PAKUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
+      "diarphawngen khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua pakua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh pakua",
+      "diarphawngen-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "199999999990",
+    "text": "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH SAWM KUA",
+      "DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
+      "diarphawngen khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua",
+      "diarphawngen khat vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh sawm kua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua",
+      "diarphawngen khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh sawm kua",
+      "diarphawngen-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-sawm-kua"
+    ]
+  },
+  {
+    "number": "200000000000",
+    "text": "diarphawngen hnih",
+    "accepted_inputs": [
+      "DIARPHAWNGEN HNIH",
+      "DIARPHAWNGEN-HNIH",
+      "diarphawngen hnih",
+      "diarphawngen-hnih"
+    ]
+  },
+  {
+    "number": "300000000000",
+    "text": "diarphawngen thum",
+    "accepted_inputs": [
+      "DIARPHAWNGEN THUM",
+      "DIARPHAWNGEN-THUM",
+      "diarphawngen thum",
+      "diarphawngen-thum"
+    ]
+  },
+  {
+    "number": "400000000000",
+    "text": "diarphawngen li",
+    "accepted_inputs": [
+      "DIARPHAWNGEN LI",
+      "DIARPHAWNGEN-LI",
+      "diarphawngen li",
+      "diarphawngen-li"
+    ]
+  },
+  {
+    "number": "500000000000",
+    "text": "diarphawngen nga",
+    "accepted_inputs": [
+      "DIARPHAWNGEN NGA",
+      "DIARPHAWNGEN-NGA",
+      "diarphawngen nga",
+      "diarphawngen-nga"
+    ]
+  },
+  {
+    "number": "600000000000",
+    "text": "diarphawngen ruk",
+    "accepted_inputs": [
+      "DIARPHAWNGEN RUK",
+      "DIARPHAWNGEN-RUK",
+      "diarphawngen ruk",
+      "diarphawngen-ruk"
+    ]
+  },
+  {
+    "number": "700000000000",
+    "text": "diarphawngen sarih",
+    "accepted_inputs": [
+      "DIARPHAWNGEN SARIH",
+      "DIARPHAWNGEN-SARIH",
+      "diarphawngen sarih",
+      "diarphawngen-sarih"
+    ]
+  },
+  {
+    "number": "800000000000",
+    "text": "diarphawngen riat",
+    "accepted_inputs": [
+      "DIARPHAWNGEN RIAT",
+      "DIARPHAWNGEN-RIAT",
+      "diarphawngen riat",
+      "diarphawngen-riat"
+    ]
+  },
+  {
+    "number": "900000000000",
+    "text": "diarphawngen kua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KUA",
+      "DIARPHAWNGEN-KUA",
+      "diarphawngen kua",
+      "diarphawngen-kua"
+    ]
+  },
+  {
+    "number": "999999999999",
+    "text": "diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1000000000000",
+    "text": "huau khat",
+    "accepted_inputs": [
+      "HUAU KHAT",
+      "HUAU-KHAT",
+      "huau khat",
+      "huau-khat"
+    ]
+  },
+  {
+    "number": "1000000000001",
+    "text": "huau khat leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH PAKHAT",
+      "HUAU-KHAT-LEH-PAKHAT",
+      "huau khat leh pakhat",
+      "huau khat pakhat",
+      "huau-khat-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000000010",
+    "text": "huau khat leh sâwm",
+    "accepted_inputs": [
+      "HUAU KHAT LEH SÂWM",
+      "HUAU-KHAT-LEH-SAWM",
+      "huau khat leh sawm",
+      "huau khat leh sâwm",
+      "huau khat sâwm",
+      "huau-khat-leh-sâwm"
+    ]
+  },
+  {
+    "number": "1000000000011",
+    "text": "huau khat sâwm leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT SÂWM LEH PAKHAT",
+      "HUAU-KHAT-LEH-SAWM-LEH-PAKHAT",
+      "huau khat leh sâwm leh pakhat",
+      "huau khat sawm leh pakhat",
+      "huau khat sâwm leh pakhat",
+      "huau khat sâwm pakhat",
+      "huau-khat-sâwm-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000000020",
+    "text": "huau khat leh sawm hnih",
+    "accepted_inputs": [
+      "HUAU KHAT LEH SAWM HNIH",
+      "HUAU-KHAT-LEH-SAWM-HNIH",
+      "huau khat leh sawm hnih",
+      "huau khat sawm hnih",
+      "huau-khat-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "1000000000021",
+    "text": "huau khat sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh sawm hnih leh pakhat",
+      "huau khat sawm hnih leh pakhat",
+      "huau khat sawm hnih pakhat",
+      "huau-khat-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000000100",
+    "text": "huau khat leh zâ",
+    "accepted_inputs": [
+      "HUAU KHAT LEH ZÂ",
+      "HUAU-KHAT-LEH-ZA",
+      "huau khat leh za",
+      "huau khat leh zâ",
+      "huau khat zâ",
+      "huau-khat-leh-zâ"
+    ]
+  },
+  {
+    "number": "1000000000111",
+    "text": "huau khat zâ sâwm leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT ZÂ SÂWM LEH PAKHAT",
+      "HUAU-KHAT-LEH-ZA-LEH-SAWM-LEH-PAKHAT",
+      "huau khat leh zâ leh sâwm leh pakhat",
+      "huau khat za sawm leh pakhat",
+      "huau khat zâ sâwm leh pakhat",
+      "huau khat zâ sâwm pakhat",
+      "huau-khat-zâ-sâwm-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000000121",
+    "text": "huau khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh zâ leh sawm hnih leh pakhat",
+      "huau khat za sawm hnih leh pakhat",
+      "huau khat zâ sawm hnih leh pakhat",
+      "huau khat zâ sawm hnih pakhat",
+      "huau-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000000220",
+    "text": "huau khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "HUAU KHAT ZA HNIH LEH SAWM HNIH",
+      "HUAU-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "huau khat leh za hnih leh sawm hnih",
+      "huau khat za hnih leh sawm hnih",
+      "huau khat za hnih sawm hnih",
+      "huau-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "1000000000221",
+    "text": "huau khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat za hnih sawm hnih leh pakhat",
+      "huau khat za hnih sawm hnih pakhat",
+      "huau-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000001000",
+    "text": "huau khat leh sâng khat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH SÂNG KHAT",
+      "HUAU-KHAT-LEH-SANG-KHAT",
+      "huau khat leh sang khat",
+      "huau khat leh sâng khat",
+      "huau khat sâng khat",
+      "huau-khat-leh-sâng-khat"
+    ]
+  },
+  {
+    "number": "1000000001021",
+    "text": "huau khat sâng khat sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT SÂNG KHAT SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-SANG-KHAT-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh sâng khat leh sawm hnih leh pakhat",
+      "huau khat sang khat sawm hnih leh pakhat",
+      "huau khat sâng khat sawm hnih leh pakhat",
+      "huau khat sâng khat sawm hnih pakhat",
+      "huau-khat-sâng-khat-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000001121",
+    "text": "huau khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "huau khat sang khat za sawm hnih leh pakhat",
+      "huau khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat sâng khat zâ sawm hnih pakhat",
+      "huau-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000001221",
+    "text": "huau khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat sang khat za hnih sawm hnih leh pakhat",
+      "huau khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat sâng khat za hnih sawm hnih pakhat",
+      "huau-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000010000",
+    "text": "huau khat leh sîng khat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH SÎNG KHAT",
+      "HUAU-KHAT-LEH-SING-KHAT",
+      "huau khat leh sing khat",
+      "huau khat leh sîng khat",
+      "huau khat sîng khat",
+      "huau-khat-leh-sîng-khat"
+    ]
+  },
+  {
+    "number": "1000000011121",
+    "text": "huau khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "huau khat sing khat sang khat za sawm hnih leh pakhat",
+      "huau khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "huau-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000011221",
+    "text": "huau khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "huau khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "huau-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000100000",
+    "text": "huau khat leh nuai khat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH NUAI KHAT",
+      "HUAU-KHAT-LEH-NUAIH-KHAT",
+      "huau khat leh nuai khat",
+      "huau khat leh nuaih khat",
+      "huau khat nuai khat",
+      "huau-khat-leh-nuai-khat"
+    ]
+  },
+  {
+    "number": "1000000100220",
+    "text": "huau khat nuai khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "HUAU KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
+      "HUAU-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "huau khat leh nuai khat leh za hnih leh sawm hnih",
+      "huau khat nuai khat za hnih leh sawm hnih",
+      "huau khat nuai khat za hnih sawm hnih",
+      "huau khat nuaih khat za hnih leh sawm hnih",
+      "huau-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "1000000100221",
+    "text": "huau khat nuai khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat nuai khat za hnih sawm hnih leh pakhat",
+      "huau khat nuai khat za hnih sawm hnih pakhat",
+      "huau khat nuaih khat za hnih sawm hnih leh pakhat",
+      "huau-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000111121",
+    "text": "huau khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "huau khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "huau khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "huau khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000000111221",
+    "text": "huau khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "huau khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "huau khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000001000000",
+    "text": "huau khat leh maktaduai khat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH MAKTADUAI KHAT",
+      "HUAU-KHAT-LEH-MAKTADUAIH-KHAT",
+      "huau khat leh maktaduai khat",
+      "huau khat leh maktaduaih khat",
+      "huau khat maktaduai khat",
+      "huau-khat-leh-maktaduai-khat"
+    ]
+  },
+  {
+    "number": "1000001100220",
+    "text": "huau khat maktaduai khat nuai khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "HUAU KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
+      "HUAU-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "huau khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih",
+      "huau khat maktaduai khat nuai khat za hnih leh sawm hnih",
+      "huau khat maktaduai khat nuai khat za hnih sawm hnih",
+      "huau khat maktaduaih khat nuaih khat za hnih leh sawm hnih",
+      "huau-khat-maktaduai-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "1000001100221",
+    "text": "huau khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+      "huau khat maktaduai khat nuai khat za hnih sawm hnih pakhat",
+      "huau khat maktaduaih khat nuaih khat za hnih sawm hnih leh pakhat",
+      "huau-khat-maktaduai-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000001111121",
+    "text": "huau khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "huau khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "huau khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "huau khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000001111221",
+    "text": "huau khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "huau khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "huau khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000010000000",
+    "text": "huau khat leh vaibêlchhe khat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH VAIBÊLCHHE KHAT",
+      "HUAU-KHAT-LEH-VAIBELCHHE-KHAT",
+      "huau khat leh vaibelchhe khat",
+      "huau khat leh vaibêlchhe khat",
+      "huau khat vaibêlchhe khat",
+      "huau-khat-leh-vaibêlchhe-khat"
+    ]
+  },
+  {
+    "number": "1000011111121",
+    "text": "huau khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "huau khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "huau khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "huau khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000011111221",
+    "text": "huau khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "huau khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "huau khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000100000000",
+    "text": "huau khat leh vaibêlchhetak khat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH VAIBÊLCHHETAK KHAT",
+      "HUAU-KHAT-LEH-VAIBELCHHETAK-KHAT",
+      "huau khat leh vaibelchhetak khat",
+      "huau khat leh vaibêlchhetak khat",
+      "huau khat vaibêlchhetak khat",
+      "huau-khat-leh-vaibêlchhetak-khat"
+    ]
+  },
+  {
+    "number": "1000111111121",
+    "text": "huau khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "huau khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "huau khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "huau khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1000111111221",
+    "text": "huau khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "huau khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "huau khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1001000000000",
+    "text": "huau khat leh tlûklehdingâwn khat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH TLÛKLEHDINGÂWN KHAT",
+      "HUAU-KHAT-LEH-TLUKLEHDINGAWN-KHAT",
+      "huau khat leh tluklehdingawn khat",
+      "huau khat leh tlûklehdingâwn khat",
+      "huau khat tlûklehdingâwn khat",
+      "huau-khat-leh-tlûklehdingâwn-khat"
+    ]
+  },
+  {
+    "number": "1001111111121",
+    "text": "huau khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "huau khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "huau khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "huau khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1001111111221",
+    "text": "huau khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "huau khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "huau khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1010000000000",
+    "text": "huau khat leh vatelubeuh khat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH VATELUBEUH KHAT",
+      "HUAU-KHAT-LEH-VATELUBEUH-KHAT",
+      "huau khat leh vatelubeuh khat",
+      "huau khat vatelubeuh khat",
+      "huau-khat-leh-vatelubeuh-khat"
+    ]
+  },
+  {
+    "number": "1010001100220",
+    "text": "huau khat vatelubeuh khat maktaduai khat nuai khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "HUAU KHAT VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
+      "HUAU-KHAT-LEH-VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "huau khat leh vatelubeuh khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih",
+      "huau khat vatelubeuh khat maktaduai khat nuai khat za hnih leh sawm hnih",
+      "huau khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih",
+      "huau khat vatelubeuh khat maktaduaih khat nuaih khat za hnih leh sawm hnih",
+      "huau-khat-vatelubeuh-khat-maktaduai-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "1010001100221",
+    "text": "huau khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh vatelubeuh khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+      "huau khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih pakhat",
+      "huau khat vatelubeuh khat maktaduaih khat nuaih khat za hnih sawm hnih leh pakhat",
+      "huau-khat-vatelubeuh-khat-maktaduai-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1011111111121",
+    "text": "huau khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT VATELUBEUH KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh vatelubeuh khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "huau khat vatelubeuh khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "huau khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "huau khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau-khat-vatelubeuh-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1011111111221",
+    "text": "huau khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT VATELUBEUH KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat leh vatelubeuh khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "huau khat vatelubeuh khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "huau khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "huau khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau-khat-vatelubeuh-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1099999999999",
+    "text": "huau khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "huau khat vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "huau khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "huau khat vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau-khat-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1100000000000",
+    "text": "huau khat leh diarphawngen khat",
+    "accepted_inputs": [
+      "HUAU KHAT LEH DIARPHAWNGEN KHAT",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KHAT",
+      "huau khat diarphawngen khat",
+      "huau khat leh diarphawngen khat",
+      "huau-khat-leh-diarphawngen-khat"
+    ]
+  },
+  {
+    "number": "1110001100220",
+    "text": "huau khat diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih leh sawm hnih",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KHAT VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH LEH SAWM HNIH",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH",
+      "huau khat diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih leh sawm hnih",
+      "huau khat diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih",
+      "huau khat diarphawngen khat vatelubeuh khat maktaduaih khat nuaih khat za hnih leh sawm hnih",
+      "huau khat leh diarphawngen khat leh vatelubeuh khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih",
+      "huau-khat-diarphawngen-khat-vatelubeuh-khat-maktaduai-khat-nuai-khat-za-hnih-leh-sawm-hnih"
+    ]
+  },
+  {
+    "number": "1110001100221",
+    "text": "huau khat diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KHAT VATELUBEUH KHAT MAKTADUAI KHAT NUAI KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih leh pakhat",
+      "huau khat diarphawngen khat vatelubeuh khat maktaduai khat nuai khat za hnih sawm hnih pakhat",
+      "huau khat diarphawngen khat vatelubeuh khat maktaduaih khat nuaih khat za hnih sawm hnih leh pakhat",
+      "huau khat leh diarphawngen khat leh vatelubeuh khat leh maktaduai khat leh nuai khat leh za hnih leh sawm hnih leh pakhat",
+      "huau-khat-diarphawngen-khat-vatelubeuh-khat-maktaduai-khat-nuai-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1111111111121",
+    "text": "huau khat diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KHAT VATELUBEUH KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZÂ SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat diarphawngen khat vatelubeuh khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za sawm hnih leh pakhat",
+      "huau khat diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat zâ sawm hnih pakhat",
+      "huau khat diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat zâ sawm hnih leh pakhat",
+      "huau khat leh diarphawngen khat leh vatelubeuh khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh zâ leh sawm hnih leh pakhat",
+      "huau-khat-diarphawngen-khat-vatelubeuh-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-zâ-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1111111111221",
+    "text": "huau khat diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KHAT VATELUBEUH KHAT TLÛKLEHDINGÂWN KHAT VAIBÊLCHHETAK KHAT VAIBÊLCHHE KHAT MAKTADUAI KHAT NUAI KHAT SÎNG KHAT SÂNG KHAT ZA HNIH SAWM HNIH LEH PAKHAT",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KHAT-LEH-VATELUBEUH-KHAT-LEH-TLUKLEHDINGAWN-KHAT-LEH-VAIBELCHHETAK-KHAT-LEH-VAIBELCHHE-KHAT-LEH-MAKTADUAIH-KHAT-LEH-NUAIH-KHAT-LEH-SING-KHAT-LEH-SANG-KHAT-LEH-ZA-HNIH-LEH-SAWM-HNIH-LEH-PAKHAT",
+      "huau khat diarphawngen khat vatelubeuh khat tluklehdingawn khat vaibelchhetak khat vaibelchhe khat maktaduai khat nuai khat sing khat sang khat za hnih sawm hnih leh pakhat",
+      "huau khat diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduai khat nuai khat sîng khat sâng khat za hnih sawm hnih pakhat",
+      "huau khat diarphawngen khat vatelubeuh khat tlûklehdingâwn khat vaibêlchhetak khat vaibêlchhe khat maktaduaih khat nuaih khat sîng khat sâng khat za hnih sawm hnih leh pakhat",
+      "huau khat leh diarphawngen khat leh vatelubeuh khat leh tlûklehdingâwn khat leh vaibêlchhetak khat leh vaibêlchhe khat leh maktaduai khat leh nuai khat leh sîng khat leh sâng khat leh za hnih leh sawm hnih leh pakhat",
+      "huau-khat-diarphawngen-khat-vatelubeuh-khat-tlûklehdingâwn-khat-vaibêlchhetak-khat-vaibêlchhe-khat-maktaduai-khat-nuai-khat-sîng-khat-sâng-khat-za-hnih-sawm-hnih-leh-pakhat"
+    ]
+  },
+  {
+    "number": "1909999999999",
+    "text": "huau khat diarphawngen kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "huau khat diarphawngen kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat leh diarphawngen kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "huau-khat-diarphawngen-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1990999999999",
+    "text": "huau khat diarphawngen kua vatelubeuh kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua vatelubeuh kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "huau khat diarphawngen kua vatelubeuh kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1999099999999",
+    "text": "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1999909999999",
+    "text": "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1999990999999",
+    "text": "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1999999099999",
+    "text": "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua sing kua sang kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua sîng kua sâng kua za kua sawm kua pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1999999909999",
+    "text": "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sang kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sâng kua za kua sawm kua pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sâng kua za kua sawm kua leh pakua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1999999990999",
+    "text": "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua za kua sawm kua pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua za kua sawm kua leh pakua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh za kua leh sawm kua leh pakua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1999999999099",
+    "text": "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA SAWM KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua sawm kua pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua sawm kua leh pakua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh sawm kua leh pakua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-sawm-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1999999999909",
+    "text": "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH PAKUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-PAKUA",
+      "huau khat diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua pakua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh pakua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh pakua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-pakua"
+    ]
+  },
+  {
+    "number": "1999999999990",
+    "text": "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
+    "accepted_inputs": [
+      "HUAU KHAT DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA LEH SAWM KUA",
+      "HUAU-KHAT-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA",
+      "huau khat diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua leh sawm kua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua leh sawm kua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua",
+      "huau khat diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua leh sawm kua",
+      "huau khat leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua",
+      "huau-khat-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-leh-sawm-kua"
+    ]
+  },
+  {
+    "number": "2000000000000",
+    "text": "huau hnih",
+    "accepted_inputs": [
+      "HUAU HNIH",
+      "HUAU-HNIH",
+      "huau hnih",
+      "huau-hnih"
+    ]
+  },
+  {
+    "number": "3000000000000",
+    "text": "huau thum",
+    "accepted_inputs": [
+      "HUAU THUM",
+      "HUAU-THUM",
+      "huau thum",
+      "huau-thum"
+    ]
+  },
+  {
+    "number": "4000000000000",
+    "text": "huau li",
+    "accepted_inputs": [
+      "HUAU LI",
+      "HUAU-LI",
+      "huau li",
+      "huau-li"
+    ]
+  },
+  {
+    "number": "5000000000000",
+    "text": "huau nga",
+    "accepted_inputs": [
+      "HUAU NGA",
+      "HUAU-NGA",
+      "huau nga",
+      "huau-nga"
+    ]
+  },
+  {
+    "number": "6000000000000",
+    "text": "huau ruk",
+    "accepted_inputs": [
+      "HUAU RUK",
+      "HUAU-RUK",
+      "huau ruk",
+      "huau-ruk"
+    ]
+  },
+  {
+    "number": "7000000000000",
+    "text": "huau sarih",
+    "accepted_inputs": [
+      "HUAU SARIH",
+      "HUAU-SARIH",
+      "huau sarih",
+      "huau-sarih"
+    ]
+  },
+  {
+    "number": "8000000000000",
+    "text": "huau riat",
+    "accepted_inputs": [
+      "HUAU RIAT",
+      "HUAU-RIAT",
+      "huau riat",
+      "huau-riat"
+    ]
+  },
+  {
+    "number": "9000000000000",
+    "text": "huau kua",
+    "accepted_inputs": [
+      "HUAU KUA",
+      "HUAU-KUA",
+      "huau kua",
+      "huau-kua"
+    ]
+  },
+  {
+    "number": "9999999999999",
+    "text": "huau kua diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+    "accepted_inputs": [
+      "HUAU KUA DIARPHAWNGEN KUA VATELUBEUH KUA TLÛKLEHDINGÂWN KUA VAIBÊLCHHETAK KUA VAIBÊLCHHE KUA MAKTADUAI KUA NUAI KUA SÎNG KUA SÂNG KUA ZA KUA SAWM KUA LEH PAKUA",
+      "HUAU-KUA-LEH-DIARPHAWNGEN-KUA-LEH-VATELUBEUH-KUA-LEH-TLUKLEHDINGAWN-KUA-LEH-VAIBELCHHETAK-KUA-LEH-VAIBELCHHE-KUA-LEH-MAKTADUAIH-KUA-LEH-NUAIH-KUA-LEH-SING-KUA-LEH-SANG-KUA-LEH-ZA-KUA-LEH-SAWM-KUA-LEH-PAKUA",
+      "huau kua diarphawngen kua vatelubeuh kua tluklehdingawn kua vaibelchhetak kua vaibelchhe kua maktaduai kua nuai kua sing kua sang kua za kua sawm kua leh pakua",
+      "huau kua diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau kua diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduai kua nuai kua sîng kua sâng kua za kua sawm kua pakua",
+      "huau kua diarphawngen kua vatelubeuh kua tlûklehdingâwn kua vaibêlchhetak kua vaibêlchhe kua maktaduaih kua nuaih kua sîng kua sâng kua za kua sawm kua leh pakua",
+      "huau kua leh diarphawngen kua leh vatelubeuh kua leh tlûklehdingâwn kua leh vaibêlchhetak kua leh vaibêlchhe kua leh maktaduai kua leh nuai kua leh sîng kua leh sâng kua leh za kua leh sawm kua leh pakua",
+      "huau-kua-diarphawngen-kua-vatelubeuh-kua-tlûklehdingâwn-kua-vaibêlchhetak-kua-vaibêlchhe-kua-maktaduai-kua-nuai-kua-sîng-kua-sâng-kua-za-kua-sawm-kua-leh-pakua"
+    ]
   }
 ]

@@ -6,6 +6,7 @@ event; these are the gaps it structurally cannot cover.
 """
 
 import copy
+import itertools
 import re
 from pathlib import Path
 
@@ -62,6 +63,9 @@ def test_every_literal_in_a_template_is_a_separator_or_a_connector():
         (10_000_000, "ten_millions"), (99_999_999, "ten_millions"),
         (100_000_000, "hundred_millions"), (999_999_999, "hundred_millions"),
         (1_000_000_000, "billions"), (9_999_999_999, "billions"),
+        (10_000_000_000, "ten_billions"), (99_999_999_999, "ten_billions"),
+        (100_000_000_000, "hundred_billions"), (999_999_999_999, "hundred_billions"),
+        (1_000_000_000_000, "trillions"), (9_999_999_999_999, "trillions"),
     ],
 )
 def test_rule_selection_follows_the_scale(n, expected):
@@ -209,6 +213,154 @@ def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking(monkeypatch):
     with pytest.raises(numberwords.NumberWordsError, match=r"ambiguous"):
         numberwords.text_to_number("one ten")
 
+    # And with a range that ends at 50, 100 is the capped value (#75): the
+    # message names the bound instead of printing that value as a reading.
+    monkeypatch.setattr(_render, "SUPPORTS", (0, 50))
+    assert set(_render._parse_readings(["one", "ten"])) == {10, 51}
+    with pytest.raises(numberwords.NumberWordsError, match=r"matches \[10, more than 50\]"):
+        numberwords.text_to_number("one ten")
+
+
+class _CheckedScale(int):
+    """The package's copy of reference/test_engine.py's _CheckedScale
+    (zoramt on #101): a rule's scale that raises on a product above `limit`
+    (max + 1), more than the cap promises any target will need to hold, and
+    on dividing a negative number, where floor and truncating division
+    part. Python tries the right operand's reflected method first when its
+    type subclasses the left's and overrides that method, so
+    `multiplier * rule["scale"]` and `(high - remainder) // rule["scale"]`
+    reach these. A copy rather than an import, since the package's tests
+    never import the reference: change the two together.
+    """
+
+    def __new__(cls, value, limit):
+        scale = super().__new__(cls, value)
+        scale.limit = limit
+        return scale
+
+    def __getnewargs__(self):
+        return int(self), self.limit
+
+    def __mul__(self, other):
+        product = int(self) * int(other)
+        if product > self.limit:
+            raise OverflowError(f"{other} x {int(self)} is above {self.limit}")
+        return product
+
+    __rmul__ = __mul__
+
+    def __rfloordiv__(self, other):
+        if other < 0:
+            raise ArithmeticError(f"{other} // {int(self)} divides a negative number")
+        return int(other) // int(self)
+
+    def __rtruediv__(self, other):
+        if other < 0:
+            raise ArithmeticError(f"{other} / {int(self)} divides a negative number")
+        return int(other) / int(self)
+
+
+def _check_scales(monkeypatch):
+    """Give every rule in _render.RULES a _CheckedScale, limited by the
+    SUPPORTS in force when this is called."""
+    limit = _render.SUPPORTS[1] + 1
+    monkeypatch.setattr(_render, "RULES", tuple(
+        {**rule, "scale": _CheckedScale(rule["scale"], limit)} for rule in _render.RULES
+    ))
+
+
+def test_the_checked_scale_refuses_what_a_fixed_size_target_cannot_do():
+    # The answer key for the tests that use it: what passes, what raises.
+    scale = _CheckedScale(100, limit=51)
+    assert scale == 100 and isinstance(scale, int)
+    assert 0 * scale == 0 and scale * 0 == 0
+    assert 50 // scale == 0 and 50 / scale == 0.5
+    with pytest.raises(OverflowError):
+        1 * scale
+    with pytest.raises(OverflowError):
+        scale * 1
+    with pytest.raises(ArithmeticError, match="negative"):
+        -1 // scale
+    with pytest.raises(ArithmeticError, match="negative"):
+        -1 / scale
+    assert copy.deepcopy(scale).limit == 51
+
+
+def test_no_short_phrase_needs_arithmetic_a_fixed_size_target_lacks(
+    monkeypatch, phrases
+):
+    # The package's half of the engine test: every phrase of the phrase
+    # file's closed world, stacked ones above the range included, parses
+    # with checked scales. Where a checked scale does not raise it gives the
+    # same numbers as a plain one (the answer-key test above), so parsing is
+    # the check.
+    _check_scales(monkeypatch)
+    assert all(isinstance(rule["scale"], _CheckedScale) for rule in _render.RULES)
+    for length in range(1, phrases["max_words"] + 1):
+        for words in itertools.product(phrases["vocabulary"], repeat=length):
+            _render._parse_readings(_render._tokenize(" ".join(words)))
+
+
+def test_a_capped_multiplier_is_never_taken_for_a_word(monkeypatch):
+    # The package's half of the engine test of the same name: "big" is the
+    # key max + 1, the capped value, and "two hundred thousand" (stacked,
+    # 200 x 1000) must still read as above the range, not lose its reading.
+    word = ("lex", "units", "multiplier", "w")
+    rule = {"condition": None, "emit": True, "whole_only": False, "multiplier": None}
+    monkeypatch.setattr(_render, "LEXICON", {
+        "units": {1: {"w": "one"}, 2: {"w": "two"}, 151: {"w": "big"}},
+        "scales": {100: {"w": "hundred"}, 1000: {"w": "thousand"}},
+    })
+    monkeypatch.setattr(_render, "RULES", (
+        {**rule, "name": "units", "scale": 1, "stacks": False, "output": (word,)},
+        {**rule, "name": "hundreds", "scale": 100, "stacks": False,
+         "output": (word, " ", ("lex", "scales", 100, "w"))},
+        {**rule, "name": "thousands", "scale": 1000, "stacks": True,
+         "output": (word, " ", ("lex", "scales", 1000, "w"))},
+    ))
+    monkeypatch.setattr(_render, "SUPPORTS", (0, 150))
+    _check_scales(monkeypatch)
+    with pytest.raises(numberwords.NumberWordsError, match=r"reads as more than 150, outside"):
+        numberwords.text_to_number("two hundred thousand")
+
+
+def test_a_capped_remainder_with_a_zero_multiplier_is_above_the_range(monkeypatch):
+    # The package's half of the engine test of the same name: with max 50,
+    # "seventy" is a remainder capped at 51 and "zero" a multiplier the rule
+    # allows. The remainder is checked before any division (#75); a parser
+    # that divided first would still answer right, since 0 x 100 + 51 is
+    # the cap again, so the checked scales are what make it fail.
+    word = ("lex", "units", "multiplier", "w")
+    rule = {"condition": None, "emit": True, "whole_only": False, "multiplier": None,
+            "stacks": False}
+    monkeypatch.setattr(_render, "LEXICON", {
+        "units": {0: {"w": "zero"}, 1: {"w": "one"}, 70: {"w": "seventy"}},
+        "scales": {100: {"w": "hundred"}},
+    })
+    monkeypatch.setattr(_render, "RULES", (
+        {**rule, "name": "units", "scale": 1, "output": (word,)},
+        {**rule, "name": "hundreds", "scale": 100,
+         "output": (word, " ", ("lex", "scales", 100, "w"),
+                    ("optional", (" ", ("remainder",))))},
+    ))
+    monkeypatch.setattr(_render, "SUPPORTS", (0, 50))
+    _check_scales(monkeypatch)
+    assert set(_render._parse_readings(["zero", "hundred", "seventy"])) == {51}
+    with pytest.raises(numberwords.NumberWordsError, match=r"reads as more than 50, outside"):
+        numberwords.text_to_number("zero hundred seventy")
+
+
+@pytest.mark.parametrize("words", range(2, 6))
+def test_no_reading_holds_more_than_max_plus_one(monkeypatch, words):
+    # Every reading above the range is one capped value (#75), so a chain of
+    # scale words -- 9 x 10^35 at six words without the cap -- never needs
+    # more than max + 1 to hold, and with checked scales no product on the
+    # way does either. The package's half of the engine test.
+    _check_scales(monkeypatch)
+    chain = ["tlûklehdingâwn", "vaibêlchhetak", "vaibêlchhe", "maktaduai", "nuai"]
+    tokens = _render._tokenize(" ".join(chain[:words]) + " kua")
+    assert max(_render._parse_readings(tokens)) == _render.SUPPORTS[1] + 1
+
 
 def test_ambiguity_raises_instead_of_returning_the_first_match(monkeypatch):
     # parse_text collects every derivation's number and only then decides.
@@ -282,8 +434,8 @@ def test_the_whitespace_set_is_unicode_white_space():
     # target needs. A Unicode update that moved the property would fail here.
     over_matched = {"\x1c", "\x1d", "\x1e", "\x1f"}
     derived = {chr(c) for c in range(0x110000) if chr(c).isspace()}
-    assert set(_render._WHITESPACE) == derived - over_matched
-    assert len(_render._WHITESPACE) == len(set(_render._WHITESPACE)) == 25
+    assert set(_render.WHITESPACE) == derived - over_matched
+    assert len(_render.WHITESPACE) == len(set(_render.WHITESPACE)) == 25
 
 
 def test_the_renderer_does_not_trust_the_compiled_separator_tuple():
@@ -316,6 +468,35 @@ def test_the_renderer_does_not_trust_the_compiled_separator_tuple():
 )
 def test_any_unicode_whitespace_separates_words(gap):
     assert numberwords.text_to_number("sawm" + gap + "nga pariat") == 58
+
+
+def _code_point(ch):
+    return f"U+{ord(ch):04X}"
+
+
+# Every character the compiled file lists, not a hand-picked few. Since #75
+# the renderer reads both lists from _mizo.py, so these check that it
+# applies the whole of each. Whether the whitespace list is the right one is
+# test_the_whitespace_set_is_unicode_white_space's job, above.
+@pytest.mark.parametrize("char", _render.WHITESPACE, ids=_code_point)
+def test_every_shipped_whitespace_character_separates_words(char):
+    assert numberwords.text_to_number("sawm" + char + "nga pariat") == 58
+
+
+def test_the_renderer_splits_on_nothing_but_the_shipped_whitespace():
+    # The test above shows no listed character is missing from the split;
+    # this shows nothing is added to it, over every code point. Before #88
+    # the renderer's own list was what the White_Space test above checked,
+    # so an extra character failed there. That test now checks the shipped
+    # list, and this checks what the renderer built from it (#88).
+    declared = {
+        sep for sep in _render.PARSE["word_separators"] if len(sep) == 1
+    }
+    split_on = {
+        ch for ch in map(chr, range(0x110000))
+        if _render._SEPARATOR_RE.fullmatch(ch)
+    }
+    assert split_on == set(_render.WHITESPACE) | declared
 
 
 @pytest.mark.parametrize("char", ["\x1c", "\x1d", "\x1e", "\x1f"])
@@ -351,6 +532,69 @@ IGNORABLE_POSITIONS = {
 @pytest.mark.parametrize("position", sorted(IGNORABLE_POSITIONS))
 def test_ignorable_characters_are_stripped(position):
     assert numberwords.text_to_number(IGNORABLE_POSITIONS[position]) == 58
+
+
+# The positions above use four of the six characters; this covers the
+# characters, from the list the renderer actually reads. Inside a word, so
+# one that was not stripped would leave a word that matches nothing.
+@pytest.mark.parametrize("char", _render.IGNORABLE, ids=_code_point)
+def test_every_shipped_ignorable_character_is_stripped(char):
+    assert numberwords.text_to_number("sa" + char + "wm nga pariat") == 58
+
+
+def test_the_renderer_strips_nothing_but_the_shipped_ignorable_characters():
+    # The same pair for the strip table: the test above shows no listed
+    # character is left in, and this shows no other character is taken out.
+    # Before #88 an extra character in the renderer's own list failed the
+    # comparison of the two copies; this is that check, against the one
+    # copy that is left (#88).
+    stripped = {
+        ch for ch in map(chr, range(0x110000))
+        if not ch.translate(_render._IGNORABLE)
+    }
+    assert stripped == set(_render.IGNORABLE)
+
+
+def test_every_shipped_fold_entry_is_applied():
+    # The same pair again for FOLD (#75): this one shows every listed
+    # character folds to what the table says...
+    wrong = {
+        ch for ch, folded in _render.FOLD.items()
+        if _render._normalize_word(ch) != folded
+    }
+    assert not wrong
+
+
+def test_the_renderer_folds_nothing_but_the_shipped_table():
+    # ...and this one that no other character changes, over every code
+    # point: no lowercasing and no Unicode normalisation of the renderer's
+    # own, which would bring back the dependence on Python's Unicode version
+    # the table exists to remove.
+    changed = {
+        ch for ch in map(chr, range(0x110000))
+        if ch not in _render.IGNORABLE and _render._normalize_word(ch) != ch
+    }
+    assert changed == set(_render.FOLD)
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["SÂWM", "sáwm", "sa" + chr(0x0302) + "wm"],
+    ids=["uppercase with the accent", "another accent", "a separate circumflex"],
+)
+def test_folded_spellings_parse(text):
+    assert numberwords.text_to_number(text) == 10
+
+
+@pytest.mark.parametrize(
+    "mark", [chr(0x05B0), chr(0x0332)], ids=["Hebrew point", "low line"]
+)
+def test_a_mark_no_accented_latin_letter_uses_is_not_ignored(mark):
+    # Decision (#75), stated here independently of the engine's tests, as
+    # the whitespace set is: a target implements the decision, not the
+    # oracle.
+    with pytest.raises(numberwords.NumberWordsError):
+        numberwords.text_to_number("sâwm" + mark)
 
 
 def test_a_zero_width_character_is_not_a_separator():

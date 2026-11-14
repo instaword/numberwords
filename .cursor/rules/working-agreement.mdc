@@ -1,0 +1,15 @@
+---
+description: The working agreement for this repository, kept in CLAUDE.md
+alwaysApply: true
+---
+
+This repository's working agreement is `CLAUDE.md` at the root: @CLAUDE.md
+
+Read it in full before acting. It is written to Claude, but everything in it
+applies to you the same way: the two modes, the workflow guardrails (never
+commit or push to `main`; every change on a branch and through a pull
+request), and the engineering standards, including never presenting
+unverified Mizo numeral data as fact.
+
+`CLAUDE.md` is the only copy. Do not restate it here or anywhere else.
+Change it there, so that every tool reads the same rules.

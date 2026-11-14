@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "Bidirectional text-number conversion driven by a single language-agnostic rule spec. Placeholder release; under active development.",
+  "description": "Bidirectional text-number conversion for Mizo (Lushai), driven by a single language-agnostic rule spec.",
   "license": "MIT",
   "author": "instaword",
   "keywords": [
@@ -17,12 +17,34 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/instaword/numberwords.git"
+    "url": "git+https://github.com/instaword/numberwords.git",
+    "directory": "packages/npm"
   },
   "homepage": "https://github.com/instaword/numberwords",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
   "main": "index.js",
+  "types": "index.d.ts",
   "files": [
     "index.js",
+    "index.d.ts",
+    "render.js",
+    "_mizo.js",
     "README.md"
-  ]
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
 }

@@ -11,14 +11,23 @@ Deliberately boring. Every behaviour here exists because the engine has it,
 and the comments say which decision each one implements rather than
 restating the code.
 
-Python 3.9 is the floor (pyproject's requires-python), so nothing newer than
-3.9 syntax appears here.
+Python 3.10 is the floor (pyproject's requires-python), so nothing newer than
+3.10 syntax appears here.
 """
 
+import operator
 import re
-import unicodedata
 
-from ._mizo import CONNECTOR, LEXICON, PARSE, RULES, SUPPORTS
+from ._mizo import (
+    CONNECTOR,
+    FOLD,
+    IGNORABLE,
+    LEXICON,
+    PARSE,
+    RULES,
+    SUPPORTS,
+    WHITESPACE,
+)
 
 
 class NumberWordsError(ValueError):
@@ -40,39 +49,21 @@ class NumberWordsError(ValueError):
 # be handed a new spec at any time. Here the spec is compiled in and cannot
 # change, so they are built once at import. Same values, computed once.
 #
-# _WHITESPACE and _IGNORABLE are not spec-derived at all: since #46 they are
-# properties of text that every language shares, so they are stated here
-# rather than read out of the compiled spec.
+# WHITESPACE and IGNORABLE are not spec-derived at all: since #46 they are
+# properties of text that every language shares. The engine states them
+# once and the compiler ships them beside PARSE (#75), so this module, like
+# every target, reads them rather than keeping its own copy. Why each list
+# holds what it does: reference/engine.py and docs/spec-format.md.
 
-# Unicode's White_Space property, enumerated. The engine's _WHITESPACE, and
-# it has to be stated here rather than read out of the compiled spec: after
-# #46 a spec declares only its non-whitespace separators, so
-# PARSE["word_separators"] is ("-",) and a renderer trusting it alone would
-# silently stop splitting on spaces.
+# Unicode's White_Space property, as the compiled file lists it. It has to
+# be applied here on top of PARSE["word_separators"]: after #46 a spec
+# declares only its non-whitespace separators, so that tuple is ("-",) and
+# a renderer trusting it alone would silently stop splitting on spaces.
 #
-# Neither runtime's convenience function is this set. Python's str.isspace()
-# -- and re's \s, which matches it exactly -- also accepts U+001C-U+001F;
-# JavaScript's \s also accepts U+FEFF. Implementing the named property is
-# what keeps two targets agreeing, and no conformance vector can check it:
-# every accepted_input is built by joining words with a separator the
-# generator chose, so none contains an exotic space. tests/ pins this
-# against str.isspace() on this side too.
-_WHITESPACE = (
-    "\t\n\v\f\r"                            # U+0009-U+000D
-    " "                                     # U+0020 SPACE
-    "\x85"                                  # U+0085 NEXT LINE
-    "\xa0"                                  # U+00A0 NO-BREAK SPACE
-    "\u1680"                                # U+1680 OGHAM SPACE MARK
-    "\u2000\u2001\u2002\u2003\u2004\u2005"
-    "\u2006\u2007\u2008\u2009\u200a"        # U+2000-U+200A
-    "\u2028"                                # U+2028 LINE SEPARATOR
-    "\u2029"                                # U+2029 PARAGRAPH SEPARATOR
-    "\u202f"                                # U+202F NARROW NO-BREAK SPACE
-    "\u205f"                                # U+205F MEDIUM MATHEMATICAL SPACE
-    "\u3000"                                # U+3000 IDEOGRAPHIC SPACE
-)
-
-_WHITESPACE_CLASS = "[{}]".format("".join(re.escape(ch) for ch in _WHITESPACE))
+# Not str.isspace(), and not re's \s, which matches it exactly: both also
+# accept U+001C-U+001F, and no conformance vector contains an exotic space
+# that would show it. tests/ pins the shipped set against str.isspace().
+_WHITESPACE_CLASS = "[{}]".format("".join(re.escape(ch) for ch in WHITESPACE))
 
 # Declared separators first, so a multi-character one is tried before a
 # single whitespace character that could match inside it.
@@ -86,8 +77,8 @@ _SEPARATOR_RE = re.compile(
 )
 
 
-# Zero-width and format characters, removed from every word before it is
-# compared.
+# Zero-width and format characters, as the compiled file lists them,
+# removed from every word before it is compared.
 #
 # The engine decision (#46): strip, rather than treat as a separator or
 # reject. The dominant real case is a BOM at position 0 -- a file read as
@@ -97,29 +88,18 @@ _SEPARATOR_RE = re.compile(
 # there, and calling one a separator asserts a boundary meaning these
 # characters do not have. The one case where separator would win, U+200B as
 # the only thing between two words, does not arise in Latin-script Mizo.
-#
-# An explicit list rather than the Default_Ignorable_Code_Point property,
-# which covers exactly these six for our purposes but needs the third-party
-# regex package to test in Python -- and this library is deliberately
-# dependency-free. Hardcoding that property's table instead would reintroduce
-# the problem #46 exists to remove: it changes between Unicode versions, so
-# two targets built against different versions would disagree. Six characters
-# covers anything realistic and cannot drift.
-_IGNORABLE = {
-    ord(ch): None
-    for ch in (
-        "\u200b"    # ZERO WIDTH SPACE
-        "\ufeff"    # ZERO WIDTH NO-BREAK SPACE / BOM
-        "\u2060"    # WORD JOINER
-        "\u200c"    # ZERO WIDTH NON-JOINER
-        "\u200d"    # ZERO WIDTH JOINER
-        "\u00ad"    # SOFT HYPHEN
-    )
-}
+_IGNORABLE = {ord(ch): None for ch in IGNORABLE}
+
+# What case_insensitive and strip_diacritics mean for this spec, as the
+# compiled file lists it: each character that folds, and what it folds to,
+# "" for a combining mark. The engine builds it from the spec's own words
+# (#75), so it is the same on every Python, where str.lower() and NFD follow
+# the Unicode version Python ships.
+_FOLD = {ord(ch): folded for ch, folded in FOLD.items()}
 
 
 def _normalize_word(word: str) -> str:
-    """Apply the parse flags to a single word.
+    """Apply the parse flags to a single word, through FOLD.
 
     Applied to *both* sides -- the input and the lexicon value it is
     compared against -- so a flag only ever loosens the comparison. It
@@ -129,18 +109,10 @@ def _normalize_word(word: str) -> str:
 
     The ignorable-character strip is unconditional rather than a parse
     flag, for the same reason whitespace is (#46): it is a property of
-    text, not of a language. It runs first so the flags below see the
-    word a reader would, and it is a no-op on authored lexicon entries.
+    text, not of a language. It runs first so the fold sees the word a
+    reader would, and it is a no-op on authored lexicon entries.
     """
-    word = word.translate(_IGNORABLE)
-    if PARSE.get("case_insensitive", False):
-        word = word.lower()
-    if PARSE.get("strip_diacritics", False):
-        # NFD splits a letter from its combining marks; dropping the marks
-        # leaves the base letters, so "sâwm" and "sawm" compare equal.
-        decomposed = unicodedata.normalize("NFD", word)
-        word = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
-    return word
+    return word.translate(_IGNORABLE).translate(_FOLD)
 
 
 # Connectors and aliases are normalised too, so they still match after the
@@ -178,6 +150,49 @@ _EMITTING_SCALES = sorted(
 )
 
 
+# Conditions arrive as data, written by the compiler from the engine's own
+# (engine._condition_tree):
+#
+#     ("and" | "or", tree, tree, ...)
+#     ("cmp", op, operand, operand)
+#     ("var", "multiplier" | "remainder")    an operand
+#     ("int", k)                             an operand; k >= 0, never a bool
+#
+# The engine's grammar puts "var" and "int" only inside a "cmp", so every
+# "and"/"or" here combines true/false values, never numbers (#75).
+#
+# Evaluated here by a second copy of the engine's evaluator, deliberately:
+# this module never imports the oracle. reference/test_compile_spec.py holds
+# the two together on every operator and on every rule's condition (#75).
+_COMPARISONS = {
+    "==": operator.eq,
+    "!=": operator.ne,
+    ">": operator.gt,
+    ">=": operator.ge,
+    "<": operator.lt,
+    "<=": operator.le,
+}
+
+
+def _eval_tree(tree: tuple, variables: dict):
+    kind = tree[0]
+    if kind == "cmp":
+        _, op, left, right = tree
+        return _COMPARISONS[op](_eval_tree(left, variables), _eval_tree(right, variables))
+    if kind == "and":
+        return all(_eval_tree(t, variables) for t in tree[1:])
+    if kind == "or":
+        return any(_eval_tree(t, variables) for t in tree[1:])
+    if kind == "var":
+        return variables[tree[1]]
+    if kind == "int":
+        return tree[1]
+    # Unreachable from a compiled spec: the engine checked every condition
+    # when it loaded. A plain ValueError, not NumberWordsError, because this
+    # would be a fault in the package rather than in the caller's input.
+    raise ValueError(f"unknown condition data: {tree!r}")
+
+
 def _rule_applies(rule: dict, multiplier: int, remainder: int) -> bool:
     """A rule's fixed multiplier, if it has one, and its condition.
 
@@ -190,7 +205,7 @@ def _rule_applies(rule: dict, multiplier: int, remainder: int) -> bool:
     condition = rule["condition"]
     if condition is None:
         return True
-    return condition({"multiplier": multiplier, "remainder": remainder})
+    return _eval_tree(condition, {"multiplier": multiplier, "remainder": remainder})
 
 
 def _find_rule(n: int) -> dict:
@@ -256,8 +271,8 @@ def _with_connector(n: int, text: str, boundaries: list) -> str:
 
 
 def _tokenize(text: str) -> list:
-    """Split text into comparable tokens: normalise, split on the spec's
-    word separators, drop connectors, resolve aliases."""
+    """Split text into comparable tokens: split on the spec's word
+    separators, normalise each piece, drop connectors, resolve aliases."""
     # Filter after normalising, not before: a split piece holding only an
     # ignorable character is truthy going in and empty coming out, and an
     # empty token matches nothing (#46). The engine does the same.
@@ -287,13 +302,14 @@ def _acceptable_fields(table: str, named_field: str, lenient: bool) -> list:
 
 def _parse_readings(tokens: list) -> dict:
     """Every number some derivation of `tokens` gives, mapped to the rank
-    greedy binding gives its best derivation. The range is not applied.
+    greedy binding gives its best derivation. The range is not applied,
+    except that every reading above the range is the one value max + 1.
 
     Recursive descent over the rules, the same algorithm as the engine's
     Spec._parse_readings and deliberately a separate copy of it: this module
     never imports the oracle. The two are held together by vectors/mizo.json,
-    and by reference/test_compile_spec.py, which feeds both every phrase of
-    up to three words and requires the same answer.
+    and by vectors/mizo.phrases.json, which both are checked against on every
+    phrase of up to three words and on the longer ones it lists.
 
     Memoised on (start, end, whole, below). `whole` is whether the span is
     the entire input -- a `scope: whole` rule is only ever the whole phrase,
@@ -311,6 +327,15 @@ def _parse_readings(tokens: list) -> dict:
     # would let "sawm hnih" (20) also read as 10 + 2 through the bound form of
     # 2, which is real ambiguity rather than an accepted alternate spelling.
     lenient = len(tokens) == 1
+    # Every reading above the range is recorded as one value, max + 1,
+    # keeping the best rank among them, as in the engine (#75). Readings
+    # only grow, so no reading needs more than max + 1 to hold, and greed
+    # picks what it would have between exact numbers while nothing a
+    # reading is compared with is above max, as in _mizo.py. The test
+    # comes before multiplying, as it must in a target with fixed-size
+    # integers.
+    high = SUPPORTS[1]
+    over = high + 1
     cache = {}
 
     def span(start, end, whole, below):
@@ -339,7 +364,15 @@ def _parse_readings(tokens: list) -> dict:
                             + bound.get("_multiplier_rank", ())
                             + rank
                         )
-                    value = multiplier * rule["scale"] + remainder
+                    # The remainder first, so the division never sees a
+                    # negative number and every target's `/` agrees (#75).
+                    if (
+                        remainder > high
+                        or multiplier > (high - remainder) // rule["scale"]
+                    ):
+                        value = over
+                    else:
+                        value = multiplier * rule["scale"] + remainder
                     if value not in readings or rank > readings[value]:
                         readings[value] = rank
             cache[key] = readings
@@ -393,7 +426,10 @@ def _parse_readings(tokens: list) -> dict:
                 # hold -- a single digit takes the bound form (#27 Q-L).
                 for stop in range(position + 1, end + 1):
                     for value, rank in span(position, stop, False, rule["scale"]).items():
-                        if value in LEXICON[table]:
+                        # The capped value stands for a number above the
+                        # range, never a word, even if a key equals max + 1
+                        # (#75): skipping it could drop greed's winner.
+                        if value <= high and value in LEXICON[table]:
                             continue
                         rebound = bind(bound, "multiplier", value)
                         if rebound is not None:
@@ -476,15 +512,25 @@ def parse_text(text: str) -> int:
         raise NumberWordsError(
             f"{text!r} does not match any number in the supported range"
         )
+    low, high = SUPPORTS
     top = max(readings.values())
     winners = sorted(n for n, rank in readings.items() if rank == top)
     if len(winners) > 1:
+        named = ", ".join(
+            f"more than {high}" if n > high else str(n) for n in winners
+        )
         raise NumberWordsError(
-            f"{text!r} is ambiguous: matches {winners}"
+            f"{text!r} is ambiguous: matches [{named}]"
         )
     n = winners[0]
-    low, high = SUPPORTS
-    if not (low <= n <= high):
+    # A reading above the range is the capped value, so the bound is named
+    # rather than a number this module never computes (#75).
+    if n > high:
+        raise NumberWordsError(
+            f"{text!r} reads as more than {high}, outside the supported range "
+            f"[{low}, {high}]"
+        )
+    if n < low:
         raise NumberWordsError(
             f"{text!r} reads as {n}, outside the supported range [{low}, {high}]"
         )

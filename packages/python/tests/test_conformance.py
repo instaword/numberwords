@@ -14,7 +14,9 @@ spelling the engine tolerates would go unchecked in the target.
 The vectors only say what must be accepted, so a parser that accepts too
 much passes all of them. The phrase file covers the other half (#75): every
 phrase of up to three words its vocabulary can spell, each either listed
-with the number it names or, by being left out, rejected.
+with the number it names or, by being left out, rejected. Beside them it
+lists longer phrases one by one, each with its number or null: spellings one
+slip from a certified one, and stacked multipliers that greed has to bind.
 """
 
 import itertools
@@ -23,7 +25,7 @@ import pytest
 
 import numberwords
 
-# The generated table for Mizo 0-9,999,999,999: all of 0-999, and above
+# The generated table for Mizo 0-9,999,999,999,999: all of 0-999, and above
 # it one number of each shape plus #27's structural cases (#12, #65).
 # Asserted rather than assumed: an empty or truncated vectors file would
 # otherwise make every parametrised test below pass by having nothing to run.
@@ -31,15 +33,25 @@ import numberwords
 # Both move with supports.max, and both are range knobs a range PR has to
 # bump by hand -- that is the point of stating them rather than deriving
 # them from the file being checked.
-EXPECTED_VECTORS = 1234
-EXPECTED_ACCEPTED_INPUTS = 7644
+EXPECTED_VECTORS = 1420
+EXPECTED_ACCEPTED_INPUTS = 8883
 
 # The phrase file's size, asserted for the same reason. These move with the
 # vocabulary rather than the range: a new scale word or alias grows all
 # three, and a range PR that adds one has to bump them by hand too.
-EXPECTED_PHRASE_VOCABULARY = 31
-EXPECTED_PHRASES = 30783
-EXPECTED_ACCEPTED_PHRASES = 2245
+EXPECTED_PHRASE_VOCABULARY = 34
+EXPECTED_PHRASES = 40494
+EXPECTED_ACCEPTED_PHRASES = 2909
+
+# The phrases the file lists one by one, and how many of each it gives a
+# number. The one-slip phrases are built from one number per shape, so they
+# move with the grammar and the vocabulary, as the accepted inputs do, and a
+# PR that changes either bumps them by hand. The stacked ones are hand-picked
+# (generate_vectors.STACKED_PHRASES).
+EXPECTED_LISTED_PHRASES = {
+    "one_slip": (6306, 2518),
+    "stacked": (19, 15),
+}
 
 
 def test_the_vector_table_is_the_size_it_should_be(vectors):
@@ -133,6 +145,13 @@ def test_the_phrase_vocabulary_has_every_kind_of_word(phrases, kind, word):
     assert word in phrases["vocabulary"], kind
 
 
+def test_a_run_of_three_connectors_parses():
+    # The phrase file's closed world stops at three words, so it cannot
+    # state three connectors plus a numeral. The package still accepts the
+    # run (#95).
+    assert numberwords.text_to_number("zâ leh leh leh pariat") == 108
+
+
 def test_text_to_number_agrees_with_the_phrase_file(phrases):
     # Closed-world, both halves at once: a listed phrase must give its
     # number, and every phrase that is not listed must be rejected. The
@@ -152,3 +171,29 @@ def test_text_to_number_agrees_with_the_phrase_file(phrases):
     assert not wrong, wrong[:10]
     # A listed phrase the loop never builds would never be checked.
     assert set(accepted) <= built, sorted(set(accepted) - built)[:10]
+
+
+@pytest.mark.parametrize("section", sorted(EXPECTED_LISTED_PHRASES))
+def test_the_listed_phrases_are_as_many_as_they_should_be(phrases, section):
+    listed = phrases[section]
+    numbered = sum(1 for number in listed.values() if number is not None)
+    assert (len(listed), numbered) == EXPECTED_LISTED_PHRASES[section]
+
+
+@pytest.mark.parametrize("section", sorted(EXPECTED_LISTED_PHRASES))
+def test_text_to_number_agrees_with_the_listed_phrases(phrases, section):
+    # Phrases no vocabulary builds, so each is written out: the number it
+    # names, or null where it must be rejected. They are where a parser
+    # that agrees on every short phrase can still differ -- a longer phrase
+    # that is nearly right, and greed choosing between stacked readings by
+    # more than the first number of words (#75).
+    wrong = []
+    for text, number in phrases[section].items():
+        try:
+            got = numberwords.text_to_number(text)
+        except numberwords.NumberWordsError:
+            got = None
+        expected = None if number is None else int(number)
+        if got != expected:
+            wrong.append((text, expected, got))
+    assert not wrong, wrong[:10]

@@ -2,7 +2,8 @@
 
 > This file is loaded into every Claude Code session in this repo. It defines
 > **how you (Claude) should behave here** and gives contributors the context they
-> need. Read it fully before acting.
+> need. Read it fully before acting. Cursor reads it too, through
+> `.cursor/rules/working-agreement.mdc`, so it stays the only copy.
 
 ## Your role
 
@@ -149,31 +150,46 @@ LICENSE                MIT.
 docs/
   architecture.md      The design: spec → multi-target, trade-offs, prior art.
   spec-format.md       The rule-spec format, prose companion to the schema.
+  interpreter-contract.md  What every target's interpreter implements.
 languages/
-  en.yaml              Worked reference example (English, 0–99) — a real spec,
+  en.yaml              Worked reference example (English, 0–999) — a real spec,
                        not a sketch: it loads, round-trips, and validates.
-  mizo.yaml            Mizo spec, 0–9,999,999,999. Numeral data verified by
-                       native speakers; nothing marked TODO(verify).
+  mizo.yaml            Mizo spec, 0–9,999,999,999,999. Numeral data through
+                       10^9 verified by native speakers. The words for
+                       10^10–10^12 are attested (Zairema 2009); see
+                       meta.sources in that file (#74).
 spec/
   spec.schema.json     Machine-checkable definition of the spec format.
                        Authoritative where it and spec-format.md disagree.
 reference/
   engine.py            The oracle — interprets a spec directly.
+  compile_spec.py      Compiles a spec into each package's compiled file:
+                       packages/python's _mizo.py and packages/npm's _mizo.js.
   generate_vectors.py  Regenerates vectors/. Run after spec edits.
-  test_*.py            Engine, English control, and schema validation.
+  test_*.py            Engine, compiler, English control, and schema validation.
 vectors/
   mizo.json            Checked-in conformance vectors. Generated, not edited.
   mizo.phrases.json    Which short phrases are accepted; all others are rejected.
+                       And longer phrases listed one by one, accepted or not.
 packages/
   python/              The first real target package: _mizo.py (compiled spec),
                        _render.py (thin interpreter), and its own test suite.
-  npm/                 Still a name-reservation placeholder (0.0.0).
+  npm/                 The second: _mizo.js (compiled spec), render.js
+                       (interpreter), hand-written index.d.ts, and its own
+                       tests. Not released yet; npm holds the 0.0.0 placeholder.
+.cursor/
+  rules/               Points Cursor at this file; holds no rules of its own.
 .githooks/
   pre-push             Local guard that blocks pushes to main.
 .github/
+  CODEOWNERS           Requests the owner's review on every PR, forks included.
   pull_request_template.md
   ISSUE_TEMPLATE/
-  workflows/tests.yml  Runs the reference suite and the vectors drift check.
+  workflows/tests.yml  Both test suites on every supported Python, the drift
+                       checks on vectors/, _mizo.py and _mizo.js, a wheel
+                       smoke test, and the npm package's tests, types and
+                       packed tarball on Node 22 and 24.
+  workflows/release.yml  Publishes packages/python to PyPI. Run by hand.
 ```
 
 Directories still unbuilt are described in the architecture doc and get created

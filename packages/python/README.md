@@ -24,14 +24,18 @@ spellings it never writes: `nuaih` and `maktaduaih` for `nuai` and
 `maktaduai`, and a multiplier stacked onto a scale word from `nuai` (100,000)
 up, as in `nuai za hnih` (200 × 100,000). A stacked multiplier takes as many
 words as it can, so `nuai za hnih sawm nga` is 25,000,000. `number_to_text()`
-always emits the canonical spelling.
+always emits the canonical spelling. `text_to_number()` is lenient, so a caller
+who needs only the canonical spelling should check
+`number_to_text(text_to_number(t)) == t`.
 
 ## Supported range
 
-Mizo (Lushai) **0–9,999,999,999**, that is 10¹⁰ − 1. Anything outside it
-raises `NumberWordsError`, which subclasses `ValueError`. There is no language
-argument yet — adding one before a second language exists would mean guessing
-at its shape.
+Mizo (Lushai) **0–9,999,999,999,999**, that is 10¹³ − 1. Anything outside it
+raises `NumberWordsError`, which subclasses `ValueError`. The words for 10¹⁰,
+10¹¹ and 10¹² are attested in Zairema 2009, cited in `meta.sources` in
+`languages/mizo.yaml`. The book prints them without tone marks. There is no
+language argument yet — adding one before a second language exists would mean
+guessing at its shape.
 
 Published from CI (`.github/workflows/release.yml`), gated on the conformance
 vectors passing — a release that fails them cannot be built.

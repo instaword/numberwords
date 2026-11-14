@@ -15,23 +15,28 @@ checked against, on purpose, because they prove different things:
   speaker types. See generate_vectors.accepted_inputs() for the rule.
 - vectors/mizo.phrases.json -- generated the same way, and the half the
   vectors cannot state: which short phrases must be rejected, namely every
-  one it does not list (generate_vectors.build_phrases). Catches drift the
-  same way.
+  one it does not list, and which longer ones, listed with the number each
+  names or null (generate_vectors.build_phrases). Catches drift the same
+  way.
 
 mizo.yaml's core numeral data has been verified by a native Mizo speaker
 (see meta.sources). The "leh" connector (parse.connectors) is a separate,
 deliberate exception -- not unverified, but a documented team decision to
 leave it unresolved (see mizo.yaml's header and its `# Decision (#10)` tag).
-Nothing in mizo.yaml is marked TODO(verify) as of #15: parse.aliases was the
-last one, and its diacritic part is now handled by parse.strip_diacritics.
+The scale words for 10^10-10^12 are attested in Zairema 2009 (see
+meta.sources); the book prints them without diacritics. Nothing in mizo.yaml
+is marked TODO(verify) as of #15: parse.aliases was the last one, and its
+diacritic part is now handled by parse.strip_diacritics.
 These tests check that the engine correctly follows the grammar as written,
 not whether the grammar itself is linguistically correct.
 """
 
+import ast
 import copy
 import itertools
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 import pytest
@@ -39,6 +44,7 @@ import pytest
 import engine
 import generate_vectors
 from engine import (
+    _IGNORABLE,
     _WHITESPACE,
     Spec,
     _joinable_separators,
@@ -54,7 +60,7 @@ PHRASES_PATH = Path(__file__).resolve().parent.parent / "vectors" / "mizo.phrase
 # these tests are meant to be an independent claim about what must work, so
 # a spec edit that narrowed the range should fail them rather than shrink
 # them. Widen it in the same PR that widens the spec (#19).
-SUPPORTED_MAX = 9_999_999_999
+SUPPORTED_MAX = 9_999_999_999_999
 
 # The numbers the per-number tests below visit, where they used to walk the
 # whole supported range: every number below EXHAUSTIVE_BELOW, and one of
@@ -97,8 +103,8 @@ def test_vectors_match_number_to_text(spec, vectors):
 def test_vector_numbers_are_strings(vectors):
     # #12: `number` is deliberately a string, so that a JS target reading
     # this file cannot silently lose precision above 2^53 - 1. The current
-    # 10^10 - 1 ceiling (#27) does not need it; a ceiling raised past
-    # 2^53 - 1 would (#27 rule 5 lets the 10^9 multiplier grow).
+    # 10^13 - 1 ceiling (#74) does not need it; a ceiling raised past
+    # 2^53 - 1 would.
     # The format outlives the range. Asserted so that a future regenerate
     # cannot quietly drop back to a JSON number.
     for vector in vectors:
@@ -159,7 +165,12 @@ def test_the_phrase_file_is_up_to_date(spec, phrases):
     # can be parsed back on its own but a missing one cannot -- this is the
     # only test that sees a phrase the engine now accepts and the file
     # still rejects.
-    assert generate_vectors.build_phrases(spec) == phrases
+    built = generate_vectors.build_phrases(spec)
+    assert built == phrases
+    # Dictionaries compare without their order, and CI diffs the file byte
+    # for byte, so the order has to be one a regenerate reproduces.
+    for section in ("accepted", "one_slip", "stacked"):
+        assert list(built[section]) == list(phrases[section]), section
 
 
 def test_phrase_numbers_are_strings(phrases):
@@ -167,6 +178,11 @@ def test_phrase_numbers_are_strings(phrases):
     # a target reads both files with the same JSON parser.
     for text, number in phrases["accepted"].items():
         assert isinstance(number, str), text
+    # A listed phrase is a number, as a string, or null where it must be
+    # rejected.
+    for section in ("one_slip", "stacked"):
+        for text, number in phrases[section].items():
+            assert number is None or isinstance(number, str), text
 
 
 # The ways text_to_number() refuses, and which of them build_phrases may
@@ -209,13 +225,88 @@ def test_build_phrases_refuses_to_write_an_ambiguous_phrase():
         generate_vectors.build_phrases(_two_number_spec("same_word", "same_word"))
 
 
+def test_a_listed_phrase_that_is_ambiguous_stops_the_build():
+    # The same rule for the phrases the file writes out one by one: null
+    # means "names no number", never "the engine could not decide".
+    spec = _two_number_spec("same_word", "same_word")
+    with pytest.raises(ValueError, match="ambiguous"):
+        generate_vectors._number_or_refusal(spec, "same_word")
+    assert generate_vectors._number_or_refusal(spec, "no_such_word") is None
+
+
 def test_build_phrases_handles_a_spec_with_no_connectors_or_aliases():
     phrases = generate_vectors.build_phrases(_two_number_spec("zero_word", "one_word"))
     assert phrases == {
         "vocabulary": ["one_word", "zero_word"],
         "max_words": generate_vectors.PHRASE_MAX_WORDS,
         "accepted": {"one_word": "1", "zero_word": "0"},
+        # One slip from a one-word spelling is that word doubled; deleting
+        # its only word leaves nothing to list.
+        "one_slip": {"one_word one_word": None, "zero_word zero_word": None},
+        # Hand-picked per language, and this spec is no language.
+        "stacked": {},
     }
+
+
+def test_one_slip_is_a_word_deleted_doubled_or_swapped():
+    assert generate_vectors.near_misses("a b c") == {
+        "b c", "a c", "a b",              # one word deleted
+        "a a b c", "a b b c", "a b c c",  # one word doubled
+        "b a c", "a c b",                 # two neighbours swapped
+    }
+    assert generate_vectors.near_misses("a") == {"a a"}
+
+
+def test_the_one_slip_phrases_are_some_accepted_and_some_refused(phrases):
+    # Both halves have to be there, or "the target agrees" means little:
+    # some slips still spell a number ("sâwm pakhat" with a word dropped is
+    # "sâwm"), and most do not.
+    slips = phrases["one_slip"]
+    accepted = sum(1 for number in slips.values() if number is not None)
+    assert 0 < accepted < len(slips), (accepted, len(slips))
+    assert all(
+        len(text.split()) <= generate_vectors.SLIP_PHRASE_MAX_WORDS for text in slips
+    )
+
+
+def test_the_slip_cap_costs_no_rule(spec):
+    # Every emitting rule heads some number whose canonical spelling,
+    # doubled in one word, still fits under SLIP_PHRASE_MAX_WORDS. At
+    # 10^10 - 1 each one already did at six words.
+    headed = {
+        spec._find_rule(n)["name"] for n in generate_vectors.numbers_to_sweep(spec)
+        if len(spec.number_to_text(n).split()) < generate_vectors.SLIP_PHRASE_MAX_WORDS
+    }
+    emitting = {r["name"] for r in spec.rules if r.get("emit") != "never"}
+    assert emitting <= headed, sorted(emitting - headed)
+
+
+def _decided_at(readings):
+    """Which element of the rank separates greed's winner from the runner-up,
+    or None where there was nothing to choose between."""
+    if len(readings) < 2:
+        return None
+    first, second = sorted(readings.values(), reverse=True)[:2]
+    return next(
+        (i for i in range(len(first)) if first[i:i + 1] != second[i:i + 1]),
+        len(first),
+    )
+
+
+def test_the_listed_phrases_take_greed_past_its_first_comparison(spec, phrases):
+    # Why the file lists them. No phrase of the closed world needs more
+    # than the first element of a rank to pick its winner, so a target that
+    # compared only that would pass the whole closed world.
+    closed = {
+        _decided_at(spec._parse_readings(text)) for text in phrases["accepted"]
+    }
+    assert closed == {None, 0}
+    for section in ("one_slip", "stacked"):
+        deeper = [
+            text for text in phrases[section]
+            if (_decided_at(spec._parse_readings(text)) or 0) > 0
+        ]
+        assert deeper, section
 
 
 @pytest.mark.parametrize(
@@ -359,17 +450,28 @@ def test_certified_connectors_are_followed_by_a_top_level_addend(spec, vectors):
 
 def test_engine_still_tolerates_what_the_vectors_do_not_certify(spec):
     # The other half of both decisions above: the narrower vectors must not
-    # be read as the engine having become stricter. These strings still
-    # parse -- they are simply not certified, so no target is required to
-    # accept them.
+    # be read as the engine having become stricter. These strings still parse.
+    #
+    # "sawm leh nga leh pariat" is five words. The phrase file stops at three,
+    # the vectors do not list it, and no target is required to accept it.
     assert spec.text_to_number("sawm leh nga leh pariat") == 58
+    # "sawm leh hnih" is three words. The vectors do not certify that gap, but
+    # the phrase file lists it as 20, so a target must accept it (#77).
     assert spec.text_to_number("sawm leh hnih") == 20
-    # Both new with #19, and both must stay uncertified. The first is what
-    # the generator produced before _connector_slots learned to skip a gap
-    # that already holds a connector; the second puts "leh" before a bound
-    # digit, which is the 100-199 shape of "sawm leh hnih".
-    assert spec.text_to_number("zâ leh leh pariat") == 108
+    # "leh" before a bound digit, the 100-199 shape of "sawm leh hnih".
+    # A repeated connector is a different decision: every target must accept
+    # it (#95), so that case is pinned in test_a_run_of_connectors_is_accepted.
     assert spec.text_to_number("zâ sawm leh thum") == 130
+
+
+def test_a_run_of_connectors_is_accepted(spec, phrases):
+    # Repeated connectors are tolerated on input, however many in a row, in
+    # every language. The generator never writes one (#19). The phrase file
+    # records the pairs it can see; three connectors plus a numeral is four
+    # words, past PHRASE_MAX_WORDS, so the longer run is pinned here (#95).
+    assert phrases["accepted"]["leh leh khat"] == "1"
+    assert spec.text_to_number("zâ leh leh pariat") == 108
+    assert spec.text_to_number("zâ leh leh leh pariat") == 108
 
 
 def test_the_string_that_does_mean_ten_and_two_is_certified(spec, vectors):
@@ -390,7 +492,8 @@ def test_no_generated_input_doubles_the_connector(spec):
     # pariat". Nothing downstream would notice: build_vectors parses every
     # candidate back before writing it, and that string parses to 108
     # because _tokenize drops connectors however many there are. Doubled
-    # "leh" is not Mizo (Rosie Malsawmtluangi, #19).
+    # "leh" is not a spelling we certify (Rosie Malsawmtluangi, #19). It is
+    # still accepted on input, in a run of any length (#95).
     #
     # Generated here rather than read from vectors/mizo.json so that
     # removing the check from _connector_slots fails this immediately,
@@ -518,23 +621,11 @@ def test_stacked_scales_are_not_accepted_below_ten_to_the_fifth(spec):
     assert Spec(data)._parse_values("za sawm hnih") == {120, 2000}
 
 
-# Stacked spellings and what they are, as written on #27 and #65 rather than
-# derived from the rules, so a wrong rule fails here instead of agreeing
-# with itself. Each is accepted on input and never emitted.
-_STACKED_FORMS = {
-    "nuai za hnih": 20_000_000,                      # #27 rule 6
-    "maktaduai za thum": 300_000_000,                # #27 rule 6
-    "nuai za pahnih": 10_200_000,                    # #27 Q-E: 10^5 x (100 + 2)
-    "nuaih za hnih": 20_000_000,                     # #27 Q-O, multiplied position
-    "nuai sawm hnih": 2_000_000,                     # a native speaker, #65, 2026-09-24
-    # 2026-08-30, the repo owner's ordinary way to say it: 201 x 10^5, then
-    # the rest, with "leh" only before the final addend.
-    "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum": 20_146_713,
-    # Mizo Ṭawng Ziah Dân Dik, ch. 4, via #27 (2026-09-03): "leh" in every
-    # gap, and "sâwm" keeping its circumflex as nuai's multiplier.
-    "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga":
-        1_098_765,
-}
+# Stacked spellings and what they are, as their sources give them rather
+# than derived from the rules, so a wrong rule fails here instead of agreeing
+# with itself. Each is accepted on input and never emitted. The one table is
+# in the generator, which lists them in the phrase file (#107).
+_STACKED_FORMS = generate_vectors.STACKED_FORMS["lus"]
 
 
 @pytest.mark.parametrize("text", sorted(_STACKED_FORMS))
@@ -547,6 +638,41 @@ def test_stacked_spellings_are_never_emitted(spec, n):
     # Rule 6: number_to_text takes the largest scale that fits (Decision 2
     # of 2026-08-30), so 20,000,000 is "vaibêlchhe hnih", never "nuai za hnih".
     assert spec.number_to_text(n) not in _STACKED_FORMS
+
+
+def test_the_phrase_file_lists_every_stacked_spelling(phrases):
+    # The phrase file is how a target comes to be held to these. The file
+    # lists the engine's answer, so this checks that answer is the number
+    # the source gives.
+    for text, number in _STACKED_FORMS.items():
+        assert phrases["stacked"][text] == str(number), text
+
+
+def test_one_stacked_phrase_tells_ranks_compared_as_text_apart(spec, phrases):
+    # JavaScript's `>` compares two arrays as text, so [11, 1] ranks below
+    # [8, 1]. Word counts stay under ten in every other listed phrase, where
+    # that mistake gives the right answer. Here the multiplier takes eleven
+    # words, and the mistake answers with the reading that took eight.
+    text = "maktaduai nuai kua sîng kua sâng kua za kua sawm kua pakua"
+    readings = spec._parse_readings(text)
+    assert max(readings.values()) == (11, 1)
+    as_text = max(readings, key=lambda value: ",".join(map(str, readings[value])))
+    assert phrases["stacked"][text] == "999999000000"
+    assert as_text == 999_900_000_099
+
+
+def test_one_stacked_phrase_is_decided_by_its_multipliers_own_rank(spec, phrases):
+    # Here the multiplier of maktaduai stacks too: nuai sawm pakhat is
+    # 10^5 x 11, or 10^5 x 10 then pakhat. Both readings take three words
+    # for maktaduai's multiplier, so the first numbers tie, and only the
+    # second -- the inner multiplier's own rank -- picks 11. A target that
+    # leaves that rank out ranks both (3,) and calls the phrase ambiguous.
+    text = "maktaduai nuai sawm pakhat"
+    readings = spec._parse_readings(text)
+    best, runner_up = sorted(readings, key=readings.get, reverse=True)[:2]
+    assert (best, readings[best]) == (1_100_000_000_000, (3, 2))
+    assert (runner_up, readings[runner_up]) == (1_000_001_000_000, (3, 1))
+    assert phrases["stacked"][text] == "1100000000000"
 
 
 # Where a stacked spelling has more than one reading and greed decides, with
@@ -618,6 +744,10 @@ def test_greed_never_decides_a_canonical_spelling(spec):
         ("nuai pakhat", "a single digit is not stacked"),
         # What follows a stacked multiplier is a remainder, below the head.
         ("nuai za hnih leh nuai khat", "an addend as large as the head scale"),
+        # A stacked remainder can reach the scale it follows, where no other
+        # can: "nuai sawm" is 10^6, maktaduai's own, and a remainder must be
+        # smaller.
+        ("maktaduai khat nuai sawm", "a remainder equal to its scale"),
     ],
 )
 def test_what_stacking_still_refuses(spec, text, why):
@@ -628,10 +758,8 @@ def test_what_stacking_still_refuses(spec, text, why):
 @pytest.mark.parametrize("text", ["nuai maktaduai khat", "nuai nuai khat"])
 def test_a_stacked_multiplier_descends(spec, text):
     # A multiplier's scale words sit below the word it multiplies: "nuai za
-    # hnih", never "nuai maktaduai khat". At 10^10 - 1 the order cannot
-    # change an answer -- an ascending reading is at least 10^11 -- so it is
-    # asked of every reading, out of range included: there must be none,
-    # not one that the range then throws away.
+    # hnih", never "nuai maktaduai khat". The parser must find no reading
+    # at all, rather than one the range then throws away.
     assert spec._parse_readings(text) == {}
 
 
@@ -666,11 +794,294 @@ def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking():
 
 
 def test_a_stacked_reading_above_the_range_is_refused_not_shortened(spec):
-    # Greedy first, then the range. "tlûklehdingâwn sawm hnih" is 20 x 10^9
-    # (#27 rule 5) -- sayable, above the 10^10 - 1 ceiling -- and is refused
-    # with the number it reads as rather than as "no match".
-    with pytest.raises(ValueError, match=r"reads as 20000000000, outside"):
-        spec.text_to_number("tlûklehdingâwn sawm hnih")
+    # Greedy first, then the range. "huau sawm" is 10 x 10^12 -- sayable,
+    # above the 10^13 - 1 ceiling (#74) -- and is refused as above the range
+    # rather than as "no match". Since #75 the message names the bound, not
+    # 10000000000000: every reading above max is capped at one value.
+    with pytest.raises(ValueError, match=r"reads as more than 9999999999999, outside"):
+        spec.text_to_number("huau sawm")
+
+
+def test_the_old_10_12_composition_stays_input_only(spec):
+    # #74. The written form is the new scale word. "tlûklehdingâwn sâng khat"
+    # is 10^9 x 1000, accepted by the stacking rule that already exists, and
+    # greed still reads a trailing addend into that multiplier.
+    assert spec.number_to_text(10**12) == "huau khat"
+    assert spec.text_to_number("tlûklehdingâwn sâng khat") == 10**12
+    assert spec.number_to_text(2 * 10**10) == "vatelubeuh hnih"
+    assert spec.text_to_number("tlûklehdingâwn sawm hnih") == 2 * 10**10
+    assert spec.text_to_number("tlûklehdingâwn sâng khat leh pakhat") == 1001 * 10**9
+    assert spec.number_to_text(1001 * 10**9) == "huau khat leh tlûklehdingâwn khat"
+    assert spec.text_to_number(spec.number_to_text(10**13 - 1)) == 10**13 - 1
+
+
+# Chains of descending scale words, each longer one reading further past the
+# range: 9 x 10^17 at three words, 9 x 10^35 at six without the cap (#75).
+_SCALE_CHAIN = ["tlûklehdingâwn", "vaibêlchhetak", "vaibêlchhe", "maktaduai", "nuai"]
+
+
+class _CheckedScale(int):
+    """A rule's scale that does arithmetic the way a target with fixed-size
+    integers needs it done (zoramt on #101). Python's integers never
+    overflow, so a parser that multiplies before it checks the range gives
+    the same answers here and only goes wrong in such a target. With every
+    scale one of these, it raises instead.
+
+    Two things raise: a product above `limit` (supports.max + 1), more than
+    the cap promises any target will need to hold, and dividing a negative
+    number, where floor and truncating division part (docs/spec-format.md).
+    `multiplier * rule["scale"]` and `(max - remainder) // rule["scale"]`
+    reach the methods below because Python tries the right operand's
+    reflected method first when its type subclasses the left operand's and
+    overrides that method -- hence `__rmul__ = __mul__`, without which
+    int's own would run. Both operand orders are covered, so the check does
+    not depend on how the parser happens to write the product.
+
+    packages/python/tests/test_render_internals.py keeps a copy, since the
+    package's tests never import this suite: change the two together.
+    """
+
+    def __new__(cls, value, limit):
+        scale = super().__new__(cls, value)
+        scale.limit = limit
+        return scale
+
+    def __getnewargs__(self):
+        return int(self), self.limit
+
+    def __mul__(self, other):
+        product = int(self) * int(other)
+        if product > self.limit:
+            raise OverflowError(f"{other} x {int(self)} is above {self.limit}")
+        return product
+
+    __rmul__ = __mul__
+
+    def __rfloordiv__(self, other):
+        if other < 0:
+            raise ArithmeticError(f"{other} // {int(self)} divides a negative number")
+        return int(other) // int(self)
+
+    def __rtruediv__(self, other):
+        if other < 0:
+            raise ArithmeticError(f"{other} / {int(self)} divides a negative number")
+        return int(other) / int(self)
+
+
+def _checked(data):
+    """Spec(data) with every rule's scale a _CheckedScale."""
+    data = copy.deepcopy(data)
+    limit = data["meta"]["supports"]["max"] + 1
+    for rule in data["grammar"]["rules"]:
+        rule["scale"] = _CheckedScale(rule["scale"], limit)
+    return Spec(data)
+
+
+@pytest.fixture(scope="module")
+def checked_spec(spec):
+    return _checked(spec._data)
+
+
+def test_the_checked_scale_refuses_what_a_fixed_size_target_cannot_do():
+    # The answer key for the tests that use it: what passes, what raises.
+    scale = _CheckedScale(100, limit=51)
+    assert scale == 100 and isinstance(scale, int)
+    assert 0 * scale == 0 and scale * 0 == 0
+    assert 50 // scale == 0 and 50 / scale == 0.5
+    with pytest.raises(OverflowError):
+        1 * scale
+    with pytest.raises(OverflowError):
+        scale * 1
+    with pytest.raises(ArithmeticError, match="negative"):
+        -1 // scale
+    with pytest.raises(ArithmeticError, match="negative"):
+        -1 / scale
+    assert copy.deepcopy(scale).limit == 51
+
+
+@pytest.mark.parametrize("words", range(2, len(_SCALE_CHAIN) + 1))
+def test_no_reading_holds_more_than_max_plus_one(checked_spec, words):
+    # Every reading above the range is the one capped value, so nothing a
+    # target computes ever needs more than supports.max + 1 to hold -- and
+    # with checked scales, no product on the way does either.
+    text = " ".join(_SCALE_CHAIN[:words]) + " kua"
+    assert max(checked_spec._parse_readings(text)) == SUPPORTED_MAX + 1
+
+
+def test_no_short_phrase_needs_arithmetic_a_fixed_size_target_lacks(
+    checked_spec, short_phrase_readings
+):
+    # Every phrase of up to three words, stacked ones above the range
+    # included, parses with checked scales and to the same readings.
+    assert all(isinstance(rule["scale"], _CheckedScale) for rule in checked_spec.rules)
+    for text, readings in short_phrase_readings.items():
+        assert checked_spec._parse_readings(text) == readings, text
+
+
+def test_capping_changes_no_short_phrase_answer(spec, short_phrase_readings):
+    # The cap is only sound if greed still picks what it would have between
+    # the exact numbers. Compared here with the same spec and a range wide
+    # enough that nothing is capped, over every phrase of up to three words:
+    # the winning numbers, with any above the real range written as "over",
+    # must be the same.
+    uncapped = Spec(copy.deepcopy(spec._data) | {"meta": {
+        **spec._data["meta"], "supports": {"min": 0, "max": 10**40},
+    }})
+
+    def winners(readings):
+        if not readings:
+            return set()
+        top = max(readings.values())
+        return {
+            "over" if n > SUPPORTED_MAX else n
+            for n, rank in readings.items() if rank == top
+        }
+
+    changed = [
+        text for text, readings in short_phrase_readings.items()
+        if winners(readings) != winners(uncapped._parse_readings(text))
+    ]
+    assert not changed, changed[:10]
+
+
+@pytest.mark.parametrize(
+    "path", sorted(MIZO_SPEC_PATH.parent.glob("*.yaml")), ids=lambda p: p.name
+)
+def test_nothing_a_reading_is_compared_with_is_above_max(path):
+    # The test above is exhaustive only to three words. What makes it hold
+    # at any length is that nothing the parser compares a reading with is
+    # above max, so a capped reading passes every test its exact number
+    # would (docs/spec-format.md, #75). Past that, with max 50, a word for
+    # 20 and rules for 100 and 1000, "one thousand twenty hundred" reads as
+    # the cap, where the exact 2000 is no remainder of a thousand. Every
+    # spec here is kept clear of that.
+    spec = load(path)
+    rules = spec._data["grammar"]["rules"]
+    numbers = [rule["scale"] for rule in rules]
+    numbers += [rule["multiplier"] for rule in rules if "multiplier" in rule]
+    numbers += [key for table in spec.lexicon.values() for key in table]
+    numbers += [
+        node.value
+        for rule in rules if "condition" in rule
+        for node in ast.walk(ast.parse(rule["condition"], mode="eval"))
+        if isinstance(node, ast.Constant)
+    ]
+    high = spec.supports["max"]
+    assert not [n for n in numbers if n > high]
+
+
+def _ones_and_tens_spec(high):
+    """'one ten' reads as 10 (one x ten) and as 100 (a rule for 100), and
+    no rule stacks, so the two tie at the top rank."""
+    return Spec({
+        "meta": {"supports": {"min": 0, "max": high}},
+        "lexicon": {
+            "units": {1: {"word": "one"}},
+            "scales": {10: {"word": "ten"}},
+        },
+        "grammar": {
+            "rules": [
+                {"name": "units", "scale": 1, "output": "{units[multiplier].word}"},
+                {"name": "tens", "scale": 10,
+                 "output": "{units[multiplier].word} {scales[10].word}"},
+                {"name": "hundred", "scale": 100, "multiplier": 1,
+                 "output": "{units[1].word} {scales[10].word}"},
+            ],
+        },
+        "parse": {},
+    })
+
+
+def test_an_ambiguity_with_a_reading_above_the_range_names_the_bound():
+    # 100 is above this spec's max of 50, so it is the capped value; the
+    # message says so rather than printing that value as if it were read.
+    with pytest.raises(ValueError, match=r"ambiguous: matches \[10, more than 50\]"):
+        _ones_and_tens_spec(50).text_to_number("one ten")
+
+
+def test_a_reading_below_the_range_is_still_named():
+    # The cap is only above the range. Below supports.min the number is
+    # small and exact, so the refusal still says which it is.
+    spec = Spec({
+        "meta": {"supports": {"min": 5, "max": 5}},
+        "lexicon": {"units": {3: {"word": "three"}, 5: {"word": "five"}}},
+        "grammar": {
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].word}"}]
+        },
+        "parse": {},
+    })
+    with pytest.raises(ValueError, match=r"reads as 3, outside the supported range \[5, 5\]"):
+        spec.text_to_number("three")
+
+
+def test_a_capped_remainder_with_a_zero_multiplier_is_above_the_range():
+    # zoramt on #75: once a remainder is capped, max - remainder is -1, and
+    # floor and truncating division disagree on a negative number. The
+    # remainder is checked first, so no division sees one. Here max is 50,
+    # "seventy" is a remainder read above it and capped, and the rule lets
+    # "zero" be its multiplier: the reading must still be above the range.
+    # A parser that divided first would get it right anyway, since
+    # 0 x 100 + 51 is the cap again; the checked scales make it fail.
+    spec = _checked({
+        "meta": {"supports": {"min": 0, "max": 50}},
+        "lexicon": {
+            "units": {0: {"w": "zero"}, 1: {"w": "one"}, 70: {"w": "seventy"}},
+            "scales": {100: {"w": "hundred"}},
+        },
+        "grammar": {
+            "rules": [
+                {"name": "units", "scale": 1, "output": "{units[multiplier].w}"},
+                {"name": "hundreds", "scale": 100,
+                 "output": "{units[multiplier].w} {scales[100].w}[ {remainder}]"},
+            ],
+        },
+        "parse": {},
+    })
+    assert set(spec._parse_readings("zero hundred seventy")) == {51}
+    with pytest.raises(ValueError, match=r"reads as more than 50, outside"):
+        spec.text_to_number("zero hundred seventy")
+
+
+def test_a_capped_multiplier_is_never_taken_for_a_word():
+    # A stacked multiplier the word slot could hold is skipped (#27 Q-L).
+    # Here "big" is the key max + 1, the capped value: if the cap were
+    # taken for that word, "two hundred thousand" (stacked, 200 x 1000)
+    # would lose its only reading and be refused as no match -- and with an
+    # in-range alternative in the spec, that alternative would answer.
+    spec = _checked({
+        "meta": {"supports": {"min": 0, "max": 150}},
+        "lexicon": {
+            "units": {1: {"w": "one"}, 2: {"w": "two"}, 151: {"w": "big"}},
+            "scales": {100: {"w": "hundred"}, 1000: {"w": "thousand"}},
+        },
+        "grammar": {
+            "stacking": {"accepted_from": 1000, "emit": "never"},
+            "rules": [
+                {"name": "units", "scale": 1, "output": "{units[multiplier].w}"},
+                {"name": "hundreds", "scale": 100,
+                 "output": "{units[multiplier].w} {scales[100].w}"},
+                {"name": "thousands", "scale": 1000,
+                 "output": "{units[multiplier].w} {scales[1000].w}"},
+            ],
+        },
+        "parse": {},
+    })
+    with pytest.raises(ValueError, match=r"reads as more than 150, outside"):
+        spec.text_to_number("two hundred thousand")
+
+
+def test_a_negative_lexicon_key_is_refused():
+    # The cap relies on a reading never shrinking as it is built (#75). The
+    # schema keeps the format open to negatives; the engine says "not yet".
+    with pytest.raises(ValueError, match=r"lexicon.units: key -1 is negative"):
+        Spec({
+            "meta": {"supports": {"min": 0, "max": 9}},
+            "lexicon": {"units": {-1: {"word": "minus one"}, 1: {"word": "one"}}},
+            "grammar": {
+                "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].word}"}]
+            },
+            "parse": {},
+        })
 
 
 # Where a scale word multiplied by zero ("sâng bial") can stand, one row
@@ -693,7 +1104,7 @@ def test_no_scale_word_is_multiplied_by_zero(spec, position):
     # rule is only reached with a multiplier of at least 1; what keeps it out
     # of input is each rule's condition -- "multiplier > 1" for sawm and za,
     # "multiplier > 0" from sâng up -- and nothing else. Without this test,
-    # dropping that condition from any of the seven ladder rules passed both
+    # dropping that condition from any of the ten ladder rules passed both
     # suites, since it changes no rendering and so no vector.
     #
     # Every scale word, in both forms, because the guard is per rule.
@@ -872,14 +1283,16 @@ def test_the_sample_keeps_the_structural_cases(spec):
 
     # And at the real threshold, where the vectors come from: the first
     # scale above it, which holds 1990 itself (#27's hard case for "leh"),
-    # and the top of the ladder, whose multiplier runs to 9 rather than to
-    # the next scale word.
+    # and the top of the ladder (10^12, #74), whose multiplier runs to 9
+    # rather than to a next scale word.
     cases = generate_vectors._structural_cases(spec, generate_vectors.EXHAUSTIVE_BELOW)
     expected = (
         {999, 1000, 1001, 1010, 1100, 1099, 1909, 1990}
         | {m * 1000 for m in range(1, 10)}
         | {10**9 - 1, 10**9, 10**9 + 1}
         | {m * 10**9 for m in range(1, 10)}
+        | {10**12 - 1, 10**12, 10**12 + 1}
+        | {m * 10**12 for m in range(1, 10)}
     )
     assert expected <= cases, sorted(expected - cases)
     assert cases <= set(COVERED), sorted(cases - set(COVERED))
@@ -895,7 +1308,7 @@ def test_everything_below_the_threshold_is_covered():
 def test_the_covered_numbers_stay_a_sample():
     # Every per-number test pays for each number in COVERED, and the vectors
     # hold an entry for each. It is all of 0-999 plus a few hundred numbers
-    # above: 1,234 with the ladder to 10^10 - 1 (#27). A sampler that stopped
+    # above. A sampler that stopped
     # deduplicating shapes would grow with the range instead, and this names
     # that rather than leaving a suite that never finishes.
     assert len(COVERED) <= 5_000
@@ -1055,6 +1468,273 @@ def test_aliases_are_normalised_on_both_sides():
     assert spec.text_to_number("âlt_five") == 5
     assert spec.text_to_number("alt_five") == 5
     assert spec.text_to_number("canonical_five") == 5
+
+
+# Combining marks, by name, so no test below holds an invisible character.
+CIRCUMFLEX = chr(0x0302)    # COMBINING CIRCUMFLEX ACCENT
+ACUTE = chr(0x0301)         # COMBINING ACUTE ACCENT
+SHEVA = chr(0x05B0)         # HEBREW POINT SHEVA
+LOW_LINE = chr(0x0332)      # COMBINING LOW LINE
+
+# What Mizo's two flags accept, keyed by the kind of character involved
+# rather than by example (#56), so a kind nobody thought of shows up as a
+# missing row.
+FOLDED_SPELLINGS = {
+    "the spec's own accent": "sâwm",
+    "no accent": "sawm",
+    "uppercase": "SAWM",
+    "uppercase with the accent": "SÂWM",
+    "another accent on the same letter": "sáwm",
+    "the accent typed as a separate mark": "sa" + CIRCUMFLEX + "wm",
+    "another accent typed as a separate mark": "sa" + ACUTE + "wm",
+}
+
+
+@pytest.mark.parametrize("kind", sorted(FOLDED_SPELLINGS))
+def test_folded_spellings_parse(spec, kind):
+    assert spec.text_to_number(FOLDED_SPELLINGS[kind]) == 10
+
+
+@pytest.mark.parametrize("mark", [SHEVA, LOW_LINE], ids=["Hebrew point", "low line"])
+def test_a_mark_no_accented_latin_letter_uses_is_not_ignored(spec, mark):
+    # Decision (#75): the fold table strips only the marks found inside the
+    # letters it folds, so its answer is the same on every Python. Python's
+    # own NFD rule strips both of these, and stripped 875 marks on 3.10 and
+    # 937 on 3.14 -- the version dependence the table exists to remove.
+    with pytest.raises(ValueError):
+        spec.text_to_number("sâwm" + mark)
+
+
+def test_the_mizo_fold_table_is_its_letters_and_the_marks_inside_them(spec):
+    # The shape #75 decided, stated from the outside: every entry folds to
+    # letters Mizo's words use, or is a mark found inside one of the entries
+    # that does. 439 on every Python from 3.10 to 3.14; a later Python that
+    # changes it fails here, and in the artifact drift check in CI.
+    fold = {chr(code): folded for code, folded in spec._fold.items()}
+    letters = {ch: folded for ch, folded in fold.items() if folded}
+    marks = {ch for ch, folded in fold.items() if not folded}
+    aliases = spec.parse_config["aliases"]
+    words = [
+        form for table in spec.lexicon.values()
+        for entry in table.values() for form in entry.values()
+    ]
+    words += [*spec.parse_config["connectors"], *aliases, *aliases.values()]
+    used = set("".join(spec._normalize_word(word) for word in words))
+    assert all(set(folded) <= used for folded in letters.values())
+    inside = {
+        mark for ch in letters for mark in unicodedata.normalize("NFD", ch)
+        if unicodedata.combining(mark)
+    }
+    assert marks == inside
+    assert CIRCUMFLEX in marks
+    assert (len(fold), len(letters), len(marks)) == (439, 414, 25)
+
+
+def _five_spellings_spec(flags):
+    return Spec({
+        "meta": {"supports": {"min": 10, "max": 10}},
+        "lexicon": {"scales": {10: {"standalone": "sâwm"}}},
+        "grammar": {
+            "rules": [{"name": "ten", "scale": 10, "multiplier": 1, "output": "{scales[10].standalone}"}]
+        },
+        "parse": flags,
+    })
+
+
+@pytest.mark.parametrize(
+    "flags, accepted",
+    [
+        ({}, {"sâwm"}),
+        ({"case_insensitive": True}, {"sâwm", "SÂWM"}),
+        ({"strip_diacritics": True}, {"sâwm", "sawm", "sa" + CIRCUMFLEX + "wm"}),
+        (
+            {"case_insensitive": True, "strip_diacritics": True},
+            {"sâwm", "SÂWM", "sawm", "SAWM", "sa" + CIRCUMFLEX + "wm"},
+        ),
+    ],
+    ids=["neither flag", "case_insensitive", "strip_diacritics", "both flags"],
+)
+def test_each_flag_folds_only_its_own_kind_of_character(flags, accepted):
+    # Every combination of the two flags against every kind of spelling.
+    # Since #75 both flags mean one table, so a table built with the wrong
+    # flag -- folding case for strip_diacritics, or a mark for
+    # case_insensitive -- would still pass every Mizo test, which sets both.
+    spec = _five_spellings_spec(flags)
+    spellings = {"sâwm", "SÂWM", "sawm", "SAWM", "sa" + CIRCUMFLEX + "wm"}
+    parsed = set()
+    for text in spellings:
+        try:
+            spec.text_to_number(text)
+        except ValueError:
+            continue
+        parsed.add(text)
+    assert parsed == accepted
+
+
+@pytest.mark.parametrize("where", ["connector", "alias"])
+def test_a_letter_only_a_connector_or_alias_uses_still_folds(where):
+    # The fold table's alphabet is every word input is compared against, not
+    # the lexicon alone. Here only the connector, or only the alias, has an
+    # "h", so an alphabet read from the lexicon alone would leave "H" as it
+    # is and the uppercase spelling would match nothing.
+    parse = {"case_insensitive": True}
+    if where == "connector":
+        parse["connectors"] = ["leh"]
+        text = "five LEH"
+    else:
+        parse["aliases"] = {"vhf": "five"}
+        text = "VHF"
+    spec = Spec({
+        "meta": {"supports": {"min": 5, "max": 5}},
+        "lexicon": {"units": {5: {"standalone": "five"}}},
+        "grammar": {
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"}]
+        },
+        "parse": parse,
+    })
+    assert spec.text_to_number(text) == 5
+
+
+# Words the fold table cannot fold the way the flags mean, keyed by why
+# (#92). The table folds one character at a time.
+UNFOLDABLE_WORDS = {
+    "a letter whose lowercase depends on its neighbours": (
+        "τρεις", {"case_insensitive": True},           # ΤΡΕΙΣ: Σ -> ς only at the end
+    ),
+    "a mark that none of the table's letters contains": (
+        "thre" + LOW_LINE + "e", {"strip_diacritics": True},
+    ),
+}
+
+
+def _spec_stating(word, place, flags):
+    """A one-number spec that states `word` in `place`."""
+    parse = dict(flags)
+    standalone = "three"
+    if place == "lexicon":
+        standalone = word
+    elif place == "connector":
+        parse["connectors"] = [word]
+    else:
+        parse["aliases"] = {word: "three"}
+    return {
+        "meta": {"supports": {"min": 3, "max": 3}},
+        "lexicon": {"units": {3: {"standalone": standalone}}},
+        "grammar": {
+            "rules": [{"name": "units", "scale": 1, "output": "{units[multiplier].standalone}"}]
+        },
+        "parse": parse,
+    }
+
+
+@pytest.mark.parametrize("place", ["lexicon", "connector", "alias"])
+@pytest.mark.parametrize("why", sorted(UNFOLDABLE_WORDS))
+def test_a_spec_the_fold_table_cannot_fold_is_rejected(why, place):
+    # Decision (#92, option 2): reject at load rather than document the limit.
+    # Without this the spec loads and the table quietly rejects a spelling
+    # the flags promise: before #92, ΤΡΕΙΣ read as 3 through str.lower()'s
+    # final-sigma rule. Every place a spec states a word input is compared
+    # against, since the table's alphabet is built from all of them.
+    word, flags = UNFOLDABLE_WORDS[why]
+    with pytest.raises(ValueError, match="fold table"):
+        Spec(_spec_stating(word, place, flags))
+
+
+def test_the_fold_error_names_the_word_and_both_folds():
+    word, flags = UNFOLDABLE_WORDS["a letter whose lowercase depends on its neighbours"]
+    with pytest.raises(ValueError) as error:
+        Spec(_spec_stating(word, "lexicon", flags))
+    message = str(error.value)
+    assert repr(word) in message            # the word the spec states
+    assert repr("ΤΡΕΙΣ") in message         # the spelling that failed
+    assert repr("τρειΣ") in message         # what the table makes of it
+
+
+def test_a_spelling_the_flags_never_accepted_is_not_required():
+    # Only the spellings the flags read back are checked. DREISSIG
+    # lowercases to dreissig, not dreißig, so str.lower() never accepted it,
+    # before #92 or since, and the table is not asked to: the spec loads,
+    # and DREIßIG still reads.
+    spec = Spec(_spec_stating("dreißig", "lexicon", {"case_insensitive": True}))
+    assert spec.text_to_number("DREIßIG") == 3
+    with pytest.raises(ValueError):
+        spec.text_to_number("DREISSIG")
+
+
+# Words whose capitalisations are hard for a table that folds one character
+# at a time: Greek sigma in each position, letters whose uppercase is more
+# than one character (ß, ǰ, ΐ), digraphs whose title case differs from their
+# uppercase (ǆ, ǉ), and two plain words as controls (istanbul, sâwm).
+HARD_WORDS = [
+    "τρεις", "σας", "ασσος", "τρεισ", "εσυ", "ΐ",
+    "dreißig", "straße", "ǆem", "ǉubav", "ǰa", "istanbul", "sâwm",
+]
+
+
+@pytest.mark.parametrize(
+    "flags",
+    [
+        {"case_insensitive": True},
+        {"strip_diacritics": True},
+        {"case_insensitive": True, "strip_diacritics": True},
+    ],
+    ids=["case_insensitive", "strip_diacritics", "both flags"],
+)
+@pytest.mark.parametrize("word", HARD_WORDS)
+def test_a_spec_loads_exactly_when_the_table_keeps_every_casing(word, flags):
+    # _validate_fold looks at a word and its uppercase form only. This is
+    # the claim that those two are enough (#93): over every capitalisation
+    # of the word, letter by letter, a spec loads exactly when the table
+    # reads back every one the flags read back. A spec that loads loses no
+    # casing, and a spec that is rejected would have lost one.
+    data = _spec_stating(word, "lexicon", flags)
+    case_insensitive = flags.get("case_insensitive", False)
+    strip_diacritics = flags.get("strip_diacritics", False)
+    fold = engine._fold_table(data["lexicon"], data["parse"])
+    target = engine._flag_fold(word, case_insensitive, strip_diacritics)
+    casings = {
+        "".join(letters)
+        for letters in itertools.product(*((c.lower(), c.upper(), c.title()) for c in word))
+    }
+    lost = sorted(
+        casing for casing in casings
+        if engine._flag_fold(casing, case_insensitive, strip_diacritics) == target
+        and engine._normalize(casing, fold) != engine._normalize(word, fold)
+    )
+    if lost:
+        with pytest.raises(ValueError, match="fold table"):
+            Spec(data)
+    else:
+        Spec(data)
+
+
+def test_a_word_is_only_checked_against_the_flags_its_spec_sets():
+    # Without case_insensitive, nobody promised ΤΡΕΙΣ, so τρεις is fine.
+    word, _ = UNFOLDABLE_WORDS["a letter whose lowercase depends on its neighbours"]
+    assert Spec(_spec_stating(word, "lexicon", {})).text_to_number(word) == 3
+
+
+@pytest.mark.parametrize(
+    "case_insensitive, strip_diacritics",
+    [(True, False), (False, True), (True, True)],
+    ids=["case_insensitive", "strip_diacritics", "both flags"],
+)
+def test_the_fold_sweep_skips_only_characters_the_flags_leave_alone(
+    case_insensitive, strip_diacritics
+):
+    # _changed_characters does not fold a code point with no lowercase
+    # mapping, no decomposition and no combining class. Fold every one of
+    # them here instead, so that shortcut cannot quietly lose a character on
+    # some later Python.
+    every = {}
+    for code in range(0x110000):
+        if 0xD800 <= code <= 0xDFFF:
+            continue
+        ch = chr(code)
+        folded = engine._flag_fold(ch, case_insensitive, strip_diacritics)
+        if folded != ch:
+            every[ch] = folded
+    assert engine._changed_characters(case_insensitive, strip_diacritics) == every
 
 
 def test_unparseable_text_raises(spec):
@@ -1286,22 +1966,21 @@ def test_a_rule_that_cannot_render_its_remainder_raises():
 
 def test_a_range_beyond_the_rules_is_named_not_crashed(spec):
     # supports.max raised past what the rules cover is the likeliest mistake
-    # the next time the ceiling moves: at 10^10 there is no scale word above
-    # tlûklehdingâwn (#27 rule 4), and its rule, written for a one-digit
-    # multiplier, asks for the digit 10. The engine names the rule and the
-    # missing word rather than surfacing KeyError: 10.
+    # the next time the ceiling moves: one past 10^13 - 1 the top rule,
+    # written for a one-digit multiplier, asks for the digit 10. The engine
+    # names the rule and the missing word rather than surfacing KeyError: 10.
     data = copy.deepcopy(spec._data)
     data["meta"]["supports"]["max"] = SUPPORTED_MAX + 1
     widened = Spec(data)
     assert widened.number_to_text(SUPPORTED_MAX) == spec.number_to_text(SUPPORTED_MAX)
-    with pytest.raises(ValueError, match=r"'billions' needs units\[10\]"):
+    with pytest.raises(ValueError, match=r"'trillions' needs units\[10\]"):
         widened.number_to_text(SUPPORTED_MAX + 1)
 
 
 @pytest.fixture(scope="module")
 def short_phrase_readings(spec):
     """Every reading of every phrase of up to three words the lexicon can
-    spell, connectors and alias spellings included -- 30,783 phrases --
+    spell, connectors and alias spellings included -- 40,494 phrases --
     before greed chooses. Computed once for the tests below.
 
     The oracle raises on ambiguity rather than guessing, which only helps if
@@ -1311,7 +1990,7 @@ def short_phrase_readings(spec):
     a separate twenty-minute job, run once while prototyping #65.
     """
     vocabulary = generate_vectors.phrase_vocabulary(spec)
-    assert len(vocabulary) == 31, vocabulary
+    assert len(vocabulary) == 34, vocabulary
     readings = {}
     for length in range(1, generate_vectors.PHRASE_MAX_WORDS + 1):
         for words in itertools.product(vocabulary, repeat=length):
@@ -1359,7 +2038,7 @@ def test_a_greedy_reading_out_of_range_has_nothing_in_range_to_fall_back_to(
     short_phrase_readings,
 ):
     # text_to_number applies the range to greed's choice rather than using
-    # it to choose. At 10^10 - 1 that cannot change an answer: a stacked
+    # it to choose. At 10^13 - 1 that cannot change an answer: a stacked
     # multiplier and every shorter one start with the same scale word, so
     # when the longest is out of range, so is every reading. Measured here
     # rather than trusted, so that a higher ceiling or a new rule that makes
@@ -1511,6 +2190,17 @@ def test_a_c0_separator_that_is_not_white_space_is_rejected(spec, char):
     # either way, so this test is the only thing standing there.
     with pytest.raises(ValueError):
         spec.text_to_number("sawm" + char + "nga pariat")
+
+
+def test_the_ignorable_list_is_the_one_decided_on_46():
+    # The six characters chosen on #46. Whitespace is checked against
+    # str.isspace() above, but nothing outside this list derives these, so
+    # this test states them: it is the check on the list's contents, not a
+    # second copy of it. Until #88 the copy in _render.py did this as a side
+    # effect, and removing that copy removed the check (zoramt, #88). A
+    # deliberate change to the list changes this test in the same PR, with
+    # the reason.
+    assert set(_IGNORABLE) == {0x200B, 0xFEFF, 0x2060, 0x200C, 0x200D, 0x00AD}
 
 
 # Enumerated by position rather than by example. The first version of this

@@ -1,30 +1,34 @@
-"""Compiles languages/mizo.yaml into the target package's _mizo.py.
+"""Compiles languages/mizo.yaml into each target package's compiled file:
+packages/python's _mizo.py and packages/npm's _mizo.js.
 
-The Python package should not depend on PyYAML or read the spec at import
-time (#20). Instead, the spec is compiled here into a plain Python module
-that ships with the package. This is similar to generate_vectors.py -- it
-uses the same PyYAML dependency and is run the same way.
+A package should not depend on a YAML parser or read the spec at import
+time (#20). Instead, the spec is compiled here, once, into plain data
+(compile_data), and each target's writer spells that data out in its own
+language (#75). This is similar to generate_vectors.py -- it uses the same
+PyYAML dependency and is run the same way.
 
 Run from inside reference/:
 
     python compile_spec.py
 
-Regenerate and commit the generated file whenever languages/mizo.yaml
-changes. test_compile_spec.py fails if the checked-in copy is out of date.
+Regenerate and commit both generated files whenever languages/mizo.yaml
+changes. test_compile_spec.py fails if either checked-in copy is out of
+date.
 
 This module intentionally uses a few private names from engine.py. The
 compiler is part of the same reference implementation, so sharing the
-template parser and the variable names avoids keeping duplicate copies that
-could drift apart.
+template parser, the condition data, the variable names and the text lists
+avoids keeping duplicate copies that could drift apart.
 """
 
-import ast
+import json
 from pathlib import Path
 
 from engine import (
+    _IGNORABLE,
     _VARIABLE_NAMES,
+    _WHITESPACE,
     _parse_template,
-    _validate_condition_node,
     load,
 )
 
@@ -33,6 +37,7 @@ SPEC_PATH = REPO_ROOT / "languages" / "mizo.yaml"
 ARTIFACT_PATH = (
     REPO_ROOT / "packages" / "python" / "src" / "numberwords" / "_mizo.py"
 )
+JS_ARTIFACT_PATH = REPO_ROOT / "packages" / "npm" / "_mizo.js"
 
 # The variable names a placeholder key or a condition may use. The engine
 # builds this set for its own load-time validation (#37); take that one
@@ -57,66 +62,113 @@ reference/ and commit the result.
 # could hold a segment.
 
 
-# Compiling conditions means there are two places that define how a
-# condition works: engine._eval_node and the compiled lambda below.
-# What keeps them in sync is vectors/mizo.json. It covers every number
-# from 0 to 999, and so every (multiplier, remainder) pair a condition is
-# evaluated at while rendering one; above 999 it keeps every multiplier at
-# every scale (generate_vectors.numbers_to_cover). test_compile_spec.py
-# also evaluates both directly at every pair those numbers give each rule.
+# Conditions are compiled as the engine already holds them: as data
+# (engine._parse_condition), checked against the allowlist when the spec was
+# loaded -- a Spec cannot hold a condition that was not. Nothing is written
+# as code, so _mizo.py is plain literals from end to end, and there is one
+# definition of what a condition means: the data, which the engine's
+# evaluator and the package's both read (#75). Until #75 each condition was
+# emitted as a lambda through ast.unparse, the one place the compiler wrote
+# code rather than data.
 
 
-# The allowlist moved into engine.py in #37, where it now also runs over the
-# whole tree when a spec is loaded. The compiler keeps validating before it
-# emits -- docs/architecture.md: "Never emit an unvalidated string" -- it just
-# stops being the only place that checks, and stops being a second
-# implementation that could drift from the oracle's.
-#
-# Kept under the local name because _compile_condition and
-# test_compile_spec.py both call it.
-_validate_condition = _validate_condition_node
+def compile_data(spec) -> dict:
+    """Everything the compiled module holds, as plain data, decided once.
 
+    A target's writer only spells this out in its own language --
+    _write_python below for packages/python, _write_js for packages/npm --
+    so every decision about *what* a target ships is made here, and two
+    targets cannot come to ship different things (#75).
 
-class _NameToLookup(ast.NodeTransformer):
-    """Rewrites a variable name like `multiplier` into
-    `variables['multiplier']`, so the generated lambda reads values
-    from the dictionary provided by the renderer.
+    `emit` and `whole_only` are booleans rather than the spec's strings
+    ("never", "whole"): the renderer asks yes-or-no questions of them, and a
+    bool cannot be misspelt in a comparison the way a string can.
+
+    `stacks` is grammar.stacking resolved per rule, by the engine: whether
+    this rule's multiplier slot also takes a whole numeral on input. Shipped
+    as the answer rather than as `accepted_from` plus the test for a
+    multiplier word, so the package holds no second copy of that test.
+
+    The connector is grammar.connector, or None for a language that writes
+    none, cut to the two values the renderer reads: `placement` has one legal
+    value, and the schema already refuses any other.
+
+    The parse config has its connectors and aliases already normalised, so
+    the renderer only compares plain strings instead of normalising them on
+    every call. `word_separators` defaults to empty, not [' ']: since #46
+    whitespace is a separator in every language and the renderer applies it,
+    so a spec that declares nothing has no *extra* separators rather than
+    one. Lists become tuples: the renderer only reads them, and a literal
+    tuple cannot be mutated by accident once it ships inside the package.
+
+    WHITESPACE and IGNORABLE are not read from the spec: since #46 they are
+    properties of text that every language shares, and the engine states
+    them once. They ship here so that no target keeps its own copy (#75),
+    and beside PARSE rather than inside it, which holds what the spec says.
+    Both are strings of the characters themselves; IGNORABLE is the
+    engine's translate table turned back into one.
+
+    FOLD is what case_insensitive and strip_diacritics mean for this spec:
+    each character that folds, and what it folds to ("" for a mark),
+    built by the engine from the spec's words (#75, engine._fold_table).
+    A target applies it after removing IGNORABLE and applies nothing else:
+    no lowercasing and no Unicode normalisation of its own, which is the
+    point of shipping it. The two flags stay in PARSE because they are what
+    the spec says, but no target needs to read them.
     """
+    meta = spec._data["meta"]
+    config = spec.parse_config
+    connector = spec.connector
+    return {
+        "LANGUAGE": meta["language"],
+        "CODE": meta["code"],
+        "SPEC_VERSION": str(meta["version"]),
+        "SUPPORTS": (spec.supports["min"], spec.supports["max"]),
+        "LEXICON": spec.lexicon,
+        "RULES": tuple(
+            {
+                "name": rule["name"],
+                "scale": rule["scale"],
+                "multiplier": rule.get("multiplier"),
+                "condition": spec._conditions.get(id(rule)),
+                "output": _parse_template(rule["output"]),
+                "emit": rule.get("emit") != "never",
+                "whole_only": rule.get("scope") == "whole",
+                "stacks": id(rule) in spec._stacking_rules,
+            }
+            for rule in spec.rules
+        ),
+        "CONNECTOR": (
+            None if connector is None
+            else {"word": connector["word"], "min": connector["min"]}
+        ),
+        "PARSE": {
+            "case_insensitive": config.get("case_insensitive", False),
+            "strip_diacritics": config.get("strip_diacritics", False),
+            "word_separators": tuple(config.get("word_separators", [])),
+            "accepted_forms": {
+                table: tuple(fields)
+                for table, fields
+                in sorted(config.get("accepted_forms", {}).items())
+            },
+            "connectors": tuple(sorted(
+                spec._normalize_word(c) for c in config.get("connectors", [])
+            )),
+            "aliases": {
+                spec._normalize_word(variant): spec._normalize_word(canonical)
+                for variant, canonical
+                in sorted(config.get("aliases", {}).items())
+            },
+        },
+        "WHITESPACE": _WHITESPACE,
+        "IGNORABLE": "".join(chr(code) for code in _IGNORABLE),
+        "FOLD": {
+            chr(code): folded for code, folded in sorted(spec._fold.items())
+        },
+    }
 
-    def visit_Name(self, node):
-        return ast.Subscript(
-            value=ast.Name(id="variables", ctx=ast.Load()),
-            slice=ast.Constant(value=node.id),
-            ctx=ast.Load(),
-        )
 
-
-def _compile_condition(expression):
-    """Turns a condition from the spec into the source code for a lambda.
-    The tree is validated first, then rewritten, then converted back into
-    code. That way, an invalid expression is never passed to ast.unparse.
-    The lambda is created with ast.unparse instead of building the code by
-    hand. This lets Python define what the condition means, instead of
-    having a second implementation in the compiler. That is especially
-    important for chained comparisons like `0 < d < 5`, whose behaviour is
-    already defined by engine._eval_node.
-    """
-    tree = ast.parse(expression, mode="eval").body
-    _validate_condition(tree)
-    rewritten = ast.fix_missing_locations(_NameToLookup().visit(tree))
-    return f"lambda variables: {ast.unparse(rewritten)}"
-
-
-def _format_condition(condition):
-    """A rule without a condition emits None; the renderer treats that as
-    "always applies", the same way engine.Spec._rule_applies does.
-    """
-    if condition is None:
-        return "None"
-    return _compile_condition(condition)
-
-
-def _format_lexicon(lexicon):
+def _python_lexicon(lexicon):
     lines = ["LEXICON = {"]
     for table in sorted(lexicon):
         lines.append(f"    {table!r}: {{")
@@ -131,123 +183,197 @@ def _format_lexicon(lexicon):
     return "\n".join(lines)
 
 
-def _format_rules(spec):
-    """Each rule as a dict of plain literals.
-
-    `emit` and `whole_only` are booleans rather than the spec's strings
-    ("never", "whole"): the renderer asks yes-or-no questions of them, and a
-    bool cannot be misspelt in a comparison the way a string can.
-
-    `stacks` is grammar.stacking resolved per rule, by the engine: whether
-    this rule's multiplier slot also takes a whole numeral on input. Shipped
-    as the answer rather than as `accepted_from` plus the test for a
-    multiplier word, so the package holds no second copy of that test.
-    """
+def _python_rules(rules):
     lines = ["RULES = ("]
-    for rule in spec.rules:
+    for rule in rules:
         lines.append("    {")
-        lines.append(f"        'name': {rule['name']!r},")
-        lines.append(f"        'scale': {rule['scale']!r},")
-        lines.append(f"        'multiplier': {rule.get('multiplier')!r},")
-        lines.append(
-            f"        'condition': "
-            f"{_format_condition(rule.get('condition'))},"
+        lines.extend(
+            f"        {field!r}: {value!r}," for field, value in rule.items()
         )
-        lines.append(f"        'output': {_parse_template(rule['output'])!r},")
-        lines.append(f"        'emit': {rule.get('emit') != 'never'!r},")
-        lines.append(f"        'whole_only': {rule.get('scope') == 'whole'!r},")
-        lines.append(f"        'stacks': {id(rule) in spec._stacking_rules!r},")
         lines.append("    },")
     lines.append(")")
     return "\n".join(lines)
 
 
-def _format_connector(spec):
-    """grammar.connector, or None for a language that writes none. Only the
-    two values the renderer reads: `placement` has one legal value, and the
-    schema already refuses any other."""
-    connector = spec.connector
-    if connector is None:
-        return "CONNECTOR = None"
-    return (
-        f"CONNECTOR = {{'word': {connector['word']!r}, "
-        f"'min': {connector['min']!r}}}"
-    )
-
-
-def _format_parse(spec):
-    """The parse config, with connectors and aliases already normalised.
-    Doing this here means the renderer only needs to compare plain strings,
-    instead of normalising them on every call.
-    """
-    config = spec.parse_config
-    connectors = tuple(
-        sorted(spec._normalize_word(c) for c in config.get("connectors", []))
-    )
-    aliases = {
-        spec._normalize_word(variant): spec._normalize_word(canonical)
-        for variant, canonical in sorted(config.get("aliases", {}).items())
-    }
-    # Field lists become tuples, like connectors and word_separators above:
-    # the renderer only reads them, and a literal tuple cannot be mutated by
-    # accident once it ships inside the package.
-    accepted = {
-        table: tuple(fields)
-        for table, fields in sorted(config.get("accepted_forms", {}).items())
-    }
-    lines = [
-        "PARSE = {",
-        f"    'case_insensitive': {config.get('case_insensitive', False)!r},",
-        f"    'strip_diacritics': {config.get('strip_diacritics', False)!r},",
-        # Default is empty, not [' ']: since #46 whitespace is a separator
-        # in every language and the renderer applies it, so a spec that
-        # declares nothing here has no *extra* separators rather than one.
-        f"    'word_separators': "
-        f"{tuple(config.get('word_separators', []))!r},",
-        f"    'accepted_forms': {accepted!r},",
-        f"    'connectors': {connectors!r},",
-        f"    'aliases': {aliases!r},",
-        "}",
-    ]
+def _python_parse(parse):
+    lines = ["PARSE = {"]
+    lines.extend(f"    {field!r}: {value!r}," for field, value in parse.items())
+    lines.append("}")
     return "\n".join(lines)
 
 
-def render_module(spec):
-    """Returns the full source text of the compiled module."""
-    meta = spec._data["meta"]
+def _python_fold(fold):
+    # ascii(), not repr(): most entries are accented letters, and the marks
+    # are combining characters, which repr() writes raw -- invisible in a
+    # diff, or drawn on top of the quote before them.
+    lines = ["FOLD = {"]
+    lines.extend(
+        f"    {ascii(ch)}: {ascii(folded)}," for ch, folded in fold.items()
+    )
+    lines.append("}")
+    return "\n".join(lines)
+
+
+def _write_python(data) -> str:
+    """compile_data's output as the source text of a Python module."""
     provenance = "\n".join(
-        [
-            f"LANGUAGE = {meta['language']!r}",
-            f"CODE = {meta['code']!r}",
-            f"SPEC_VERSION = {str(meta['version'])!r}",
-            f"SUPPORTS = ({spec.supports['min']}, {spec.supports['max']})",
-        ]
+        f"{name} = {data[name]!r}"
+        for name in ("LANGUAGE", "CODE", "SPEC_VERSION", "SUPPORTS")
     )
     sections = [
         _HEADER,
         provenance,
-        _format_lexicon(spec.lexicon),
-        _format_rules(spec),
-        _format_connector(spec),
-        _format_parse(spec),
+        _python_lexicon(data["LEXICON"]),
+        _python_rules(data["RULES"]),
+        f"CONNECTOR = {data['CONNECTOR']!r}",
+        _python_parse(data["PARSE"]),
+        "\n".join(
+            f"{name} = {data[name]!r}" for name in ("WHITESPACE", "IGNORABLE")
+        ),
+        _python_fold(data["FOLD"]),
     ]
     return "\n\n".join(sections) + "\n"
 
 
-def write_module(spec, path):
-    """Writes the compiled module to `path`. Kept separate from main() so
-    the drift test can write to a temporary file instead of the real one.
-    This prevents a failing test from changing the working tree.
+_JS_HEADER = """\
+// Compiled from languages/mizo.yaml by reference/compile_spec.py.
+//
+// Do not edit by hand. Regenerate with `python compile_spec.py` from
+// reference/ and commit the result."""
+
+# The names a compiled file holds, in the order _write_python writes them.
+# _write_js follows it, and test_compile_spec.py checks the two files agree.
+_NAMES = (
+    "LANGUAGE", "CODE", "SPEC_VERSION", "SUPPORTS", "LEXICON", "RULES",
+    "CONNECTOR", "PARSE", "WHITESPACE", "IGNORABLE", "FOLD",
+)
+
+# Written with \u escapes rather than as the characters themselves, as
+# _python_fold does for FOLD: the whitespace and ignorable characters and the
+# fold table's combining marks are invisible in a diff, or drawn on top of
+# the quote before them.
+_JS_ESCAPED = frozenset({"WHITESPACE", "IGNORABLE", "FOLD"})
+
+# Every integer a JavaScript number holds exactly: all of them up to 2^53.
+_JS_EXACT = 2 ** 53
+
+# How deep a name's value is laid out one item per line before the rest is
+# written on one line, so that, as in _mizo.py, a lexicon entry, a rule's
+# field, a parse setting or a fold entry is one line of a diff. Names not
+# listed are one line.
+_JS_LINES = {"LEXICON": 2, "RULES": 2, "PARSE": 1, "FOLD": 1}
+
+
+def _js_literal(value, ascii_only: bool, lines_to: int) -> str:
+    """`value` as JSON, one item per line down to depth `lines_to` and on
+    one line below it. Whatever the layout, it parses as the same JSON."""
+    def one_line(v):
+        return json.dumps(v, ensure_ascii=ascii_only, separators=(", ", ": "))
+
+    def layout(v, depth):
+        if depth >= lines_to or not isinstance(v, (dict, list, tuple)) or not v:
+            return one_line(v)
+        pad, close = "  " * (depth + 1), "  " * depth
+        if isinstance(v, dict):
+            items = [
+                f"{pad}{one_line(k)}: {layout(x, depth + 1)}" for k, x in v.items()
+            ]
+            return "{\n" + ",\n".join(items) + "\n" + close + "}"
+        items = [f"{pad}{layout(x, depth + 1)}" for x in v]
+        return "[\n" + ",\n".join(items) + "\n" + close + "]"
+
+    return layout(value, 0)
+
+
+def _js_values(data) -> dict:
+    """compile_data's output, shaped for JSON: each lexicon table as
+    [key, entry] pairs, sorted by key, since a JavaScript object's keys are
+    strings, and an interpreter that read a key from one would hold "5"
+    where it needs 5 (docs/interpreter-contract.md, "Runtime traps").
+    Tuples become arrays, as JSON writes them anyway."""
+    values = dict(data)
+    values["LEXICON"] = {
+        table: [
+            [key, {field: entry[field] for field in sorted(entry)}]
+            for key, entry in sorted(data["LEXICON"][table].items())
+        ]
+        for table in sorted(data["LEXICON"])
+    }
+    return values
+
+
+def _check_js_integers(value):
+    """Refuse any integer, anywhere in `value`, that a JavaScript number
+    would not hold exactly: it holds every integer up to 2^53, and not
+    all of those above."""
+    if isinstance(value, bool):
+        return
+    if isinstance(value, int):
+        if abs(value) > _JS_EXACT:
+            raise ValueError(f"the compiled data: {value} is above 2^53, which "
+                             f"a JavaScript number does not hold exactly")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            _check_js_integers(key)
+            _check_js_integers(item)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            _check_js_integers(item)
+
+
+def _write_js(data) -> str:
+    """compile_data's output as the source text of an ES module: one
+    `export const` per name, each value a JSON literal. So _mizo.js is plain
+    data, as _mizo.py is, and no code is written (#75).
+
+    No reading ever holds more than max + 1 (docs/interpreter-contract.md,
+    "Arithmetic"), so that has to be exact too, beside every integer the
+    file holds. A spec that outgrows the type fails here, when the file is
+    built, rather than in a caller's hands.
+    """
+    _check_js_integers(data)
+    high = data["SUPPORTS"][1]
+    if high + 1 > _JS_EXACT:
+        raise ValueError(
+            f"supports.max is {high}: max + 1 is above 2^53, which a "
+            f"JavaScript number does not hold exactly"
+        )
+    values = _js_values(data)
+    sections = [_JS_HEADER]
+    for name in _NAMES:
+        text = _js_literal(values[name], name in _JS_ESCAPED, _JS_LINES.get(name, 0))
+        sections.append(f"export const {name} = {text};")
+    return "\n\n".join(sections) + "\n"
+
+
+def render_module(spec):
+    """Returns the full source text of the compiled Python module."""
+    return _write_python(compile_data(spec))
+
+
+def render_js_module(spec):
+    """Returns the full source text of the compiled JavaScript module."""
+    return _write_js(compile_data(spec))
+
+
+def write_module(spec, path, render=render_module):
+    """Writes a compiled module to `path`, the Python one unless `render`
+    says otherwise. Kept separate from main() so the drift tests can write
+    to a temporary file instead of the real one. This prevents a failing
+    test from changing the working tree.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        f.write(render_module(spec))
+        f.write(render(spec))
 
 
 def main():
     spec = load(SPEC_PATH)
     write_module(spec, ARTIFACT_PATH)
     print(f"Wrote {ARTIFACT_PATH.relative_to(REPO_ROOT)}")
+    write_module(spec, JS_ARTIFACT_PATH, render_js_module)
+    print(f"Wrote {JS_ARTIFACT_PATH.relative_to(REPO_ROOT)}")
 
 
 if __name__ == "__main__":

@@ -26,8 +26,8 @@ also test the canonical form. See below for how the list is chosen.
 
 Why `number` is a string (#12)
 ------------------------------
-Every number in this file is at most Mizo's ceiling, 10^10 - 1 (#27, revised
-2026-09-25), which JavaScript's Number.MAX_SAFE_INTEGER holds exactly -- so
+Every number in this file is at most Mizo's ceiling, 10^13 - 1 (#74),
+which JavaScript's Number.MAX_SAFE_INTEGER holds exactly -- so
 JSON's number type would do. It is written as a string anyway, because the
 format outlives the ceiling. The decision was taken when the ceiling was
 10^18 - 1, 111x past MAX_SAFE_INTEGER, where a standard JSON.parse reads
@@ -417,6 +417,8 @@ def accepted_inputs(spec, n: int, every_dimension: bool = False) -> list:
         # canonical output emits "leh", leaving it out is equally idiomatic.
         # It only arises where the canonical output carries a connector, so
         # nothing below grammar.connector's `min` produces one.
+        # English has no grammar.connector; its hundreds rule writes "and",
+        # and leaving that out is the accepted American form (#82).
         dropped = _without_connectors(spec, canonical_words)
         if len(dropped) != len(canonical_words):
             variants.add(canonical_joiner.join(dropped))
@@ -654,10 +656,11 @@ def _connector_slots(spec, n: int, words) -> tuple:
 
     2. Is the gap still empty? From 100 up the canonical output itself
        contains "leh", before the final addend (Q-M on #27). A gap whose
-       neighbour is already a connector is spoken for; adding another
-       produces "zâ leh leh pariat", which is not Mizo and which nothing
-       downstream would catch -- the generator's own parse-back check passes
-       it, since _tokenize drops connectors however many there are.
+       neighbour is already a connector is spoken for. Adding another would
+       produce "zâ leh leh pariat". The generator skips that gap, so the
+       spelling is not certified: doubled "leh" is not Mizo (Rosie
+       Malsawmtluangi, #19). The engine still accepts it, and a run of any
+       length, because _tokenize drops every connector before matching (#95).
 
     The certified set stays deliberately narrower than what the engine
     tolerates (#12, #34): the engine drops a connector from any gap, so it
@@ -846,8 +849,9 @@ def build_vectors(spec) -> list:
 
 
 # The longest phrase the phrase file covers, in words. Every phrase up to
-# three words is 30,783 phrases, about ten seconds to check in either suite;
-# four would be 954,304, minutes in each. Three is also the length the
+# three words is 40,494 phrases with the current vocabulary, about ten
+# seconds to check in either suite; four would be over a million, minutes
+# in each. Three is also the length the
 # short-phrase checks in test_engine.py had already settled on.
 PHRASE_MAX_WORDS = 3
 
@@ -870,41 +874,179 @@ def phrase_vocabulary(spec) -> list:
     )
 
 
+# The longest one-slip phrase the phrase file lists, in words. A parse costs
+# more the longer the phrase: uncapped, the slips ran to 29 words and 12,525
+# phrases at 10^10 - 1 (#27). At 0-999 the longest was eight words, a
+# seven-word spelling with one word doubled, so the cap would have dropped
+# nothing there. And length is not where two parsers differ: a longer phrase
+# is the same rules reached through one more {remainder}. What has to survive
+# the cap is every rule, which test_engine.py checks.
+SLIP_PHRASE_MAX_WORDS = 8
+
+
+def near_misses(text: str) -> set:
+    """Every spelling one slip away from `text`: one word deleted, one word
+    doubled, or two neighbouring words swapped."""
+    words = text.split()
+    slips = set()
+    for i in range(len(words)):
+        slips.add(" ".join(words[:i] + words[i + 1:]))
+        slips.add(" ".join(words[:i + 1] + words[i:]))
+        if i + 1 < len(words):
+            slips.add(" ".join(words[:i] + [words[i + 1], words[i]] + words[i + 2:]))
+    slips.discard("")
+    return slips
+
+
+def one_slip_phrases(spec) -> list:
+    """Every certified spelling of one number per shape (numbers_to_sweep),
+    one slip away (near_misses), up to SLIP_PHRASE_MAX_WORDS words, sorted.
+
+    Longer phrases that are *nearly* right, which is where a second copy of
+    a parser is most likely to accept what the first one refuses. One number
+    per shape, so the list grows with the grammar rather than the range.
+    """
+    slips = set()
+    for n in numbers_to_sweep(spec):
+        for text in accepted_inputs(spec, n):
+            slips |= {
+                slip for slip in near_misses(text)
+                if len(slip.split()) <= SLIP_PHRASE_MAX_WORDS
+            }
+    return sorted(slips)
+
+
+# Stacked spellings with the numbers their sources give, by language code.
+# Written out rather than derived from the rules, so that a wrong rule fails
+# test_engine.py instead of agreeing with itself. Every one is accepted on
+# input and never emitted. STACKED_PHRASES lists them in the phrase file,
+# and the engine suite holds the engine's answer for each to the number here.
+STACKED_FORMS = {
+    "lus": {
+        "nuai za hnih": 20_000_000,  # #27 rule 6
+        "maktaduai za thum": 300_000_000,  # #27 rule 6
+        "nuai za pahnih": 10_200_000,  # #27 Q-E: 10^5 x (100 + 2)
+        "nuaih za hnih": 20_000_000,  # #27 Q-O, multiplied position
+        "nuai sawm hnih": 2_000_000,  # a native speaker, #65, 2026-09-24
+        # 2026-08-30, the repo owner's ordinary way to say it: 201 x 10^5,
+        # then the rest, with "leh" only before the final addend.
+        "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum":
+            20_146_713,
+        # Mizo Ṭawng Ziah Dân Dik, ch. 4, via #27 (2026-09-03): "leh" in
+        # every gap, and "sâwm" keeping its circumflex as nuai's multiplier.
+        "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga":
+            1_098_765,
+        # Rosie Malsawmtluangi, native Mizo speaker, 2026-11-13: 10^6 x
+        # (10^5 x 11), a stacked multiplier inside a stacked multiplier.
+        # Greed picks it over 10^6 x (10^5 x 10 + 1) only by the inner
+        # multiplier's rank, which no other listed phrase needs.
+        "maktaduai nuai sawm pakhat": 1_100_000_000_000,
+    },
+}
+
+# Phrases in which a stacked multiplier has to bind as the engine binds it,
+# or be refused, by language code: the sourced spellings above, and more.
+# Hand-picked: no rule generates them, and the one-slip phrases stop at
+# eight words.
+STACKED_PHRASES = {
+    "lus": (
+        *STACKED_FORMS["lus"],
+        # Places greedy binding has to choose (#27 rule 6, Q-E, and the
+        # 2026-08-30 / 2026-09-03 decisions).
+        "nuai za hnih leh sawm nga",
+        "nuai za hnih leh pathum",
+        "maktaduai sawm pakhat",
+        "vaibêlchhetak khat nuai sawm pakhat",
+        "NUAIH-ZA-HNIH",
+        # 20 x 10^9, in range since #74, written "vatelubeuh hnih".
+        "tlûklehdingâwn sawm hnih",
+        # Refused, each for its own reason: above the range, below the
+        # floor for stacking, a single digit offered as a stacked
+        # multiplier, and a remainder as large as its scale. In the last,
+        # "nuai sawm" is 10^6, maktaduai's own scale; only a stacked
+        # remainder can reach its scale. Its refusal is the grammar's rule
+        # that a remainder is smaller than its scale, not a linguistic claim.
+        "huau sawm",
+        "sîng za",
+        "vaibêlchhe pahnih",
+        "maktaduai khat nuai sawm",
+        # Grammatical stacking (zoramt, #107), though in practice nuai and
+        # vaibêlchhe are the scales most often stacked, in financial
+        # figures. A multiplier of eleven words, with readings whose
+        # multipliers take ten, eight, six, four and two. Greed takes the
+        # eleven. A target that compares ranks as text, as JavaScript's `>`
+        # does on arrays, puts "11" below "8" and answers with the eight.
+        "maktaduai nuai kua sîng kua sâng kua za kua sawm kua pakua",
+    ),
+}
+
+
+def _number_or_refusal(spec, text: str):
+    """The number `text` names, as a string, or None where the engine
+    refuses it as naming no number.
+
+    Only engine.NoNumberError is a refusal. Anything else the engine
+    raises -- an ambiguous phrase, a fault in the spec -- stops the build
+    instead, because writing it down as "must be rejected" would make that
+    the answer every target is tested against (#77).
+    """
+    try:
+        return str(spec.text_to_number(text))
+    except NoNumberError:
+        return None
+
+
 def build_phrases(spec) -> dict:
-    """Build the phrase file: the vocabulary, the longest phrase, and every
+    """Build the phrase file. It has two parts (#75).
+
+    The closed world: `vocabulary`, `max_words`, and in `accepted` every
     phrase of 1 to PHRASE_MAX_WORDS words from the vocabulary that
-    text_to_number() accepts, with the number it names (#75).
+    text_to_number() accepts, with the number it names. The vectors only
+    say what must be accepted, so a target that accepts too much passes all
+    of them. This part says what must be rejected as well, without listing
+    it. A target builds every phrase from `vocabulary` itself, words joined
+    by one space; one listed in `accepted` must give that number, and every
+    other one must be rejected. Of the bugs planted in a JS port on #75, it
+    caught both that changed an answer; the vectors caught neither.
 
-    The vectors only say what must be accepted, so a target that accepts
-    too much passes all of them. This file says what must be rejected as
-    well, without listing it: it is closed-world. A target builds every
-    phrase from `vocabulary` itself, words joined by one space; one listed
-    in `accepted` must give that number, and every other one must be
-    rejected. Of the bugs planted in a JS port on #75, it caught both that
-    changed an answer; the vectors caught neither.
+    The listed phrases: `one_slip` (one_slip_phrases) and `stacked`
+    (STACKED_PHRASES). No target can build these from the vocabulary, so
+    each is written out with the number it names, or null where it must be
+    rejected. They reach what three words cannot: longer phrases that are
+    nearly right, and greed choosing past its first comparison, which no
+    phrase of the closed world needs.
 
-    Only engine.NoNumberError is written down as a rejection. Anything else
-    the engine raises -- an ambiguous phrase, a fault in the spec -- stops
-    the build instead, because leaving the phrase out would certify "must
-    be rejected" as the answer every target is tested against (#77).
+    The file certifies whatever the engine accepts, repeated connectors
+    included, and that is deliberate (#95). A run of "leh" is not a spelling
+    the vectors generate, and a target that rejects one fails this file.
+
+    Only a phrase that names no number is recorded as rejected, in either
+    part (_number_or_refusal).
 
     Numbers are strings, for the reason the vectors' are (see the top of
-    this module). `accepted` is sorted, so the file is byte-stable for the
-    CI drift check.
+    this module). Every mapping is sorted, so the file is byte-stable for
+    the CI drift check.
     """
     vocabulary = phrase_vocabulary(spec)
     accepted = {}
     for length in range(1, PHRASE_MAX_WORDS + 1):
         for words in itertools.product(vocabulary, repeat=length):
             text = " ".join(words)
-            try:
-                accepted[text] = str(spec.text_to_number(text))
-            except NoNumberError:
-                pass
+            number = _number_or_refusal(spec, text)
+            if number is not None:
+                accepted[text] = number
+    code = spec._data.get("meta", {}).get("code")
     return {
         "vocabulary": vocabulary,
         "max_words": PHRASE_MAX_WORDS,
         "accepted": dict(sorted(accepted.items())),
+        "one_slip": {
+            text: _number_or_refusal(spec, text) for text in one_slip_phrases(spec)
+        },
+        "stacked": {
+            text: _number_or_refusal(spec, text)
+            for text in sorted(STACKED_PHRASES.get(code, ()))
+        },
     }
 
 
@@ -929,7 +1071,9 @@ def main() -> None:
     print(
         f"Wrote {len(phrases['accepted'])} accepted phrases of up to "
         f"{phrases['max_words']} words, from a vocabulary of "
-        f"{len(phrases['vocabulary'])}, to {PHRASES_PATH.relative_to(REPO_ROOT)}"
+        f"{len(phrases['vocabulary'])}, and {len(phrases['one_slip'])} one-slip "
+        f"and {len(phrases['stacked'])} stacked phrases, to "
+        f"{PHRASES_PATH.relative_to(REPO_ROOT)}"
     )
 
 

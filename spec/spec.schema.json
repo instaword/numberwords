@@ -163,7 +163,7 @@
               "condition": {
                 "type": "string",
                 "minLength": 1,
-                "description": "Optional extra test over the variables `multiplier` and `remainder`. Evaluated by a restricted AST walker in engine.py -- comparisons, and/or, names and integer constants only. NOT eval(). Anything outside that subset raises rather than executing."
+                "description": "Optional extra test over the variables `multiplier` and `remainder`. Checked against an allowlist in engine.py -- a comparison, or conditions joined by and/or, where a comparison uses ==, !=, >, >=, < or <= and its operands are multiplier, remainder or non-negative integers, never True/False -- and kept as data that every target evaluates (#75). NOT eval(). Anything outside that grammar raises rather than executing, including forms Python would accept by coercion, such as a bare `remainder` or `multiplier == True`. It means what it means in Python: `0 < multiplier < 5` is `0 < multiplier and multiplier < 5`."
               },
               "output": {
                 "type": "string",
@@ -196,11 +196,11 @@
       "properties": {
         "case_insensitive": {
           "type": "boolean",
-          "description": "Lowercase input and lexicon before comparing."
+          "description": "Fold uppercase forms of the spec's letters to the letters themselves, on input and lexicon before comparing. Through the engine's fold table, not the runtime's lowercasing (#75): see spec-format.md, 'Case and diacritics'."
         },
         "strip_diacritics": {
           "type": "boolean",
-          "description": "Remove combining marks from input and lexicon before comparing, so ASCII-typed input matches. Applied to both sides -- applying it to input alone would stop it matching the lexicon."
+          "description": "Fold accented forms of the spec's letters to the letters themselves, and strip the combining marks found in those forms, on input and lexicon before comparing, so ASCII-typed input matches. Applied to both sides -- applying it to input alone would stop it matching the lexicon. Other combining marks are not stripped (#75): see spec-format.md, 'Case and diacritics'."
         },
         "word_separators": {
           "type": "array",

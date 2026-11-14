@@ -9,14 +9,17 @@ tooling; it is not shipped.
 import ast
 import importlib
 import importlib.util
+import json
 import re
 import sys
 
 import pytest
+from hypothesis import example, given, settings
 
 import compile_spec
 import generate_vectors
-from engine import _eval_condition, load
+import test_properties
+from engine import _IGNORABLE, _WHITESPACE, _eval_tree, _parse_condition, load
 
 
 @pytest.fixture(scope="module")
@@ -58,6 +61,121 @@ def test_compiling_twice_gives_the_same_text(spec):
     a timestamp) would make it fail at random.
     """
     assert compile_spec.render_module(spec) == compile_spec.render_module(spec)
+    assert compile_spec.render_js_module(spec) == compile_spec.render_js_module(spec)
+
+
+# --- packages/npm's _mizo.js ---------------------------------------------
+
+
+_JS_EXPORT = re.compile(r"export const ([A-Z_]+) = (.*?);\n(?:\n|\Z)", re.S)
+
+
+def _js_exports(text):
+    """The names and values of a compiled _mizo.js, read as JSON.
+
+    Strict on purpose: the file has to be its header and then nothing but
+    `export const NAME = <JSON>;` blocks, so anything else written into it
+    -- a function, a stray statement -- fails here. Every JSON value is a
+    JavaScript expression, so a file this accepts is one Node can import.
+    """
+    header, _, body = text.partition("\n\nexport const ")
+    assert all(line.startswith("//") for line in header.splitlines()), header
+    body = "export const " + body
+    exports, end = {}, 0
+    for match in _JS_EXPORT.finditer(body):
+        assert match.start() == end, body[end:match.start()][:200]
+        exports[match.group(1)] = json.loads(match.group(2))
+        end = match.end()
+    assert end == len(body), body[end:][:200]
+    return exports
+
+
+def test_checked_in_js_artifact_is_up_to_date(spec, tmp_path):
+    """_mizo.py's drift test, for packages/npm's compiled file."""
+    generated = tmp_path / "_mizo.js"
+    compile_spec.write_module(spec, generated, compile_spec.render_js_module)
+    assert generated.read_text(encoding="utf-8") == (
+        compile_spec.JS_ARTIFACT_PATH.read_text(encoding="utf-8")
+    ), "_mizo.js is stale -- run `python compile_spec.py` and commit it"
+
+
+def _as_json(value):
+    return json.loads(json.dumps(value))
+
+
+def test_the_js_artifact_holds_what_the_python_one_holds(artifact):
+    """The two writers spell out the same compile_data. Compared file
+    against file, each read back independently, so a writer that dropped,
+    reordered or retyped something fails here whichever one it is.
+
+    The lexicon is the one shape that differs: JavaScript object keys are
+    strings, so _mizo.js writes each table as [key, entry] pairs, and the
+    keys have to come back as numbers (docs/interpreter-contract.md).
+    """
+    exports = _js_exports(compile_spec.JS_ARTIFACT_PATH.read_text(encoding="utf-8"))
+    # The names _mizo.py holds, in the order it holds them: read from the
+    # other writer's file, not from the list both writers share.
+    names = [name for name in vars(artifact) if name.isupper()]
+    assert list(exports) == names
+    lexicon = {}
+    for table, pairs in exports.pop("LEXICON").items():
+        for pair in pairs:
+            assert isinstance(pair, list) and len(pair) == 2, pair
+            key, entry = pair
+            assert isinstance(key, int) and not isinstance(key, bool), (table, key)
+        keys = [key for key, _ in pairs]
+        assert keys == sorted(keys), table
+        lexicon[table] = dict(pairs)
+    assert lexicon == artifact.LEXICON
+    for name, value in exports.items():
+        assert value == _as_json(getattr(artifact, name)), name
+
+
+def test_the_js_artifact_escapes_what_a_diff_would_hide():
+    """The whitespace and ignorable characters and the fold table's marks
+    are written as \\u escapes, as _mizo.py writes FOLD with ascii(): raw,
+    they are invisible in a diff or drawn over the quote before them. The
+    lexicon is written as it reads, circumflexes and all."""
+    text = compile_spec.JS_ARTIFACT_PATH.read_text(encoding="utf-8")
+    for line in text.splitlines():
+        if line.startswith(("export const WHITESPACE", "export const IGNORABLE")):
+            assert line.isascii(), line[:60]
+    fold = text[text.index("export const FOLD"):]
+    assert fold.isascii()
+    assert '"standalone": "sâwm"' in text
+
+
+def _spec_reaching(high, scale=10):
+    """A two-rule spec whose range ends at `high` and whose one scale word
+    is worth `scale`."""
+    from engine import Spec
+
+    return Spec({
+        "meta": {"language": "Test", "code": "test", "version": "0.0.0",
+                 "supports": {"min": 0, "max": high}},
+        "lexicon": {"units": {1: {"word": "one"}}, "scales": {scale: {"word": "ten"}}},
+        "grammar": {"rules": [
+            {"name": "units", "scale": 1, "output": "{units[multiplier].word}"},
+            {"name": "tens", "scale": scale,
+             "output": "{units[multiplier].word} {scales[" + str(scale) + "].word}"},
+        ]},
+        "parse": {},
+    })
+
+
+def test_the_js_writer_refuses_what_a_javascript_number_cannot_hold():
+    """A JavaScript number holds every integer up to 2^53 exactly, and no
+    reading ever holds more than max + 1 (docs/interpreter-contract.md,
+    "Arithmetic"). So a spec past that fails when _mizo.js is built, not
+    in a caller's hands, and so does any integer the file would write."""
+    compile_spec.render_js_module(_spec_reaching(2 ** 53 - 1))
+    with pytest.raises(ValueError, match=r"max \+ 1 is above 2\^53"):
+        compile_spec.render_js_module(_spec_reaching(2 ** 53))
+    with pytest.raises(ValueError, match=r"is above 2\^53"):
+        compile_spec.render_js_module(_spec_reaching(99, scale=2 ** 53 + 2))
+    # Mizo is far inside it: max + 1 is 10^13.
+    mizo = compile_spec.compile_data(load(compile_spec.SPEC_PATH))
+    assert mizo["SUPPORTS"][1] + 1 <= 2 ** 53
 
 
 def test_artifact_imports_nothing(artifact):
@@ -74,13 +192,31 @@ def test_artifact_imports_nothing(artifact):
     assert imports == []
 
 
-def test_compiled_conditions_match_the_engine(spec, artifact):
-    """The compiled lambda and engine._eval_condition are two
-    implementations of the same condition, which is the risk that made
-    ast.unparse the right way to emit them. This checks they agree at every
-    (multiplier, remainder) pair a covered number gives the rule's scale.
-    Up to 999 that is every input the renderer can hand a condition; above
-    it, every multiplier, with the remainders the sampled numbers leave.
+def test_artifact_is_data_only():
+    """Since #75 the compiled module holds no code at all: every name it
+    defines is a literal. Conditions were compiled as lambdas until then,
+    and a lambda creeping back in would put a second definition of what a
+    condition means into the package -- in Python, which no other target
+    can read.
+    """
+    tree = ast.parse(compile_spec.ARTIFACT_PATH.read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+            continue    # the module docstring
+        assert isinstance(node, ast.Assign), ast.dump(node)[:120]
+        # literal_eval refuses anything but a literal: a lambda, a call, a
+        # name.
+        ast.literal_eval(node.value)
+
+
+def test_compiled_conditions_match_the_engine(spec, artifact, package):
+    """The compiler writes each condition as the engine's own data, and the
+    package evaluates that data with a second copy of the engine's
+    evaluator. This checks the data is the engine's, unchanged, and that the
+    two evaluators agree at every (multiplier, remainder) pair a covered
+    number gives the rule's scale. Up to 999 that is every input the
+    renderer can hand a condition; above it, every multiplier, with the
+    remainders the sampled numbers leave.
     """
     # zip() stops at the shorter sequence, so without this the test would
     # quietly check fewer rules if the compiler ever dropped one. The name
@@ -94,28 +230,73 @@ def test_compiled_conditions_match_the_engine(spec, artifact):
     covered = generate_vectors.numbers_to_cover(spec)
     for yaml_rule, compiled_rule in zip(spec.rules, artifact.RULES):
         assert yaml_rule["name"] == compiled_rule["name"]
-        condition = yaml_rule.get("condition")
-        if condition is None:
-            assert compiled_rule["condition"] is None
+        tree = spec._conditions.get(id(yaml_rule))
+        assert compiled_rule["condition"] == tree, yaml_rule["name"]
+        if tree is None:
             continue
         pairs = {divmod(n, yaml_rule["scale"]) for n in covered}
         for multiplier, remainder in sorted(pairs):
             variables = {"multiplier": multiplier, "remainder": remainder}
-            assert bool(compiled_rule["condition"](variables)) == bool(
-                _eval_condition(condition, variables)
+            assert package._render._eval_tree(compiled_rule["condition"], variables) == (
+                _eval_tree(tree, variables)
             ), f"rule {yaml_rule['name']} disagrees at {variables}"
 
 
-def test_chained_comparison_keeps_python_semantics():
-    """A chained comparison is the case an emitter that pasted strings
-    together would get wrong: `0 < d < 5` means `0 < d and d < 5`, not
-    `(0 < d) < 5`, which would evaluate a bool against 5 and be true for
-    d = 0. No rule in mizo.yaml uses one today, so this guards the
-    mechanism rather than the current data.
+# One row per thing condition data can hold (engine._condition_tree), named
+# after it, so an evaluator that mishandles one fails the row that says
+# which. mizo.yaml uses only `>` and `and` today; these guard the mechanism
+# for the next spec, and for the next target's evaluator.
+@pytest.mark.parametrize(
+    "what, expression",
+    [
+        ("==", "multiplier == 3"),
+        ("!=", "multiplier != 3"),
+        (">", "multiplier > 3"),
+        (">=", "multiplier >= 3"),
+        ("<", "multiplier < 3"),
+        ("<=", "multiplier <= 3"),
+        ("and", "multiplier > 1 and remainder > 0"),
+        ("or", "multiplier == 0 or remainder == 5"),
+        ("and inside or", "remainder != 0 or multiplier >= 3 and multiplier <= 7"),
+        ("the remainder variable", "remainder > 4"),
+        ("a constant on the left", "5 < multiplier"),
+        ("a chained comparison", "0 < multiplier < 5"),
+    ],
+)
+def test_both_evaluators_read_condition_data_as_python_reads_the_condition(
+    package, what, expression
+):
+    # The meaning a spec author wrote is Python's reading of the string, so
+    # Python is the oracle here: eval() on these fixed test strings, never
+    # on a spec. The package gets the data as the compiler writes it --
+    # repr(), read back as a literal -- not the engine's object.
+    tree = _parse_condition(expression)
+    compiled = ast.literal_eval(repr(tree))
+    for multiplier in range(11):
+        for remainder in range(11):
+            variables = {"multiplier": multiplier, "remainder": remainder}
+            expected = eval(expression, {"__builtins__": {}}, dict(variables))
+            assert _eval_tree(tree, variables) == expected, (what, variables)
+            assert package._render._eval_tree(compiled, variables) == expected, (what, variables)
+
+
+def test_a_chained_comparison_becomes_an_explicit_and():
+    """A chained comparison is the case another language gets wrong:
+    `0 < d < 5` means `0 < d and d < 5` in Python, and `(0 < d) < 5` in
+    JavaScript, which is true for every d. The engine spells the `and` out
+    when it converts the condition to data, so no evaluator -- the engine's,
+    the package's, or a future target's -- ever sees a chain (#75). No rule
+    in mizo.yaml uses one today, so this guards the mechanism rather than
+    the current data.
     """
-    condition = eval(compile_spec._compile_condition("0 < multiplier < 5"))
+    tree = _parse_condition("0 < multiplier < 5")
+    assert tree == (
+        "and",
+        ("cmp", "<", ("int", 0), ("var", "multiplier")),
+        ("cmp", "<", ("var", "multiplier"), ("int", 5)),
+    )
     results = [
-        condition({"multiplier": n, "remainder": 0}) for n in (0, 1, 4, 5)
+        _eval_tree(tree, {"multiplier": n, "remainder": 0}) for n in (0, 1, 4, 5)
     ]
     assert results == [False, True, True, False]
 
@@ -128,15 +309,130 @@ def test_chained_comparison_keeps_python_semantics():
         "multiplier.real == 1",    # attribute access
         "ones_digit == 1",         # a name the format no longer defines
         "multiplier == 'zero'",    # a constant that is not an integer
+        "multiplier > -1",         # minus applied to 1, not one number
     ],
 )
 def test_validator_rejects_unsupported_conditions(expression):
-    """The compiler only accepts what engine._eval_node accepts. Anything
-    else raises here, at build time, instead of being written into the
-    package as code.
+    """Only what the allowlist accepts becomes condition data. Anything else
+    raises when the spec loads, so it can never reach the compiler or be
+    written into a package.
     """
     with pytest.raises(ValueError):
-        compile_spec._compile_condition(expression)
+        _parse_condition(expression)
+
+
+# The grammar has two kinds of position. Where a condition goes -- the
+# whole expression, or inside an and/or -- it holds a comparison or an
+# and/or; a comparison's operand holds a variable or a non-negative
+# integer. Keyed by position, then by what wrongly sits there, so a missing
+# cell reads as a missing row. The five forms named on #75 are here, with
+# the four that complete the grid. Each is checked against its own message,
+# so it is refused for the reason the row says.
+WRONG_VALUE_IN_A_POSITION = {
+    ("the whole condition", "a bool"): ("True", "Not a condition"),
+    ("the whole condition", "a variable"): ("remainder", "Not a condition"),
+    ("the whole condition", "an integer"): ("1", "Not a condition"),
+    ("inside and/or", "a bool"): ("multiplier > 1 and True", "Not a condition"),
+    ("inside and/or", "a variable"): (
+        "multiplier > 1 and remainder", "Not a condition"
+    ),
+    ("inside and/or", "an integer"): ("multiplier > 1 or 0", "Not a condition"),
+    ("a comparison operand", "a bool"): (
+        "multiplier == True", "True is not a number"
+    ),
+    ("a comparison operand", "a comparison"): (
+        "(multiplier > 1) == 1", "Not a comparison operand"
+    ),
+    ("a comparison operand", "an and/or"): (
+        "(multiplier > 1 and remainder > 0) == 1", "Not a comparison operand"
+    ),
+}
+
+
+@pytest.mark.parametrize("position, value", sorted(WRONG_VALUE_IN_A_POSITION))
+def test_a_value_python_would_coerce_is_not_a_condition(position, value):
+    """Every row is valid Python, which counts True as 1 and any integer as
+    true or false, so each one evaluates there -- the eval() call checks
+    that, so a row cannot pass by being rejected for a typo. The allowlist
+    refuses them anyway (zoramt, #75): no spec uses them, and other
+    languages coerce differently, so every target would otherwise have to
+    copy Python's rules.
+    """
+    expression, reason = WRONG_VALUE_IN_A_POSITION[position, value]
+    eval(expression, {"__builtins__": {}}, {"multiplier": 2, "remainder": 1})
+    with pytest.raises(ValueError, match=reason):
+        _parse_condition(expression)
+
+
+# Python has ten comparison operators, and a condition may use six. These
+# are the other four, each in a comparison that is wrong in nothing else.
+REFUSED_OPERATORS = {
+    "in": "multiplier in 1",
+    "not in": "multiplier not in 1",
+    "is": "multiplier is 1",
+    "is not": "multiplier is not 1",
+}
+
+
+def test_the_refused_operators_are_all_the_others():
+    """So the test below cannot miss one: with the six a condition may use,
+    written out, the four rows above are every operator Python has."""
+    used = {
+        type(ast.parse(expression, mode="eval").body.ops[0])
+        for expression in REFUSED_OPERATORS.values()
+    }
+    allowed = {ast.Eq, ast.NotEq, ast.Gt, ast.GtE, ast.Lt, ast.LtE}
+    assert len(used) == len(REFUSED_OPERATORS)
+    assert used | allowed == set(ast.cmpop.__subclasses__())
+
+
+# Where a refused operator can stand: alone, or as either link of a chain.
+POSITIONS_IN_A_COMPARISON = {
+    "alone": "{}",
+    "first of a chain": "{} < 5",
+    "second of a chain": "0 < {}",
+}
+
+
+@pytest.mark.parametrize("position", sorted(POSITIONS_IN_A_COMPARISON))
+@pytest.mark.parametrize("operator", sorted(REFUSED_OPERATORS))
+def test_a_comparison_operator_outside_the_six_is_refused(operator, position):
+    """Each refused operator in each position, since every link of a chain
+    has to be checked, not only the first or the last. The message lists
+    the six, as the grammar's other refusals say what is allowed (zoramt,
+    #89).
+    """
+    expression = POSITIONS_IN_A_COMPARISON[position].format(
+        REFUSED_OPERATORS[operator]
+    )
+    with pytest.raises(ValueError) as refused:
+        _parse_condition(expression)
+    assert str(refused.value) == (
+        f"Unsupported comparison operator in {expression!r}. "
+        "A comparison uses ==, !=, >, >=, < or <="
+    )
+
+
+# Where an operand can stand: either side of a comparison, or further along
+# a chain. Every operand has to be checked.
+OPERAND_POSITIONS = {
+    "left": "{} == 1",
+    "right": "1 == {}",
+    "third of a chain": "0 < multiplier < {}",
+}
+
+
+@pytest.mark.parametrize("position", sorted(OPERAND_POSITIONS))
+def test_an_unknown_variable_is_refused_naming_the_two_there_are(position):
+    """The message names multiplier and remainder, as the grammar's other
+    refusals say what is allowed."""
+    expression = OPERAND_POSITIONS[position].format("ones_digit")
+    with pytest.raises(ValueError) as refused:
+        _parse_condition(expression)
+    assert str(refused.value) == (
+        "Unknown variable in condition: 'ones_digit'. A condition's "
+        "variables are multiplier and remainder"
+    )
 
 
 @pytest.mark.parametrize(
@@ -146,10 +442,14 @@ def test_validator_rejects_unsupported_conditions(expression):
         "multiplier > 1",
         "multiplier > 1 and remainder > 0",
         "remainder == 0 or remainder == 5",
+        "5 < multiplier",
+        "0 < multiplier < 5",
+        "remainder != 0 or multiplier >= 3 and multiplier <= 7",
+        "(multiplier > 1 or remainder > 0) and remainder < 9",
     ],
 )
 def test_validator_accepts_the_shapes_the_engine_supports(expression):
-    compile_spec._compile_condition(expression)
+    _parse_condition(expression)
 
 
 # The tests below check the rest of the artifact against the spec. The
@@ -177,7 +477,8 @@ def test_compiled_rules_match_the_spec(spec, artifact):
     # the compiler reads it from: every rule from 10^5 up (#27 rule 6, the
     # floor from Q-K), and none below it.
     assert {r["name"] for r in artifact.RULES if r["stacks"]} == {
-        "hundred_thousands", "millions", "ten_millions", "hundred_millions", "billions",
+        "hundred_thousands", "millions", "ten_millions", "hundred_millions",
+        "billions", "ten_billions", "hundred_billions", "trillions",
     }
 
 
@@ -229,8 +530,8 @@ def _render_from_artifact(artifact, n):
             if rule["multiplier"] not in (None, multiplier):
                 continue
             condition = rule["condition"]
-            if condition is None or condition(
-                {"multiplier": multiplier, "remainder": remainder}
+            if condition is None or _eval_tree(
+                condition, {"multiplier": multiplier, "remainder": remainder}
             ):
                 return rule
         raise AssertionError(f"no compiled rule matches n={n}")
@@ -356,12 +657,50 @@ def test_compiled_parse_config_matches_the_spec(spec, artifact):
         assert spec._normalize_word(canonical) == canonical
 
 
+def test_compiled_text_lists_match_the_engine(artifact):
+    """WHITESPACE and IGNORABLE are the engine's own lists, shipped whole.
+
+    Until #75 _render.py kept a second copy of each, and the ignorable one
+    had nothing outside itself to be checked against, so a one-sided edit
+    passed both suites (zoramt, #56). Now there is one copy, the package
+    reads it from _mizo.py, and what is left to check here is that the
+    compiler shipped all of it. Whether the list holds the right characters
+    is test_engine.py's job: test_the_ignorable_list_is_the_one_decided_on_46
+    states them. IGNORABLE is compared as the translate table the package
+    builds from it, so this is not the compiler's own expression run a
+    second time.
+    """
+    assert artifact.WHITESPACE == _WHITESPACE
+    assert {ord(ch): None for ch in artifact.IGNORABLE} == _IGNORABLE
+    assert len(set(artifact.WHITESPACE)) == len(artifact.WHITESPACE) == 25
+    assert len(set(artifact.IGNORABLE)) == len(artifact.IGNORABLE) == 6
+
+
+def test_compiled_fold_is_the_engines(artifact, spec):
+    """FOLD is the engine's fold table for the spec, shipped whole (#75).
+
+    Compared as the translate table the package builds from it, as
+    IGNORABLE is above. Which characters belong in it is test_engine.py's
+    job (test_the_mizo_fold_table_is_its_letters_and_the_marks_inside_them).
+    """
+    assert {ord(ch): folded for ch, folded in artifact.FOLD.items()} == spec._fold
+    assert len(artifact.FOLD) == 439
+
+
+def test_the_compiled_fold_is_written_in_ascii(spec):
+    # Its marks are combining characters. Written raw, as repr() would, each
+    # would be invisible in a diff or drawn over the quote before it, so a
+    # reviewer could not see what the table holds.
+    fold = compile_spec.compile_data(spec)["FOLD"]
+    assert compile_spec._python_fold(fold).isascii()
+
+
 def test_package_version_is_stated_once():
     """pyproject.toml and __init__.py both carry the package version, and
     nothing stops one being bumped without the other.
 
     Read as text rather than imported: tomllib is 3.11+ and the package
-    floor is 3.9, and __init__.py will grow real imports once it exports
+    floor is 3.10, and __init__.py will grow real imports once it exports
     an API. Single-sourcing this properly (hatch's dynamic version) is
     worth doing when the version actually moves.
     """
@@ -378,79 +717,12 @@ def test_package_version_is_stated_once():
     assert declared[0] == exported[0]
 
 
-def _ignorable_table(path):
-    """The characters _IGNORABLE is built from, read out of the source.
-
-    Read rather than imported: _render.py belongs to the package and does a
-    relative import of _mizo, so it is not importable from here -- the same
-    reason test_package_version_is_stated_once reads packages/python/ as
-    text. Reading the source is also the right level for this check, since
-    a one-sided edit to the table is a source-level edit.
-
-    The shape is checked rather than assumed. Both copies are a dict
-    comprehension over one string literal today; if either is rewritten into
-    some other form, this says so instead of raising AttributeError from
-    inside an attribute chain -- the "a verdict, not a crash from three calls
-    down" rule #37 settled for _validate_spec, which applies to a helper that
-    reads source just as much.
-    """
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    for node in ast.walk(tree):
-        targets = getattr(node, "targets", [])
-        if not any(isinstance(t, ast.Name) and t.id == "_IGNORABLE" for t in targets):
-            continue
-        value = node.value
-        if not isinstance(value, ast.DictComp) or len(value.generators) != 1:
-            raise AssertionError(
-                f"{path.name}: _IGNORABLE is no longer a single dict "
-                f"comprehension; update this helper to read its new shape"
-            )
-        try:
-            return ast.literal_eval(value.generators[0].iter)
-        except ValueError:
-            raise AssertionError(
-                f"{path.name}: _IGNORABLE is not built from a string literal"
-            ) from None
-    raise AssertionError(f"no _IGNORABLE assignment in {path.name}")
-
-
-def test_the_ignorable_table_is_identical_in_both_implementations():
-    """_IGNORABLE is duplicated across engine.py and _render.py, and nothing
-    else pins it.
-
-    _WHITESPACE is duplicated the same way, but both suites derive it
-    independently from str.isspace() minus the four characters that function
-    over-matches, so those copies cannot drift without a test failing.
-    _IGNORABLE has no external property to check against -- it is six
-    characters chosen deliberately on #46 -- so until this, a one-sided edit
-    passed both suites silently. That is the divergence #46 exists to
-    prevent, in the one table with nothing to derive it from (zoramt, #56).
-
-    Enumerating rather than deriving is defensible against Unicode drift,
-    which was the argument on #46. It says nothing about two hand-maintained
-    copies, which drift for ordinary reasons.
-    """
-    reference_table = _ignorable_table(
-        compile_spec.REPO_ROOT / "reference" / "engine.py"
-    )
-    package_table = _ignorable_table(
-        compile_spec.REPO_ROOT
-        / "packages"
-        / "python"
-        / "src"
-        / "numberwords"
-        / "_render.py"
-    )
-    assert reference_table == package_table
-    assert len(set(reference_table)) == 6
-
-
 @pytest.fixture(scope="module")
 def package():
     """The package's own public API, imported from its source tree.
 
     Everything else in this file reads the artifact or the package source as
-    data. This one needs the package's parser running, and the package is
+    data. This one needs the package's own code running, and the package is
     importable from its src/ directory with no install step -- it depends on
     nothing, which is the point of compiling the spec (#20).
     """
@@ -462,112 +734,11 @@ def package():
         sys.path.remove(source)
 
 
-# The longest slip, in words, that the one-slip test below checks. See its
-# docstring for why eight.
-SLIP_PHRASE_MAX_WORDS = 8
-
-
-def _near_misses(text):
-    """Every spelling one slip away from `text`: one word deleted, one word
-    doubled, or two neighbouring words swapped."""
-    words = text.split()
-    slips = set()
-    for i in range(len(words)):
-        slips.add(" ".join(words[:i] + words[i + 1:]))
-        slips.add(" ".join(words[:i + 1] + words[i:]))
-        if i + 1 < len(words):
-            slips.add(" ".join(words[:i] + [words[i + 1], words[i]] + words[i + 2:]))
-    slips.discard("")
-    return slips
-
-
-def test_the_package_parser_agrees_with_the_engine_one_slip_from_the_vectors(spec, package):
-    """The phrase file (vectors/mizo.phrases.json) stops at three words,
-    and the vectors only hold spellings that must be accepted. This covers
-    the gap between: longer phrases that are *nearly* right, which is where
-    a second copy of a parser is most likely to accept what the first one
-    refuses.
-
-    Every certified spelling of one number per shape (numbers_to_sweep),
-    with one word deleted, doubled or swapped with its neighbour: same
-    number, or both refuse. One number per shape, so it grows with the
-    grammar rather than the range.
-
-    Capped at SLIP_PHRASE_MAX_WORDS, because a parse costs more the longer
-    the phrase: with the ladder to 10^10 - 1 (#27) the slips run to 29
-    words, 12,525 phrases, about 70 s here. At 0-999 the longest slip was
-    eight words (a seven-word spelling with one word doubled), so the cap
-    would have dropped nothing there. And the length of a phrase is not
-    where the two parsers can differ: a longer one is the same rules reached
-    through one more {remainder}. What has to survive the cap is every rule,
-    which the last assertion checks.
-    """
-    sweep = generate_vectors.numbers_to_sweep(spec)
-    phrases = set()
-    for n in sweep:
-        for text in generate_vectors.accepted_inputs(spec, n):
-            phrases |= {
-                slip for slip in _near_misses(text)
-                if len(slip.split()) <= SLIP_PHRASE_MAX_WORDS
-            }
-    disagreements = []
-    accepted = 0
-    for text in sorted(phrases):
-        try:
-            expected = spec.text_to_number(text)
-            accepted += 1
-        except ValueError:
-            expected = None
-        try:
-            got = package.text_to_number(text)
-        except package.NumberWordsError:
-            got = None
-        if got != expected:
-            disagreements.append((text, expected, got))
-    assert not disagreements, disagreements[:10]
-    # Both halves have to be exercised, or "they agree" means little: some
-    # slips still spell a number ("sâwm pakhat" with a word dropped is
-    # "sâwm"), and most do not.
-    assert 0 < accepted < len(phrases), (accepted, len(phrases))
-    # The cap must not cost a rule: every emitting rule heads some number
-    # whose canonical spelling, doubled in one word, still fits under it.
-    # At 10^10 - 1 each one already does at six words.
-    headed = {
-        spec._find_rule(n)["name"] for n in sweep
-        if len(spec.number_to_text(n).split()) < SLIP_PHRASE_MAX_WORDS
-    }
-    emitting = {r["name"] for r in spec.rules if r.get("emit") != "never"}
-    assert emitting <= headed, sorted(emitting - headed)
-
-
-@pytest.mark.parametrize(
-    "text",
-    [
-        # Longer than the sweeps above reach, and each one a place where the
-        # package's copy of greedy binding has to choose as the engine does
-        # (#27 rule 6, Q-E, and the 2026-08-30 / 2026-09-03 decisions).
-        "nuai za hnih pakhat sîng li sâng ruk za sarih sâwm leh pathum",
-        "nuai sâwm leh sîng kua leh sâng riat leh za sarih leh sawm ruk leh panga",
-        "nuai za hnih leh sawm nga",
-        "nuai za hnih leh pathum",
-        "nuai za pahnih",
-        "maktaduai sawm pakhat",
-        "vaibêlchhetak khat nuai sawm pakhat",
-        "NUAIH-ZA-HNIH",
-        # Refused by both, each for its own reason: above the range, below
-        # the floor, and a single digit offered as a stacked multiplier.
-        "tlûklehdingâwn sawm hnih",
-        "sîng za",
-        "vaibêlchhe pahnih",
-    ],
-)
-def test_the_package_stacks_and_binds_greedily_as_the_engine_does(spec, package, text):
-    try:
-        expected = spec.text_to_number(text)
-    except ValueError:
-        expected = None
-    try:
-        got = package.text_to_number(text)
-    except package.NumberWordsError:
-        got = None
-    assert got == expected
+@settings(max_examples=100, database=None)
+@example(test_properties.TOP_POWER)
+@example(test_properties.HIGH)
+@given(n=test_properties.NUMBERS)
+def test_the_package_matches_the_engine_on_random_numbers(spec, package, n):
+    # #84. The vectors compare the two on a sample of shapes. A random n,
+    # including a power of ten and the ceiling, is the rest of the range.
+    assert package.number_to_text(n) == spec.number_to_text(n)
