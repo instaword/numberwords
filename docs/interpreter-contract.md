@@ -288,9 +288,7 @@ From the shared files, on every change:
   phrases, which take greed past its first comparison.
 
 On its own, for what the shared files never reach. The Python package tests
-each of these with two exceptions, both to come in #114: it does not test the
-separator, non-BMP and `emit: never` cases yet, and it skips the below-`min`
-refusal, since Mizo's `min` is 0. The cases:
+each of these:
 
 - every character of `WHITESPACE` separates words, every one of `IGNORABLE`
   is removed and every entry of `FOLD` is applied, and no other character

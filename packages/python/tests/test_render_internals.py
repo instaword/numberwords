@@ -6,8 +6,11 @@ event; these are the gaps it structurally cannot cover.
 """
 
 import copy
+import importlib
 import itertools
 import re
+import shutil
+import sys
 from pathlib import Path
 
 import numberwords
@@ -219,6 +222,159 @@ def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking(monkeypatch):
     assert set(_render._parse_readings(["one", "ten"])) == {10, 51}
     with pytest.raises(numberwords.NumberWordsError, match=r"matches \[10, more than 50\]"):
         numberwords.text_to_number("one ten")
+
+
+# --- The contract's hand-built cases (#114) ---------------------------------
+#
+# docs/interpreter-contract.md ("What each target tests") lists these as
+# cases Mizo's data cannot show, so each runs on hand-built tables. They are
+# the package's half of the npm tests of the same name.
+#
+# Unlike the tests above, they do not patch _render. It builds its split
+# pattern, its strip and fold tables and its list of emitting scales once,
+# when it is imported, and the first two cases test exactly that building:
+# patched tables would hand the code what it is meant to build, and the test
+# could not fail. Reloading _render instead would define a second
+# NumberWordsError and break `except numberwords.NumberWordsError` for the
+# rest of the suite. So `hand_built` imports a copy of the package whose
+# _mizo.py holds the test's tables, and the real code builds everything from
+# them, as makeConverter(table(...)) does for the npm tests. All four cases
+# use it, so no table built from Mizo's data is left in play.
+
+
+@pytest.fixture
+def hand_built(tmp_path, monkeypatch):
+    """Return a function that imports a fresh copy of the package, its
+    _mizo.py holding the tables passed in place of Mizo's.
+
+    LEXICON and RULES are required. SUPPORTS defaults to (0, 100), the range
+    npm's tests of the first three cases pass, and the rest to what the npm
+    tests' table() gives: no connector, no fold entries, no declared
+    separators or other parse data, and Mizo's whitespace and ignorable
+    lists. PARSE is merged into its default; the others replace theirs. Each
+    copy is a package of its own, in tmp_path, and leaves sys.modules when
+    the test ends.
+    """
+    imported = []
+    monkeypatch.syspath_prepend(str(tmp_path))
+
+    def build(PARSE=None, **tables):
+        name = f"hand_built_{len(imported)}"
+        package = tmp_path / name
+        shutil.copytree(
+            PACKAGE_SOURCE, package, ignore=shutil.ignore_patterns("__pycache__")
+        )
+        data = {
+            "SUPPORTS": (0, 100),
+            "CONNECTOR": None,
+            "WHITESPACE": _render.WHITESPACE,
+            "IGNORABLE": _render.IGNORABLE,
+            "FOLD": {},
+            **tables,
+            "PARSE": {
+                "case_insensitive": False,
+                "strip_diacritics": False,
+                "word_separators": (),
+                "accepted_forms": {},
+                "connectors": (),
+                "aliases": {},
+                **(PARSE or {}),
+            },
+        }
+        (package / "_mizo.py").write_text(
+            "".join(f"{key} = {value!r}\n" for key, value in data.items()),
+            encoding="utf-8",
+        )
+        imported.append(name)
+        importlib.invalidate_caches()
+        return importlib.import_module(name)
+
+    yield build
+    for name in imported:
+        for module in [m for m in sys.modules if m == name or m.startswith(name + ".")]:
+            del sys.modules[module]
+
+
+# Placeholder words, not Mizo, as in the tie test above.
+_WORD = ("lex", "units", "multiplier", "w")
+_TEN = ("lex", "scales", 10, "w")
+_RULE = {"multiplier": None, "condition": None, "emit": True, "whole_only": False,
+         "stacks": False}
+_TWO_AND_TEN = {"units": {2: {"w": "two"}}, "scales": {10: {"w": "ten"}}}
+_TENS = {**_RULE, "name": "tens", "scale": 10, "output": (_WORD, " ", _TEN)}
+
+
+def test_the_hand_built_copy_reads_its_own_tables_and_not_mizos(hand_built):
+    # The answer key for the four tests below: the copy answers from the
+    # tables it was given, and the package itself still answers from Mizo's.
+    nw = hand_built(LEXICON=_TWO_AND_TEN, RULES=(_TENS,))
+    assert nw.text_to_number("two ten") == 20
+    assert nw._render._SEPARATOR_RE is not _render._SEPARATOR_RE
+    with pytest.raises(nw.NumberWordsError):
+        nw.text_to_number("sawm hnih")
+    assert numberwords.text_to_number("sawm hnih") == 20
+
+
+def test_a_declared_separator_that_is_a_pattern_character_splits_only_where_it_stands(
+    hand_built,
+):
+    # Mizo's one declared separator, "-", is plain text in a pattern, so its
+    # data cannot tell an escaped separator from an unescaped one. Left
+    # unescaped, "." would match every character and split each word into
+    # nothing.
+    nw = hand_built(LEXICON=_TWO_AND_TEN, RULES=(_TENS,), PARSE={"word_separators": (".",)})
+    assert nw.text_to_number("two.ten") == 20
+    assert nw.text_to_number("two ten") == 20
+
+
+def test_a_character_outside_the_bmp_is_removed_or_folded_whole(hand_built):
+    # U+1D173 is ignorable here, and U+1D428 (bold small o) folds to "o".
+    # Mizo's IGNORABLE and FOLD hold nothing above U+FFFF, so its data cannot
+    # show how a character there is handled. A Python str is indexed by code
+    # point, so npm's trap, walking by UTF-16 unit, is not the risk here;
+    # this pins that nothing in building or applying the two tables assumes
+    # a character fits in 16 bits.
+    nw = hand_built(
+        LEXICON=_TWO_AND_TEN,
+        RULES=(_TENS,),
+        IGNORABLE=_render.IGNORABLE + "\U0001d173",
+        FOLD={"\U0001d428": "o"},
+    )
+    assert nw.text_to_number("tw\U0001d428 t\U0001d173en") == 20
+
+
+def test_an_emit_never_rule_is_never_written_even_where_it_comes_first(hand_built):
+    # Mizo's one emit: never rule, tens_shorthand, comes after ten and tens,
+    # which write every number it would, so a renderer that took the first
+    # rule at the scale without checking emit would still pass on Mizo's
+    # data. Here it comes first, and it is still read.
+    nw = hand_built(
+        LEXICON=_TWO_AND_TEN,
+        RULES=(
+            {**_RULE, "name": "tens_reversed", "scale": 10, "emit": False,
+             "output": (_TEN, " ", _WORD)},
+            _TENS,
+        ),
+    )
+    assert nw.number_to_text(20) == "two ten"
+    assert nw.text_to_number("ten two") == 20
+
+
+def test_a_reading_below_the_range_is_refused_naming_it(hand_built):
+    # Mizo's range starts at 0, where no reading falls below it, so its data
+    # never reaches this refusal. The contract asks for it only of a spec
+    # whose min is above 0; npm tests it anyway, and so does this.
+    nw = hand_built(
+        SUPPORTS=(5, 5),
+        LEXICON={"units": {3: {"w": "three"}, 5: {"w": "five"}}},
+        RULES=({**_RULE, "name": "units", "scale": 1, "output": (_WORD,)},),
+    )
+    with pytest.raises(
+        nw.NumberWordsError,
+        match=re.escape("'three' reads as 3, outside the supported range [5, 5]"),
+    ):
+        nw.text_to_number("three")
+    assert nw.text_to_number("five") == 5
 
 
 class _CheckedScale(int):
