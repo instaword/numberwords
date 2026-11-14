@@ -158,11 +158,11 @@ test("a reading below the range is refused, naming it", () => {
   assert.equal(parse("five"), 5);
 });
 
-// Beyond the contract's list: three of its runtime traps, and one rule
-// kind, where Mizo's data gives the same answers whether the code is right
-// or wrong. Its one separator is "-", plain text in a pattern; it ships no
-// character outside the BMP; and its one emit: never rule comes after an
-// emitting rule that covers every number it would.
+// Two of the contract's runtime traps, and one rule kind, where Mizo's data
+// gives the same answers whether the code is right or wrong. Its one
+// separator is "-", plain text in a pattern; it ships no character outside
+// the BMP; and its one emit: never rule comes after an emitting rule that
+// covers every number it would.
 
 test("a declared separator that is a pattern character splits only where it stands", () => {
   // Left unescaped, "." would match every character and split each word
