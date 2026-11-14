@@ -17,6 +17,7 @@ Python 3.10 is the floor (pyproject's requires-python), so nothing newer than
 
 import operator
 import re
+from typing import Any, Callable, Iterator, TypedDict, cast
 
 from ._mizo import (
     CONNECTOR,
@@ -28,6 +29,38 @@ from ._mizo import (
     SUPPORTS,
     WHITESPACE,
 )
+
+
+class _Connector(TypedDict):
+    word: str
+    min: int
+
+
+class _Parse(TypedDict):
+    case_insensitive: bool
+    strip_diacritics: bool
+    word_separators: tuple[str, ...]
+    accepted_forms: dict[str, tuple[str, ...]]
+    connectors: tuple[str, ...]
+    aliases: dict[str, str]
+
+
+class _Rule(TypedDict):
+    name: str
+    scale: int
+    multiplier: int | None
+    condition: tuple[Any, ...] | None
+    output: tuple[Any, ...]
+    emit: bool
+    whole_only: bool
+    stacks: bool
+
+
+# Names for the compiled values. _mizo.py is literals only (#75), so it
+# cannot carry them, and a dict whose values differ in type is read as
+# object. The casts are unchecked: mypy trusts them and does not check the
+# compiled data. The loops that walk RULES read the name when they run: the
+# checked-scale tests replace it on this module.
 
 
 class NumberWordsError(ValueError):
@@ -70,7 +103,10 @@ _WHITESPACE_CLASS = "[{}]".format("".join(re.escape(ch) for ch in WHITESPACE))
 _SEPARATOR_RE = re.compile(
     "|".join(
         [
-            *(re.escape(sep) for sep in PARSE.get("word_separators", ())),
+            *(
+                re.escape(sep)
+                for sep in cast(_Parse, PARSE).get("word_separators", ())
+            ),
             _WHITESPACE_CLASS,
         ]
     )
@@ -118,10 +154,12 @@ def _normalize_word(word: str) -> str:
 # Connectors and aliases are normalised too, so they still match after the
 # flags have been applied to the input. A connector written with a diacritic
 # would otherwise stop being dropped once strip_diacritics changed the text.
-_CONNECTORS = frozenset(_normalize_word(c) for c in PARSE.get("connectors", ()))
+_CONNECTORS = frozenset(
+    _normalize_word(c) for c in cast(_Parse, PARSE).get("connectors", ())
+)
 _ALIASES = {
     _normalize_word(variant): _normalize_word(canonical)
-    for variant, canonical in PARSE.get("aliases", {}).items()
+    for variant, canonical in cast(_Parse, PARSE).get("aliases", {}).items()
 }
 
 
@@ -146,7 +184,8 @@ _ALIASES = {
 # The scales number_to_text chooses between, largest first. Computed once:
 # the compiled spec cannot change.
 _EMITTING_SCALES = sorted(
-    {rule["scale"] for rule in RULES if rule["emit"]}, reverse=True
+    {rule["scale"] for rule in cast(tuple[_Rule, ...], RULES) if rule["emit"]},
+    reverse=True,
 )
 
 
@@ -164,7 +203,7 @@ _EMITTING_SCALES = sorted(
 # Evaluated here by a second copy of the engine's evaluator, deliberately:
 # this module never imports the oracle. reference/test_compile_spec.py holds
 # the two together on every operator and on every rule's condition (#75).
-_COMPARISONS = {
+_COMPARISONS: dict[str, Callable[[int, int], bool]] = {
     "==": operator.eq,
     "!=": operator.ne,
     ">": operator.gt,
@@ -174,7 +213,7 @@ _COMPARISONS = {
 }
 
 
-def _eval_tree(tree: tuple, variables: dict):
+def _eval_tree(tree: tuple[Any, ...], variables: dict[str, int]) -> bool | int:
     kind = tree[0]
     if kind == "cmp":
         _, op, left, right = tree
@@ -186,14 +225,14 @@ def _eval_tree(tree: tuple, variables: dict):
     if kind == "var":
         return variables[tree[1]]
     if kind == "int":
-        return tree[1]
+        return cast(int, tree[1])
     # Unreachable from a compiled spec: the engine checked every condition
     # when it loaded. A plain ValueError, not NumberWordsError, because this
     # would be a fault in the package rather than in the caller's input.
     raise ValueError(f"unknown condition data: {tree!r}")
 
 
-def _rule_applies(rule: dict, multiplier: int, remainder: int) -> bool:
+def _rule_applies(rule: _Rule, multiplier: int, remainder: int) -> bool:
     """A rule's fixed multiplier, if it has one, and its condition.
 
     The fixed multiplier is what lets a parser read a rule that never writes
@@ -205,10 +244,13 @@ def _rule_applies(rule: dict, multiplier: int, remainder: int) -> bool:
     condition = rule["condition"]
     if condition is None:
         return True
-    return _eval_tree(condition, {"multiplier": multiplier, "remainder": remainder})
+    return cast(
+        bool,
+        _eval_tree(condition, {"multiplier": multiplier, "remainder": remainder}),
+    )
 
 
-def _find_rule(n: int) -> dict:
+def _find_rule(n: int) -> _Rule:
     """The rule n is rendered with: the largest emitting scale not above n,
     then the first rule at that scale, in spec order, that applies.
 
@@ -218,14 +260,14 @@ def _find_rule(n: int) -> dict:
     candidates = [s for s in _EMITTING_SCALES if s <= max(n, 1)]
     scale = candidates[0] if candidates else _EMITTING_SCALES[-1]
     multiplier, remainder = divmod(n, scale)
-    for rule in RULES:
+    for rule in cast(tuple[_Rule, ...], RULES):
         if rule["scale"] == scale and rule["emit"]:
             if _rule_applies(rule, multiplier, remainder):
                 return rule
     raise NumberWordsError(f"no grammar rule matches n={n}")
 
 
-def _render(rule: dict, n: int) -> tuple:
+def _render(rule: _Rule, n: int) -> tuple[str, list[int]]:
     """Render n with `rule`, before any connector goes in.
 
     Returns (text, boundaries): the offsets where each {remainder} expansion
@@ -234,10 +276,10 @@ def _render(rule: dict, n: int) -> tuple:
     """
     multiplier, remainder = divmod(n, rule["scale"])
     values = {"multiplier": multiplier, "remainder": remainder}
-    parts = []
-    boundaries = []
+    parts: list[str] = []
+    boundaries: list[int] = []
 
-    def walk(items):
+    def walk(items: tuple[Any, ...]) -> None:
         for item in items:
             if isinstance(item, str):
                 parts.append(item)
@@ -257,20 +299,21 @@ def _render(rule: dict, n: int) -> tuple:
     return "".join(parts), boundaries
 
 
-def _with_connector(n: int, text: str, boundaries: list) -> str:
+def _with_connector(n: int, text: str, boundaries: list[int]) -> str:
     """The connector before the final addend, for every n from its `min` up
     (Mizo: "leh" from 100, #27 Q-M). Followed by a space: the boundary it
     goes in front of already follows a separator."""
-    if CONNECTOR is None or n < CONNECTOR["min"] or not boundaries:
+    connector = cast(_Connector | None, CONNECTOR)
+    if connector is None or n < connector["min"] or not boundaries:
         return text
     at = boundaries[-1]
-    return text[:at] + CONNECTOR["word"] + " " + text[at:]
+    return text[:at] + connector["word"] + " " + text[at:]
 
 
 # --- Parsing ----------------------------------------------------------------
 
 
-def _tokenize(text: str) -> list:
+def _tokenize(text: str) -> list[str]:
     """Split text into comparable tokens: split on the spec's word
     separators, normalise each piece, drop connectors, resolve aliases."""
     # Filter after normalising, not before: a split piece holding only an
@@ -284,7 +327,7 @@ def _tokenize(text: str) -> list:
     return [_ALIASES.get(w, w) for w in words if w not in _CONNECTORS]
 
 
-def _acceptable_fields(table: str, named_field: str, lenient: bool) -> list:
+def _acceptable_fields(table: str, named_field: str, lenient: bool) -> list[str]:
     """Which lexicon fields a token may match for one placeholder.
 
     The field the template names is *always* accepted -- number_to_text()
@@ -296,11 +339,11 @@ def _acceptable_fields(table: str, named_field: str, lenient: bool) -> list:
     """
     if not lenient:
         return [named_field]
-    extras = PARSE.get("accepted_forms", {}).get(table, ())
+    extras = cast(_Parse, PARSE).get("accepted_forms", {}).get(table, ())
     return [named_field] + [f for f in extras if f != named_field]
 
 
-def _parse_readings(tokens: list) -> dict:
+def _parse_readings(tokens: list[str]) -> dict[int, tuple[Any, ...]]:
     """Every number some derivation of `tokens` gives, mapped to the rank
     greedy binding gives its best derivation. The range is not applied,
     except that every reading above the range is the one value max + 1.
@@ -336,13 +379,17 @@ def _parse_readings(tokens: list) -> dict:
     # integers.
     high = SUPPORTS[1]
     over = high + 1
-    cache = {}
+    cache: dict[tuple[int, int, bool, int | None], dict[int, tuple[Any, ...]]] = {}
+    # Once per call, after any test has replaced RULES. span() reads this.
+    rules = cast(tuple[_Rule, ...], RULES)
 
-    def span(start, end, whole, below):
+    def span(
+        start: int, end: int, whole: bool, below: int | None
+    ) -> dict[int, tuple[Any, ...]]:
         key = (start, end, whole, below)
         if key not in cache:
-            readings = {}
-            for rule in RULES:
+            readings: dict[int, tuple[Any, ...]] = {}
+            for rule in rules:
                 if below is not None and rule["scale"] >= below:
                     continue
                 if rule["whole_only"] and not whole:
@@ -357,11 +404,13 @@ def _parse_readings(tokens: list) -> dict:
                     remainder = bound.get("remainder", 0)
                     if not _rule_applies(rule, multiplier, remainder):
                         continue
-                    rank = bound.get("_remainder_rank", ())
+                    rank: tuple[Any, ...] = cast(
+                        tuple[Any, ...], bound.get("_remainder_rank", ())
+                    )
                     if rule["stacks"]:
                         rank = (
-                            (bound.get("_multiplier_words", 0),)
-                            + bound.get("_multiplier_rank", ())
+                            (cast(int, bound.get("_multiplier_words", 0)),)
+                            + cast(tuple[Any, ...], bound.get("_multiplier_rank", ()))
                             + rank
                         )
                     # The remainder first, so the division never sees a
@@ -378,14 +427,23 @@ def _parse_readings(tokens: list) -> dict:
             cache[key] = readings
         return cache[key]
 
-    def bind(bound, name, value):
+    def bind(
+        bound: dict[str, Any], name: str, value: int
+    ) -> dict[str, Any] | None:
         if bound.get(name, value) != value:
             return None
         rebound = dict(bound)
         rebound[name] = value
         return rebound
 
-    def match(items, position, end, bound, rule, whole):
+    def match(
+        items: tuple[Any, ...],
+        position: int,
+        end: int,
+        bound: dict[str, Any],
+        rule: _Rule,
+        whole: bool,
+    ) -> Iterator[dict[str, Any]]:
         """Yield every binding under which `items` consume exactly
         tokens[position:end]."""
         if not items:

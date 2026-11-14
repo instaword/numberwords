@@ -22,9 +22,10 @@ Homepage = "https://github.com/instaword/numberwords"
 Source = "https://github.com/instaword/numberwords"
 
 # Development only. Installing the package does not install this.
-# The suite imports pytest and hypothesis (#84).
+# The suite imports pytest and hypothesis (#84). mypy checks the
+# hints py.typed says a caller can trust (#83).
 [dependency-groups]
-test = ["pytest", "hypothesis"]
+test = ["pytest", "hypothesis", "mypy"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/numberwords"]
