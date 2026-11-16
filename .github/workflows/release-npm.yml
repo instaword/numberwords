@@ -1,0 +1,194 @@
+name: release-npm
+
+# Publishes packages/npm to npm (#75), as release.yml publishes packages/python
+# to PyPI. It is a workflow of its own rather than a second package in
+# release.yml, so each run publishes one package: the version it asks for and
+# checks belongs to that package, and no job runs for one package and not the
+# other. Both call tests.yml, so the gate is still one copy.
+#
+# Manual for the same reason as release.yml: you run it from the Actions tab
+# and type the version, and the tag is the last step, so a tag here means
+# "this was released" rather than "someone intended to release this". Tags
+# carry the package path, packages/npm/vX.Y.Z (#75).
+#
+# One-time setup on npmjs.com, by a maintainer of @instaword/numberwords -- the
+# package's Settings -> Trusted Publisher -> GitHub Actions:
+#
+#     Organization or user:  instaword
+#     Repository:            numberwords
+#     Workflow filename:     release-npm.yml
+#     Environment name:      npm
+#     Allowed actions:       allow npm publish as well
+#
+# Do it only when ready to run this workflow: a new trusted publisher that has
+# not completed a successful publish within 2 days expires, and can then no
+# longer be used or edited.
+#
+# Every field has to match the run exactly. If one doesn't, the publish fails,
+# possibly as E404 Not Found even though the package exists. The filename is
+# one of them, and npm does not let an existing trusted publisher be changed,
+# so renaming this file means deleting the trusted publisher and creating a
+# new one.
+#
+# npm stage publish is always allowed; npm publish has to be allowed as well,
+# since configurations created after 2026-09-03 allow only staged publishing
+# by default. This workflow publishes directly. The `npm` environment's
+# reviewer is the human check, as the `pypi` one is for PyPI, and a staged
+# publish would add a second sign-off, a maintainer approving it on npm with
+# 2FA, that the PyPI flow does not have. npm's docs also do not say whether a
+# staged publish counts as the first publish that stops the 2-day expiry.
+#
+# That is trusted publishing: npm verifies a short-lived OIDC token minted by
+# this workflow, so there is no npm token to store, rotate or leak. For a
+# public package published from a public repository, npm also attaches a
+# provenance statement by itself.
+#
+# The `npm` environment requires a reviewer, as `pypi` does: the publish job
+# waits for a human to approve the deployment before it runs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish, e.g. 0.1.0 (must match packages/npm/package.json)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify the version
+    runs-on: ubuntu-latest
+    outputs:
+      previous: ${{ steps.check.outputs.previous }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Tags are needed to tell whether this version was already released,
+          # and which release the notes start from.
+          fetch-depth: 0
+
+      # The version is written in package.json, and typing it here makes
+      # another copy. This ties what you typed to what gets published and
+      # tagged, so a typo fails in ten seconds rather than after a full test
+      # run.
+      - name: Check the version matches the package
+        id: check
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          declared=$(node -p "require('./packages/npm/package.json').version")
+          if [ "$declared" != "$VERSION" ]; then
+            echo "::error::asked to publish $VERSION, but packages/npm/package.json declares $declared"
+            exit 1
+          fi
+          tag="packages/npm/v$VERSION"
+          if git rev-parse --verify "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "::error::tag $tag already exists -- that version was already released"
+            exit 1
+          fi
+          # The newest earlier npm release, where the notes start. Empty
+          # before the first one.
+          previous=$(git tag -l 'packages/npm/v*' --sort=-v:refname | head -n1)
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+          echo "publishing $VERSION, notes from ${previous:-nothing: the first npm release}"
+
+  # The same gate as a pull request and as release.yml: both test suites,
+  # the drift checks, the wheel smoke test and the npm package's job, which
+  # also checks the packed tarball holds exactly the files it should.
+  test:
+    name: Gate
+    uses: ./.github/workflows/tests.yml
+
+  publish:
+    name: Publish to npm
+    needs: [verify, test]
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      # A job-level permissions block replaces the default set, so
+      # contents: read is restated for actions/checkout (see release.yml).
+      contents: read
+      # Mints the OIDC token trusted publishing exchanges for the upload. No
+      # registry credential is stored in this repository.
+      id-token: write
+    defaults:
+      run:
+        working-directory: packages/npm
+    steps:
+      - uses: actions/checkout@v7
+
+      # Trusted publishing needs Node 22.14.0 or newer and npm 11.5.1 or
+      # newer, so this is Node 24, whose current releases ship npm 11, rather
+      # than the package's own floor of 22. registry-url and no cache are as
+      # in npm's and setup-node's own trusted-publishing examples: a cache in
+      # a publishing job could be poisoned. setup-node 7 no longer sets a
+      # placeholder NODE_AUTH_TOKEN (#117), which its docs say trusted
+      # publishing does not use.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      # Below 11.5.1 npm cannot publish this way even with id-token: write,
+      # so check it here, with a message that says so, rather than at the
+      # upload.
+      - name: Check npm can publish with trusted publishing
+        run: |
+          set -euo pipefail
+          version=$(npm --version)
+          if [ "$(printf '%s\n' 11.5.1 "$version" | sort -V | head -n1)" != "11.5.1" ]; then
+            echo "::error::npm $version is older than 11.5.1, which trusted publishing needs"
+            exit 1
+          fi
+          echo "npm $version"
+
+      # What is about to be published, in the log, so a release can be
+      # reconstructed from its run without downloading anything. There is no
+      # build step and no install: the package is its source files.
+      - name: List what will be published
+        run: npm pack --dry-run
+
+      # No token and no --provenance: npm authenticates with the OIDC token
+      # and adds provenance itself. publishConfig in package.json makes the
+      # scoped package public.
+      - name: Publish
+        run: npm publish
+
+  tag:
+    name: Tag the release
+    needs: [verify, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      # Last, and only on success: the tag records what shipped rather than
+      # what was attempted. Points at the commit this run built.
+      #
+      # The notes start from the previous npm release. GitHub's docs do not
+      # say where generated notes start when no tag is given, and with Python
+      # releases in between it could start from one of those. The first npm
+      # release has no previous one, so it gets one line, and its notes are
+      # written by hand after the run.
+      - name: Create the tag and GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          PREVIOUS: ${{ needs.verify.outputs.previous }}
+        run: |
+          set -euo pipefail
+          if [ -n "$PREVIOUS" ]; then
+            notes=(--generate-notes --notes-start-tag "$PREVIOUS")
+          else
+            notes=(--notes "The first release of @instaword/numberwords on npm.")
+          fi
+          gh release create "packages/npm/v$VERSION" \
+            --title "npm v$VERSION" \
+            --target "$GITHUB_SHA" \
+            "${notes[@]}"

@@ -21,8 +21,7 @@ interprets it, written from `docs/interpreter-contract.md` rather than ported
 line by line from `_render.py`. It exports `numberToText`, `textToNumber` and
 `NumberWordsError`, with hand-written types in `index.d.ts`, and it passes
 `vectors/mizo.json` in both directions and `vectors/mizo.phrases.json`. Its
-version is still `0.0.0`: it has not been released, and its release job comes
-in its own PR.
+version is `0.1.0`, for its first release (see Publishing below).
 
 `python/` `0.4.0` is **on PyPI**, released from CI on 2026-11-16 (#100), as
 `0.3.0` (#72), `0.2.0` (#51) and `0.1.0` (#23) were before it. `npm/` has only
@@ -51,20 +50,26 @@ full test gate, builds, and only then publishes — creating the git tag and
 GitHub release last, so a tag here always means "this shipped" rather than
 "this was attempted".
 
-Credentials: there are none. PyPI trusted publishing verifies a short-lived
-OIDC token minted by the workflow, so nothing is stored in the repository. The
-one-time PyPI configuration is written at the top of the workflow file.
+`npm/` is published the same way, by its own workflow,
+[`.github/workflows/release-npm.yml`](../.github/workflows/release-npm.yml)
+(#75): it checks the version against `package.json`, refuses a version already
+tagged (`packages/npm/vX.Y.Z`), runs the same test gate, publishes, and tags
+last. Until its first run, the only version on npm is the `0.0.0` placeholder,
+published by hand as the name reservation.
 
-`npm/` has only ever been published by hand, as the name reservation. Its
-tests now run in `tests.yml`, so it has a gate; its release job, in the same
-workflow, is its own PR, and nothing more is published until then.
+Credentials: there are none. Trusted publishing, on PyPI and on npm, verifies
+a short-lived OIDC token minted by the workflow, so nothing is stored in the
+repository. The one-time configuration for each registry is written at the top
+of its workflow file. npm's has to be added only when the workflow is about to
+run: a new trusted publisher that has not published within 2 days expires.
 
 ### Every release makes some prose false
 
 A version bump silently invalidates whatever described the previous state.
 Before publishing, grep for the old version and for "placeholder" across
-`README.md`, `packages/README.md`, `packages/python/README.md` and `CLAUDE.md`,
-and fix what the release is about to contradict.
+`README.md`, `packages/README.md`, `packages/python/README.md`,
+`packages/npm/README.md` and `CLAUDE.md`, and fix what the release is about to
+contradict.
 
 This is not hypothetical: `0.1.0` went out with three files still saying PyPI
 carried only the `0.0.0` placeholder. They were caught because #23 listed them
@@ -84,8 +89,8 @@ The **versions** are deliberately allowed to diverge. Each package is versioned
 by what it actually ships, so `python/` moved to `0.1.0` when it started
 exporting a public API, to `0.2.0` when that API reached 0–199, and to
 `0.3.0` when it reached 0–9,999,999,999, and to `0.4.0` when it reached
-0–9,999,999,999,999, while `npm/` stays at `0.0.0` until its first release,
-whose PR sets the version by what it ships (#75). A version is most useful
+0–9,999,999,999,999, while `npm/` starts its own line at `0.1.0`, its first
+release with a public API, for that same range (#75). A version is most useful
 attached to the release that publishes it, so the bump belongs to the PR that
 makes it true rather than to the groundwork before it.
 
