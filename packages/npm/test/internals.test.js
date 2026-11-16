@@ -158,11 +158,11 @@ test("a reading below the range is refused, naming it", () => {
   assert.equal(parse("five"), 5);
 });
 
-// Two of the contract's runtime traps, and one rule kind, where Mizo's data
-// gives the same answers whether the code is right or wrong. Its one
-// separator is "-", plain text in a pattern; it ships no character outside
-// the BMP; and its one emit: never rule comes after an emitting rule that
-// covers every number it would.
+// Two of the contract's runtime traps, and two cases of one rule kind, where
+// Mizo's data gives the same answers whether the code is right or wrong. Its
+// one separator is "-", plain text in a pattern; it ships no character
+// outside the BMP; and its one emit: never rule comes after an emitting rule
+// that covers every number it would, at a scale emitting rules also use.
 
 test("a declared separator that is a pattern character splits only where it stands", () => {
   // Left unescaped, "." would match every character and split each word
@@ -204,6 +204,23 @@ test("an emit: never rule is never written, even where it comes first", () => {
   const { numberToText: render, textToNumber: parse } = makeConverter(data);
   assert.equal(render(20), "two ten");
   assert.equal(parse("ten two"), 20);
+});
+
+test("a scale only emit: never rules use is never chosen for output", () => {
+  // The only rule at 100 is read-only, so 200 is written with scale 10.
+  // Chosen anyway, 100 would have no rule to write 200 with.
+  const data = table({
+    supports: [0, 200],
+    lexicon: { units: { 2: { w: "two" }, 20: { w: "twenty" } }, scales: { 10: { w: "ten" }, 100: { w: "hundred" } } },
+    rules: [
+      { name: "tens", scale: 10, output: [word, " ", ["lex", "scales", 10, "w"]] },
+      { name: "hundreds_read_only", scale: 100, emit: false, output: [word, " ", ["lex", "scales", 100, "w"]] },
+    ],
+  });
+  const { numberToText: render, textToNumber: parse } = makeConverter(data);
+  assert.equal(render(200), "twenty ten");
+  assert.equal(parse("twenty ten"), 200);
+  assert.equal(parse("two hundred"), 200);
 });
 
 // A product the parser computes, refused above `limit`, as a target with

@@ -2103,6 +2103,36 @@ def test_an_emit_never_collision_raises_ambiguous():
         spec.text_to_number("shared_word")
 
 
+def test_a_scale_only_emit_never_rules_use_is_never_chosen_for_output():
+    # Mechanism test with synthetic data (#116): the only rule at 100 is
+    # `emit: never`, so number_to_text() writes 200 with scale 10, and both
+    # spellings still read as 200. Mizo's one `emit: never` rule shares
+    # scale 10 with emitting rules, so its data gives the same answers
+    # whether or not the scales number_to_text() chooses between leave
+    # `emit: never` rules out. Chosen anyway, 100 would have no rule to write
+    # 200 with.
+    data = {
+        "meta": {"supports": {"min": 0, "max": 200}},
+        "lexicon": {
+            "units": {2: {"w": "two"}, 20: {"w": "twenty"}},
+            "scales": {10: {"w": "ten"}, 100: {"w": "hundred"}},
+        },
+        "grammar": {
+            "rules": [
+                {"name": "tens", "scale": 10,
+                 "output": "{units[multiplier].w} {scales[10].w}"},
+                {"name": "hundreds_read_only", "scale": 100, "emit": "never",
+                 "output": "{units[multiplier].w} {scales[100].w}"},
+            ]
+        },
+        "parse": {},
+    }
+    spec = Spec(data)
+    assert spec.number_to_text(200) == "twenty ten"
+    assert spec.text_to_number("twenty ten") == 200
+    assert spec.text_to_number("two hundred") == 200
+
+
 def test_ambiguous_match_raises():
     # If a future grammar ever let two different numbers accept the same
     # spelling, text_to_number() must raise rather than silently returning

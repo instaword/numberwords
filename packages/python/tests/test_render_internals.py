@@ -232,13 +232,13 @@ def test_greed_does_not_settle_an_ambiguity_that_is_not_stacking(monkeypatch):
 #
 # Unlike the tests above, they do not patch _render. It builds its split
 # pattern, its strip and fold tables and its list of emitting scales once,
-# when it is imported, and the first two cases test exactly that building:
+# when it is imported, and three of the cases test exactly that building:
 # patched tables would hand the code what it is meant to build, and the test
 # could not fail. Reloading _render instead would define a second
 # NumberWordsError and break `except numberwords.NumberWordsError` for the
 # rest of the suite. So `hand_built` imports a copy of the package whose
 # _mizo.py holds the test's tables, and the real code builds everything from
-# them, as makeConverter(table(...)) does for the npm tests. All four cases
+# them, as makeConverter(table(...)) does for the npm tests. All five cases
 # use it, so no table built from Mizo's data is left in play.
 
 
@@ -305,7 +305,7 @@ _TENS = {**_RULE, "name": "tens", "scale": 10, "output": (_WORD, " ", _TEN)}
 
 
 def test_the_hand_built_copy_reads_its_own_tables_and_not_mizos(hand_built):
-    # The answer key for the four tests below: the copy answers from the
+    # The answer key for the five tests below: the copy answers from the
     # tables it was given, and the package itself still answers from Mizo's.
     nw = hand_built(LEXICON=_TWO_AND_TEN, RULES=(_TENS,))
     assert nw.text_to_number("two ten") == 20
@@ -358,6 +358,29 @@ def test_an_emit_never_rule_is_never_written_even_where_it_comes_first(hand_buil
     )
     assert nw.number_to_text(20) == "two ten"
     assert nw.text_to_number("ten two") == 20
+
+
+def test_a_scale_only_emit_never_rules_use_is_never_chosen_for_output(hand_built):
+    # Mizo's one emit: never rule shares scale 10 with ten and tens, so the
+    # scales number_to_text chooses between are the same whether or not
+    # emit: never rules are left out of them. Here the only rule at 100 is
+    # read-only, so 200 is written with scale 10. Chosen anyway, 100 would
+    # have no rule to write 200 with, and 200 would be refused.
+    nw = hand_built(
+        SUPPORTS=(0, 200),
+        LEXICON={
+            "units": {2: {"w": "two"}, 20: {"w": "twenty"}},
+            "scales": {10: {"w": "ten"}, 100: {"w": "hundred"}},
+        },
+        RULES=(
+            _TENS,
+            {**_RULE, "name": "hundreds_read_only", "scale": 100, "emit": False,
+             "output": (_WORD, " ", ("lex", "scales", 100, "w"))},
+        ),
+    )
+    assert nw.number_to_text(200) == "twenty ten"
+    assert nw.text_to_number("twenty ten") == 200
+    assert nw.text_to_number("two hundred") == 200
 
 
 def test_a_reading_below_the_range_is_refused_naming_it(hand_built):
