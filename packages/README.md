@@ -24,9 +24,9 @@ line by line from `_render.py`. It exports `numberToText`, `textToNumber` and
 version is still `0.0.0`: it has not been released, and its release job comes
 in its own PR.
 
-`python/` `0.3.0` is **on PyPI**, released from CI on 2026-10-02 (#72), as
-`0.2.0` (#51) and `0.1.0` (#23) were before it. `npm/` has only ever had its
-`0.0.0` placeholder published.
+`python/` `0.4.0` is **on PyPI**, released from CI on 2026-11-16 (#100), as
+`0.3.0` (#72), `0.2.0` (#51) and `0.1.0` (#23) were before it. `npm/` has only
+ever had its `0.0.0` placeholder published.
 
 `python/` is the reference for how a target package is laid out, and
 [`docs/interpreter-contract.md`](../docs/interpreter-contract.md) for what its

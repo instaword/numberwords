@@ -31,16 +31,15 @@ or turning a number someone typed in words back into digits.
 ## Install
 
 ```bash
-pip install numberwords              # Python -- 0.3.0 on PyPI, Mizo 0-9,999,999,999
+pip install numberwords              # Python -- 0.4.0 on PyPI, Mizo 0-9,999,999,999,999
 npm install @instaword/numberwords   # JS/TS -- placeholder release, exports nothing
 ```
 
-The Python package in this repository exports `number_to_text`,
-`text_to_number` and `NumberWordsError`; the npm package, not yet released,
-exports `numberToText`, `textToNumber` and `NumberWordsError`. Their range
-stops at 10¹³ − 1. Above it the 10¹² scale would take a multi-digit
-multiplier, and a trailing addend would be read into that multiplier
-([#74](https://github.com/instaword/numberwords/issues/74)).
+The Python package exports `number_to_text`, `text_to_number` and
+`NumberWordsError`; the npm package, not yet released, exports `numberToText`,
+`textToNumber` and `NumberWordsError`. Their range stops at 10¹³ − 1. Above it
+the 10¹² scale would take a multi-digit multiplier, and a trailing addend would
+be read into that multiplier ([#74](https://github.com/instaword/numberwords/issues/74)).
 
 ## How it works
 
@@ -55,9 +54,8 @@ published targets. The design is in
 
 ## Status
 
-`numberwords` 0.4.0 handles Mizo 0–9,999,999,999,999 in both directions.
-0.3.0, which stops at 9,999,999,999, is the release on PyPI until 0.4.0 is
-published. The npm package is built and tested here, for the same range, but
+`numberwords` 0.4.0, on PyPI, handles Mizo 0–9,999,999,999,999 in both
+directions. The npm package is built and tested here, for the same range, but
 not yet released: npm still holds the `0.0.0` placeholder. Open work, including
 a second language ([#48](https://github.com/instaword/numberwords/issues/48)),
 is tracked in the [issues](https://github.com/instaword/numberwords/issues).
