@@ -60,7 +60,7 @@ jobs:
     name: Verify the version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Tags are needed to tell whether this version was already released.
           fetch-depth: 0
@@ -112,9 +112,9 @@ jobs:
       # No registry credential is stored in this repository.
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -150,7 +150,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Last, and only on success: the tag records what shipped rather than
       # what was attempted. Points at the commit this run built.

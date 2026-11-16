@@ -41,9 +41,9 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -112,9 +112,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           # The oldest version pyproject claims to support. If the wheel
           # works here it works on the rest of the matrix.
@@ -168,9 +168,9 @@ jobs:
         working-directory: packages/npm
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
 
