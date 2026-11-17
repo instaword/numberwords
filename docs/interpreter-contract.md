@@ -303,6 +303,10 @@ each of these:
 - an `emit: never` rule placed ahead of an emitting rule at its scale is never
   written but still read, on hand-built tables, since Mizo's one comes after
   the rule that writes its numbers;
+- a scale that only `emit: never` rules use, above every emitting scale, is
+  never chosen for output: a number at or above it is written with the
+  largest emitting scale below it, on hand-built tables, since Mizo's one
+  `emit: never` rule shares its scale with emitting rules;
 - the cap computed as a fixed-size integer type would, so that a parser that
   multiplies first fails (#102);
 - each case under "Errors", including the argument checks, and the
