@@ -4,9 +4,6 @@ Bidirectional text ↔ number conversion for Mizo (Lushai), driven by a single
 language-agnostic rule spec. This is the JavaScript package; the Python one is
 [`numberwords` on PyPI](https://pypi.org/project/numberwords/).
 
-**Not released yet.** npm holds only a `0.0.0` placeholder. The package in this
-repository is built and tested, and its first release comes in its own PR.
-
 ## Use
 
 ```js

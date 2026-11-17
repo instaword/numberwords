@@ -9,9 +9,9 @@ name: release
 # is the last step, which makes a tag in this repository mean "this was
 # released" rather than "someone intended to release this".
 #
-# Only the Python package is published. packages/npm is built and tested,
-# but its version stays 0.0.0, deliberately diverging (see
-# packages/README.md), until its own release job, which comes in its own PR.
+# Only the Python package is published here. packages/npm has its own
+# workflow, release-npm.yml, so each run publishes one package and checks one
+# package's version.
 #
 # Each package has its own version line, so tags carry the package path:
 # packages/python/vX.Y.Z (#75). Go requires that form for a module in a
@@ -59,10 +59,13 @@ jobs:
   verify:
     name: Verify the version
     runs-on: ubuntu-latest
+    outputs:
+      previous: ${{ steps.check.outputs.previous }}
     steps:
       - uses: actions/checkout@v7
         with:
-          # Tags are needed to tell whether this version was already released.
+          # Tags are needed to tell whether this version was already released,
+          # and which release the notes start from.
           fetch-depth: 0
 
       # The version is written in pyproject.toml and __init__.py, and typing it
@@ -70,6 +73,7 @@ jobs:
       # two agree; this ties what you typed to what gets built and tagged, so a
       # typo fails in ten seconds rather than after a full test run.
       - name: Check the version matches the package
+        id: check
         env:
           VERSION: ${{ inputs.version }}
         run: |
@@ -86,7 +90,12 @@ jobs:
               exit 1
             fi
           done
-          echo "publishing $VERSION"
+          # The newest earlier Python release, where the notes start. Releases
+          # from 0.4.0 on are tagged packages/python/vX.Y.Z, so it is always
+          # one of those, never a bare vX.Y.Z.
+          previous=$(git tag -l 'packages/python/v*' --sort=-v:refname | head -n1)
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+          echo "publishing $VERSION, notes from $previous"
 
   # The full suite, across the supported Python matrix, plus the vectors and
   # compiled-artifact drift checks, the wheel smoke test and the npm
@@ -145,7 +154,7 @@ jobs:
 
   tag:
     name: Tag the release
-    needs: publish
+    needs: [verify, publish]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -154,13 +163,19 @@ jobs:
 
       # Last, and only on success: the tag records what shipped rather than
       # what was attempted. Points at the commit this run built.
+      #
+      # The notes start from the previous Python release. GitHub's docs do
+      # not say where generated notes start when no tag is given, and once
+      # npm releases sit in between it could start from one of those.
       - name: Create the tag and GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
+          PREVIOUS: ${{ needs.verify.outputs.previous }}
         run: |
           set -euo pipefail
           gh release create "packages/python/v$VERSION" \
             --title "Python v$VERSION" \
             --target "$GITHUB_SHA" \
-            --generate-notes
+            --generate-notes \
+            --notes-start-tag "$PREVIOUS"

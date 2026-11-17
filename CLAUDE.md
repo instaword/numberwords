@@ -190,6 +190,7 @@ packages/
                        smoke test, and the npm package's tests, types and
                        packed tarball on Node 22 and 24.
   workflows/release.yml  Publishes packages/python to PyPI. Run by hand.
+  workflows/release-npm.yml  Publishes packages/npm to npm. Run by hand.
 ```
 
 Directories still unbuilt are described in the architecture doc and get created
