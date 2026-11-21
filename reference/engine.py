@@ -1,3 +1,5 @@
+import sys  # scratch: unused import to demonstrate the lint gate fails
+
 """Reference engine: interprets a language spec (languages/<lang>.yaml) to
 convert numbers to text and back. This is the "oracle" described in
 docs/architecture.md -- the definition of correctness that target packages
