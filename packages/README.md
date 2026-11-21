@@ -20,12 +20,13 @@ same data as `_mizo.py`, written by the same compiler — and `render.js`, which
 interprets it, written from `docs/interpreter-contract.md` rather than ported
 line by line from `_render.py`. It exports `numberToText`, `textToNumber` and
 `NumberWordsError`, with hand-written types in `index.d.ts`, and it passes
-`vectors/mizo.json` in both directions and `vectors/mizo.phrases.json`. Its
-version is `0.1.0`, for its first release (see Publishing below).
+`vectors/mizo.json` in both directions and `vectors/mizo.phrases.json`. Its 
+version is `0.1.0`. That first release is on npm (see Publishing below).
 
 `python/` `0.4.0` is **on PyPI**, released from CI on 2026-11-16 (#100), as
-`0.3.0` (#72), `0.2.0` (#51) and `0.1.0` (#23) were before it. `npm/` has only
-ever had its `0.0.0` placeholder published.
+`0.3.0` (#72), `0.2.0` (#51) and `0.1.0` (#23) were before it. `npm/` `0.1.0`
+is **on npm**, released from CI on 2026-11-17 (#119). Before that, npm held
+only the `0.0.0` name reservation.
 
 `python/` is the reference for how a target package is laid out, and
 [`docs/interpreter-contract.md`](../docs/interpreter-contract.md) for what its
@@ -54,8 +55,8 @@ GitHub release last, so a tag here always means "this shipped" rather than
 [`.github/workflows/release-npm.yml`](../.github/workflows/release-npm.yml)
 (#75): it checks the version against `package.json`, refuses a version already
 tagged (`packages/npm/vX.Y.Z`), runs the same test gate, publishes, and tags
-last. Until its first run, the only version on npm is the `0.0.0` placeholder,
-published by hand as the name reservation.
+last. That first run published `0.1.0` on 2026-11-17 (#119). The `0.0.0`
+name reservation was published by hand before it.
 
 Credentials: there are none. Trusted publishing, on PyPI and on npm, verifies
 a short-lived OIDC token minted by the workflow, so nothing is stored in the
@@ -103,6 +104,6 @@ one convention. The bare `v0.1.0`–`v0.3.0` tags are earlier Python releases
 and stay as they are.
 
 The **descriptions** now diverge for the same reason. `python/` describes what
-it ships — Mizo 0–9,999,999,999,999 — and `npm/` describes what it will ship,
-now that it has contents. Keep the *shared* fields (keywords, repo URL) in
+it ships — Mizo 0–9,999,999,999,999 — and `npm/` describes what it ships.
+Keep the *shared* fields (keywords, repo URL) in
 step; let the fields that describe the contents follow the contents.
