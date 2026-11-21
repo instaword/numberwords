@@ -19,6 +19,20 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          # The basic E/F rules do not depend on a Python version, but pinning
+          # one keeps the job reproducible when ruff's own behaviour changes.
+          python-version: "3.13"
+      - name: Lint Python sources
+        run: |
+          python -m pip install "ruff==0.17.6"
+          ruff check
+
   test:
     runs-on: ubuntu-latest
 
