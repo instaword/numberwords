@@ -56,9 +56,7 @@ published targets. The design is in
 
 `numberwords` 0.4.0, on PyPI, handles Mizo 0–9,999,999,999,999 in both
 directions. `@instaword/numberwords` 0.1.0, on npm, handles the same range.
-Open work, including
-a second language ([#48](https://github.com/instaword/numberwords/issues/48)),
-is tracked in the [issues](https://github.com/instaword/numberwords/issues).
+Open work, including a second language ([#48](https://github.com/instaword/numberwords/issues/48)), is tracked in the [issues](https://github.com/instaword/numberwords/issues).
 
 ## For contributors
 

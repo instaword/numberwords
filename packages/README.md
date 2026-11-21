@@ -20,8 +20,8 @@ same data as `_mizo.py`, written by the same compiler — and `render.js`, which
 interprets it, written from `docs/interpreter-contract.md` rather than ported
 line by line from `_render.py`. It exports `numberToText`, `textToNumber` and
 `NumberWordsError`, with hand-written types in `index.d.ts`, and it passes
-`vectors/mizo.json` in both directions and `vectors/mizo.phrases.json`. Its
-version is `0.1.0`, for its first release (see Publishing below).
+`vectors/mizo.json` in both directions and `vectors/mizo.phrases.json`. Its 
+version is `0.1.0`. That first release is on npm (see Publishing below).
 
 `python/` `0.4.0` is **on PyPI**, released from CI on 2026-11-16 (#100), as
 `0.3.0` (#72), `0.2.0` (#51) and `0.1.0` (#23) were before it. `npm/` `0.1.0`
