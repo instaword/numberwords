@@ -17,6 +17,9 @@ pip install -r reference/requirements.txt
 
 ```
 
+`.gitattributes` stores text as LF on every OS
+`.editorconfig` asks editors to trim trailing whitespace, add a final newline, and use LF.
+
 ## Running the tests
 
 There are three independent test suites. All three must pass before a change is considered ready.
