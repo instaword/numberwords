@@ -21,7 +21,7 @@ interprets it, written from `docs/interpreter-contract.md` rather than ported
 line by line from `_render.py`. It exports `numberToText`, `textToNumber` and
 `NumberWordsError`, with hand-written types in `index.d.ts`, and it passes
 `vectors/mizo.json` in both directions and `vectors/mizo.phrases.json`. Its
-version is `0.1.0`. Its first release (see Publishing below).
+version is `0.1.0`, its first release (see Publishing below).
 
 `python/` `0.4.0` is **on PyPI**, released from CI on 2026-11-16 (#100), as
 `0.3.0` (#72), `0.2.0` (#51) and `0.1.0` (#23) were before it. `npm/` `0.1.0`
@@ -105,5 +105,5 @@ and stay as they are.
 
 The **descriptions** now diverge for the same reason. `python/` describes what
 it ships — Mizo 0–9,999,999,999,999 — and `npm/` describes what it ships.
-Keep the *shared* fields (keywords, repo URL) in
-step; let the fields that describe the contents follow the contents.
+Keep the *shared* fields (keywords, repo URL) in step;
+let the fields that describe the contents follow the contents.
