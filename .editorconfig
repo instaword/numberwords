@@ -1,0 +1,7 @@
+# Trim trailing whitespace, end every file with a newline, and use LF.
+root = true
+
+[*]
+trim_trailing_whitespace = true
+insert_final_newline = true
+end_of_line = lf

@@ -17,6 +17,11 @@ pip install -r reference/requirements.txt
 
 ```
 
+- `.gitattributes` stores text as LF on every OS.
+- `.editorconfig` asks editors to trim trailing whitespace, add a final newline, and use LF.
+
+Cursor does not apply `.editorconfig` on its own. Install the EditorConfig for VS Code extension (`EditorConfig.EditorConfig`). The built-in extensions only syntax-highlight the file.
+
 ## Running the tests
 
 There are three independent test suites. All three must pass before a change is considered ready.

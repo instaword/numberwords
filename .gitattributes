@@ -1,0 +1,3 @@
+# text=auto stores text files with LF line endings and leaves binary files alone.
+# eol=lf checks that text out as LF too, so a Windows checkout does not turn it into CRLF.
+* text=auto eol=lf
