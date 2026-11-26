@@ -176,7 +176,7 @@ packages/
                        _render.py (thin interpreter), and its own test suite.
   npm/                 The second: _mizo.js (compiled spec), render.js
                        (interpreter), hand-written index.d.ts, and its own
-                       tests. Not released yet; npm holds the 0.0.0 placeholder.
+                       tests. 0.1.0 is on npm, released from CI (#119).
 .cursor/
   rules/               Points Cursor at this file; holds no rules of its own.
 .githooks/
